@@ -135,3 +135,33 @@ export interface Attendance {
   member?: { id: string; firstName: string; lastName: string } | null
   staffUser?: { id: string; firstName: string; lastName: string } | null
 }
+
+export type PaymentMethod = "CASH" | "CARD" | "UPI" | "BANK_TRANSFER" | "OTHER"
+export type PaymentStatus = "COMPLETED" | "REFUNDED" | "PARTIALLY_REFUNDED"
+
+export interface Refund {
+  id: string
+  paymentId: string
+  amount: string
+  reason: string | null
+  recordedByUserId: string | null
+  createdAt: string
+}
+
+export interface Payment {
+  id: string
+  organizationId: string
+  branchId: string
+  memberId: string
+  membershipId: string | null
+  amount: string
+  currency: string
+  method: PaymentMethod
+  status: PaymentStatus
+  note: string | null
+  recordedByUserId: string | null
+  createdAt: string
+  member?: { id: string; firstName: string; lastName: string }
+  membership?: Membership
+  refunds?: Refund[]
+}

@@ -36,13 +36,13 @@ export const primaryNav: NavItem[] = [
     permission: "membership_plans.read",
   },
   { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: "attendance.read" },
+  { title: "Billing", href: "/billing", icon: Wallet, permission: "payments.read" },
   { title: "Staff", href: "/staff", icon: UserCog, permission: "users.read" },
   { title: "Branches", href: "/branches", icon: Building2, permission: "branches.read" },
 ];
 
 export const comingSoonNav: NavItem[] = [
   { title: "AI Assistant", href: "/ai", icon: Sparkles, permission: "ai.generate", comingSoon: true },
-  { title: "Billing", href: "/billing", icon: Wallet, permission: "payments.read", comingSoon: true },
   { title: "Workouts", href: "/workouts", icon: Dumbbell, permission: "workouts.read", comingSoon: true },
   { title: "Nutrition", href: "/nutrition", icon: Salad, permission: "nutrition.read", comingSoon: true },
   { title: "Inventory", href: "/inventory", icon: Package, permission: "inventory.read", comingSoon: true },

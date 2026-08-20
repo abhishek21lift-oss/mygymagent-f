@@ -56,3 +56,18 @@ export const checkInSchema = z.object({
   method: z.enum(["QR", "MANUAL", "KIOSK", "APP", "STAFF"]),
 })
 export type CheckInInput = z.infer<typeof checkInSchema>
+
+export const createPaymentSchema = z.object({
+  memberId: z.string().min(1, "Member is required"),
+  membershipId: z.string().optional(),
+  amount: z.coerce.number().positive("Amount must be greater than 0"),
+  method: z.enum(["CASH", "CARD", "UPI", "BANK_TRANSFER", "OTHER"]),
+  note: z.string().optional().or(z.literal("")),
+})
+export type CreatePaymentInput = z.infer<typeof createPaymentSchema>
+
+export const refundPaymentSchema = z.object({
+  amount: z.coerce.number().positive("Amount must be greater than 0").optional(),
+  reason: z.string().optional().or(z.literal("")),
+})
+export type RefundPaymentInput = z.infer<typeof refundPaymentSchema>
