@@ -29,6 +29,21 @@ cp .env.local.example .env.local   # point NEXT_PUBLIC_API_URL at the API
 npm run dev
 ```
 
+## Deployment
+
+Deployed to Vercel (builds this app natively). `Dockerfile` is provided as an alternative for a
+Docker-based host — it uses Next's `output: 'standalone'` build and requires
+`NEXT_PUBLIC_API_URL` as a **build arg** (it's inlined into the client bundle at build time, so it
+must be set before `docker build`, not as a runtime env var):
+
+```bash
+docker build --build-arg NEXT_PUBLIC_API_URL=https://api.example.com -t mygymagent-f .
+```
+
+`.github/workflows/ci.yml` runs typecheck/lint/build/Docker-build on every push. See
+`mygymagent-b/docs/deployment/overview.md` for the full deployment architecture (this app's and the
+API's).
+
 ## Auth architecture
 
 The API and this app run on separate origins in local dev (and typically in production too). The
