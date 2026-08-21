@@ -152,6 +152,89 @@ export interface MemberTrainerHistoryEntry {
   createdAt: string
 }
 
+export type MemberAssessmentType = "INITIAL" | "PROGRESS" | "PAR_Q" | "FITNESS_TEST" | "CUSTOM"
+
+export interface MemberAssessment {
+  id: string
+  type: MemberAssessmentType
+  notes: string | null
+  conductedByUser?: { id: string; firstName: string; lastName: string } | null
+  conductedAt: string
+  measurements: MemberMeasurement[]
+  fitnessResults: MemberFitnessTestResult[]
+  screening: MemberScreening | null
+}
+
+export interface MemberMeasurement {
+  id: string
+  assessmentId: string | null
+  recordedAt: string
+  weightKg: string | null
+  heightCm: string | null
+  bodyFatPercent: string | null
+  muscleMassKg: string | null
+  waistCm: string | null
+  hipCm: string | null
+  chestCm: string | null
+  restingHeartRate: number | null
+  bloodPressureSystolic: number | null
+  bloodPressureDiastolic: number | null
+  notes: string | null
+}
+
+export interface MemberFitnessTestResult {
+  id: string
+  assessmentId: string | null
+  testName: string
+  value: string
+  unit: string
+  notes: string | null
+  recordedAt: string
+}
+
+export interface MemberScreening {
+  id: string
+  assessmentId: string | null
+  responses: Record<string, boolean>
+  flaggedForMedicalClearance: boolean
+  notes: string | null
+  completedAt: string
+}
+
+export type MemberGoalCategory =
+  | "WEIGHT_LOSS"
+  | "MUSCLE_GAIN"
+  | "STRENGTH"
+  | "ENDURANCE"
+  | "GENERAL_FITNESS"
+  | "OTHER"
+export type MemberGoalStatus = "ACTIVE" | "ACHIEVED" | "ABANDONED" | "PAUSED"
+
+export interface MemberGoalMilestone {
+  id: string
+  title: string
+  targetDate: string | null
+  achievedAt: string | null
+  value: string | null
+  note: string | null
+  createdAt: string
+}
+
+export interface MemberGoal {
+  id: string
+  title: string
+  description: string | null
+  category: MemberGoalCategory
+  status: MemberGoalStatus
+  targetValue: string | null
+  targetUnit: string | null
+  baselineValue: string | null
+  startDate: string
+  targetDate: string | null
+  achievedAt: string | null
+  milestones: MemberGoalMilestone[]
+}
+
 export interface MembershipPlan {
   id: string
   organizationId: string
