@@ -71,3 +71,33 @@ export const refundPaymentSchema = z.object({
   reason: z.string().optional().or(z.literal("")),
 })
 export type RefundPaymentInput = z.infer<typeof refundPaymentSchema>
+
+export const createExerciseSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  muscleGroup: z.string().optional().or(z.literal("")),
+  equipment: z.string().optional().or(z.literal("")),
+  description: z.string().optional().or(z.literal("")),
+})
+export type CreateExerciseInput = z.infer<typeof createExerciseSchema>
+
+export const workoutPlanExerciseSchema = z.object({
+  exerciseId: z.string().min(1, "Pick an exercise"),
+  order: z.coerce.number().int().positive(),
+  sets: z.coerce.number().int().positive("Sets must be at least 1"),
+  reps: z.string().min(1, "Reps is required (e.g. \"8-12\")"),
+  restSeconds: z.coerce.number().int().min(0).optional(),
+  notes: z.string().optional().or(z.literal("")),
+})
+
+export const createWorkoutPlanSchema = z.object({
+  name: z.string().min(1, "Plan name is required"),
+  description: z.string().optional().or(z.literal("")),
+  exercises: z.array(workoutPlanExerciseSchema).min(1, "Add at least one exercise"),
+})
+export type CreateWorkoutPlanInput = z.infer<typeof createWorkoutPlanSchema>
+
+export const assignWorkoutPlanSchema = z.object({
+  memberId: z.string().min(1, "Member is required"),
+  notes: z.string().optional().or(z.literal("")),
+})
+export type AssignWorkoutPlanInput = z.infer<typeof assignWorkoutPlanSchema>

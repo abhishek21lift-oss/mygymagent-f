@@ -165,3 +165,52 @@ export interface Payment {
   membership?: Membership
   refunds?: Refund[]
 }
+
+export interface Exercise {
+  id: string
+  organizationId: string
+  name: string
+  muscleGroup: string | null
+  equipment: string | null
+  description: string | null
+  videoUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WorkoutPlanExercise {
+  exerciseId: string
+  order: number
+  sets: number
+  reps: string
+  restSeconds?: number
+  notes?: string
+}
+
+export interface WorkoutPlan {
+  id: string
+  organizationId: string
+  name: string
+  description: string | null
+  exercises: WorkoutPlanExercise[]
+  createdByUserId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type WorkoutAssignmentStatus = "ACTIVE" | "COMPLETED" | "CANCELLED"
+
+export interface WorkoutAssignment {
+  id: string
+  organizationId: string
+  workoutPlanId: string
+  memberId: string
+  assignedByUserId: string | null
+  status: WorkoutAssignmentStatus
+  startDate: string
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+  workoutPlan?: { id: string; name: string }
+  member?: { id: string; firstName: string; lastName: string }
+}
