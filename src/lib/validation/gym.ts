@@ -101,3 +101,19 @@ export const assignWorkoutPlanSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
 })
 export type AssignWorkoutPlanInput = z.infer<typeof assignWorkoutPlanSchema>
+
+export const createLeadSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Enter a valid email address").optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
+  source: z.string().optional().or(z.literal("")),
+  notes: z.string().optional().or(z.literal("")),
+})
+export type CreateLeadInput = z.infer<typeof createLeadSchema>
+
+export const createFollowUpSchema = z.object({
+  dueAt: z.string().min(1, "Due date is required"),
+  note: z.string().min(1, "Note is required"),
+})
+export type CreateFollowUpInput = z.infer<typeof createFollowUpSchema>

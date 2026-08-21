@@ -214,3 +214,36 @@ export interface WorkoutAssignment {
   workoutPlan?: { id: string; name: string }
   member?: { id: string; firstName: string; lastName: string }
 }
+
+export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "TRIAL" | "WON" | "LOST"
+
+export interface LeadFollowUp {
+  id: string
+  leadId: string
+  dueAt: string
+  note: string
+  completedAt: string | null
+  createdByUserId: string | null
+  createdAt: string
+}
+
+export interface Lead {
+  id: string
+  organizationId: string
+  branchId: string | null
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  source: string | null
+  status: LeadStatus
+  notes: string | null
+  assignedToUserId: string | null
+  convertedMemberId: string | null
+  convertedAt: string | null
+  createdAt: string
+  updatedAt: string
+  assignedToUser?: { id: string; firstName: string; lastName: string } | null
+  followUps?: LeadFollowUp[]
+  _count?: { followUps: number }
+}
