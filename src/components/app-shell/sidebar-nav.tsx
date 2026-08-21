@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dumbbell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -50,8 +50,8 @@ export function SidebarNav({ className }: { className?: string }) {
   return (
     <nav className={cn("flex h-full flex-col gap-6 bg-sidebar text-sidebar-foreground p-4", className)}>
       <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-1">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-          <Dumbbell className="size-4" />
+        <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm">
+          <Image src="/logo-icon.webp" alt="" width={32} height={32} className="size-full object-cover" priority />
         </div>
         <span className="text-[15px] font-semibold tracking-tight">MyGymAgent</span>
       </Link>
