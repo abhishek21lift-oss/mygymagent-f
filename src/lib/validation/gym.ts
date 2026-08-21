@@ -117,3 +117,34 @@ export const createFollowUpSchema = z.object({
   note: z.string().min(1, "Note is required"),
 })
 export type CreateFollowUpInput = z.infer<typeof createFollowUpSchema>
+
+export const createFoodItemSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  servingSize: z.string().optional().or(z.literal("")),
+  calories: z.coerce.number().int().min(0).optional(),
+  proteinG: z.coerce.number().min(0).optional(),
+  carbsG: z.coerce.number().min(0).optional(),
+  fatG: z.coerce.number().min(0).optional(),
+})
+export type CreateFoodItemInput = z.infer<typeof createFoodItemSchema>
+
+export const dietPlanItemSchema = z.object({
+  foodItemId: z.string().min(1, "Pick a food item"),
+  mealSlot: z.enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK"]),
+  quantity: z.coerce.number().positive("Quantity must be greater than 0"),
+  unit: z.string().min(1, "Unit is required (e.g. \"g\", \"cup\")"),
+})
+
+export const createDietPlanSchema = z.object({
+  name: z.string().min(1, "Plan name is required"),
+  description: z.string().optional().or(z.literal("")),
+  items: z.array(dietPlanItemSchema).min(1, "Add at least one food item"),
+  targetCalories: z.coerce.number().int().positive().optional(),
+})
+export type CreateDietPlanInput = z.infer<typeof createDietPlanSchema>
+
+export const assignDietPlanSchema = z.object({
+  memberId: z.string().min(1, "Member is required"),
+  notes: z.string().optional().or(z.literal("")),
+})
+export type AssignDietPlanInput = z.infer<typeof assignDietPlanSchema>

@@ -247,3 +247,58 @@ export interface Lead {
   followUps?: LeadFollowUp[]
   _count?: { followUps: number }
 }
+
+export interface FoodItem {
+  id: string
+  organizationId: string
+  name: string
+  servingSize: string | null
+  calories: number | null
+  proteinG: string | null
+  carbsG: string | null
+  fatG: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type MealSlot = "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK"
+
+export interface DietPlanItem {
+  foodItemId: string
+  mealSlot: MealSlot
+  quantity: number
+  unit: string
+  notes?: string
+}
+
+export interface DietPlan {
+  id: string
+  organizationId: string
+  name: string
+  description: string | null
+  items: DietPlanItem[]
+  targetCalories: number | null
+  targetProteinG: string | null
+  targetCarbsG: string | null
+  targetFatG: string | null
+  createdByUserId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type DietAssignmentStatus = "ACTIVE" | "COMPLETED" | "CANCELLED"
+
+export interface DietAssignment {
+  id: string
+  organizationId: string
+  dietPlanId: string
+  memberId: string
+  assignedByUserId: string | null
+  status: DietAssignmentStatus
+  startDate: string
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+  dietPlan?: { id: string; name: string }
+  member?: { id: string; firstName: string; lastName: string }
+}
