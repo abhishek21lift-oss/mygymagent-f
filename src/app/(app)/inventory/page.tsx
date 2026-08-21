@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, PackagePlus } from "lucide-react";
+import { Plus, PackagePlus, Boxes, AlertTriangle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard } from "@/components/shared/stat-card";
 import {
   Dialog,
   DialogContent,
@@ -420,24 +420,19 @@ export default function InventoryPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Products (this page)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {productsQuery.data?.total ?? "—"}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Low stock (this page)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">{lowStockCount}</CardContent>
-        </Card>
+        <StatCard
+          title="Products (this page)"
+          icon={Boxes}
+          value={productsQuery.data?.total}
+          isLoading={productsQuery.isLoading}
+        />
+        <StatCard
+          title="Low stock (this page)"
+          icon={AlertTriangle}
+          value={lowStockCount}
+          isLoading={productsQuery.isLoading}
+          tone={lowStockCount > 0 ? "destructive" : "success"}
+        />
       </div>
 
       <div>

@@ -6,11 +6,19 @@
 /* ============================================================================
  * Design tokens
  *
- * A single brand color (indigo) carries trust/professionalism; a warm amber
- * accent is reserved for energy/emphasis (streaks, highlights) and used
- * sparingly, not as a second primary. Neutral grays do the heavy lifting so
- * the product reads as calm, high-trust SaaS rather than a flashy consumer
- * app. Radii and shadows are restrained -- no glassmorphism, no heavy blur.
+ * A single brand color (indigo) carries trust/professionalism. Neutral
+ * grays do the heavy lifting so the product reads as calm, high-trust SaaS
+ * rather than a flashy consumer app. Radii and shadows are restrained --
+ * no glassmorphism, no heavy blur.
+ *
+ * `--accent`/`--accent-foreground` are the shadcn-convention tokens every
+ * base primitive (Button ghost/outline, DropdownMenu item, Select item,
+ * Dialog close, Skeleton) hovers/highlights with -- they must stay a
+ * neutral tint (same value as --secondary) or literally every interactive
+ * surface in the app picks up whatever color sits there. `--highlight` is
+ * the actual warm-amber brand color, reserved for deliberate emphasis
+ * (streaks, "new" badges) -- opt in to it explicitly, never assume it's
+ * wired into a hover state.
  * ========================================================================= */
 
 :root {
@@ -34,8 +42,11 @@
   --muted: oklch(0.96 0.01 260);
   --muted-foreground: oklch(0.5 0.02 260);
 
-  --accent: oklch(0.75 0.15 70);
-  --accent-foreground: oklch(0.22 0.03 70);
+  --accent: oklch(0.96 0.01 260);
+  --accent-foreground: oklch(0.24 0.02 260);
+
+  --highlight: oklch(0.75 0.15 70);
+  --highlight-foreground: oklch(0.22 0.03 70);
 
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 25);
@@ -85,8 +96,11 @@
   --muted: oklch(0.26 0.012 260);
   --muted-foreground: oklch(0.66 0.015 260);
 
-  --accent: oklch(0.75 0.15 70);
-  --accent-foreground: oklch(0.18 0.03 70);
+  --accent: oklch(0.26 0.012 260);
+  --accent-foreground: oklch(0.96 0.005 260);
+
+  --highlight: oklch(0.75 0.15 70);
+  --highlight-foreground: oklch(0.18 0.03 70);
 
   --destructive: oklch(0.62 0.2 25);
   --destructive-foreground: oklch(0.98 0.01 25);
@@ -132,6 +146,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);

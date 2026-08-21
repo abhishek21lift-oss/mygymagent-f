@@ -32,7 +32,7 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
+    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
       <Button variant="ghost" size="icon" className="md:hidden" onClick={onOpenMobileNav}>
         <Menu className="size-5" />
         <span className="sr-only">Open navigation</span>
@@ -40,7 +40,7 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
 
       <div />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon"
@@ -53,9 +53,9 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2 px-2">
-              <Avatar className="size-7">
-                <AvatarFallback>
+            <Button variant="ghost" className="gap-2 pr-2 pl-1.5">
+              <Avatar className="size-7 border">
+                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                   {user ? initials(user.firstName, user.lastName) : <UserIcon className="size-4" />}
                 </AvatarFallback>
               </Avatar>

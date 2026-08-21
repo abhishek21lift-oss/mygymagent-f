@@ -4,16 +4,16 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, Undo2 } from "lucide-react";
+import { Plus, Undo2, Wallet } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable } from "@/components/shared/data-table";
 import { MemberPicker } from "@/components/shared/member-picker";
+import { StatCard } from "@/components/shared/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -326,26 +326,20 @@ export default function BillingPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Collected (this page)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {totalCollected.toFixed(2)}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Refunded (this page)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {totalRefunded.toFixed(2)}
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Collected (this page)"
+          icon={Wallet}
+          value={totalCollected.toFixed(2)}
+          isLoading={paymentsQuery.isLoading}
+          tone="success"
+        />
+        <StatCard
+          title="Refunded (this page)"
+          icon={Undo2}
+          value={totalRefunded.toFixed(2)}
+          isLoading={paymentsQuery.isLoading}
+          tone="warning"
+        />
       </div>
 
       <DataTable

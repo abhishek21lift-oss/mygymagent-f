@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { TableSkeleton } from "@/components/shared/table-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -82,13 +83,13 @@ export function DataTable<T>({
         <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />
       ) : (
         <>
-          <div className="rounded-md border">
+          <div className="overflow-hidden rounded-xl border">
             <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="bg-muted/40 hover:bg-muted/40">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                         {header.isPlaceholder
                           ? null
                           : flexRender(header.column.columnDef.header, header.getContext())}
@@ -101,7 +102,10 @@ export function DataTable<T>({
                 {table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
-                    className={onRowClick ? "cursor-pointer" : undefined}
+                    className={cn(
+                      "transition-colors",
+                      onRowClick && "cursor-pointer",
+                    )}
                     onClick={() => onRowClick?.(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
