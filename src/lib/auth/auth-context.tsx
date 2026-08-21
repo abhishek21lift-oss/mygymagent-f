@@ -15,7 +15,11 @@ interface AuthContextValue {
   login: (input: LoginInput) => Promise<void>
   register: (input: RegisterInput) => Promise<void>
   logout: () => Promise<void>
-  hasPermission: (key: string) => boolean
+  /** A string requires that exact permission; an array is satisfied by
+   * holding any one of the listed keys (e.g. the broad "members.read" or
+   * the narrower "members.read_assigned" -- see the backend's
+   * RequireAnyPermission for why a route can be reachable via either). */
+  hasPermission: (key: string | string[]) => boolean
   refetchMe: () => Promise<void>
 }
 
@@ -94,7 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const hasPermission = React.useCallback(
-    (key: string) => permissions.includes(key),
+    (key: string | string[]) =>
+      Array.isArray(key) ? key.some((k) => permissions.includes(k)) : permissions.includes(key),
     [permissions],
   )
 

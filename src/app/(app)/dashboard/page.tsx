@@ -62,7 +62,7 @@ export default function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {hasPermission("members.read") && (
+        {hasPermission(["members.read", "members.read_assigned"]) && (
           <StatCard
             title="Total members"
             icon={Users}
