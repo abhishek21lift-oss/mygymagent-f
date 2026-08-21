@@ -302,3 +302,33 @@ export interface DietAssignment {
   dietPlan?: { id: string; name: string }
   member?: { id: string; firstName: string; lastName: string }
 }
+
+export interface Product {
+  id: string
+  organizationId: string
+  sku: string
+  name: string
+  description: string | null
+  category: string | null
+  unitPrice: string
+  costPrice: string | null
+  quantityOnHand: number
+  reorderLevel: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type StockMovementType = "RESTOCK" | "SALE" | "ADJUSTMENT" | "DAMAGED"
+
+export interface StockMovement {
+  id: string
+  organizationId: string
+  productId: string
+  type: StockMovementType
+  quantity: number
+  note: string | null
+  recordedByUserId: string | null
+  createdAt: string
+  product?: { id: string; name: string; sku: string }
+}

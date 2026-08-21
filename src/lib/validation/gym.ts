@@ -148,3 +148,22 @@ export const assignDietPlanSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
 })
 export type AssignDietPlanInput = z.infer<typeof assignDietPlanSchema>
+
+export const createProductSchema = z.object({
+  sku: z.string().min(1, "SKU is required"),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().or(z.literal("")),
+  category: z.string().optional().or(z.literal("")),
+  unitPrice: z.coerce.number().min(0, "Price must be 0 or more"),
+  costPrice: z.coerce.number().min(0).optional(),
+  quantityOnHand: z.coerce.number().int().min(0).optional(),
+  reorderLevel: z.coerce.number().int().min(0).optional(),
+})
+export type CreateProductInput = z.infer<typeof createProductSchema>
+
+export const createStockMovementSchema = z.object({
+  type: z.enum(["RESTOCK", "SALE", "ADJUSTMENT", "DAMAGED"]),
+  quantity: z.coerce.number().int().refine((v) => v !== 0, "Quantity cannot be 0"),
+  note: z.string().optional().or(z.literal("")),
+})
+export type CreateStockMovementInput = z.infer<typeof createStockMovementSchema>
