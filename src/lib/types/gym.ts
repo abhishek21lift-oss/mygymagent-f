@@ -78,6 +78,80 @@ export interface Member {
   memberships?: Membership[]
 }
 
+export type MemberAddressType = "HOME" | "WORK" | "BILLING" | "OTHER"
+
+export interface MemberAddress {
+  id: string
+  type: MemberAddressType
+  isPrimary: boolean
+  addressLine1: string
+  addressLine2: string | null
+  city: string | null
+  state: string | null
+  postalCode: string | null
+  country: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MemberEmergencyContact {
+  id: string
+  name: string
+  phone: string
+  relationship: string | null
+  isPrimary: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MemberNote {
+  id: string
+  body: string
+  pinned: boolean
+  authorUserId: string | null
+  authorUser?: { id: string; firstName: string; lastName: string } | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type MemberConsentType = "WAIVER" | "MARKETING" | "PHOTO_RELEASE" | "DATA_PROCESSING" | "OTHER"
+
+export interface MemberConsent {
+  id: string
+  type: MemberConsentType
+  granted: boolean
+  note: string | null
+  recordedByUserId: string | null
+  createdAt: string
+}
+
+export interface MemberStatusHistoryEntry {
+  id: string
+  fromStatus: MemberStatus | null
+  toStatus: MemberStatus
+  reason: string | null
+  changedByUser?: { id: string; firstName: string; lastName: string } | null
+  createdAt: string
+}
+
+export interface MemberBranchHistoryEntry {
+  id: string
+  fromBranch?: { id: string; name: string } | null
+  toBranch: { id: string; name: string }
+  reason: string | null
+  changedByUser?: { id: string; firstName: string; lastName: string } | null
+  createdAt: string
+}
+
+export interface MemberTrainerHistoryEntry {
+  id: string
+  fromTrainer?: { id: string; firstName: string; lastName: string } | null
+  toTrainer?: { id: string; firstName: string; lastName: string } | null
+  reason: string | null
+  changedByUser?: { id: string; firstName: string; lastName: string } | null
+  createdAt: string
+}
+
 export interface MembershipPlan {
   id: string
   organizationId: string

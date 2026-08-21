@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMember } from "@/lib/hooks/use-members";
+import { Member360Tabs } from "./member-360-tabs";
 import { useCreateMembership, useFreezeMembership, useResumeMembership, useCancelMembership } from "@/lib/hooks/use-memberships";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -261,6 +262,15 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Member 360</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Member360Tabs memberId={member.id} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
