@@ -13,6 +13,7 @@ import {
   Activity,
   Target,
   CheckCircle2,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ import { ApiError } from "@/lib/api/client";
 import type {
   MemberAddressType,
   MemberConsentType,
+  MemberDocumentCategory,
   MemberGoalCategory,
   MemberGoalMilestone,
 } from "@/lib/types/gym";
@@ -55,6 +57,11 @@ import {
   useCreateMemberGoalMilestone,
   useAchieveMemberGoalMilestone,
 } from "@/lib/hooks/use-member-goals";
+import {
+  useMemberDocuments,
+  useUploadMemberDocument,
+  useDeleteMemberDocument,
+} from "@/lib/hooks/use-member-documents";
 import {
   useMemberAddresses,
   useCreateMemberAddress,
@@ -856,6 +863,158 @@ function GoalsPanel({ memberId }: { memberId: string }) {
   );
 }
 
+// -- Documents ------------------------------------------------------------------
+
+const DOCUMENT_CATEGORY_LABELS: Record<MemberDocumentCategory, string> = {
+  DOCUMENT: "Document",
+  PROGRESS_PHOTO: "Progress photo",
+  ID_SCAN: "ID scan",
+  OTHER: "Other",
+};
+
+const ALLOWED_DOCUMENT_TYPES = "image/jpeg,image/png,image/webp,application/pdf";
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function DocumentsPanel({ memberId }: { memberId: string }) {
+  const query = useMemberDocuments(memberId);
+  const upload = useUploadMemberDocument(memberId);
+  const remove = useDeleteMemberDocument(memberId);
+  const [open, setOpen] = React.useState(false);
+  const [file, setFile] = React.useState<File | null>(null);
+  const [category, setCategory] = React.useState<MemberDocumentCategory>("DOCUMENT");
+  const [description, setDescription] = React.useState("");
+
+  async function handleUpload() {
+    if (!file) return;
+    try {
+      await upload.mutateAsync({ file, category, description: description || undefined });
+      toast.success("Document uploaded");
+      setOpen(false);
+      setFile(null);
+      setDescription("");
+      setCategory("DOCUMENT");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to upload document");
+    }
+  }
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-end">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">
+              <Plus className="size-3.5" />
+              Upload document
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Upload a document</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <Input
+                type="file"
+                accept={ALLOWED_DOCUMENT_TYPES}
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+              <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or PDF, up to 10MB.</p>
+              <Select value={category} onValueChange={(v) => setCategory(v as MemberDocumentCategory)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="Description (optional)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button onClick={handleUpload} disabled={!file || upload.isPending}>
+                {upload.isPending ? "Uploading..." : "Upload"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {!query.data || query.data.length === 0 ? (
+        <EmptyState
+          icon={FileText}
+          title="No documents yet"
+          description="Upload documents and progress photos for this member."
+        />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {query.data.map((doc) => (
+            <div key={doc.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                {doc.mimeType.startsWith("image/") ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset Next's optimizer can proxy
+                  <img
+                    src={doc.url}
+                    alt={doc.originalName}
+                    className="size-10 shrink-0 rounded object-cover"
+                  />
+                ) : (
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
+                    <FileText className="size-4 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{doc.originalName}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline">{DOCUMENT_CATEGORY_LABELS[doc.category]}</Badge>
+                    <span>{formatFileSize(doc.sizeBytes)}</span>
+                    <span>· {fmtDateTime(doc.createdAt)}</span>
+                  </div>
+                  {doc.description && <p className="mt-1 text-xs text-muted-foreground">{doc.description}</p>}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button variant="ghost" size="sm" asChild>
+                  <a href={doc.url} target="_blank" rel="noreferrer">
+                    View
+                  </a>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7"
+                  disabled={remove.isPending}
+                  onClick={() =>
+                    remove
+                      .mutateAsync(doc.id)
+                      .then(() => toast.success("Document deleted"))
+                      .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to delete"))
+                  }
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // -- Root -----------------------------------------------------------------------
 
 export function Member360Tabs({ memberId }: { memberId: string }) {
@@ -868,6 +1027,7 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
         <TabsTrigger value="consents">Consents</TabsTrigger>
         <TabsTrigger value="assessments">Assessments</TabsTrigger>
         <TabsTrigger value="goals">Goals</TabsTrigger>
+        <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="history">History</TabsTrigger>
       </TabsList>
       <TabsContent value="addresses">
@@ -887,6 +1047,9 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
       </TabsContent>
       <TabsContent value="goals">
         <GoalsPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="documents">
+        <DocumentsPanel memberId={memberId} />
       </TabsContent>
       <TabsContent value="history">
         <HistoryPanel memberId={memberId} />

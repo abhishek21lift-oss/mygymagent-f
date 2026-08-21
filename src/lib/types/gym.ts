@@ -235,6 +235,19 @@ export interface MemberGoal {
   milestones: MemberGoalMilestone[]
 }
 
+export type MemberDocumentCategory = "DOCUMENT" | "PROGRESS_PHOTO" | "ID_SCAN" | "OTHER"
+
+export interface MemberDocument {
+  id: string
+  category: MemberDocumentCategory
+  description: string | null
+  createdAt: string
+  originalName: string
+  mimeType: string
+  sizeBytes: number
+  url: string
+}
+
 export interface MembershipPlan {
   id: string
   organizationId: string

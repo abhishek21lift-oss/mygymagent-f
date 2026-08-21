@@ -81,8 +81,12 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
  * httpOnly refresh cookie is included on auth endpoints. */
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, branchId, _isRetry } = options
+  const isFormData = body instanceof FormData
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
+  const headers: Record<string, string> = {}
+  // A FormData body's multipart boundary is set by the browser -- an explicit
+  // Content-Type header here would omit it and the backend couldn't parse the body.
+  if (!isFormData) headers["Content-Type"] = "application/json"
   const token = getAccessToken()
   if (token) headers.Authorization = `Bearer ${token}`
   if (branchId) headers["x-branch-id"] = branchId
@@ -91,7 +95,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     method,
     headers,
     credentials: "include",
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
   })
 
   if (res.status === 401 && !_isRetry && path !== "/auth/refresh") {
