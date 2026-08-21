@@ -50,9 +50,14 @@ export function SidebarNav({ className }: { className?: string }) {
   return (
     <nav className={cn("flex h-full flex-col gap-6 bg-sidebar text-sidebar-foreground p-4", className)}>
       <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-1">
-        <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm">
-          <Image src="/logo-icon.webp" alt="" width={32} height={32} className="size-full object-cover" priority />
-        </div>
+        <Image
+          src="/logo-mark.webp"
+          alt=""
+          width={36}
+          height={36}
+          className="size-9 shrink-0 object-contain"
+          priority
+        />
         <span className="text-[15px] font-semibold tracking-tight">MyGymAgent</span>
       </Link>
 
