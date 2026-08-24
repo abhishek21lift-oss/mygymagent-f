@@ -27,7 +27,7 @@ import type { Paginated } from "@/lib/types/pagination";
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
-  data: Paginated<T> | undefined;
+  data: Paginated<T> | T[] | undefined;
   isLoading: boolean;
   isError: boolean;
   onRetry?: () => void;
@@ -58,8 +58,18 @@ export function DataTable<T>({
   emptyDescription,
   emptyAction,
 }: DataTableProps<T>) {
+  const normalizedData: Paginated<T> | undefined = Array.isArray(data)
+    ? {
+        items: data,
+        page,
+        pageSize: data.length || 1,
+        total: data.length,
+        totalPages: 1,
+      }
+    : data;
+
   const table = useReactTable({
-    data: data?.items ?? [],
+    data: normalizedData?.items ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -79,7 +89,7 @@ export function DataTable<T>({
         <TableSkeleton columns={columns.length} />
       ) : isError ? (
         <ErrorState onRetry={onRetry} />
-      ) : !data || data.items.length === 0 ? (
+      ) : !normalizedData || normalizedData.items.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />
       ) : (
         <>
@@ -121,7 +131,7 @@ export function DataTable<T>({
 
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>
-              Page {data.page} of {data.totalPages} &middot; {data.total} total
+              Page {normalizedData.page} of {normalizedData.totalPages} &middot; {normalizedData.total} total
             </span>
             <div className="flex items-center gap-2">
               <Button
@@ -135,7 +145,7 @@ export function DataTable<T>({
               <Button
                 variant="outline"
                 size="icon"
-                disabled={page >= data.totalPages}
+                disabled={page >= normalizedData.totalPages}
                 onClick={() => onPageChange(page + 1)}
               >
                 <ChevronRight className="size-4" />
