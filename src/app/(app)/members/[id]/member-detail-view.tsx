@@ -2,26 +2,18 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Snowflake, XCircle, PlayCircle } from "lucide-react";
+import { ArrowLeft, Brain, CheckCircle2, Dumbbell, Plus, Snowflake, Sparkles, UserRound, Wallet, XCircle, PlayCircle, Activity, CalendarCheck, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-
-import { PageHeader } from "@/components/shared/page-header";
 import { ErrorState } from "@/components/shared/error-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMember } from "@/lib/hooks/use-members";
+import { useMemberWorkoutHistory, useMemberExerciseHistory } from "@/lib/hooks/use-workout-history";
 import { Member360Tabs } from "./member-360-tabs";
 import { useCreateMembership, useFreezeMembership, useResumeMembership, useCancelMembership } from "@/lib/hooks/use-memberships";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
@@ -29,248 +21,14 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { ApiError } from "@/lib/api/client";
 import type { MembershipStatus } from "@/lib/types/gym";
 
-const membershipStatusVariant: Record<MembershipStatus, "default" | "secondary" | "destructive" | "warning"> = {
-  PENDING: "secondary",
-  ACTIVE: "default",
-  FROZEN: "warning",
-  EXPIRED: "destructive",
-  CANCELLED: "secondary",
-};
+const membershipStatusVariant: Record<MembershipStatus, "default" | "secondary" | "destructive" | "warning"> = { PENDING: "secondary", ACTIVE: "default", FROZEN: "warning", EXPIRED: "destructive", CANCELLED: "secondary" };
 
-function SellMembershipDialog({ memberId }: { memberId: string }) {
-  const [open, setOpen] = React.useState(false);
-  const [planId, setPlanId] = React.useState<string>("");
-  const plansQuery = useMembershipPlans({ pageSize: 100 });
-  const createMembership = useCreateMembership();
-
-  async function handleSell() {
-    if (!planId) return;
-    try {
-      await createMembership.mutateAsync({ memberId, membershipPlanId: planId });
-      toast.success("Membership sold");
-      setOpen(false);
-      setPlanId("");
-    } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : "Failed to sell membership");
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus />
-          Sell membership
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Sell a membership</DialogTitle>
-        </DialogHeader>
-        <Select value={planId} onValueChange={setPlanId}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a plan" />
-          </SelectTrigger>
-          <SelectContent>
-            {plansQuery.data?.items.map((plan) => (
-              <SelectItem key={plan.id} value={plan.id}>
-                {plan.name} — {plan.currency} {plan.price} / {plan.durationDays}d
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <DialogFooter>
-          <Button onClick={handleSell} disabled={!planId || createMembership.isPending}>
-            {createMembership.isPending ? "Selling..." : "Confirm sale"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function MembershipActions({ membershipId, status }: { membershipId: string; status: MembershipStatus }) {
-  const freeze = useFreezeMembership();
-  const resume = useResumeMembership();
-  const cancel = useCancelMembership();
-
-  if (status === "ACTIVE") {
-    return (
-      <div className="flex gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={freeze.isPending}
-          onClick={() =>
-            freeze
-              .mutateAsync({ id: membershipId, days: 7 })
-              .then(() => toast.success("Membership frozen for 7 days"))
-              .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to freeze"))
-          }
-        >
-          <Snowflake className="size-3.5" />
-          Freeze 7d
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={cancel.isPending}
-          onClick={() =>
-            cancel
-              .mutateAsync({ id: membershipId })
-              .then(() => toast.success("Membership cancelled"))
-              .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to cancel"))
-          }
-        >
-          <XCircle className="size-3.5" />
-          Cancel
-        </Button>
-      </div>
-    );
-  }
-
-  if (status === "FROZEN") {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        disabled={resume.isPending}
-        onClick={() =>
-          resume
-            .mutateAsync(membershipId)
-            .then(() => toast.success("Membership resumed"))
-            .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to resume"))
-        }
-      >
-        <PlayCircle className="size-3.5" />
-        Resume
-      </Button>
-    );
-  }
-
-  return null;
-}
-
-export function MemberDetailView({ memberId }: { memberId: string }) {
-  const router = useRouter();
-  const { hasPermission } = useAuth();
-  const memberQuery = useMember(memberId);
-
-  if (memberQuery.isLoading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
-  }
-
-  if (memberQuery.isError || !memberQuery.data) {
-    return <ErrorState message="Member not found or you don't have access." onRetry={() => memberQuery.refetch()} />;
-  }
-
-  const member = memberQuery.data;
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => router.push("/members")}>
-          <ArrowLeft className="size-4" />
-          Back to members
-        </Button>
-        <PageHeader
-          title={`${member.firstName} ${member.lastName}`}
-          description={`Member code ${member.memberCode} · Joined ${new Date(member.joinedAt).toLocaleDateString()}`}
-        />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-base">Profile</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Status</span>
-              <Badge>{member.status}</Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Branch</span>
-              <span>{member.primaryBranch?.name ?? "—"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Email</span>
-              <span>{member.email ?? "—"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Phone</span>
-              <span>{member.phone ?? "—"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Trainer</span>
-              <span>
-                {member.assignedTrainer
-                  ? `${member.assignedTrainer.firstName} ${member.assignedTrainer.lastName}`
-                  : "Unassigned"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Emergency contact</span>
-              <span>{member.emergencyContactName ?? "—"}</span>
-            </div>
-            {member.notes && (
-              <div className="border-t pt-3">
-                <p className="text-muted-foreground">Notes</p>
-                <p className="mt-1">{member.notes}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Memberships</CardTitle>
-            {hasPermission("memberships.create") && <SellMembershipDialog memberId={member.id} />}
-          </CardHeader>
-          <CardContent>
-            {!member.memberships || member.memberships.length === 0 ? (
-              <EmptyState title="No memberships yet" description="Sell this member their first plan." />
-            ) : (
-              <div className="flex flex-col gap-3">
-                {member.memberships.map((membership) => (
-                  <div
-                    key={membership.id}
-                    className="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-medium">{membership.membershipPlan?.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(membership.startDate).toLocaleDateString()} —{" "}
-                        {new Date(membership.endDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={membershipStatusVariant[membership.status]}>{membership.status}</Badge>
-                      {hasPermission("memberships.update") && (
-                        <MembershipActions membershipId={membership.id} status={membership.status} />
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Member 360</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Member360Tabs memberId={member.id} />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+function SellMembershipDialog({ memberId }: { memberId: string }) { const [open, setOpen] = React.useState(false); const [planId, setPlanId] = React.useState(""); const plansQuery = useMembershipPlans({ pageSize: 100 }); const createMembership = useCreateMembership(); async function handleSell() { if (!planId) return; try { await createMembership.mutateAsync({ memberId, membershipPlanId: planId }); toast.success("Membership sold"); setOpen(false); setPlanId(""); } catch (error) { toast.error(error instanceof ApiError ? error.message : "Failed to sell membership"); } } return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button size="sm" className="rounded-xl"><Plus /> Sell membership</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Sell a membership</DialogTitle></DialogHeader><Select value={planId} onValueChange={setPlanId}><SelectTrigger className="w-full"><SelectValue placeholder="Select a plan" /></SelectTrigger><SelectContent>{plansQuery.data?.items.map((plan) => <SelectItem key={plan.id} value={plan.id}>{plan.name} — {plan.currency} {plan.price} / {plan.durationDays}d</SelectItem>)}</SelectContent></Select><DialogFooter><Button onClick={handleSell} disabled={!planId || createMembership.isPending}>{createMembership.isPending ? "Selling..." : "Confirm sale"}</Button></DialogFooter></DialogContent></Dialog>; }
+function MembershipActions({ membershipId, status }: { membershipId: string; status: MembershipStatus }) { const freeze = useFreezeMembership(); const resume = useResumeMembership(); const cancel = useCancelMembership(); if (status === "ACTIVE") return <div className="flex gap-1"><Button variant="ghost" size="sm" disabled={freeze.isPending} onClick={() => freeze.mutateAsync({ id: membershipId, days: 7 }).then(() => toast.success("Membership frozen for 7 days")).catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to freeze"))}><Snowflake className="size-3.5" /> Freeze 7d</Button><Button variant="ghost" size="sm" disabled={cancel.isPending} onClick={() => cancel.mutateAsync({ id: membershipId }).then(() => toast.success("Membership cancelled")).catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to cancel"))}><XCircle className="size-3.5" /> Cancel</Button></div>; if (status === "FROZEN") return <Button variant="ghost" size="sm" disabled={resume.isPending} onClick={() => resume.mutateAsync(membershipId).then(() => toast.success("Membership resumed")).catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to resume"))}><PlayCircle className="size-3.5" /> Resume</Button>; return null; }
+function WorkoutProgress({ memberId }: { memberId: string }) { const history = useMemberWorkoutHistory(memberId, 12); const sessions = history.data ?? []; const completed = sessions.filter((session) => session.status === "COMPLETED"); const totalVolume = completed.reduce((sum, session) => sum + Number(session.volumeKg ?? 0), 0); const last = completed[0]; const exerciseIds: string[] = []; return <Card className="border-0 shadow-sm ring-1 ring-border/70"><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="flex items-center gap-2 text-base"><Dumbbell className="size-4 text-primary" /> Workout progress</CardTitle><p className="mt-1 text-xs text-muted-foreground">Real execution history from completed sessions.</p></div><Badge variant="outline">{completed.length} completed</Badge></CardHeader><CardContent className="space-y-4">{history.isLoading ? <div className="grid gap-3 sm:grid-cols-3">{[1,2,3].map((item) => <Skeleton key={item} className="h-20 rounded-2xl" />)}</div> : history.isError ? <ErrorState message="Unable to load workout history." onRetry={() => history.refetch()} /> : !sessions.length ? <EmptyState title="No workout history yet" description="Completed training sessions will appear here automatically." /> : <><div className="grid gap-3 sm:grid-cols-3"><ProgressStat icon={CheckCircle2} label="Completed sessions" value={String(completed.length)} /><ProgressStat icon={TrendingUp} label="Logged volume" value={totalVolume > 0 ? `${Math.round(totalVolume).toLocaleString()} kg` : "—"} /><ProgressStat icon={Activity} label="Last workout" value={last ? new Date(last.sessionDate).toLocaleDateString() : "—"} /></div><div className="rounded-2xl border bg-muted/10 p-4"><div className="flex items-center gap-2"><TrendingUp className="size-4 text-primary" /><p className="text-sm font-semibold">Exercise progression</p></div><p className="mt-1 text-xs text-muted-foreground">Select an exercise to compare real logged sets across sessions.</p><div className="mt-3 flex flex-wrap gap-2">{exerciseIds.length === 0 ? <span className="text-xs text-muted-foreground">Exercise-level history becomes available when session logs include exercise identifiers.</span> : exerciseIds.map((id) => <ExerciseProgression key={id} memberId={memberId} exerciseId={id} />)}</div></div><div className="space-y-2">{sessions.map((session) => <div key={session.id} className="flex flex-col gap-2 rounded-2xl border p-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-semibold">{session.workoutPlanName ?? "Workout session"}</p><p className="mt-1 text-xs text-muted-foreground">{new Date(session.sessionDate).toLocaleDateString()} · {Number(session.setsLogged)} sets · {Number(session.volumeKg) > 0 ? `${Math.round(Number(session.volumeKg)).toLocaleString()} kg volume` : "Volume unavailable"}</p></div><Badge variant={session.status === "COMPLETED" ? "default" : "secondary"}>{session.status.replace("_", " ")}</Badge></div>)}</div></>}</CardContent></Card>; }
+function ExerciseProgression({ memberId, exerciseId }: { memberId: string; exerciseId: string }) { const query = useMemberExerciseHistory(memberId, exerciseId, 20); const rows = query.data ?? []; if (query.isLoading) return <Skeleton className="h-16 w-full" />; if (query.isError || !rows.length) return null; const latest = rows[0]; const previous = rows.find((row) => row.sessionDate !== latest.sessionDate); const weightDelta = latest.weightKg != null && previous?.weightKg != null ? Number(latest.weightKg) - Number(previous.weightKg) : null; const repsDelta = latest.reps != null && previous?.reps != null ? latest.reps - previous.reps : null; return <div className="w-full rounded-2xl border bg-background/70 p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold">{latest.exerciseName}</p><p className="text-xs text-muted-foreground">Latest logged set vs previous available session</p></div>{weightDelta != null ? <Badge variant={weightDelta > 0 ? "default" : "secondary"}>{weightDelta > 0 ? `↑ ${weightDelta} kg` : weightDelta === 0 ? "No weight change" : `↓ ${Math.abs(weightDelta)} kg`}</Badge> : <Badge variant="secondary">—</Badge>}</div><div className="mt-3 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4"><Metric label="Latest" value={`${latest.weightKg ?? "—"} kg × ${latest.reps ?? "—"}`} /><Metric label="Previous" value={previous ? `${previous.weightKg ?? "—"} kg × ${previous.reps ?? "—"}` : "—"} /><Metric label="Weight Δ" value={weightDelta != null ? `${weightDelta > 0 ? "+" : ""}${weightDelta} kg` : "—"} /><Metric label="Reps Δ" value={repsDelta != null ? `${repsDelta > 0 ? "+" : ""}${repsDelta}` : "—"} /></div></div>; }
+function Metric({ label, value }: { label: string; value: string }) { return <div className="rounded-xl border bg-muted/20 p-3"><p className="text-[10px] text-muted-foreground">{label}</p><p className="mt-1 font-semibold">{value}</p></div>; }
+function ProgressStat({ icon: Icon, label, value }: { icon: typeof Activity; label: string; value: string }) { return <div className="rounded-2xl border bg-muted/20 p-4"><Icon className="size-4 text-primary" /><p className="mt-3 text-lg font-semibold">{value}</p><p className="mt-1 text-[11px] text-muted-foreground">{label}</p></div>; }
+export function MemberDetailView({ memberId }: { memberId: string }) { const router = useRouter(); const { hasPermission } = useAuth(); const memberQuery = useMember(memberId); const [now] = React.useState(() => Date.now()); if (memberQuery.isLoading) return <div className="flex flex-col gap-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-40 w-full" /></div>; if (memberQuery.isError || !memberQuery.data) return <ErrorState message="Member not found or you don't have access." onRetry={() => memberQuery.refetch()} />; const member = memberQuery.data; const activeMembership = member.memberships?.find((m) => m.status === "ACTIVE"); const daysLeft = activeMembership ? Math.max(0, Math.ceil((new Date(activeMembership.endDate).getTime() - now) / 86400000)) : null; return <div className="flex flex-col gap-6"><Button variant="ghost" size="sm" className="-ml-2 w-fit" onClick={() => router.push("/members")}><ArrowLeft className="size-4" /> Back to members</Button><section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[0.10] via-card to-card p-6 shadow-sm sm:p-8"><div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"><div className="flex items-center gap-4"><span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary"><UserRound className="size-7" /></span><div><div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-semibold tracking-tight">{member.firstName} {member.lastName}</h1><Badge variant={member.status === "ACTIVE" ? "default" : "secondary"}>{member.status}</Badge></div><p className="mt-1 text-sm text-muted-foreground">{member.memberCode} · Joined {new Date(member.joinedAt).toLocaleDateString()}</p><p className="mt-1 text-xs text-muted-foreground">{member.assignedTrainer ? `Trainer: ${member.assignedTrainer.firstName} ${member.assignedTrainer.lastName}` : "No trainer assigned"}</p></div></div><div className="flex flex-wrap gap-2"><Button variant="outline" className="rounded-xl"><Brain className="size-4" /> Ask AI about member</Button>{hasPermission("memberships.create") && <SellMembershipDialog memberId={member.id} />}</div></div></section><section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><HealthCard icon={CalendarCheck} label="Membership" value={activeMembership ? "Active" : "No active plan"} hint={daysLeft !== null ? `${daysLeft} days remaining` : "Needs attention"} /><HealthCard icon={Activity} label="Engagement" value="Member 360" hint="Attendance & activity" /><HealthCard icon={Target} label="Goals" value="Track progress" hint="Assessments & milestones" /><HealthCard icon={Wallet} label="Payments" value="Financial view" hint="Billing history" /></section><WorkoutProgress memberId={member.id} /><section className="grid gap-6 lg:grid-cols-3"><Card className="lg:col-span-1 border-0 shadow-sm ring-1 ring-border/70"><CardHeader><CardTitle className="text-base">Member snapshot</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><Info label="Branch" value={member.primaryBranch?.name ?? "—"} /><Info label="Email" value={member.email ?? "—"} /><Info label="Phone" value={member.phone ?? "—"} /><Info label="Trainer" value={member.assignedTrainer ? `${member.assignedTrainer.firstName} ${member.assignedTrainer.lastName}` : "Unassigned"} /><Info label="Emergency" value={member.emergencyContactName ?? "—"} /></CardContent></Card><Card className="lg:col-span-2 border-0 shadow-sm ring-1 ring-border/70"><CardHeader><CardTitle className="text-base">Membership timeline</CardTitle></CardHeader><CardContent>{!member.memberships?.length ? <EmptyState title="No memberships yet" description="Sell this member their first plan." /> : <div className="space-y-3">{member.memberships.map((membership) => <div key={membership.id} className="flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">{membership.membershipPlan?.name}</p><p className="mt-1 text-xs text-muted-foreground">{new Date(membership.startDate).toLocaleDateString()} — {new Date(membership.endDate).toLocaleDateString()}</p></div><div className="flex flex-wrap items-center gap-2"><Badge variant={membershipStatusVariant[membership.status]}>{membership.status}</Badge>{hasPermission("memberships.update") && <MembershipActions membershipId={membership.id} status={membership.status} />}</div></div>)}</div>}</CardContent></Card></section><Card className="border-0 bg-gradient-to-br from-violet-500/[0.08] via-card to-card shadow-sm ring-1 ring-primary/15"><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Sparkles className="size-4 text-primary" /> AI member intelligence</CardTitle></CardHeader><CardContent><p className="text-xs text-muted-foreground">AI insights will use verified member activity and workout history only.</p></CardContent></Card><Card className="border-0 shadow-sm ring-1 ring-border/70"><CardHeader><CardTitle className="text-base">Member 360</CardTitle></CardHeader><CardContent><Member360Tabs memberId={member.id} /></CardContent></Card></div>; }
+function Info({ label, value }: { label: string; value: string }) { return <div className="flex items-start justify-between gap-4"><span className="text-muted-foreground">{label}</span><span className="max-w-[65%] text-right font-medium">{value}</span></div>; }
+function HealthCard({ icon: Icon, label, value, hint }: { icon: typeof Activity; label: string; value: string; hint: string }) { return <Card className="border-0 shadow-sm ring-1 ring-border/70"><CardContent className="p-4"><span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="size-4.5" /></span><p className="mt-4 text-sm font-semibold">{value}</p><p className="mt-0.5 text-xs font-medium text-muted-foreground">{label}</p><p className="mt-2 text-[11px] text-muted-foreground">{hint}</p></CardContent></Card>; }
