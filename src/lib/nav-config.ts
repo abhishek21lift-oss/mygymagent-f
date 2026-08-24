@@ -13,24 +13,25 @@ import {
   Package,
   Megaphone,
   Settings,
+  ClipboardCheck,
 } from "lucide-react";
 
 export interface NavItem {
   title: string;
   href: string;
   icon: LucideIcon;
-  /** Permission required to see this item; omit for anything an
-   * authenticated user can always reach (e.g. the dashboard). An array is
-   * satisfied by holding any one of the listed keys (e.g. Members is
-   * reachable via the broad "members.read" or a trainer's narrower
-   * "members.read_assigned"). */
   permission?: string | string[];
-  /** Marks a reserved-but-not-yet-built module (see backend module READMEs). */
   comingSoon?: boolean;
 }
 
 export const primaryNav: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  {
+    title: "PT Operations",
+    href: "/pt-operations",
+    icon: ClipboardCheck,
+    permission: "workouts.read",
+  },
   {
     title: "Members",
     href: "/members",
