@@ -1,19 +1,19 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  CalendarCheck,
-  UserCog,
+  BarChart3,
   Building2,
-  Sparkles,
-  Wallet,
+  CalendarCheck,
+  CreditCard,
   Dumbbell,
-  Salad,
-  Package,
+  LayoutDashboard,
   Megaphone,
+  Package,
+  Salad,
   Settings,
-  ClipboardCheck,
+  Sparkles,
+  UserCog,
+  Users,
+  Wallet,
 } from "lucide-react";
 
 export interface NavItem {
@@ -21,38 +21,49 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   permission?: string | string[];
-  comingSoon?: boolean;
+  children?: NavItem[];
+  accent?: "ai" | "default";
 }
 
 export const primaryNav: NavItem[] = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Members", href: "/members", icon: Users, permission: ["members.read", "members.read_assigned"] },
+  { title: "Sales", href: "/crm", icon: Megaphone, permission: "leads.read" },
   {
-    title: "PT Operations",
+    title: "Training",
     href: "/pt-operations",
-    icon: ClipboardCheck,
+    icon: Dumbbell,
     permission: "workouts.read",
+    children: [
+      { title: "PT OS", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read" },
+      { title: "Workouts", href: "/workouts", icon: Dumbbell, permission: "workouts.read" },
+      { title: "Nutrition", href: "/nutrition", icon: Salad, permission: "nutrition.read" },
+    ],
   },
   {
-    title: "Members",
-    href: "/members",
-    icon: Users,
-    permission: ["members.read", "members.read_assigned"],
+    title: "Finance",
+    href: "/billing",
+    icon: Wallet,
+    permission: "payments.read",
+    children: [
+      { title: "Payments", href: "/billing", icon: Wallet, permission: "payments.read" },
+      { title: "Membership Plans", href: "/membership-plans", icon: CreditCard, permission: "membership_plans.read" },
+    ],
   },
   {
-    title: "Membership Plans",
-    href: "/membership-plans",
-    icon: CreditCard,
-    permission: "membership_plans.read",
+    title: "Operations",
+    href: "/attendance",
+    icon: CalendarCheck,
+    permission: "attendance.read",
+    children: [
+      { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: "attendance.read" },
+      { title: "Inventory", href: "/inventory", icon: Package, permission: "inventory.read" },
+      { title: "Staff", href: "/staff", icon: UserCog, permission: "users.read" },
+      { title: "Branches", href: "/branches", icon: Building2, permission: "branches.read" },
+    ],
   },
-  { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: "attendance.read" },
-  { title: "Billing", href: "/billing", icon: Wallet, permission: "payments.read" },
-  { title: "Workouts", href: "/workouts", icon: Dumbbell, permission: "workouts.read" },
-  { title: "Leads / CRM", href: "/crm", icon: Megaphone, permission: "leads.read" },
-  { title: "Nutrition", href: "/nutrition", icon: Salad, permission: "nutrition.read" },
-  { title: "Inventory", href: "/inventory", icon: Package, permission: "inventory.read" },
-  { title: "AI Assistant", href: "/ai", icon: Sparkles, permission: "ai.generate" },
-  { title: "Staff", href: "/staff", icon: UserCog, permission: "users.read" },
-  { title: "Branches", href: "/branches", icon: Building2, permission: "branches.read" },
+  { title: "Insights", href: "/owner-os", icon: BarChart3, permission: "organizations.read" },
+  { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
 ];
 
 export const comingSoonNav: NavItem[] = [];
