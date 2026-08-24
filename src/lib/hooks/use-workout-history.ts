@@ -13,6 +13,7 @@ type WorkoutHistoryItem = {
 }
 
 type ExerciseHistoryItem = {
+  exerciseId: string
   sessionDate: string
   exerciseName: string
   setNumber: number
