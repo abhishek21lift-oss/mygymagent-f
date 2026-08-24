@@ -1,6 +1,10 @@
 import { MemberDetailView } from "./member-detail-view";
 
-export default async function MemberDetailPage(props: PageProps<"/members/[id]">) {
-  const { id } = await props.params;
+type MemberDetailPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function MemberDetailPage({ params }: MemberDetailPageProps) {
+  const { id } = await params;
   return <MemberDetailView memberId={id} />;
 }
