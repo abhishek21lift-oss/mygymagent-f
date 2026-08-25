@@ -102,13 +102,13 @@ If required backend/database data is unavailable, use `—` or `Data unavailable
 ## CURRENT PROJECT STATE
 
 ### Current Phase
-`FRONTEND STABILIZATION → PRODUCTION ARCHITECTURE BASELINE`
+`PRODUCTION BASELINE → REMEDIATION OF CONFIRMED AUDIT FINDINGS`
 
 ### Current Task
-`Establish and maintain a verified project baseline before adding the next feature.`
+`Fix verified architecture/security problems found during the baseline audit before expanding the product.`
 
 ### Current Subtask
-`Track the stable frontend checkpoint and use it as the baseline for subsequent architecture work.`
+`Complete trainer-assignment isolation remediation and verification across membership and attendance flows, then re-audit the same surface for regressions.`
 
 ### Status
 `ACTIVE`
@@ -126,12 +126,18 @@ Keep only verified completed work here. Add dates and evidence where possible.
 - [x] Finance OS redesigned
 - [x] Frontend build/type errors from the V2 iteration resolved through iterative fixes
 - [x] Stable frontend deployment checkpoint verified: `d4fbb19` on `feat/world-class-ui-v2`
-- [ ] Architecture baseline documented
-- [ ] Multi-tenancy audited
-- [ ] Authentication audited
-- [ ] Authorization / RBAC audited
-- [ ] Core gym workflows audited
-- [ ] AI architecture audited
+- [x] Architecture baseline audit started
+- [x] Trainer assignment gap identified in membership and attendance REST flows
+- [x] Assignment-scoped membership read permissions/routes implemented
+- [x] Assignment-scoped attendance read/check-in/check-out permissions/routes implemented
+- [x] Trainer role changed from broad membership/attendance access to assignment-scoped access for those operations
+- [ ] Full verification of the remediation (typecheck/lint/tests/API authorization/tenant isolation)
+- [ ] Architecture baseline fully documented
+- [ ] Multi-tenancy fully audited
+- [ ] Authentication fully audited
+- [ ] Authorization / RBAC fully audited
+- [ ] Core gym workflows fully audited
+- [ ] AI architecture fully audited
 - [ ] Frontend full audit completed
 - [ ] Backend full audit completed
 - [ ] Database audited
@@ -140,25 +146,28 @@ Keep only verified completed work here. Add dates and evidence where possible.
 ## IN PROGRESS
 
 ### Current Work
-`Production baseline and architecture continuity`
+`Remediation-first: fix and verify audit findings before feature expansion.`
 
 ### Files / Modules Being Changed
-`AI_TASK_STATE.md` is the persistent state source; application code changes require an explicit implementation task and verification.
+`mygymagent-b`: membership permissions/controller/service, attendance permissions/controller/service, trainer role catalog.
+
+`mygymagent-f`: `AI_TASK_STATE.md` project-state tracking only.
 
 ### Expected Outcome
-`Every subsequent task has a known starting point, verified baseline, single next action, and recorded result.`
+`No known trainer-assignment isolation gap remains in the audited membership and attendance flows, and verification evidence is recorded before the audit expands.`
 
 ## BLOCKERS
 
 | Blocker | Severity | Impact | Owner / Action |
 |---|---|---|---|
-| No verified full-system architecture/security audit yet | P1 | Security and scalability decisions lack complete evidence | Perform evidence-based audit before major backend architecture changes |
+| Remediation verification is pending | P1 | Cannot declare the trainer-scope fixes production-safe yet | Run typecheck, lint, tests and authorization/tenant-isolation verification |
+| Full-system architecture/security audit is incomplete | P1 | Other issues may still exist outside the audited surface | Continue audit after current remediation is verified |
 
 ## NEXT ACTION
 
 There must be exactly **ONE primary next action**.
 
-`Perform an evidence-based architecture baseline audit of the current MyGymAgent frontend and backend before implementing the next major feature.`
+`Verify the trainer-assignment remediation end-to-end (typecheck, lint, tests, route authorization, tenant isolation and regression checks) before auditing or expanding any additional feature area.`
 
 ## IMPORTANT DECISIONS
 
@@ -172,6 +181,8 @@ There must be exactly **ONE primary next action**.
 | Stable frontend checkpoint is `d4fbb19` on `feat/world-class-ui-v2` | Active | 2026-08-24 | Prevent regression while architecture work proceeds |
 | Failed deployment history must remain tracked as regression evidence | Active | 2026-08-24 | Prevent repeated build/deployment mistakes |
 | Audit before major architecture changes | Active | 2026-08-24 | Security, tenancy and data integrity |
+| Remediation before feature expansion | Active | 2026-08-25 | Fix known problems before expanding architecture/product scope |
+| Trainer membership/attendance access is assignment-scoped | Active | 2026-08-25 | Prevent trainers from accessing unrelated client operational data |
 
 ## NON-NEGOTIABLE RULES
 
@@ -190,6 +201,7 @@ There must be exactly **ONE primary next action**.
 13. Never perform destructive database changes casually.
 14. Never expose one tenant's data to another tenant.
 15. Keep the current task separate from the master mission.
+16. Fix verified audit findings before expanding the product or architecture.
 
 ## AUDIT MODE
 
@@ -380,6 +392,6 @@ A new idea does not automatically replace the mission. A bug does not become the
 
 ## LAST UPDATED
 
-`2026-08-24`
+`2026-08-25`
 
-Current state: `FRONTEND STABILIZATION → PRODUCTION ARCHITECTURE BASELINE`
+Current state: `PRODUCTION BASELINE → REMEDIATION OF CONFIRMED AUDIT FINDINGS`
