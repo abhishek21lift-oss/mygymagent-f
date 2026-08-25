@@ -105,10 +105,10 @@ If required backend/database data is unavailable, use `—` or `Data unavailable
 `PRODUCTION BASELINE → REMEDIATION OF CONFIRMED AUDIT FINDINGS`
 
 ### Current Task
-`Fix verified architecture/security problems found during the baseline audit before expanding the product.`
+`Fix verified architecture/security problems before expanding the product.`
 
 ### Current Subtask
-`Complete trainer-assignment isolation remediation and verification across membership and attendance flows, then re-audit the same surface for regressions.`
+`Remediate AI tool access so trainer-scoped permissions cannot be bypassed through AI, then verify the complete AI authorization chain.`
 
 ### Status
 `ACTIVE`
@@ -130,8 +130,14 @@ Keep only verified completed work here. Add dates and evidence where possible.
 - [x] Trainer assignment gap identified in membership and attendance REST flows
 - [x] Assignment-scoped membership read permissions/routes implemented
 - [x] Assignment-scoped attendance read/check-in/check-out permissions/routes implemented
-- [x] Trainer role changed from broad membership/attendance access to assignment-scoped access for those operations
-- [ ] Full verification of the remediation (typecheck/lint/tests/API authorization/tenant isolation)
+- [x] Trainer membership/attendance access changed to assignment-scoped permissions
+- [x] AI tool executor re-checks resource permissions rather than trusting `ai.generate` alone
+- [x] AI tool context uses authenticated organization identity rather than model-supplied organization IDs
+- [x] Assignment-scoped workout read permission added
+- [x] Trainer REST workout-assignment reads changed to assignment scope
+- [ ] Full verification of membership/attendance remediation
+- [ ] Full verification of workout/AI remediation
+- [ ] AI workout-history tool updated to consume `workouts.read_assigned` and assignment scope without regressions
 - [ ] Architecture baseline fully documented
 - [ ] Multi-tenancy fully audited
 - [ ] Authentication fully audited
@@ -146,28 +152,29 @@ Keep only verified completed work here. Add dates and evidence where possible.
 ## IN PROGRESS
 
 ### Current Work
-`Remediation-first: fix and verify audit findings before feature expansion.`
+`AI-first remediation: prevent AI tool access from exceeding the caller's real tenant, branch and trainer scope.`
 
 ### Files / Modules Being Changed
-`mygymagent-b`: membership permissions/controller/service, attendance permissions/controller/service, trainer role catalog.
+`mygymagent-b`: AI tool authorization, workout-assignment permissions/controller/service, trainer role catalog.
 
 `mygymagent-f`: `AI_TASK_STATE.md` project-state tracking only.
 
 ### Expected Outcome
-`No known trainer-assignment isolation gap remains in the audited membership and attendance flows, and verification evidence is recorded before the audit expands.`
+`A trainer cannot use MyGymAgent AI or workout-assignment APIs to retrieve workout data for an unrelated member, while legitimate assigned-member AI functionality remains available.`
 
 ## BLOCKERS
 
 | Blocker | Severity | Impact | Owner / Action |
 |---|---|---|---|
-| Remediation verification is pending | P1 | Cannot declare the trainer-scope fixes production-safe yet | Run typecheck, lint, tests and authorization/tenant-isolation verification |
-| Full-system architecture/security audit is incomplete | P1 | Other issues may still exist outside the audited surface | Continue audit after current remediation is verified |
+| Remediation CI/API verification is pending | P1 | Cannot declare the trainer-scope fixes production-safe yet | Run typecheck, lint, tests and authorization/tenant-isolation verification |
+| AI workout-history adapter still uses the old `workouts.read` permission | P1 | Trainer AI workout-history access currently fails closed after the role was tightened; functionality must be restored safely with assignment scope | Update `ToolExecutorService.readWorkoutHistory` to accept `workouts.read_assigned` and pass assignment scope |
+| Full-system architecture/security audit is incomplete | P1 | Other issues may still exist outside the audited surface | Continue audit only after current remediation is verified |
 
 ## NEXT ACTION
 
 There must be exactly **ONE primary next action**.
 
-`Verify the trainer-assignment remediation end-to-end (typecheck, lint, tests, route authorization, tenant isolation and regression checks) before auditing or expanding any additional feature area.`
+`Fix the AI workout-history tool so TRAINER requests use workouts.read_assigned + authenticated assignment scope, then run full verification before moving to another problem.`
 
 ## IMPORTANT DECISIONS
 
@@ -183,6 +190,8 @@ There must be exactly **ONE primary next action**.
 | Audit before major architecture changes | Active | 2026-08-24 | Security, tenancy and data integrity |
 | Remediation before feature expansion | Active | 2026-08-25 | Fix known problems before expanding architecture/product scope |
 | Trainer membership/attendance access is assignment-scoped | Active | 2026-08-25 | Prevent trainers from accessing unrelated client operational data |
+| Trainer workout-assignment reads are assignment-scoped | Active | 2026-08-25 | Prevent workout data leakage through REST and AI pathways |
+| AI tool permissions must mirror underlying resource permissions | Active | 2026-08-25 | `ai.generate` alone must never grant broader data access |
 
 ## NON-NEGOTIABLE RULES
 
@@ -202,6 +211,7 @@ There must be exactly **ONE primary next action**.
 14. Never expose one tenant's data to another tenant.
 15. Keep the current task separate from the master mission.
 16. Fix verified audit findings before expanding the product or architecture.
+17. AI tools must enforce the same tenant/branch/assignment permissions as the equivalent domain operation.
 
 ## AUDIT MODE
 
