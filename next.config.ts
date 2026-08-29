@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Only for the Docker build path (Dockerfile sets DOCKER_BUILD=1) -- bundles
-  // runtime-needed files into .next/standalone for a lean image. Must stay
-  // unset for Vercel: standalone mode skips the *.nft.json trace output
-  // Vercel's own build packaging depends on, and its build fails without it.
-  ...(process.env.DOCKER_BUILD === "1" ? { output: "standalone" as const } : {}),
+  allowedDevOrigins: [
+    "3000-56d39e1e-dfbb-4e33-a41e-4b5e25e67684.daytonaproxy01.net",
+  ],
 };
 
 export default nextConfig;
