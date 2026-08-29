@@ -12,50 +12,35 @@ import { useBranches } from "@/lib/hooks/use-branches"
 import { useMembers } from "@/lib/hooks/use-members"
 import { useStaff } from "@/lib/hooks/use-staff"
 import { ApiError } from "@/lib/api/client"
-import { useBookPtSession, usePtSessionAction, usePtSessions, type PtSessionType } from "@/lib/hooks/use-pt-sessions"
+import { useBookPtSession, usePtSessionAction, usePtSessions, type PtSession, type PtSessionType } from "@/lib/hooks/use-pt-sessions"
 
 function localDateTime(value: string) {
-  const d = new Date(value)
-  return d.toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })
+  return new Date(value).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })
 }
-
-function toIso(value: string) {
-  return new Date(value).toISOString()
-}
-
+function toIso(value: string) { return new Date(value).toISOString() }
 function statusVariant(status: string) {
   if (status === "COMPLETED") return "success" as const
   if (status === "CANCELLED" || status === "NO_SHOW") return "destructive" as const
   return "default" as const
 }
 
-function SessionRow({ session }: { session: ReturnType<typeof usePtSessions>["data"] extends infer T ? T extends { items: Array<infer I> } ? I : never : never }) {
+function SessionRow({ session }: { session: PtSession }) {
   const complete = usePtSessionAction("complete")
   const cancel = usePtSessionAction("cancel")
   const noShow = usePtSessionAction("no-show")
   const busy = complete.isPending || cancel.isPending || noShow.isPending
   const member = session.member ? `${session.member.firstName} ${session.member.lastName}` : "Member unavailable"
   const trainer = session.trainer ? `${session.trainer.firstName} ${session.trainer.lastName}` : "Unassigned"
-
   async function run(action: "complete" | "cancel" | "no-show") {
     try {
       if (action === "complete") await complete.mutateAsync({ id: session.id })
       if (action === "cancel") await cancel.mutateAsync({ id: session.id, reason: "Cancelled by trainer" })
       if (action === "no-show") await noShow.mutateAsync({ id: session.id })
       toast.success(action === "complete" ? "PT session completed" : action === "no-show" ? "Marked as no-show" : "Session cancelled")
-    } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : "Unable to update session")
-    }
+    } catch (error) { toast.error(error instanceof ApiError ? error.message : "Unable to update session") }
   }
-
   return <div className="group flex flex-col gap-4 rounded-2xl border p-4 transition hover:border-primary/20 hover:bg-muted/20 lg:flex-row lg:items-center">
-    <div className="flex min-w-0 flex-1 items-center gap-3">
-      <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><UserRound className="size-5" /></div>
-      <div className="min-w-0">
-        <p className="truncate font-semibold">{member}</p>
-        <p className="truncate text-xs text-muted-foreground">{session.member?.memberCode ?? ""} · {trainer}</p>
-      </div>
-    </div>
+    <div className="flex min-w-0 flex-1 items-center gap-3"><div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><UserRound className="size-5" /></div><div className="min-w-0"><p className="truncate font-semibold">{member}</p><p className="truncate text-xs text-muted-foreground">{session.member?.memberCode ?? ""} · {trainer}</p></div></div>
     <div className="flex items-center gap-2 text-sm"><Clock3 className="size-4 text-muted-foreground" /><span>{localDateTime(session.startTime)}</span><span className="text-muted-foreground">→</span><span>{new Date(session.endTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></div>
     <div className="flex items-center gap-2"><Badge variant={statusVariant(session.status)}>{session.status.replace("_", " ")}</Badge><Badge variant="outline">{session.type.replaceAll("_", " ")}</Badge></div>
     {session.status === "SCHEDULED" && <div className="flex gap-2 lg:ml-auto"><Button size="sm" disabled={busy} onClick={() => run("complete")}><CheckCircle2 className="size-4" />Complete</Button><Button size="sm" variant="outline" disabled={busy} onClick={() => run("no-show")}><XCircle className="size-4" />No-show</Button><Button size="sm" variant="ghost" disabled={busy} onClick={() => run("cancel")}>Cancel</Button></div>}
@@ -79,7 +64,6 @@ export default function PtSessionsPage() {
   const [end, setEnd] = React.useState(`${dateKey}T11:00`)
   const [type, setType] = React.useState<PtSessionType>("PERSONAL_TRAINING")
   const [price, setPrice] = React.useState("")
-
   const items = sessions.data?.items ?? []
   const scheduled = items.filter(x => x.status === "SCHEDULED")
   const completed = items.filter(x => x.status === "COMPLETED")
@@ -88,13 +72,12 @@ export default function PtSessionsPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     if (!memberId || !branchId) return toast.error("Select a client and branch")
+    if (new Date(start) >= new Date(end)) return toast.error("End time must be after start time")
     try {
       await book.mutateAsync({ memberId, trainerId: trainerId || undefined, branchId, startTime: toIso(start), endTime: toIso(end), type, price: price ? Number(price) : undefined })
       toast.success("PT session booked")
       setPrice("")
-    } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : "Unable to book PT session")
-    }
+    } catch (error) { toast.error(error instanceof ApiError ? error.message : "Unable to book PT session") }
   }
 
   return <div className="flex flex-col gap-7">
