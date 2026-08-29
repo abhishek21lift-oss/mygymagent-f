@@ -1,0 +1,1 @@
+PT package management workspace. Uses the real `/pt-packages` backend API for package creation and remaining-session visibility.
