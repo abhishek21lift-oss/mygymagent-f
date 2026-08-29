@@ -7,8 +7,10 @@ interface Integration { phone_number_id: string; business_account_id?: string | 
 
 export default function WhatsAppSettingsPage() {
   const [integration, setIntegration] = useState<Integration | null>(null), [phoneNumberId, setPhoneNumberId] = useState(""), [businessAccountId, setBusinessAccountId] = useState(""), [accessToken, setAccessToken] = useState(""), [messageTo, setMessageTo] = useState(""), [message, setMessage] = useState(""), [notice, setNotice] = useState(""), [busy, setBusy] = useState(false);
+  useEffect(() => {
+    api.get<Integration | null>("/whatsapp/integration").then(setIntegration).catch(() => setIntegration(null));
+  }, []);
   const load = async () => { try { setIntegration(await api.get<Integration | null>("/whatsapp/integration")); } catch { setIntegration(null); } };
-  useEffect(() => { void load(); }, []);
   const connect = async () => { setBusy(true); setNotice(""); try { await api.post("/whatsapp/integration/connect", { phoneNumberId, businessAccountId: businessAccountId || undefined, accessToken }); setAccessToken(""); setNotice("WhatsApp Business connected and verified."); await load(); } catch (e) { setNotice(e instanceof Error ? e.message : "Connection failed"); } finally { setBusy(false); } };
   const disconnect = async () => { setBusy(true); try { await api.post("/whatsapp/integration/disconnect"); setNotice("WhatsApp disconnected."); await load(); } catch (e) { setNotice(e instanceof Error ? e.message : "Disconnect failed"); } finally { setBusy(false); } };
   const sendTest = async () => { setBusy(true); setNotice(""); try { await api.post("/whatsapp/messages", { to: messageTo, text: message }); setNotice("Message accepted by Meta."); setMessage(""); } catch (e) { setNotice(e instanceof Error ? e.message : "Message failed"); } finally { setBusy(false); } };
