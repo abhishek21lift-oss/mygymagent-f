@@ -1,6 +1,7 @@
 import { getAccessToken, setAccessToken } from "./token-store"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"
+const REQUEST_TIMEOUT_MS = 20_000
 
 export interface ApiErrorBody {
   error: {
@@ -38,13 +39,23 @@ interface RequestOptions {
 
 let refreshInFlight: Promise<boolean> | null = null
 
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
 /** Calls POST /auth/refresh using the httpOnly cookie. Coalesces concurrent
  * callers into a single in-flight request so a burst of 401s doesn't fire
  * a refresh storm. */
 async function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
     try {
-      const res = await fetch(`${API_URL}/auth/refresh`, {
+      const res = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
         method: "POST",
         credentials: "include",
       })
@@ -84,19 +95,25 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   const isFormData = body instanceof FormData
 
   const headers: Record<string, string> = {}
-  // A FormData body's multipart boundary is set by the browser -- an explicit
-  // Content-Type header here would omit it and the backend couldn't parse the body.
   if (!isFormData) headers["Content-Type"] = "application/json"
   const token = getAccessToken()
   if (token) headers.Authorization = `Bearer ${token}`
   if (branchId) headers["x-branch-id"] = branchId
 
-  const res = await fetch(buildUrl(path, query), {
-    method,
-    headers,
-    credentials: "include",
-    body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-  })
+  let res: Response
+  try {
+    res = await fetchWithTimeout(buildUrl(path, query), {
+      method,
+      headers,
+      credentials: "include",
+      body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+    })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError(408, { error: { code: "REQUEST_TIMEOUT", message: `Request timed out: ${method} ${path}` } })
+    }
+    throw error
+  }
 
   if (res.status === 401 && !_isRetry && path !== "/auth/refresh") {
     const refreshed = await refreshSession()
