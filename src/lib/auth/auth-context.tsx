@@ -35,17 +35,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const me = await api.get<MeResponse>("/auth/me")
       setUser(me.user)
       setPermissions(me.permissions)
+      return true
     } catch {
-      setUser(null)
       setPermissions([])
+      return false
     }
   }, [])
 
   React.useEffect(() => {
     let cancelled = false
     async function bootstrap() {
-      // No access token in memory yet (fresh page load) -- try the silent
-      // refresh flow against the httpOnly cookie before giving up.
       try {
         const refreshed = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/auth/refresh`,
@@ -71,7 +70,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      await loadMe()
+
+      // Login itself must not be held hostage by a secondary /auth/me call.
+      // The login response already contains the authenticated user; permissions
+      // are hydrated opportunistically and can be refreshed later.
+      void loadMe()
     },
     [loadMe],
   )
@@ -81,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<RegisterResponse>("/auth/register", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      await loadMe()
+      void loadMe()
     },
     [loadMe],
   )
