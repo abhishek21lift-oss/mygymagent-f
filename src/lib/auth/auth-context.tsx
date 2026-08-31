@@ -15,10 +15,6 @@ interface AuthContextValue {
   login: (input: LoginInput) => Promise<void>
   register: (input: RegisterInput) => Promise<void>
   logout: () => Promise<void>
-  /** A string requires that exact permission; an array is satisfied by
-   * holding any one of the listed keys (e.g. the broad "members.read" or
-   * the narrower "members.read_assigned" -- see the backend's
-   * RequireAnyPermission for why a route can be reachable via either). */
   hasPermission: (key: string | string[]) => boolean
   refetchMe: () => Promise<void>
 }
@@ -30,15 +26,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [permissions, setPermissions] = React.useState<string[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
 
-  const loadMe = React.useCallback(async () => {
+  const loadMe = React.useCallback(async (): Promise<void> => {
     try {
       const me = await api.get<MeResponse>("/auth/me")
       setUser(me.user)
       setPermissions(me.permissions)
-      return true
     } catch {
       setPermissions([])
-      return false
     }
   }, [])
 
@@ -70,10 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-
-      // Login itself must not be held hostage by a secondary /auth/me call.
-      // The login response already contains the authenticated user; permissions
-      // are hydrated opportunistically and can be refreshed later.
       void loadMe()
     },
     [loadMe],
