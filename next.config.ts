@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Vercel's Next.js builder expects the normal Next output.
+  // The standalone bundle is only needed for the Docker image.
+  output: process.env.DOCKER_BUILD === "1" ? "standalone" : undefined,
   allowedDevOrigins: [
     "3000-56d39e1e-dfbb-4e33-a41e-4b5e25e67684.daytonaproxy01.net",
   ],
