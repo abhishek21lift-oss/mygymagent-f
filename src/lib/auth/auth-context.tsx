@@ -25,15 +25,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [permissions, setPermissions] = React.useState<string[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
 
-  const loadMe = React.useCallback(async (throwOnError = false): Promise<void> => {
+  const loadMe = React.useCallback(async (): Promise<void> => {
     try {
       const me = await api.get<MeResponse>("/auth/me")
       setUser(me.user)
       setPermissions(me.permissions)
-    } catch (error) {
+    } catch {
       setUser(null)
       setPermissions([])
-      if (throwOnError) throw error
     }
   }, [])
 
@@ -71,10 +70,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(
     async (input: LoginInput) => {
+      // A successful /auth/login response is already proof of authentication.
+      // Do not make navigation depend on a second /auth/me request succeeding:
+      // on a fresh page load that request can race the startup refresh flow and
+      // turn a successful login into a visible sign-in failure.
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      await loadMe(true)
+      setPermissions([])
+
+      // Permissions are useful for navigation, but they are not required to
+      // establish the authenticated session. Refresh them opportunistically
+      // after the login state is installed so a transient /auth/me failure does
+      // not block the user from reaching the dashboard.
+      void loadMe()
     },
     [loadMe],
   )
@@ -84,7 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<RegisterResponse>("/auth/register", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      await loadMe(true)
+      setPermissions([])
+      void loadMe()
     },
     [loadMe],
   )
