@@ -2,14 +2,13 @@
 
 import * as React from "react"
 import { api, ApiError } from "@/lib/api/client"
-import { setAccessToken } from "@/lib/api/token-store"
+import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import type { AuthUser, LoginResponse, MeResponse, RegisterResponse } from "@/lib/types/auth"
 import type { LoginInput, RegisterInput } from "@/lib/validation/auth"
 
 interface AuthContextValue {
   user: AuthUser | null
   permissions: string[]
-  /** True while the initial session bootstrap (silent refresh + /auth/me) is running. */
   isLoading: boolean
   isAuthenticated: boolean
   login: (input: LoginInput) => Promise<void>
@@ -44,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const timeoutId = window.setTimeout(() => controller.abort(), AUTH_REFRESH_TIMEOUT_MS)
 
     async function bootstrap() {
+      const tokenAtStart = getAccessToken()
       try {
         const refreshed = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/auth/refresh`,
@@ -57,19 +57,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const json = (await refreshed.json()) as { data: { accessToken: string } }
           setAccessToken(json.data.accessToken)
           if (!cancelled) await loadMe()
-        } else {
+        } else if (getAccessToken() === tokenAtStart) {
           setAccessToken(null)
           if (!cancelled) setUser(null)
         }
       } catch {
-        // A failed/slow refresh must never leave the app stuck on the splash screen.
-        setAccessToken(null)
-        if (!cancelled) setUser(null)
+        if (getAccessToken() === tokenAtStart) {
+          setAccessToken(null)
+          if (!cancelled) setUser(null)
+        }
       } finally {
         window.clearTimeout(timeoutId)
         if (!cancelled) setIsLoading(false)
       }
     }
+
     void bootstrap()
     return () => {
       cancelled = true
@@ -83,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      void loadMe()
+      await loadMe()
     },
     [loadMe],
   )
@@ -93,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<RegisterResponse>("/auth/register", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      void loadMe()
+      await loadMe()
     },
     [loadMe],
   )
@@ -102,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.post("/auth/logout")
     } catch {
-      // Best-effort -- clear local state regardless.
+      // Best effort; local auth state must still be cleared.
     }
     setAccessToken(null)
     setUser(null)
