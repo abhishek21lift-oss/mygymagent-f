@@ -26,13 +26,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true)
 
   const loadMe = React.useCallback(async (): Promise<void> => {
+    // Ignore a response from an older auth request if login/logout changed the
+    // in-memory token while /auth/me was in flight. This prevents a startup
+    // request from overwriting a fresh login session or clearing it on failure.
+    const tokenAtStart = getAccessToken()
+
     try {
       const me = await api.get<MeResponse>("/auth/me")
+      if (getAccessToken() !== tokenAtStart) return
       setUser(me.user)
       setPermissions(me.permissions)
     } catch {
-      setUser(null)
-      setPermissions([])
+      if (getAccessToken() !== tokenAtStart) return
+      // A failed background /auth/me must not turn a successful login into a
+      // signed-out state. The access token remains the source of truth here;
+      // protected API calls can still perform the normal 401 refresh flow.
     }
   }, [])
 
