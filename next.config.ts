@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' https://cdnjs.cloudflare.com; " +
               "img-src 'self' data: https:; " +
               "font-src 'self' https://cdnjs.cloudflare.com; " +
-              "connect-src 'self'; " +
+              "connect-src 'self' https:; " +
               "frame-src 'none'; " +
               "object-src 'none'; " +
               "base-uri 'self'; " +
