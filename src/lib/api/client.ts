@@ -134,24 +134,23 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     const refreshed = await refreshSession()
     if (refreshed) return apiFetch<T>(path, { ...options, _isRetry: true })
   }
+if (res.status === 204) return undefined as T
 
-  if (res.status === 204) return undefined as T
+  let raw: unknown = null
+  try {
+    raw = await res.json()
+  } catch {}
 
-  const json = (await res.json().catch(() => null)) as
-  | { data: T; meta?: { requestId: string } }
-  | { error: { code: string; message: string }; status?: number }
-  | null
-
-  if (!res.ok) {
-    throw new ApiError(res.status, (json as { error: { code: string; message: string } })?.error ?? {
-      error: { code: "UNKNOWN", message: res.statusText },
-    })
+if (!res.ok) {
+    const code = typeof raw === "object" && raw !== null && "code" in raw ? raw.code : "UNKNOWN"
+    const message = typeof raw === "object" && raw !== null && "message" in raw ? raw.message : res.statusText
+    throw new ApiError(res.status, { error: { code: code as string, message: message as string } } as ApiErrorBody)
   }
 
-  if ("data" in json && json.data !== null && json.data !== undefined) {
-    return (json as { data: T }).data
+  if (typeof raw === "object" && raw !== null && "data" in raw && raw.data !== null && raw.data !== undefined) {
+    return (raw as { data: T }).data
   }
-  return (json as T)
+  return (raw as T) ?? (({ code: "SUCCESS", message: "" } as { code: string; message: string }) as T)
 }
 
 export const api = {
