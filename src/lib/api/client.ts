@@ -50,24 +50,24 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
 }
 
 /** Calls POST /auth/refresh using the httpOnly cookie. Coalesces concurrent
- * callers into a single in-flight request so a burst of 401s doesn't fire
- * a refresh storm. */
-async function refreshSession(): Promise<boolean> {
+ * callers into a single in-flight request so bootstrap and 401 recovery cannot
+ * rotate the refresh token against each other. */
+export async function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
     try {
       const res = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
         method: "POST",
         credentials: "include",
       })
-      if (!res.ok) {
-        setAccessToken(null)
-        return false
-      }
-      const json = (await res.json()) as { data: { accessToken: string } }
-      setAccessToken(json.data.accessToken)
+      if (!res.ok) return false
+
+      const json = (await res.json()) as { data?: { accessToken?: string } }
+      const accessToken = json.data?.accessToken
+      if (!accessToken) return false
+
+      setAccessToken(accessToken)
       return true
     } catch {
-      setAccessToken(null)
       return false
     } finally {
       refreshInFlight = null
