@@ -3,12 +3,12 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, ApiError } from "@/lib/api/client";
-import { setAccessToken } from "@/lib/api/token-store";
-import type { LoginResponse } from "@/lib/types/auth";
+import { useAuth } from "@/lib/auth/auth-context";
+import { ApiError } from "@/lib/api/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
@@ -21,16 +21,17 @@ export default function LoginPage() {
       setError("Please enter your email and password.");
       return;
     }
+
     setIsSubmitting(true);
     try {
-      const response = await api.post<LoginResponse>("/auth/login", {
-        email: email.trim(),
-        password,
-      });
-      setAccessToken(response.accessToken);
+      await login({ email: email.trim(), password });
       router.replace("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to sign in. Please try again.");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Unable to sign in. Please check your credentials and try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
