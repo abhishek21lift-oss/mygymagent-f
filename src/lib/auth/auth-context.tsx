@@ -26,14 +26,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [permissions, setPermissions] = React.useState<string[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
 
-  const loadMe = React.useCallback(async (): Promise<void> => {
+  const loadMe = React.useCallback(async (throwOnError = false): Promise<void> => {
     try {
       const me = await api.get<MeResponse>("/auth/me")
       setUser(me.user)
       setPermissions(me.permissions)
-    } catch {
+    } catch (error) {
       setUser(null)
       setPermissions([])
+      if (throwOnError) throw error
     }
   }, [])
 
@@ -85,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      await loadMe()
+      await loadMe(true)
     },
     [loadMe],
   )
@@ -95,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post<RegisterResponse>("/auth/register", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
-      await loadMe()
+      await loadMe(true)
     },
     [loadMe],
   )
