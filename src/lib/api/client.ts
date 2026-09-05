@@ -54,20 +54,31 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
  * rotate the refresh token against each other. */
 export async function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
+    // Never let a failed startup/401 refresh clear a newer token that may have
+    // been installed by a successful login while this request was in flight.
+    const tokenAtStart = getAccessToken()
+
     try {
       const res = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
         method: "POST",
         credentials: "include",
       })
-      if (!res.ok) return false
+      if (!res.ok) {
+        if (getAccessToken() === tokenAtStart) setAccessToken(null)
+        return false
+      }
 
       const json = (await res.json()) as { data?: { accessToken?: string } }
       const accessToken = json.data?.accessToken
-      if (!accessToken) return false
+      if (!accessToken) {
+        if (getAccessToken() === tokenAtStart) setAccessToken(null)
+        return false
+      }
 
       setAccessToken(accessToken)
       return true
     } catch {
+      if (getAccessToken() === tokenAtStart) setAccessToken(null)
       return false
     } finally {
       refreshInFlight = null
