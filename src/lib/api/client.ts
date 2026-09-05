@@ -21,8 +21,8 @@ export class ApiError extends Error {
   constructor(status: number, body: ApiErrorBody) {
     super(body.error.message)
     this.name = "ApiError"
-    this.status = status
     this.code = body.error.code
+    this.status = status
     this.details = body.error.details
     this.requestId = body.error.requestId
   }
@@ -54,8 +54,9 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
  * rotate the refresh token against each other. */
 export async function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
-    // Never let a failed startup/401 refresh clear a newer token that may have
-    // been installed by a successful login while this request was in flight.
+    // Capture the token before starting the refresh. If login/logout changes it
+    // while this request is in flight, this stale refresh must never overwrite
+    // the newer auth state when it completes.
     const tokenAtStart = getAccessToken()
 
     try {
@@ -75,7 +76,10 @@ export async function refreshSession(): Promise<boolean> {
         return false
       }
 
-      setAccessToken(accessToken)
+      // A successful login can happen while this refresh is pending. In that
+      // case keep the fresh login token instead of replacing it with the token
+      // produced by the older refresh request.
+      if (getAccessToken() === tokenAtStart) setAccessToken(accessToken)
       return true
     } catch {
       if (getAccessToken() === tokenAtStart) setAccessToken(null)
