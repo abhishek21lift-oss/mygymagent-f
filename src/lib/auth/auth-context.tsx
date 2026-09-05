@@ -20,6 +20,7 @@ interface AuthContextValue {
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null)
+const AUTH_REFRESH_TIMEOUT_MS = 8000
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<AuthUser | null>(null)
@@ -32,30 +33,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(me.user)
       setPermissions(me.permissions)
     } catch {
+      setUser(null)
       setPermissions([])
     }
   }, [])
 
   React.useEffect(() => {
     let cancelled = false
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), AUTH_REFRESH_TIMEOUT_MS)
+
     async function bootstrap() {
       try {
         const refreshed = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/auth/refresh`,
-          { method: "POST", credentials: "include" },
+          {
+            method: "POST",
+            credentials: "include",
+            signal: controller.signal,
+          },
         )
         if (refreshed.ok) {
           const json = (await refreshed.json()) as { data: { accessToken: string } }
           setAccessToken(json.data.accessToken)
           if (!cancelled) await loadMe()
+        } else {
+          setAccessToken(null)
+          if (!cancelled) setUser(null)
         }
+      } catch {
+        // A failed/slow refresh must never leave the app stuck on the splash screen.
+        setAccessToken(null)
+        if (!cancelled) setUser(null)
       } finally {
+        window.clearTimeout(timeoutId)
         if (!cancelled) setIsLoading(false)
       }
     }
     void bootstrap()
     return () => {
       cancelled = true
+      controller.abort()
+      window.clearTimeout(timeoutId)
     }
   }, [loadMe])
 
