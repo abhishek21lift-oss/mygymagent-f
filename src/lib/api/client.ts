@@ -137,18 +137,18 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   if (res.status === 204) return undefined as T
 
-  const json = (await res.json().catch(() => null)) as unknown as
+  const json = (await res.json().catch(() => null)) as
   | { data: T; meta?: { requestId: string } }
-  | ApiErrorBody
+  | { error: { code: string; message: string }; status?: number }
   | null
 
   if (!res.ok) {
-    throw new ApiError(res.status, (json as ApiErrorBody) ?? {
+    throw new ApiError(res.status, (json as { error: { code: string; message: string } })?.error ?? {
       error: { code: "UNKNOWN", message: res.statusText },
     })
   }
 
-  if ((json as { data?: unknown }).data !== null && (json as { data?: unknown }).data !== undefined) {
+  if ("data" in json && json.data !== null && json.data !== undefined) {
     return (json as { data: T }).data
   }
   return (json as T)
