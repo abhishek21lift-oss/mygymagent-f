@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -23,16 +23,7 @@ import { ApiError } from "@/lib/api/client";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
 export default function LoginPage() {
-  return (
-    <React.Suspense>
-      <LoginForm />
-    </React.Suspense>
-  );
-}
-
-function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -45,7 +36,7 @@ function LoginForm() {
     setIsSubmitting(true);
     try {
       await login(values);
-      router.push(searchParams.get("next") ?? "/dashboard");
+      router.push("/dashboard");
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "Something went wrong";
       toast.error(message);
