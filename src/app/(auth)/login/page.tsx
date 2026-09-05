@@ -3,100 +3,92 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { useAuth } from "@/lib/auth/auth-context";
 import { ApiError } from "@/lib/api/client";
-import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-  const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
 
-  async function onSubmit(values: LoginInput) {
+    if (!email.trim() || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await login(values);
-      router.push("/dashboard");
-    } catch (error) {
-      const message = error instanceof ApiError ? error.message : "Something went wrong";
-      toast.error(message);
+      await login({ email: email.trim(), password });
+      router.replace("/dashboard");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Unable to sign in. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to manage your gym</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="you@yourgym.com" autoComplete="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground">
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <FormControl>
-                    <Input type="password" autoComplete="current-password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-        </Form>
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Setting up a new gym?{" "}
-          <Link href="/register" className="font-medium text-foreground hover:underline">
-            Create an account
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border bg-background p-6 shadow-sm">
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold">Welcome back</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Sign in to manage your gym</p>
+      </div>
+
+      <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="login-email" className="text-sm font-medium">Email</label>
+          <input
+            id="login-email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@yourgym.com"
+            autoComplete="email"
+            autoFocus
+            className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none ring-offset-background focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <label htmlFor="login-password" className="text-sm font-medium">Password</label>
+            <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground">Forgot password?</Link>
+          </div>
+          <input
+            id="login-password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none ring-offset-background focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isSubmitting ? "Signing in..." : "Sign in"}
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Setting up a new gym?{" "}
+        <Link href="/register" className="font-medium text-foreground hover:underline">Create an account</Link>
+      </p>
+    </div>
   );
 }
