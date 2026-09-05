@@ -137,7 +137,10 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   if (res.status === 204) return undefined as T
 
-  const json = (await res.json().catch(() => null)) as { data: T } | ApiErrorBody | null
+  const json = (await res.json().catch(() => null)) as
+  | { data: T; meta?: { requestId: string } }
+  | ApiErrorBody
+  | null
 
   if (!res.ok) {
     throw new ApiError(res.status, (json as ApiErrorBody) ?? {
@@ -145,7 +148,10 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     })
   }
 
-  return (json as { data: T }).data
+  if (json?.data) {
+    return json.data as T
+  }
+  return json as T
 }
 
 export const api = {
