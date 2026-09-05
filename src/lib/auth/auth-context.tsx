@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { api, ApiError } from "@/lib/api/client"
+import { api, ApiError, refreshSession } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import type { AuthUser, LoginResponse, MeResponse, RegisterResponse } from "@/lib/types/auth"
 import type { LoginInput, RegisterInput } from "@/lib/validation/auth"
@@ -19,7 +19,6 @@ interface AuthContextValue {
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null)
-const AUTH_REFRESH_TIMEOUT_MS = 8000
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<AuthUser | null>(null)
@@ -40,35 +39,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     let cancelled = false
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(() => controller.abort(), AUTH_REFRESH_TIMEOUT_MS)
 
     async function bootstrap() {
-      const tokenAtStart = getAccessToken()
       try {
-        const refreshed = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/auth/refresh`,
-          {
-            method: "POST",
-            credentials: "include",
-            signal: controller.signal,
-          },
-        )
-        if (refreshed.ok) {
-          const json = (await refreshed.json()) as { data: { accessToken: string } }
-          setAccessToken(json.data.accessToken)
-          if (!cancelled) await loadMe()
-        } else if (getAccessToken() === tokenAtStart) {
-          setAccessToken(null)
-          if (!cancelled) setUser(null)
+        // Prefer an already-issued in-memory access token. This prevents the
+        // startup refresh request from racing a login submitted immediately
+        // after the login page mounts. A stale token is recovered by apiFetch's
+        // single-flight 401 refresh path.
+        if (getAccessToken()) {
+          await loadMe()
+        } else {
+          const refreshed = await refreshSession()
+          if (refreshed && !cancelled) await loadMe()
         }
       } catch {
-        if (getAccessToken() === tokenAtStart) {
+        if (!cancelled) {
           setAccessToken(null)
-          if (!cancelled) setUser(null)
+          setUser(null)
+          setPermissions([])
         }
       } finally {
-        window.clearTimeout(timeoutId)
         if (!cancelled) setIsLoading(false)
       }
     }
@@ -76,8 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void bootstrap()
     return () => {
       cancelled = true
-      controller.abort()
-      window.clearTimeout(timeoutId)
     }
   }, [loadMe])
 
