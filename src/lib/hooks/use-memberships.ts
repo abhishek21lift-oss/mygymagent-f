@@ -16,7 +16,14 @@ export function useMemberships(params: PaginationParams & { memberId?: string } 
 export function useCreateMembership() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { memberId: string; membershipPlanId: string; autoRenew?: boolean }) =>
+    mutationFn: (input: {
+      memberId: string;
+      membershipPlanId: string;
+      autoRenew?: boolean;
+      discount?: number;
+      initialPayment?: number;
+      paymentMethod?: string;
+    }) =>
       api.post<Membership>("/memberships", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   });
