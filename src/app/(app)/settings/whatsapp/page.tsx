@@ -119,7 +119,7 @@ export default function WhatsAppSettingsPage() {
   }
 
   if (!canManage) {
-    return <div className="flex flex-col gap-6"><PageHeader title="WhatsApp" description="Connect your gym's official WhatsApp Business number" /><ErrorState title="Permission required" description="You need settings.manage permission to manage WhatsApp." /></div>
+    return <div className="flex flex-col gap-6"><PageHeader title="WhatsApp" description="Connect your gym's official WhatsApp Business number" /><ErrorState message="You need settings.manage permission to manage WhatsApp." /></div>
   }
 
   return (
