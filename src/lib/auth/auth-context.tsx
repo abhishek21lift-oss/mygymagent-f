@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { api, ApiError, refreshSession } from "@/lib/api/client"
+import { api, ApiError } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import type { AuthUser, LoginResponse, MeResponse, RegisterResponse } from "@/lib/types/auth"
 import type { LoginInput, RegisterInput } from "@/lib/validation/auth"

@@ -130,7 +130,7 @@ export default function SettingsPage() {
               <div className="rounded-xl bg-primary/10 p-3"><MessageCircle className="h-5 w-5 text-primary" /></div>
               <div>
                 <div className="font-medium">WhatsApp Business</div>
-                <div className="text-sm text-muted-foreground">Connect this gym's own WhatsApp number through Meta.</div>
+                <div className="text-sm text-muted-foreground">Connect this gym&apos;s own WhatsApp number through Meta.</div>
               </div>
             </div>
             <Button asChild variant="outline"><Link href="/settings/whatsapp">Manage</Link></Button>
