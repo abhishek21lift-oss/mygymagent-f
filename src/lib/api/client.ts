@@ -1,6 +1,10 @@
 import { getAccessToken, setAccessToken } from "./token-store"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? (
+  process.env.NODE_ENV === "production"
+    ? "https://mygymagent-b.onrender.com"
+    : "http://localhost:4000"
+)
 const REQUEST_TIMEOUT_MS = 20_000
 
 export interface ApiErrorBody {
@@ -54,9 +58,6 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
  * rotate the refresh token against each other. */
 export async function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
-    // Capture the token before starting the refresh. If login/logout changes it
-    // while this request is in flight, this stale refresh must never overwrite
-    // the newer auth state when it completes.
     const tokenAtStart = getAccessToken()
 
     try {
@@ -76,9 +77,6 @@ export async function refreshSession(): Promise<boolean> {
         return false
       }
 
-      // A successful login can happen while this refresh is pending. In that
-      // case keep the fresh login token instead of replacing it with the token
-      // produced by the older refresh request.
       if (getAccessToken() === tokenAtStart) setAccessToken(accessToken)
       return true
     } catch {
@@ -97,9 +95,7 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined) {
         if (Array.isArray(value)) {
-          for (const item of value) {
-            url.searchParams.append(key, String(item))
-          }
+          for (const item of value) url.searchParams.append(key, String(item))
         } else {
           url.searchParams.set(key, String(value))
         }
@@ -142,14 +138,15 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     const refreshed = await refreshSession()
     if (refreshed) return apiFetch<T>(path, { ...options, _isRetry: true })
   }
-if (res.status === 204) return undefined as T
+
+  if (res.status === 204) return undefined as T
 
   let raw: unknown = null
   try {
     raw = await res.json()
   } catch {}
 
-if (!res.ok) {
+  if (!res.ok) {
     const code = typeof raw === "object" && raw !== null && "code" in raw ? raw.code : "UNKNOWN"
     const message = typeof raw === "object" && raw !== null && "message" in raw ? raw.message : res.statusText
     throw new ApiError(res.status, { error: { code: code as string, message: message as string } } as ApiErrorBody)
