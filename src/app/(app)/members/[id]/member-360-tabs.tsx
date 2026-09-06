@@ -18,6 +18,12 @@ import {
   CreditCard,
   Dumbbell,
   UtensilsCrossed,
+  User,
+  Mail,
+  Calendar,
+  Users,
+  TrendingUp,
+  Award,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +45,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/lib/auth/auth-context";
 import { ApiError } from "@/lib/api/client";
 import type {
@@ -66,6 +73,7 @@ import {
   useUploadMemberDocument,
   useDeleteMemberDocument,
 } from "@/lib/hooks/use-member-documents";
+import { useMember } from "@/lib/hooks/use-members";
 import {
   useMemberAddresses,
   useCreateMemberAddress,
@@ -90,6 +98,208 @@ import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
 
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
+}
+
+// -- Overview Panel ----------------------------------------------------------------
+
+function InfoRow({ icon: Icon, label, value }: { icon: typeof User; label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border bg-card/50 p-3 transition-colors hover:bg-card">
+      <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
+        <Icon className="size-4 text-primary" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <div className="mt-0.5 text-sm font-semibold">{value || "—"}</div>
+      </div>
+    </div>
+  );
+}
+
+function MemberOverviewPanel({ memberId }: { memberId: string }) {
+  const { data: member, isLoading: memberLoading } = useMember(memberId);
+  const { data: addresses } = useMemberAddresses(memberId);
+  const { data: emergencyContacts } = useMemberEmergencyContacts(memberId);
+  const { data: goals } = useMemberGoals(memberId);
+  const { data: measurements } = useMemberMeasurements(memberId);
+  const { data: screenings } = useMemberScreenings(memberId);
+  const { data: payments } = useMemberPayments(memberId);
+  const { data: attendance } = useMemberAttendance(memberId);
+  const { data: consents } = useMemberConsents(memberId);
+
+  if (memberLoading) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!member) {
+    return <EmptyState title="Member not found" description="Unable to load member information." />;
+  }
+
+  const activeGoals = goals?.filter((g) => g.status === "ACTIVE") ?? [];
+  const latestMeasurement = measurements
+    ? [...measurements].sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0]
+    : null;
+  const latestScreening = screenings?.[0];
+  const totalPaid = payments?.reduce((sum, p) => sum + (p.status === "COMPLETED" ? Number(p.amount) : 0), 0) ?? 0;
+  const thisMonthAttendance = attendance?.filter((a) => {
+    const date = new Date(a.checkInAt);
+    const now = new Date();
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).length ?? 0;
+
+  const latestConsent = consents?.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Personal Information */}
+      <div>
+        <h3 className="mb-3 text-lg font-semibold tracking-tight">Personal Information</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <InfoRow icon={User} label="Full Name" value={`${member.firstName} ${member.lastName}`} />
+          <InfoRow icon={Mail} label="Email" value={member.email} />
+          <InfoRow icon={Phone} label="Phone" value={member.phone} />
+          <InfoRow
+            icon={Calendar}
+            label="Date of Birth"
+            value={member.dateOfBirth ? fmtDate(member.dateOfBirth) : "—"}
+          />
+          <InfoRow icon={MapPin} label="City" value={member.city || member.addressLine1 || "—"} />
+          <InfoRow icon={Award} label="Member Type" value={member.memberType || "—"} />
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Emergency & Contact */}
+      <div>
+        <h3 className="mb-3 text-lg font-semibold tracking-tight">Emergency & Contact</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <InfoRow
+            icon={Phone}
+            label="Emergency Contact"
+            value={
+              emergencyContacts?.[0] ? (
+                <span>
+                  {emergencyContacts[0].name} — {emergencyContacts[0].phone}
+                  {emergencyContacts[0].relationship && ` (${emergencyContacts[0].relationship})`}
+                </span>
+              ) : (
+                "—"
+              )
+            }
+          />
+          <InfoRow
+            icon={MapPin}
+            label="Primary Address"
+            value={
+              addresses?.find((a) => a.isPrimary)
+                ? `${addresses.find((a) => a.isPrimary)?.addressLine1}${
+                    addresses.find((a) => a.isPrimary)?.city
+                      ? `, ${addresses.find((a) => a.isPrimary)?.city}`
+                      : ""
+                  }`
+                : addresses?.[0]
+                  ? `${addresses[0].addressLine1}${
+                      addresses[0].city ? `, ${addresses[0].city}` : ""
+                    }`
+                  : "—"
+            }
+          />
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Health & Fitness */}
+      <div>
+        <h3 className="mb-3 text-lg font-semibold tracking-tight">Health & Fitness</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoRow
+            icon={TrendingUp}
+            label="Current Weight"
+            value={latestMeasurement?.weightKg ? `${latestMeasurement.weightKg} kg` : "—"}
+          />
+          <InfoRow
+            icon={Target}
+            label="Active Goals"
+            value={activeGoals.length > 0 ? `${activeGoals.length} goal${activeGoals.length > 1 ? "s" : ""}` : "—"}
+          />
+          <InfoRow
+            icon={Activity}
+            label="PAR-Q Status"
+            value={
+              latestScreening?.flaggedForMedicalClearance ? (
+                <Badge variant="warning" className="rounded-full">Review Needed</Badge>
+              ) : latestScreening ? (
+                <Badge variant="default" className="rounded-full bg-emerald-500">Cleared</Badge>
+              ) : (
+                "Not completed"
+              )
+            }
+          />
+          <InfoRow
+            icon={ShieldCheck}
+            label="Latest Consent"
+            value={
+              latestConsent ? (
+                <Badge
+                  variant={latestConsent.granted ? "default" : "secondary"}
+                  className="rounded-full"
+                >
+                  {latestConsent.type}
+                </Badge>
+              ) : (
+                "—"
+              )
+            }
+          />
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Engagement */}
+      <div>
+        <h3 className="mb-3 text-lg font-semibold tracking-tight">Engagement</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoRow
+            icon={Calendar}
+            label="This Month's Visits"
+            value={thisMonthAttendance}
+          />
+          <InfoRow
+            icon={CreditCard}
+            label="Total Paid"
+            value={totalPaid > 0 ? `$${totalPaid.toLocaleString()}` : "—"}
+          />
+          <InfoRow
+            icon={Users}
+            label="Assigned Trainer"
+            value={
+              member.assignedTrainer
+                ? `${member.assignedTrainer.firstName} ${member.assignedTrainer.lastName}`
+                : "—"
+            }
+          />
+          <InfoRow
+            icon={Dumbbell}
+            label="Member Since"
+            value={fmtDate(member.joinedAt)}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // -- Addresses ----------------------------------------------------------------
@@ -1314,22 +1524,98 @@ function NutritionPanel({ memberId }: { memberId: string }) {
 
 export function Member360Tabs({ memberId }: { memberId: string }) {
   return (
-    <Tabs defaultValue="addresses">
-      <TabsList>
-        <TabsTrigger value="addresses">Addresses</TabsTrigger>
-        <TabsTrigger value="emergency">Emergency contacts</TabsTrigger>
-        <TabsTrigger value="notes">Notes</TabsTrigger>
-        <TabsTrigger value="consents">Consents</TabsTrigger>
-        <TabsTrigger value="assessments">Assessments</TabsTrigger>
-        <TabsTrigger value="goals">Goals</TabsTrigger>
-        <TabsTrigger value="documents">Documents</TabsTrigger>
-        <TabsTrigger value="history">History</TabsTrigger>
-        <TabsTrigger value="attendance">Attendance</TabsTrigger>
-        <TabsTrigger value="payments">Payments</TabsTrigger>
-        <TabsTrigger value="screening">PAR-Q</TabsTrigger>
-        <TabsTrigger value="pt-sessions">PT Sessions</TabsTrigger>
-        <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="overview" className="w-full">
+      <div className="relative">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
+          <TabsTrigger
+            value="overview"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="addresses"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Addresses
+          </TabsTrigger>
+          <TabsTrigger
+            value="emergency"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Emergency
+          </TabsTrigger>
+          <TabsTrigger
+            value="notes"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Notes
+          </TabsTrigger>
+          <TabsTrigger
+            value="consents"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Consents
+          </TabsTrigger>
+          <TabsTrigger
+            value="assessments"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Assessments
+          </TabsTrigger>
+          <TabsTrigger
+            value="goals"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Goals
+          </TabsTrigger>
+          <TabsTrigger
+            value="documents"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Documents
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            History
+          </TabsTrigger>
+          <TabsTrigger
+            value="attendance"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Attendance
+          </TabsTrigger>
+          <TabsTrigger
+            value="payments"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Payments
+          </TabsTrigger>
+          <TabsTrigger
+            value="screening"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            PAR-Q
+          </TabsTrigger>
+          <TabsTrigger
+            value="pt-sessions"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            PT Sessions
+          </TabsTrigger>
+          <TabsTrigger
+            value="nutrition"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Nutrition
+          </TabsTrigger>
+        </TabsList>
+      </div>
+      <TabsContent value="overview" className="mt-6">
+        <MemberOverviewPanel memberId={memberId} />
+      </TabsContent>
       <TabsContent value="addresses">
         <AddressesPanel memberId={memberId} />
       </TabsContent>
