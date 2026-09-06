@@ -57,7 +57,7 @@ function SectionHeader({ eyebrow, title, action, href }: { eyebrow: string; titl
 function EmptyState({ text }: { text: string }) { return <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-stone-200 bg-stone-50/70 p-5 text-center text-xs font-medium text-stone-500">{text}</div>; }
 
 export default function CommandCenterPage() {
-  const { user, hasPermission } = useAuth();
+  const { hasPermission } = useAuth();
   const briefing = useDailyBriefing();
   const data = briefing.data;
   const currency = data?.revenue.revenue[0]?.currency ?? "INR";
@@ -80,10 +80,7 @@ export default function CommandCenterPage() {
           <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-300/25 blur-3xl transition-transform duration-700 group-hover:scale-110" /><div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-violet-300/25 blur-3xl transition-transform duration-700 group-hover:scale-105" /><div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-fuchsia-300/15 blur-3xl" /><div className="pointer-events-none absolute right-[20%] top-10 size-28 rounded-full bg-amber-300/25 blur-2xl" />
           <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-end lg:p-10">
             <div className="max-w-3xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white bg-white/75 px-3.5 py-2 text-[10px] font-black uppercase tracking-[.2em] text-stone-600 shadow-sm backdrop-blur-xl"><span className="relative flex size-2.5"><span className="absolute size-full animate-ping rounded-full bg-emerald-400 opacity-50" /><span className="relative size-2.5 rounded-full bg-emerald-500" /></span>MyGymAgent · Command Center</div>
-              <h1 className="font-serif text-4xl font-semibold leading-[.98] tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Good morning, {user?.firstName ?? "Owner"}.</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-500 sm:text-base">Your gym's operating pulse, priorities, people and AI actions—brought together in one premium command surface.</p>
-              <div className="mt-6 flex flex-wrap gap-2"><span className="rounded-full border border-emerald-200/70 bg-emerald-50/75 px-3 py-1.5 text-[10px] font-bold text-emerald-700">Live briefing</span><span className="rounded-full border border-indigo-200/70 bg-indigo-50/75 px-3 py-1.5 text-[10px] font-bold text-indigo-700">AI assisted</span><span className="rounded-full border border-amber-200/70 bg-amber-50/75 px-3 py-1.5 text-[10px] font-bold text-amber-700">Owner view</span></div>
+              <h1 className="font-serif text-4xl font-semibold leading-[.98] tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">619 FITNESS STUDIO</h1>
             </div>
             <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto lg:flex-col"><Link href="/owner-os" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-stone-200/80 bg-white/85 px-5 text-sm font-extrabold text-stone-800 shadow-lg shadow-stone-900/5 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-xl">Insights <ChevronRight className="size-4" /></Link><Link href="/ai" className="group/ai relative inline-flex min-h-13 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 text-sm font-extrabold text-white shadow-[0_18px_45px_-18px_rgba(99,102,241,.75)] transition hover:-translate-y-1 hover:shadow-[0_25px_55px_-18px_rgba(192,38,211,.55)]"><span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover/ai:translate-x-full" /><Sparkles className="relative size-4" /><span className="relative">Ask MyGymAgent</span><ArrowRight className="relative size-4" /></Link></div>
           </div>
