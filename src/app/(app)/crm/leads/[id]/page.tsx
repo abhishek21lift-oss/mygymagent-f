@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -32,7 +31,6 @@ function scoreLead(status: LeadStatus, hasPhone: boolean, hasEmail: boolean, has
 }
 
 export default function Lead360Page({ params }: { params: { id: string } }) {
-  const router = useRouter()
   const query = useLead(params.id)
   const update = useUpdateLead()
   const statusMutation = useUpdateLeadStatus()
