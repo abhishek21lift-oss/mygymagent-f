@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, Brain, Building2, CalendarCheck, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
+import { BarChart3, Brain, Building2, CalendarCheck, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, ListChecks, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
 
 export interface NavItem {
   title: string;
@@ -14,7 +14,11 @@ export interface NavItem {
 export const primaryNav: NavItem[] = [
   { title: "Command Center", href: "/command-center", icon: LayoutDashboard },
   { title: "Members", href: "/members", icon: Users, permission: ["members.read", "members.read_assigned"] },
-  { title: "Sales", href: "/crm", icon: Megaphone, permission: "leads.read" },
+  { title: "Sales", href: "/crm", icon: Megaphone, permission: "leads.read", children: [
+    { title: "Sales OS", href: "/crm", icon: Megaphone, permission: "leads.read" },
+    { title: "Follow-ups", href: "/crm/follow-ups", icon: ListChecks, permission: "leads.read" },
+    { title: "Sales Intelligence", href: "/crm/analytics", icon: BarChart3, permission: "reports.view" },
+  ] },
   { title: "Training", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read", children: [
     { title: "PT OS", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read" },
     { title: "PT Sessions", href: "/pt-operations/sessions", icon: CalendarCheck, permission: "pt-sessions.read" },
