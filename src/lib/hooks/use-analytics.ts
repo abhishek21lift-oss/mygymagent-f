@@ -29,8 +29,8 @@ export interface SalesFunnel {
 }
 
 interface SalesFunnelApi extends Omit<SalesFunnel, "conversionRatePct" | "followUps"> {
-  conversionRatePct: string | number
-  followUps: { total: number; completed: number; completionRatePct: string | number }
+  conversionRatePct?: string | number
+  followUps?: { total?: number; completed?: number; completionRatePct?: string | number }
 }
 
 export interface SalesSourcePerformance {
@@ -49,44 +49,110 @@ interface SalesDateQueryParams { from?: string; to?: string }
 
 type QueryParams = Record<string, string | number | boolean | undefined>
 
+function asArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : []
+}
+
 export function useRevenueSummary(params: RevenueQueryParams = {}) {
-  return useQuery({ queryKey: ["analytics", "revenue", params], queryFn: () => api.get<RevenueSummary>("/analytics/revenue", { query: params as QueryParams }) })
+  return useQuery({
+    queryKey: ["analytics", "revenue", params],
+    queryFn: async () => {
+      const data = await api.get<RevenueSummary>("/analytics/revenue", { query: params as QueryParams })
+      return {
+        ...data,
+        revenue: asArray<RevenueSummary["revenue"][number]>(data?.revenue),
+        outstanding: asArray<RevenueSummary["outstanding"][number]>(data?.outstanding),
+        notComputable: asArray<RevenueSummary["notComputable"][number]>(data?.notComputable),
+      }
+    },
+  })
 }
 
 export function useRevenueTrend(months: number = 6, branchId?: string) {
-  return useQuery({ queryKey: ["analytics", "revenue-trend", months, branchId], queryFn: () => api.get<RevenueTrendMonth[]>(`/analytics/revenue/trend`, { query: { months, branchId } }), enabled: months > 0 })
+  return useQuery({
+    queryKey: ["analytics", "revenue-trend", months, branchId],
+    queryFn: async () => {
+      const data = await api.get<RevenueTrendMonth[]>("/analytics/revenue/trend", { query: { months, branchId } })
+      return asArray<RevenueTrendMonth>(data)
+    },
+    enabled: months > 0,
+  })
 }
 
 export function useAtRiskMembers(branchId?: string) {
-  return useQuery({ queryKey: ["analytics", "at-risk-members", branchId], queryFn: () => api.get<AtRiskMember[]>("/analytics/members/at-risk") })
+  return useQuery({
+    queryKey: ["analytics", "at-risk-members", branchId],
+    queryFn: async () => asArray<AtRiskMember>(await api.get<AtRiskMember[]>("/analytics/members/at-risk")),
+  })
 }
 
 export function useMemberStatusBreakdown(branchId?: string) {
-  return useQuery({ queryKey: ["analytics", "member-status-breakdown", branchId], queryFn: () => api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown") })
+  return useQuery({
+    queryKey: ["analytics", "member-status-breakdown", branchId],
+    queryFn: async () => asArray<MemberStatusBreakdown>(await api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown")),
+  })
 }
 
 export function useSalesFunnel(branchId?: string, params: SalesDateQueryParams = {}) {
   return useQuery({
     queryKey: ["analytics", "sales-funnel", branchId, params],
-    queryFn: async () => {
+    queryFn: async (): Promise<SalesFunnel> => {
       const data = await api.get<SalesFunnelApi>("/analytics/sales/funnel", { query: params as QueryParams })
+      const followUps = data?.followUps ?? {}
       return {
         ...data,
-        conversionRatePct: Number(data.conversionRatePct),
-        followUps: { ...data.followUps, completionRatePct: Number(data.followUps.completionRatePct) },
+        totalLeads: Number(data?.totalLeads ?? 0),
+        wonLeads: Number(data?.wonLeads ?? 0),
+        conversionRatePct: Number(data?.conversionRatePct ?? 0),
+        followUps: {
+          total: Number(followUps.total ?? 0),
+          completed: Number(followUps.completed ?? 0),
+          completionRatePct: Number(followUps.completionRatePct ?? 0),
+        },
       }
     },
   })
 }
 
 export function useSalesSourcePerformance(branchId?: string, params: SalesDateQueryParams = {}) {
-  return useQuery({ queryKey: ["analytics", "sales-sources", branchId, params], queryFn: () => api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: params as QueryParams }) })
+  return useQuery({
+    queryKey: ["analytics", "sales-sources", branchId, params],
+    queryFn: async () => asArray<SalesSourcePerformance>(await api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: params as QueryParams })),
+  })
 }
 
 export function useTrainerWorkload(branchId?: string) {
-  return useQuery({ queryKey: ["analytics", "trainer-workload", branchId], queryFn: () => api.get<TrainerWorkload[]>("/analytics/trainers/workload") })
+  return useQuery({
+    queryKey: ["analytics", "trainer-workload", branchId],
+    queryFn: async () => asArray<TrainerWorkload>(await api.get<TrainerWorkload[]>("/analytics/trainers/workload")),
+  })
+}
+
+interface InventoryForecastApi {
+  productId: string
+  sku?: string
+  name?: string
+  productName?: string
+  quantityOnHand?: number
+  currentStock?: number
+  reorderLevel?: number
+  atOrBelowReorderLevel?: boolean
+  lowStock?: boolean
+  daysUntilStockout: number | null
 }
 
 export function useInventoryForecast() {
-  return useQuery({ queryKey: ["analytics", "inventory-forecast"], queryFn: () => api.get<InventoryForecast[]>("/analytics/inventory/forecast") })
+  return useQuery({
+    queryKey: ["analytics", "inventory-forecast"],
+    queryFn: async () => {
+      const data = await api.get<InventoryForecastApi[]>("/analytics/inventory/forecast")
+      return asArray<InventoryForecastApi>(data).map((item) => ({
+        productId: item.productId,
+        productName: item.productName ?? item.name ?? "Unknown product",
+        currentStock: Number(item.currentStock ?? item.quantityOnHand ?? 0),
+        daysUntilStockout: item.daysUntilStockout ?? null,
+        lowStock: Boolean(item.lowStock ?? item.atOrBelowReorderLevel ?? false),
+      }))
+    },
+  })
 }
