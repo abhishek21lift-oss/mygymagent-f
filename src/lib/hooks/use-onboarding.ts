@@ -72,7 +72,6 @@ export function useCompleteOnboarding() {
         injuries: data.injuries || null,
         allergies: data.allergies || null,
         medicalNotes: data.medicalNotes || null,
-        notes: data.medicalNotes || null,
       })
 
       if (data.profilePhoto) {
@@ -88,7 +87,7 @@ export function useCompleteOnboarding() {
       if (data.parqChestPain !== undefined) parqResponses.chestPain = data.parqChestPain
       if (data.parqDizziness !== undefined) parqResponses.dizziness = data.parqDizziness
       if (data.parqJointProblems !== undefined) parqResponses.jointProblems = data.parqJointProblems
-      if (data.parqMedication !== undefined) parqResponses.medication = data.parqMedication
+      if (data.parqMedication !== undefined) parqResponses.onMedication = data.parqMedication
       if (data.parqPregnant !== undefined) parqResponses.pregnant = data.parqPregnant
       if (data.parqOtherConcerns !== undefined) parqResponses.otherConcerns = data.parqOtherConcerns
 

@@ -8,8 +8,8 @@ type WorkoutHistoryItem = {
   startedAt?: string | null
   completedAt?: string | null
   workoutPlanName?: string | null
-  volumeKg: number | string
-  setsLogged: number | string
+  volumeKg: number
+  setsLogged: number
 }
 
 type ExerciseHistoryItem = {
@@ -17,16 +17,16 @@ type ExerciseHistoryItem = {
   sessionDate: string
   exerciseName: string
   setNumber: number
-  weightKg?: number | string | null
+  weightKg?: number | null
   reps?: number | null
-  rpe?: number | string | null
+  rpe?: number | null
   completedAt?: string | null
 }
 
 export function useMemberWorkoutHistory(memberId: string, limit = 30) {
   return useQuery({
     queryKey: ["workout-history", "member", memberId, limit],
-    queryFn: () => api.get<WorkoutHistoryItem[]>(`/workout-history/members/${memberId}`, { query: { limit } }),
+    queryFn: () => api.get<WorkoutHistoryItem[]>(`/workout-sessions/member/${memberId}/history`, { query: { limit } }),
     enabled: Boolean(memberId),
   })
 }
@@ -34,7 +34,7 @@ export function useMemberWorkoutHistory(memberId: string, limit = 30) {
 export function useMemberExerciseHistory(memberId: string, exerciseId?: string, limit = 20) {
   return useQuery({
     queryKey: ["workout-history", "member", memberId, "exercise", exerciseId, limit],
-    queryFn: () => api.get<ExerciseHistoryItem[]>(`/workout-history/members/${memberId}/exercises/${exerciseId}`, { query: { limit } }),
+    queryFn: () => api.get<ExerciseHistoryItem[]>(`/workout-sessions/member/${memberId}/exercise/${exerciseId}/history`, { query: { limit } }),
     enabled: Boolean(memberId && exerciseId),
   })
 }
