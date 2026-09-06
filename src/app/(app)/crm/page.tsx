@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, ArrowRightCircle, CalendarClock, Check, Flame, Megaphone, Plus, Sparkles, Target, Users } from "lucide-react";
+import { ArrowRightCircle, CalendarClock, Check, Flame, Megaphone, Plus, Sparkles, Target, Users } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable } from "@/components/shared/data-table";
