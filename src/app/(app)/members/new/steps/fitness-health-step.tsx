@@ -129,6 +129,16 @@ export function FitnessHealthStep({ data, onUpdate, onContinue, onBack }: Fitnes
         />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="medicalNotes">Medical Notes</Label>
+        <Textarea
+          id="medicalNotes"
+          value={form.medicalNotes}
+          onChange={(e) => updateField("medicalNotes", e.target.value)}
+          placeholder="Any other medical notes or conditions we should know about..."
+        />
+      </div>
+
       {/* PAR-Q Section */}
       <div className="space-y-4">
         <div>
