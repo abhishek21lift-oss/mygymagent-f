@@ -25,15 +25,15 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
   }
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 border-b border-white/80 bg-gradient-to-r from-white/92 via-violet-50/88 to-blue-50/88 shadow-[0_12px_36px_rgba(64,40,120,0.10)] backdrop-blur-2xl dark:border-white/10 dark:from-background/95 dark:via-primary/10 dark:to-ai/10">
+    <header className="sticky top-0 z-40 shrink-0 border-b border-white/80 bg-gradient-to-r from-white/92 via-violet-50/88 to-blue-50/88 shadow-[0_8px_24px_rgba(64,40,120,0.08)] backdrop-blur-2xl dark:border-white/10 dark:from-background/95 dark:via-primary/10 dark:to-ai/10">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
-      <div className="mx-auto flex min-h-[4.25rem] w-full items-center gap-2 px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+0.625rem)] sm:min-h-[4.5rem] sm:px-5 sm:py-2.5 sm:pt-2.5">
-        <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/85 bg-white/70 p-1 shadow-[0_5px_18px_rgba(64,40,120,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <Button variant="ghost" size="icon" className="hidden rounded-xl md:inline-flex" onClick={onToggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
-            {sidebarCollapsed ? <ChevronsRight className="size-5" /> : <ChevronsLeft className="size-5" />}
+      <div className="mx-auto flex min-h-[3.35rem] w-full items-center gap-2 px-3 py-1.5 pt-[calc(env(safe-area-inset-top)+0.375rem)] sm:min-h-[3.75rem] sm:px-5 sm:py-1.5 sm:pt-1.5">
+        <div className="flex shrink-0 items-center gap-1 rounded-xl border border-white/85 bg-white/70 p-0.5 shadow-[0_4px_14px_rgba(64,40,120,0.07)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <Button variant="ghost" size="icon" className="hidden size-9 rounded-lg md:inline-flex" onClick={onToggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+            {sidebarCollapsed ? <ChevronsRight className="size-4.5" /> : <ChevronsLeft className="size-4.5" />}
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-xl md:hidden" onClick={onOpenMobileNav} aria-label="Open navigation">
-            <Menu className="size-5" />
+          <Button variant="ghost" size="icon" className="size-9 rounded-lg md:hidden" onClick={onOpenMobileNav} aria-label="Open navigation">
+            <Menu className="size-4.5" />
           </Button>
         </div>
 
@@ -42,14 +42,14 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
         </div>
         <div className="flex-1 md:hidden" />
 
-        <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/85 bg-white/70 p-1 shadow-[0_5px_18px_rgba(64,40,120,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
-            <Sun className="size-4 dark:hidden" /><Moon className="hidden size-4 dark:block" />
+        <div className="flex shrink-0 items-center gap-1 rounded-xl border border-white/85 bg-white/70 p-0.5 shadow-[0_4px_14px_rgba(64,40,120,0.07)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <Button variant="ghost" size="icon" className="size-9 rounded-lg" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
+            <Sun className="size-3.5 dark:hidden" /><Moon className="hidden size-3.5 dark:block" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 rounded-xl border border-transparent bg-white/60 pr-1.5 pl-1 shadow-sm hover:border-primary/10 hover:bg-white/95 dark:bg-white/5">
-                <Avatar className="size-8 border border-primary/15 shadow-sm"><AvatarFallback className="bg-gradient-to-br from-primary/15 to-ai/15 text-xs font-bold text-primary">{user ? initials(user.firstName, user.lastName) : <UserIcon className="size-4" />}</AvatarFallback></Avatar>
+              <Button variant="ghost" className="size-9 gap-2 rounded-lg border border-transparent bg-white/60 p-0.5 shadow-sm hover:border-primary/10 hover:bg-white/95 sm:w-auto sm:pr-1.5 sm:pl-1 dark:bg-white/5">
+                <Avatar className="size-8 border border-primary/15 shadow-sm"><AvatarFallback className="bg-gradient-to-br from-primary/15 to-ai/15 text-xs font-bold text-primary">{user ? initials(user.firstName, user.lastName) : <UserIcon className="size-3.5" />}</AvatarFallback></Avatar>
                 <span className="hidden text-sm font-semibold sm:inline">{user ? `${user.firstName} ${user.lastName}` : ""}</span>
               </Button>
             </DropdownMenuTrigger>
