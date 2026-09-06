@@ -26,9 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true)
 
   const loadMe = React.useCallback(async (): Promise<void> => {
-    // Ignore a response from an older auth request if login/logout changed the
-    // in-memory token while /auth/me was in flight. This prevents a startup
-    // request from overwriting a fresh login session or clearing it on failure.
     const tokenAtStart = getAccessToken()
 
     try {
@@ -38,9 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setPermissions(me.permissions)
     } catch {
       if (getAccessToken() !== tokenAtStart) return
-      // A failed background /auth/me must not turn a successful login into a
-      // signed-out state. The access token remains the source of truth here;
-      // protected API calls can still perform the normal 401 refresh flow.
+      if (tokenAtStart !== null) {
+        return
+      }
+      setAccessToken(null)
+      setUser(null)
+      setPermissions([])
     }
   }, [])
 
@@ -78,19 +78,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(
     async (input: LoginInput) => {
-      // A successful /auth/login response is already proof of authentication.
-      // Do not make navigation depend on a second /auth/me request succeeding:
-      // on a fresh page load that request can race the startup refresh flow and
-      // turn a successful login into a visible sign-in failure.
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
       setPermissions([])
 
-      // Permissions are useful for navigation, but they are not required to
-      // establish the authenticated session. Refresh them opportunistically
-      // after the login state is installed so a transient /auth/me failure does
-      // not block the user from reaching the dashboard.
       void loadMe()
     },
     [loadMe],

@@ -14,6 +14,10 @@ import {
   Target,
   CheckCircle2,
   FileText,
+  Clock,
+  CreditCard,
+  Dumbbell,
+  UtensilsCrossed,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -78,6 +82,11 @@ import {
   useMemberBranchHistory,
   useMemberTrainerHistory,
 } from "@/lib/hooks/use-member-details";
+import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
+import { useMemberPayments } from "@/lib/hooks/use-member-payments";
+import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
+import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
+import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
 
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -1015,6 +1024,292 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
   );
 }
 
+// -- Attendance Panel
+function AttendancePanel({ memberId }: { memberId: string }) {
+  const query = useMemberAttendance(memberId);
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  if (!query.data || query.data.length === 0) {
+    return (
+      <EmptyState
+        icon={Clock}
+        title="No attendance history"
+        description="Check-in history will appear here."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {query.data.map((record) => (
+        <div key={record.id} className="flex items-center justify-between rounded-md border p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+              <Clock className="size-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">
+                {new Date(record.checkInAt).toLocaleDateString()} {new Date(record.checkInAt).toLocaleTimeString()}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {record.method} &bull; Branch: {record.branchId}
+              </p>
+            </div>
+          </div>
+          {record.checkOutAt && (
+            <Badge variant="secondary">Out: {new Date(record.checkOutAt).toLocaleTimeString()}</Badge>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// -- Payments Panel
+function PaymentsPanel({ memberId }: { memberId: string }) {
+  const query = useMemberPayments(memberId);
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  const totalSpent = query.data?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+
+  if (!query.data || query.data.length === 0) {
+    return (
+      <EmptyState
+        icon={CreditCard}
+        title="No payments yet"
+        description="Payment history will appear here."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="rounded-xl border bg-muted/20 p-4">
+        <p className="text-sm text-muted-foreground">Total spent</p>
+        <p className="text-2xl font-semibold">
+          {query.data[0]?.currency ?? "USD"} {totalSpent.toLocaleString()}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {query.data.map((payment) => (
+          <div key={payment.id} className="flex items-center justify-between rounded-md border p-3">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                <CreditCard className="size-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">
+                  {payment.currency} {Number(payment.amount).toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {payment.method} &bull; {new Date(payment.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <Badge variant={payment.status === "COMPLETED" ? "default" : "secondary"}>{payment.status}</Badge>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// -- Screening Panel (PAR-Q)
+function ScreeningPanel({ memberId }: { memberId: string }) {
+  const query = useMemberScreenings(memberId);
+  const create = useCreateMemberScreening(memberId);
+  const [open, setOpen] = React.useState(false);
+  const [responses, setResponses] = React.useState<Record<string, boolean>>({});
+
+  const PAR_Q_QUESTIONS = [
+    { key: "heartCondition", question: "Has a doctor ever said you have a heart condition?" },
+    { key: "chestPain", question: "Do you experience chest pain during physical activity?" },
+    { key: "dizziness", question: "Do you ever feel dizzy or faint?" },
+    { key: "jointProblems", question: "Do you have joint or bone problems that may worsen with exercise?" },
+    { key: "onMedication", question: "Are you currently taking any medication?" },
+    { key: "pregnant", question: "Are you pregnant or possibly pregnant?" },
+  ];
+
+  async function handleSubmit() {
+    const flagged = Object.entries(responses).some(([, value]) => value);
+    await create.mutateAsync({
+      responses,
+      flaggedForMedicalClearance: flagged,
+    });
+    toast.success("PAR-Q submitted");
+    setOpen(false);
+    setResponses({});
+  }
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  const latestScreening = query.data?.[0];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">
+              <Plus className="size-3.5" />
+              New PAR-Q
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>PAR-Q Health Screening</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              {PAR_Q_QUESTIONS.map((q) => (
+                <div key={q.key} className="flex items-center justify-between">
+                  <span className="text-sm">{q.question}</span>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant={responses[q.key] === true ? "default" : "outline"}
+                      onClick={() => setResponses({ ...responses, [q.key]: true })}
+                    >
+                      Yes
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={responses[q.key] === false ? "default" : "outline"}
+                      onClick={() => setResponses({ ...responses, [q.key]: false })}
+                    >
+                      No
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button onClick={handleSubmit} disabled={create.isPending}>
+                {create.isPending ? "Submitting..." : "Submit"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {latestScreening ? (
+        <div className="rounded-md border p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Latest PAR-Q</p>
+              <p className="text-sm text-muted-foreground">{new Date(latestScreening.completedAt).toLocaleDateString()}</p>
+            </div>
+            {latestScreening.flaggedForMedicalClearance && (
+              <Badge variant="destructive">Medical clearance needed</Badge>
+            )}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {Object.entries(latestScreening.responses).map(([key, value]) => (
+              <Badge key={key} variant={value ? "destructive" : "secondary"}>
+                {PAR_Q_QUESTIONS.find((q) => q.key === key)?.question.slice(0, 30)}: {value ? "Yes" : "No"}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <EmptyState
+          icon={ShieldCheck}
+          title="No PAR-Q on file"
+          description="Complete a PAR-Q health screening to document health history."
+        />
+      )}
+    </div>
+  );
+}
+
+// -- PT Sessions Panel
+function PtSessionsPanel({ memberId }: { memberId: string }) {
+  const query = useMemberPtSessions(memberId);
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  if (!query.data || query.data.length === 0) {
+    return (
+      <EmptyState
+        icon={Dumbbell}
+        title="No PT sessions"
+        description="Book a personal training session to get started."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {query.data.map((session) => (
+        <div key={session.id} className="rounded-md border p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
+                <Dumbbell className="size-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">
+                  {new Date(session.scheduledAt).toLocaleDateString()} at {new Date(session.scheduledAt).toLocaleTimeString()}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {session.trainer?.firstName} {session.trainer?.lastName}
+                  {session.workoutPlan && ` &bull; ${session.workoutPlan.name}`}
+                </p>
+              </div>
+            </div>
+            <Badge
+              variant={session.status === "COMPLETED" ? "default" : session.status === "CANCELLED" ? "secondary" : "outline"}
+            >
+              {session.status}
+            </Badge>
+          </div>
+          {session.notes && <p className="mt-2 text-sm text-muted-foreground">{session.notes}</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// -- Nutrition Panel
+function NutritionPanel({ memberId }: { memberId: string }) {
+  const query = useMemberDietAssignments(memberId);
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  if (!query.data || query.data.length === 0) {
+    return (
+      <EmptyState
+        icon={UtensilsCrossed}
+        title="No diet plans assigned"
+        description="Assign a diet plan to help track nutrition."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {query.data.map((assignment) => (
+        <div key={assignment.id} className="rounded-md border p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">{assignment.dietPlan?.name}</p>
+              <p className="text-sm text-muted-foreground">Started {new Date(assignment.startDate).toLocaleDateString()}</p>
+            </div>
+            <Badge variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "secondary" : "outline"}>
+              {assignment.status}
+            </Badge>
+          </div>
+          {assignment.dietPlan && (
+            <p className="mt-2 text-sm text-muted-foreground">Diet plan assigned</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // -- Root -----------------------------------------------------------------------
 
 export function Member360Tabs({ memberId }: { memberId: string }) {
@@ -1029,6 +1324,11 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
         <TabsTrigger value="goals">Goals</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="history">History</TabsTrigger>
+        <TabsTrigger value="attendance">Attendance</TabsTrigger>
+        <TabsTrigger value="payments">Payments</TabsTrigger>
+        <TabsTrigger value="screening">PAR-Q</TabsTrigger>
+        <TabsTrigger value="pt-sessions">PT Sessions</TabsTrigger>
+        <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
       </TabsList>
       <TabsContent value="addresses">
         <AddressesPanel memberId={memberId} />
@@ -1053,6 +1353,21 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
       </TabsContent>
       <TabsContent value="history">
         <HistoryPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="attendance">
+        <AttendancePanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="payments">
+        <PaymentsPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="screening">
+        <ScreeningPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="pt-sessions">
+        <PtSessionsPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="nutrition">
+        <NutritionPanel memberId={memberId} />
       </TabsContent>
     </Tabs>
   );
