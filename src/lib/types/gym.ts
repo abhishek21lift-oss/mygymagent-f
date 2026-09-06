@@ -528,3 +528,152 @@ export interface StockMovement {
   createdAt: string
   product?: { id: string; name: string; sku: string }
 }
+
+export type TimelineEventType =
+  | 'member_created'
+  | 'status_changed'
+  | 'branch_changed'
+  | 'trainer_changed'
+  | 'membership_started'
+  | 'membership_renewed'
+  | 'membership_frozen'
+  | 'membership_resumed'
+  | 'membership_cancelled'
+  | 'membership_expired'
+  | 'attendance_checkin'
+  | 'attendance_checkout'
+  | 'payment_received'
+  | 'refund_issued'
+  | 'pt_session_scheduled'
+  | 'pt_session_completed'
+  | 'pt_session_cancelled'
+  | 'pt_session_no_show'
+  | 'assessment_completed'
+  | 'measurement_recorded'
+  | 'fitness_test_recorded'
+  | 'screening_completed'
+  | 'goal_created'
+  | 'goal_achieved'
+  | 'goal_paused'
+  | 'goal_abandoned'
+  | 'document_uploaded'
+  | 'note_added'
+  | 'consent_recorded'
+  | 'message_sent'
+
+export interface TimelineEvent {
+  id: string
+  type: TimelineEventType
+  timestamp: string
+  title: string
+  description: string | null
+  metadata: Record<string, unknown>
+  actorName: string | null
+}
+
+export interface Member360Timeline {
+  events: TimelineEvent[]
+  totalCount: number
+  page: number
+  pageSize: number
+}
+
+export interface Member360Overview {
+  member: {
+    id: string
+    memberCode: string
+    firstName: string
+    lastName: string
+    email: string | null
+    phone: string | null
+    dateOfBirth: string | null
+    gender: string | null
+    memberType: string | null
+    status: string
+    joinedAt: string
+    addressLine1: string | null
+    city: string | null
+    state: string | null
+    postalCode: string | null
+    country: string | null
+    emergencyContactName: string | null
+    emergencyContactPhone: string | null
+    notes: string | null
+    assignedTrainerId: string | null
+    primaryBranchId: string
+    primaryBranch: { id: string; name: string }
+    assignedTrainer: { id: string; firstName: string; lastName: string } | null
+  }
+  membership: {
+    id: string
+    planName: string
+    status: string
+    startDate: string
+    endDate: string
+    price: string
+    currency: string
+    autoRenew: boolean
+    totalPaid: string
+    outstandingBalance: string
+  } | null
+  attendance: {
+    thisMonth: number
+    last30Days: number
+    totalVisits: number
+    currentStreak: number
+    lastVisit: string | null
+  }
+  engagement: {
+    score: number
+    level: 'low' | 'medium' | 'high'
+    lastActivityAt: string | null
+    daysSinceLastVisit: number | null
+  }
+  finance: {
+    totalPaid: string
+    totalRefunded: string
+    outstandingBalance: string
+    pendingPayments: number
+  }
+  ptSummary: {
+    totalSessions: number
+    completedSessions: number
+    cancelledSessions: number
+    upcomingSessions: number
+    remainingPackageSessions: number | null
+    totalRevenue: string
+  }
+  latestAssessment: {
+    weightKg: string | null
+    bodyFatPercent: string | null
+    recordedAt: string | null
+  } | null
+  activeGoals: number
+  latestScreening: {
+    completedAt: string | null
+    flaggedForMedicalClearance: boolean
+  } | null
+}
+
+export interface DuplicateCandidate {
+  memberId: string
+  memberCode: string
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  status: string
+  matchScore: number
+  matchReasons: string[]
+}
+
+export interface DuplicateDetectionResult {
+  memberId: string
+  memberCode: string
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  status: string
+  potentialDuplicates: DuplicateCandidate[]
+}

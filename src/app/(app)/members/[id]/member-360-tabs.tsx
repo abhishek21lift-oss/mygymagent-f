@@ -28,6 +28,12 @@ import {
   AlertCircle,
   RefreshCw,
   TrendingDown,
+  GitMerge,
+  AlertTriangle,
+  Snowflake,
+  PlayCircle,
+  XCircle,
+  Pause,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,6 +109,10 @@ import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
 import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
+import { useMemberTimeline } from "@/lib/hooks/use-member-360";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api/client";
+import type { DuplicateDetectionResult, TimelineEventType } from "@/lib/types/gym";
 
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -1799,6 +1809,292 @@ function NutritionPanel({ memberId }: { memberId: string }) {
   );
 }
 
+// -- Timeline Panel
+const TIMELINE_ICON_MAP: Record<TimelineEventType, typeof Activity> = {
+  member_created: User,
+  status_changed: TrendingUp,
+  branch_changed: MapPin,
+  trainer_changed: Users,
+  membership_started: CreditCard,
+  membership_renewed: RefreshCw,
+  membership_frozen: Snowflake,
+  membership_resumed: PlayCircle,
+  membership_cancelled: XCircle,
+  membership_expired: Clock,
+  attendance_checkin: Clock,
+  attendance_checkout: Clock,
+  payment_received: CreditCard,
+  refund_issued: Undo2,
+  pt_session_scheduled: Dumbbell,
+  pt_session_completed: CheckCircle2,
+  pt_session_cancelled: XCircle,
+  pt_session_no_show: AlertTriangle,
+  assessment_completed: Activity,
+  measurement_recorded: TrendingDown,
+  fitness_test_recorded: TrendingUp,
+  screening_completed: ShieldCheck,
+  goal_created: Target,
+  goal_achieved: Award,
+  goal_paused: Pause,
+  goal_abandoned: XCircle,
+  document_uploaded: FileText,
+  note_added: StickyNote,
+  consent_recorded: ShieldCheck,
+  message_sent: Mail,
+};
+
+function TimelinePanel({ memberId }: { memberId: string }) {
+  const [page, setPage] = React.useState(1);
+  const [pageSize] = React.useState(50);
+  const { data, isLoading } = useMemberTimeline(memberId, page, pageSize);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!data || data.events.length === 0) {
+    return (
+      <EmptyState
+        icon={History}
+        title="No activity yet"
+        description="This member's activity timeline will appear here."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        {data.events.map((event) => {
+          const Icon = TIMELINE_ICON_MAP[event.type] ?? History;
+          return (
+            <div key={event.id} className="flex items-start gap-3 rounded-md border p-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <Icon className="size-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium">{event.title}</p>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {fmtDateTime(event.timestamp)}
+                  </span>
+                </div>
+                {event.description && (
+                  <p className="mt-0.5 text-sm text-muted-foreground">{event.description}</p>
+                )}
+                {event.actorName && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">by {event.actorName}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {data.totalCount > pageSize && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {Math.ceil(data.totalCount / pageSize)}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page * pageSize >= data.totalCount}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Duplicates Panel
+function DuplicatesPanel({ memberId }: { memberId: string }) {
+  const [mergeOpen, setMergeOpen] = React.useState(false);
+  const [selectedDuplicate, setSelectedDuplicate] = React.useState<DuplicateDetectionResult | null>(null);
+
+  const { data, isLoading, refetch } = useQuery<DuplicateDetectionResult>({
+    queryKey: ["member-duplicates", memberId],
+    queryFn: () => api.get<DuplicateDetectionResult>(`/members/${memberId}/duplicates`),
+  });
+
+  const previewMerge = useMutation({
+    mutationFn: ({ sourceId, targetId }: { sourceId: string; targetId: string }) =>
+      api.get<unknown>("/members/duplicates/preview-merge", {
+        query: { sourceId, targetId },
+      }),
+  });
+
+  const executeMerge = useMutation({
+    mutationFn: ({
+      sourceMemberId,
+      targetMemberId,
+      resolution,
+    }: {
+      sourceMemberId: string;
+      targetMemberId: string;
+      resolution: Record<string, "source" | "target">;
+    }) =>
+      api.post<{ success: boolean; mergedMemberId: string }>("/members/duplicates/execute-merge", {
+        sourceMemberId,
+        targetMemberId,
+        resolution,
+      }),
+    onSuccess: () => {
+      toast.success("Members merged successfully");
+      setMergeOpen(false);
+      setSelectedDuplicate(null);
+      void refetch();
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Failed to merge members");
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-20 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!data || data.potentialDuplicates.length === 0) {
+    return (
+      <EmptyState
+        icon={GitMerge}
+        title="No duplicates found"
+        description="This member doesn't have any potential duplicate records."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Found {data.potentialDuplicates.length} potential duplicate
+          {data.potentialDuplicates.length !== 1 ? "s" : ""}
+        </p>
+        <Button variant="outline" size="sm" onClick={() => void refetch()}>
+          <RefreshCw className="size-3.5" />
+          Refresh
+        </Button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {data.potentialDuplicates.map((dup) => (
+          <div key={dup.memberId} className="flex items-center justify-between rounded-md border p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-warning/10">
+                <AlertTriangle className="size-5 text-warning" />
+              </div>
+              <div>
+                <p className="font-medium">
+                  {dup.firstName} {dup.lastName}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {dup.email && <span>{dup.email}</span>}
+                  {dup.phone && <span> · {dup.phone}</span>}
+                </p>
+                <div className="mt-1 flex items-center gap-2">
+                  <Badge variant="outline">{dup.status}</Badge>
+                  <Badge variant={dup.matchScore >= 80 ? "destructive" : "secondary"}>
+                    {dup.matchScore}% match
+                  </Badge>
+                </div>
+                {dup.matchReasons.length > 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Reasons: {dup.matchReasons.join(", ")}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedDuplicate(data);
+                  setMergeOpen(true);
+                }}
+              >
+                Review & Merge
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Dialog open={mergeOpen} onOpenChange={setMergeOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Merge Members</DialogTitle>
+          </DialogHeader>
+          {selectedDuplicate && (
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
+                <div>
+                  <p className="text-sm font-medium">Source (to merge)</p>
+                  <p className="mt-1">
+                    {data.firstName} {data.lastName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{data.email ?? "No email"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Target (to keep)</p>
+                  <p className="mt-1">
+                    {selectedDuplicate.firstName} {selectedDuplicate.lastName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedDuplicate.email ?? "No email"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" onClick={() => setMergeOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() =>
+                    executeMerge.mutate({
+                      sourceMemberId: data.memberId,
+                      targetMemberId: selectedDuplicate.memberId,
+                      resolution: {},
+                    })
+                  }
+                  disabled={executeMerge.isPending}
+                >
+                  {executeMerge.isPending ? "Merging..." : "Confirm Merge"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // -- Root -----------------------------------------------------------------------
 
 export function Member360Tabs({ memberId }: { memberId: string }) {
@@ -1890,6 +2186,18 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
           >
             Nutrition
           </TabsTrigger>
+          <TabsTrigger
+            value="timeline"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Timeline
+          </TabsTrigger>
+          <TabsTrigger
+            value="duplicates"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Duplicates
+          </TabsTrigger>
         </TabsList>
       </div>
       <TabsContent value="overview" className="mt-6">
@@ -1933,6 +2241,12 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
       </TabsContent>
       <TabsContent value="nutrition">
         <NutritionPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="timeline">
+        <TimelinePanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="duplicates">
+        <DuplicatesPanel memberId={memberId} />
       </TabsContent>
     </Tabs>
   );
