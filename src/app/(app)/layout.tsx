@@ -42,7 +42,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onOpenMobileNav={() => setMobileNavOpen(true)} sidebarCollapsed={sidebarCollapsed} onToggleSidebar={() => setSidebarCollapsed((value) => !value)} />
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1720px] p-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="mx-auto w-full max-w-[1720px] px-3 pb-6 pt-4 sm:p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </div>
