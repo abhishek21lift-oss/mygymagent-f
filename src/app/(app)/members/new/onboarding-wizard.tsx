@@ -3,9 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Check, ChevronLeft } from "lucide-react"
-import { PageHeader } from "@/components/shared/page-header"
-import { Button } from "@/components/ui/button"
+import { Check } from "lucide-react"
 
 import { LeadSelectionStep } from "./steps/lead-selection-step"
 import { PersonalInfoStep } from "./steps/personal-info-step"

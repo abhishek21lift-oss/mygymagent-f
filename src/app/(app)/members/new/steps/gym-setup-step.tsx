@@ -1,11 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Building2, User, Target, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,

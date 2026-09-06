@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Lead } from "@/lib/types/gym"
 
 interface PersonalInfoData {
   firstName: string
