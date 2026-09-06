@@ -13,6 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/login");
@@ -32,10 +33,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-svh overflow-hidden bg-background">
-      <SidebarNav className="hidden w-[248px] shrink-0 border-r border-sidebar-border md:flex" />
+      <SidebarNav
+        collapsed={sidebarCollapsed}
+        onNavigate={() => setSidebarCollapsed(true)}
+        className={"hidden shrink-0 border-r border-sidebar-border transition-[width] duration-300 md:flex " + (sidebarCollapsed ? "w-[76px]" : "w-[248px]")}
+      />
       <MobileNav open={mobileNavOpen} onOpenChange={setMobileNavOpen} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onOpenMobileNav={() => setMobileNavOpen(true)} />
+        <Topbar
+          onOpenMobileNav={() => setMobileNavOpen(true)}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
+        />
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1680px] p-4 sm:p-6 lg:p-8">{children}</div>
         </main>
