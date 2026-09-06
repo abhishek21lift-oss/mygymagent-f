@@ -38,43 +38,97 @@ export default function CommandCenterPage() {
 
   const priorities = data
     ? [
-        data.atRiskMembers.count > 0 && { icon: AlertTriangle, tone: "rose", title: `${data.atRiskMembers.count} members need attention`, detail: "Retention risk detected from recent activity.", href: "/members", action: "Review members" },
-        data.salesFunnel.followUps.total > 0 && { icon: TrendingUp, tone: "blue", title: `${data.salesFunnel.followUps.total} follow-ups in the pipeline`, detail: `${data.salesFunnel.followUps.completionRatePct}% completed so far.`, href: "/crm", action: "Open Sales" },
-        data.lowStock.count > 0 && { icon: Package, tone: "amber", title: `${data.lowStock.count} products below reorder level`, detail: "Protect availability before the next stockout.", href: "/inventory", action: "Review stock" },
-        data.pendingAiActions > 0 && { icon: Sparkles, tone: "violet", title: `${data.pendingAiActions} AI actions await approval`, detail: "Review before anything is executed.", href: "/ai-actions", action: "Review actions" },
+        data.atRiskMembers.count > 0 && {
+          icon: AlertTriangle,
+          tone: "rose",
+          title: `${data.atRiskMembers.count} members need attention`,
+          detail: "Retention risk detected from recent activity.",
+          href: "/members",
+          action: "Review members",
+        },
+        data.salesFunnel.followUps.total > 0 && {
+          icon: TrendingUp,
+          tone: "blue",
+          title: `${data.salesFunnel.followUps.total} follow-ups in the pipeline`,
+          detail: `${data.salesFunnel.followUps.completionRatePct}% completed so far.`,
+          href: "/crm",
+          action: "Open Sales",
+        },
+        data.lowStock.count > 0 && {
+          icon: Package,
+          tone: "amber",
+          title: `${data.lowStock.count} products below reorder level`,
+          detail: "Protect availability before the next stockout.",
+          href: "/inventory",
+          action: "Review stock",
+        },
+        data.pendingAiActions > 0 && {
+          icon: Sparkles,
+          tone: "violet",
+          title: `${data.pendingAiActions} AI actions await approval`,
+          detail: "Review before anything is executed.",
+          href: "/ai-actions",
+          action: "Review actions",
+        },
       ].filter(Boolean)
     : [];
 
   return (
     <div className="relative -mx-2 min-h-full overflow-hidden pb-10 sm:-mx-3 lg:-mx-5">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_8%_5%,rgba(190,24,93,.11),transparent_23%),radial-gradient(circle_at_88%_4%,rgba(37,99,235,.12),transparent_25%),radial-gradient(circle_at_55%_25%,rgba(217,119,6,.08),transparent_24%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-56 bg-gradient-to-b from-white via-white/80 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_4%_2%,rgba(236,72,153,.13),transparent_20%),radial-gradient(circle_at_95%_3%,rgba(59,130,246,.14),transparent_23%),radial-gradient(circle_at_78%_28%,rgba(168,85,247,.10),transparent_24%),radial-gradient(circle_at_24%_55%,rgba(16,185,129,.07),transparent_22%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-gradient-to-b from-white/90 via-white/65 to-transparent" />
 
       <div className="mx-auto flex max-w-[1640px] flex-col gap-7 px-2 sm:px-4 lg:px-6">
-        {/* Executive masthead */}
-        <section className="relative overflow-hidden rounded-[30px] border border-stone-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,.94),rgba(255,248,244,.92),rgba(246,249,255,.94))] p-6 shadow-[0_28px_90px_-45px_rgba(79,70,229,.38)] backdrop-blur-xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -right-24 -top-32 size-80 rounded-full bg-rose-300/15 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 right-32 size-72 rounded-full bg-blue-300/15 blur-3xl" />
-          <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[.19em] text-stone-600 shadow-sm">
-                <span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-50" /><span className="relative inline-flex size-2 rounded-full bg-emerald-500" /></span>
+        {/* Premium executive masthead — intentionally minimal */}
+        <section className="group relative isolate overflow-hidden rounded-[32px] border border-white/80 bg-white/90 p-5 shadow-[0_35px_100px_-45px_rgba(79,70,229,.42)] ring-1 ring-stone-200/60 backdrop-blur-2xl sm:p-7 lg:p-9">
+          <div className="pointer-events-none absolute -left-24 -top-28 size-72 rounded-full bg-fuchsia-300/25 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+          <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full bg-blue-300/25 blur-3xl transition-transform duration-700 group-hover:scale-110" />
+          <div className="pointer-events-none absolute -bottom-36 left-1/3 size-80 rounded-full bg-violet-300/20 blur-3xl" />
+          <div className="pointer-events-none absolute right-[22%] top-10 size-32 rounded-full bg-amber-200/25 blur-2xl" />
+
+          <div className="relative z-10 flex min-h-[260px] flex-col justify-between gap-10 lg:min-h-[310px] lg:flex-row lg:items-end">
+            <div>
+              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white bg-white/80 px-4 py-2 text-[10px] font-black uppercase tracking-[.2em] text-stone-600 shadow-[0_8px_30px_-15px_rgba(28,25,23,.45)] backdrop-blur-xl">
+                <span className="relative flex size-2.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-50" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
+                </span>
                 MyGymAgent · Command Center
               </div>
-              <h1 className="font-serif text-3xl font-semibold tracking-[-.035em] text-stone-950 sm:text-4xl lg:text-5xl">Good morning, {user?.firstName ?? "Owner"}.</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-[15px]">A refined executive view of your gym — people, performance, revenue, sales, inventory and AI decisions, all in one place.</p>
-              <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold text-stone-500"><span className="rounded-full border border-stone-200 bg-white/70 px-3 py-1.5">Live tenant data</span><span className="rounded-full border border-stone-200 bg-white/70 px-3 py-1.5">Operational overview</span><span className="rounded-full border border-stone-200 bg-white/70 px-3 py-1.5">Human-controlled AI</span></div>
+              <h1 className="max-w-3xl font-serif text-4xl font-semibold leading-[.98] tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">
+                Good morning, {user?.firstName ?? "Owner"}.
+              </h1>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/owner-os" className="inline-flex items-center gap-2 rounded-2xl border border-stone-200 bg-white/85 px-4 py-3 text-sm font-bold text-stone-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">Insights <ChevronRight className="size-4" /></Link>
-              <Link href="/ai" className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-stone-900 via-indigo-900 to-violet-800 px-4 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-900/15 transition hover:-translate-y-0.5 hover:shadow-2xl"><Sparkles className="size-4" /> Ask MyGymAgent <ArrowRight className="size-4" /></Link>
+
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:pb-1">
+              <Link
+                href="/owner-os"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-stone-200/80 bg-white/90 px-5 text-sm font-extrabold text-stone-800 shadow-[0_10px_30px_-18px_rgba(28,25,23,.55)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-violet-200 hover:shadow-[0_18px_35px_-18px_rgba(99,102,241,.35)]"
+              >
+                Insights <ChevronRight className="size-4" />
+              </Link>
+              <Link
+                href="/ai"
+                className="relative inline-flex min-h-14 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[linear-gradient(100deg,#18181b_0%,#312e81_48%,#7e22ce_100%)] px-6 text-sm font-extrabold text-white shadow-[0_18px_40px_-18px_rgba(79,70,229,.72)] transition-all hover:-translate-y-1 hover:shadow-[0_24px_48px_-18px_rgba(126,34,206,.55)]"
+              >
+                <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,.22)_48%,transparent_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <Sparkles className="relative size-4" />
+                <span className="relative">Ask MyGymAgent</span>
+                <ArrowRight className="relative size-4" />
+              </Link>
             </div>
           </div>
         </section>
 
         {/* Business pulse */}
         <section>
-          <div className="mb-4 flex items-end justify-between px-1"><div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-rose-700">Business pulse</p><h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950">Today at a glance</h2></div><span className="hidden rounded-full border border-stone-200 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-stone-500 sm:block">Live context · refreshes every minute</span></div>
+          <div className="mb-4 flex items-end justify-between px-1">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-rose-700">Business pulse</p>
+              <h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950">Today at a glance</h2>
+            </div>
+            <span className="hidden rounded-full border border-stone-200 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-stone-500 sm:block">Live context · refreshes every minute</span>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard3D icon={CalendarCheck} label="Today's check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Today" trend="neutral" delay={0} />
             <MetricCard3D icon={Wallet} label="Net revenue" value={data ? money(revenue?.netRevenue, currency) : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="neutral" delay={80} />
@@ -87,7 +141,13 @@ export default function CommandCenterPage() {
         <section className="grid gap-5 xl:grid-cols-[1.35fr_.9fr]">
           <Card className="overflow-hidden border-stone-200/80 bg-white/85 shadow-[0_20px_65px_-42px_rgba(28,25,23,.55)] ring-1 ring-white/70 backdrop-blur-xl">
             <CardHeader className="border-b border-stone-100 bg-gradient-to-r from-white to-rose-50/40 px-5 py-4">
-              <div className="flex items-center justify-between gap-3"><div><CardTitle className="flex items-center gap-2 font-serif text-lg font-semibold text-stone-950"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-100 to-amber-100 text-rose-700"><Zap className="size-4" /></span>Decision queue</CardTitle><p className="mt-1 text-xs text-stone-500">Every priority keeps its original action and destination.</p></div><span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-500">Today</span></div>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="flex items-center gap-2 font-serif text-lg font-semibold text-stone-950"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-100 to-amber-100 text-rose-700"><Zap className="size-4" /></span>Decision queue</CardTitle>
+                  <p className="mt-1 text-xs text-stone-500">Every priority keeps its original action and destination.</p>
+                </div>
+                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-500">Today</span>
+              </div>
             </CardHeader>
             <CardContent className="p-3 sm:p-4">
               {briefing.isLoading ? <div className="space-y-2">{[1, 2, 3].map((item) => <div key={item} className="h-[72px] animate-pulse rounded-2xl bg-stone-100" />)}</div> : priorities.length ? <div className="space-y-2">{priorities.map((item) => { if (!item) return null; const Icon = item.icon; const tone = toneClasses[item.tone as keyof typeof toneClasses]; return <Link key={item.title} href={item.href} className={`group flex items-center gap-3 rounded-2xl border border-transparent p-3.5 transition-all hover:-translate-y-0.5 hover:border-stone-200 hover:bg-white hover:shadow-md ${tone.surface}`}><span className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] ${tone.icon}`}><Icon className="size-5" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-bold text-stone-900">{item.title}</span><span className="mt-1 block text-xs text-stone-500">{item.detail}</span></span><span className="hidden items-center gap-1 text-xs font-bold text-stone-600 sm:flex">{item.action}<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></span></Link>; })}</div> : <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/50 p-9 text-center"><span className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><CheckCircle2 className="size-6" /></span><p className="mt-3 text-sm font-bold text-stone-900">Command queue is clear</p><p className="mt-1 text-xs text-stone-500">No urgent signals were returned by the live briefing.</p></div>}
