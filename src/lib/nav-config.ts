@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, Building2, CalendarCheck, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
+import { BarChart3, Brain, Building2, CalendarCheck, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
 
 export interface NavItem {
   title: string;
@@ -33,6 +33,7 @@ export const primaryNav: NavItem[] = [
     { title: "Branches", href: "/branches", icon: Building2, permission: "branches.read" },
   ] },
   { title: "Insights", href: "/owner-os", icon: BarChart3, permission: "organizations.read" },
+  { title: "Intelligence", href: "/intelligence", icon: Brain, permission: "reports.view", accent: "ai" },
   { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai", children: [
     { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
     { title: "Action Queue", href: "/ai-actions", icon: CheckSquare, permission: "ai.generate" },
