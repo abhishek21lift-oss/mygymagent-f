@@ -336,6 +336,28 @@ export interface Payment {
   refunds?: Refund[]
 }
 
+export type PtSessionStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "NO_SHOW"
+
+export interface PtSession {
+  id: string
+  organizationId: string
+  memberId: string
+  trainerId: string
+  workoutPlanId: string | null
+  branchId: string
+  scheduledAt: string
+  status: PtSessionStatus
+  notes: string | null
+  completedAt: string | null
+  cancellationReason: string | null
+  createdAt: string
+  updatedAt: string
+  member?: { id: string; firstName: string; lastName: string }
+  trainer?: { id: string; firstName: string; lastName: string }
+  workoutPlan?: { id: string; name: string }
+  branch?: { id: string; name: string }
+}
+
 export interface Exercise {
   id: string
   organizationId: string
