@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { LogOut, Menu, Moon, Sun, User as UserIcon } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, LogOut, Menu, Moon, Sun, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -21,7 +21,15 @@ function initials(firstName: string, lastName: string) {
   return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
 }
 
-export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
+export function Topbar({
+  onOpenMobileNav,
+  sidebarCollapsed = false,
+  onToggleSidebar,
+}: {
+  onOpenMobileNav: () => void;
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
+}) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -33,6 +41,9 @@ export function Topbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
 
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-3 border-b border-border/70 bg-background/80 px-3 backdrop-blur-xl sm:px-5">
+      <Button variant="ghost" size="icon" className="hidden shrink-0 rounded-xl md:inline-flex" onClick={onToggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+        {sidebarCollapsed ? <ChevronsRight className="size-5" /> : <ChevronsLeft className="size-5" />}
+      </Button>
       <Button variant="ghost" size="icon" className="shrink-0 rounded-xl md:hidden" onClick={onOpenMobileNav}>
         <Menu className="size-5" />
         <span className="sr-only">Open navigation</span>
