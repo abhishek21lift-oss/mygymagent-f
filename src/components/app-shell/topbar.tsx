@@ -25,9 +25,10 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
   }
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 border-b border-white/75 bg-white/82 shadow-[0_10px_34px_rgba(64,40,120,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-background/82">
-      <div className="mx-auto flex min-h-[4.25rem] w-full items-center gap-2 px-3 py-2 sm:min-h-[4.5rem] sm:px-5 sm:py-2.5">
-        <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/80 bg-white/65 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
+    <header className="sticky top-0 z-40 shrink-0 border-b border-white/80 bg-gradient-to-r from-white/92 via-violet-50/88 to-blue-50/88 shadow-[0_12px_36px_rgba(64,40,120,0.10)] backdrop-blur-2xl dark:border-white/10 dark:from-background/95 dark:via-primary/10 dark:to-ai/10">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
+      <div className="mx-auto flex min-h-[4.25rem] w-full items-center gap-2 px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+0.625rem)] sm:min-h-[4.5rem] sm:px-5 sm:py-2.5 sm:pt-2.5">
+        <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/85 bg-white/70 p-1 shadow-[0_5px_18px_rgba(64,40,120,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
           <Button variant="ghost" size="icon" className="hidden rounded-xl md:inline-flex" onClick={onToggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
             {sidebarCollapsed ? <ChevronsRight className="size-5" /> : <ChevronsLeft className="size-5" />}
           </Button>
@@ -41,13 +42,13 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
         </div>
         <div className="flex-1 md:hidden" />
 
-        <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/80 bg-white/65 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
+        <div className="flex shrink-0 items-center gap-1.5 rounded-2xl border border-white/85 bg-white/70 p-1 shadow-[0_5px_18px_rgba(64,40,120,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
             <Sun className="size-4 dark:hidden" /><Moon className="hidden size-4 dark:block" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 rounded-xl border border-transparent bg-white/55 pr-1.5 pl-1 shadow-sm hover:border-primary/10 hover:bg-white/90 dark:bg-white/5">
+              <Button variant="ghost" className="gap-2 rounded-xl border border-transparent bg-white/60 pr-1.5 pl-1 shadow-sm hover:border-primary/10 hover:bg-white/95 dark:bg-white/5">
                 <Avatar className="size-8 border border-primary/15 shadow-sm"><AvatarFallback className="bg-gradient-to-br from-primary/15 to-ai/15 text-xs font-bold text-primary">{user ? initials(user.firstName, user.lastName) : <UserIcon className="size-4" />}</AvatarFallback></Avatar>
                 <span className="hidden text-sm font-semibold sm:inline">{user ? `${user.firstName} ${user.lastName}` : ""}</span>
               </Button>
