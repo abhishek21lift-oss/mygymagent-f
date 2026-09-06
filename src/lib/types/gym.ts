@@ -47,6 +47,8 @@ export interface StaffUser {
 export type Gender = "MALE" | "FEMALE" | "OTHER" | "UNDISCLOSED"
 export type MemberStatus = "ACTIVE" | "INACTIVE" | "FROZEN" | "EXPIRED"
 
+export type MemberType = "GYM" | "PT" | "GYM_PT"
+
 export interface Member {
   id: string
   organizationId: string
@@ -66,6 +68,8 @@ export interface Member {
   country: string | null
   emergencyContactName: string | null
   emergencyContactPhone: string | null
+  memberType: MemberType | null
+  leadSource: string | null
   profilePhotoUrl: string | null
   status: MemberStatus
   assignedTrainerId: string | null

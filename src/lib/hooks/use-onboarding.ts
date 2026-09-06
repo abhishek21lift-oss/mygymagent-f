@@ -20,6 +20,9 @@ interface OnboardingData {
   emergencyContactPhone?: string
   emergencyContactRelationship?: string
   assignedTrainerId?: string
+  memberType?: "GYM" | "PT" | "GYM_PT"
+  leadSource?: string
+  fitnessGoal?: string
   notes?: string
   heightCm?: number
   weightKg?: number
@@ -60,7 +63,15 @@ export function useCompleteOnboarding() {
         country: data.country || null,
         emergencyContactName: data.emergencyContactName || null,
         emergencyContactPhone: data.emergencyContactPhone || null,
+        emergencyContactRelationship: data.emergencyContactRelationship || null,
         assignedTrainerId: data.assignedTrainerId || null,
+        memberType: data.memberType || null,
+        leadSource: data.leadSource || null,
+        fitnessGoal: data.fitnessGoal || null,
+        waiverConsent: data.waiverConsent,
+        injuries: data.injuries || null,
+        allergies: data.allergies || null,
+        medicalNotes: data.medicalNotes || null,
         notes: data.medicalNotes || null,
       })
 
