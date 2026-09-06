@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  BarChart3,
   CalendarCheck,
   CheckCircle2,
   ChevronRight,
@@ -11,15 +12,16 @@ import {
   Dumbbell,
   Package,
   Sparkles,
+  Target,
   TrendingUp,
   Users,
   Wallet,
   Zap,
 } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
-import { MetricCard3D } from "@/components/three/metric-card-3d";
 
 function money(value: string | undefined, currency: string) {
   const amount = Number(value ?? 0);
@@ -27,6 +29,32 @@ function money(value: string | undefined, currency: string) {
     ? `${currency} ${amount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
     : `${currency} 0`;
 }
+
+const tones = {
+  cyan: { icon: "bg-cyan-100 text-cyan-700", glow: "from-cyan-400/20", value: "text-cyan-950" },
+  emerald: { icon: "bg-emerald-100 text-emerald-700", glow: "from-emerald-400/20", value: "text-emerald-950" },
+  amber: { icon: "bg-amber-100 text-amber-700", glow: "from-amber-400/20", value: "text-amber-950" },
+  violet: { icon: "bg-violet-100 text-violet-700", glow: "from-violet-400/20", value: "text-violet-950" },
+};
+
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: keyof typeof tones }) {
+  const t = tones[tone];
+  return (
+    <Card className="group relative overflow-hidden border-white/80 bg-white/85 shadow-[0_18px_55px_-35px_rgba(79,70,229,.34)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_65px_-32px_rgba(79,70,229,.42)]">
+      <div className={`pointer-events-none absolute -right-8 -top-10 size-36 rounded-full bg-gradient-to-br ${t.glow} to-transparent blur-2xl`} />
+      <CardContent className="relative flex items-center gap-4 p-5">
+        <span className={`flex size-14 shrink-0 items-center justify-center rounded-[19px] shadow-sm ${t.icon}`}><Icon className="size-6" /></span>
+        <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-[.12em] text-stone-500">{label}</p><p className={`mt-1 truncate text-2xl font-black tracking-tight ${t.value}`}>{value}</p><p className="mt-1 text-[11px] font-medium text-stone-400">{hint}</p></div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SectionHeader({ eyebrow, title, action, href }: { eyebrow: string; title: string; action?: string; href?: string }) {
+  return <div className="mb-4 flex items-end justify-between gap-4 px-1"><div><p className="text-[10px] font-black uppercase tracking-[.22em] text-primary">{eyebrow}</p><h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950 sm:text-[28px]">{title}</h2></div>{action && href && <Link href={href} className="group inline-flex items-center gap-1.5 rounded-full border border-stone-200/80 bg-white/70 px-3.5 py-2 text-xs font-bold text-stone-600 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/20 hover:text-primary">{action}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>}</div>;
+}
+
+function EmptyState({ text }: { text: string }) { return <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-stone-200 bg-stone-50/70 p-5 text-center text-xs font-medium text-stone-500">{text}</div>; }
 
 export default function CommandCenterPage() {
   const { user, hasPermission } = useAuth();
@@ -36,164 +64,50 @@ export default function CommandCenterPage() {
   const revenue = data?.revenue.revenue.find((item) => item.currency === currency);
   const outstanding = data?.revenue.outstanding.find((item) => item.currency === currency);
 
-  const priorities = data
-    ? [
-        data.atRiskMembers.count > 0 && {
-          icon: AlertTriangle,
-          tone: "rose",
-          title: `${data.atRiskMembers.count} members need attention`,
-          detail: "Retention risk detected from recent activity.",
-          href: "/members",
-          action: "Review members",
-        },
-        data.salesFunnel.followUps.total > 0 && {
-          icon: TrendingUp,
-          tone: "blue",
-          title: `${data.salesFunnel.followUps.total} follow-ups in the pipeline`,
-          detail: `${data.salesFunnel.followUps.completionRatePct}% completed so far.`,
-          href: "/crm",
-          action: "Open Sales",
-        },
-        data.lowStock.count > 0 && {
-          icon: Package,
-          tone: "amber",
-          title: `${data.lowStock.count} products below reorder level`,
-          detail: "Protect availability before the next stockout.",
-          href: "/inventory",
-          action: "Review stock",
-        },
-        data.pendingAiActions > 0 && {
-          icon: Sparkles,
-          tone: "violet",
-          title: `${data.pendingAiActions} AI actions await approval`,
-          detail: "Review before anything is executed.",
-          href: "/ai-actions",
-          action: "Review actions",
-        },
-      ].filter(Boolean)
-    : [];
+  const priorities = data ? [
+    data.atRiskMembers.count > 0 && { icon: AlertTriangle, title: `${data.atRiskMembers.count} members need attention`, detail: "Retention risk detected from recent activity.", href: "/members", action: "Review members", cls: "bg-rose-50/80 border-rose-100/80" },
+    data.salesFunnel.followUps.total > 0 && { icon: TrendingUp, title: `${data.salesFunnel.followUps.total} follow-ups in the pipeline`, detail: `${data.salesFunnel.followUps.completionRatePct}% completed so far.`, href: "/crm", action: "Open Sales", cls: "bg-blue-50/80 border-blue-100/80" },
+    data.lowStock.count > 0 && { icon: Package, title: `${data.lowStock.count} products below reorder level`, detail: "Protect availability before the next stockout.", href: "/inventory", action: "Review stock", cls: "bg-amber-50/80 border-amber-100/80" },
+    data.pendingAiActions > 0 && { icon: Sparkles, title: `${data.pendingAiActions} AI actions await approval`, detail: "Review before anything is executed.", href: "/ai-actions", action: "Review actions", cls: "bg-violet-50/80 border-violet-100/80" },
+  ].filter(Boolean) : [];
 
   return (
-    <div className="relative -mx-2 min-h-full overflow-hidden pb-10 sm:-mx-3 lg:-mx-5">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_4%_2%,rgba(236,72,153,.13),transparent_20%),radial-gradient(circle_at_95%_3%,rgba(59,130,246,.14),transparent_23%),radial-gradient(circle_at_78%_28%,rgba(168,85,247,.10),transparent_24%),radial-gradient(circle_at_24%_55%,rgba(16,185,129,.07),transparent_22%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-gradient-to-b from-white/90 via-white/65 to-transparent" />
-
-      <div className="mx-auto flex max-w-[1640px] flex-col gap-7 px-2 sm:px-4 lg:px-6">
-        {/* Premium executive masthead — intentionally minimal */}
-        <section className="group relative isolate overflow-hidden rounded-[32px] border border-white/80 bg-white/90 p-5 shadow-[0_35px_100px_-45px_rgba(79,70,229,.42)] ring-1 ring-stone-200/60 backdrop-blur-2xl sm:p-7 lg:p-9">
-          <div className="pointer-events-none absolute -left-24 -top-28 size-72 rounded-full bg-fuchsia-300/25 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-          <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full bg-blue-300/25 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-          <div className="pointer-events-none absolute -bottom-36 left-1/3 size-80 rounded-full bg-violet-300/20 blur-3xl" />
-          <div className="pointer-events-none absolute right-[22%] top-10 size-32 rounded-full bg-amber-200/25 blur-2xl" />
-
-          <div className="relative z-10 flex min-h-[260px] flex-col justify-between gap-10 lg:min-h-[310px] lg:flex-row lg:items-end">
-            <div>
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white bg-white/80 px-4 py-2 text-[10px] font-black uppercase tracking-[.2em] text-stone-600 shadow-[0_8px_30px_-15px_rgba(28,25,23,.45)] backdrop-blur-xl">
-                <span className="relative flex size-2.5">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-50" />
-                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
-                </span>
-                MyGymAgent · Command Center
-              </div>
-              <h1 className="max-w-3xl font-serif text-4xl font-semibold leading-[.98] tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">
-                Good morning, {user?.firstName ?? "Owner"}.
-              </h1>
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_76%_32%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_15%_72%,rgba(16,185,129,.08),transparent_24%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-gradient-to-b from-white/90 via-white/55 to-transparent" />
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        <section className="group relative isolate overflow-hidden rounded-[34px] border border-white/90 bg-white/88 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] ring-1 ring-stone-200/60 backdrop-blur-2xl">
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-300/25 blur-3xl transition-transform duration-700 group-hover:scale-110" /><div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-violet-300/25 blur-3xl transition-transform duration-700 group-hover:scale-105" /><div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-fuchsia-300/15 blur-3xl" /><div className="pointer-events-none absolute right-[20%] top-10 size-28 rounded-full bg-amber-300/25 blur-2xl" />
+          <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-end lg:p-10">
+            <div className="max-w-3xl">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white bg-white/75 px-3.5 py-2 text-[10px] font-black uppercase tracking-[.2em] text-stone-600 shadow-sm backdrop-blur-xl"><span className="relative flex size-2.5"><span className="absolute size-full animate-ping rounded-full bg-emerald-400 opacity-50" /><span className="relative size-2.5 rounded-full bg-emerald-500" /></span>MyGymAgent · Command Center</div>
+              <h1 className="font-serif text-4xl font-semibold leading-[.98] tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Good morning, {user?.firstName ?? "Owner"}.</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-500 sm:text-base">Your gym's operating pulse, priorities, people and AI actions—brought together in one premium command surface.</p>
+              <div className="mt-6 flex flex-wrap gap-2"><span className="rounded-full border border-emerald-200/70 bg-emerald-50/75 px-3 py-1.5 text-[10px] font-bold text-emerald-700">Live briefing</span><span className="rounded-full border border-indigo-200/70 bg-indigo-50/75 px-3 py-1.5 text-[10px] font-bold text-indigo-700">AI assisted</span><span className="rounded-full border border-amber-200/70 bg-amber-50/75 px-3 py-1.5 text-[10px] font-bold text-amber-700">Owner view</span></div>
             </div>
-
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:pb-1">
-              <Link
-                href="/owner-os"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-stone-200/80 bg-white/90 px-5 text-sm font-extrabold text-stone-800 shadow-[0_10px_30px_-18px_rgba(28,25,23,.55)] backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-violet-200 hover:shadow-[0_18px_35px_-18px_rgba(99,102,241,.35)]"
-              >
-                Insights <ChevronRight className="size-4" />
-              </Link>
-              <Link
-                href="/ai"
-                className="relative inline-flex min-h-14 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[linear-gradient(100deg,#18181b_0%,#312e81_48%,#7e22ce_100%)] px-6 text-sm font-extrabold text-white shadow-[0_18px_40px_-18px_rgba(79,70,229,.72)] transition-all hover:-translate-y-1 hover:shadow-[0_24px_48px_-18px_rgba(126,34,206,.55)]"
-              >
-                <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,.22)_48%,transparent_70%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <Sparkles className="relative size-4" />
-                <span className="relative">Ask MyGymAgent</span>
-                <ArrowRight className="relative size-4" />
-              </Link>
-            </div>
+            <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto lg:flex-col"><Link href="/owner-os" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-stone-200/80 bg-white/85 px-5 text-sm font-extrabold text-stone-800 shadow-lg shadow-stone-900/5 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-xl">Insights <ChevronRight className="size-4" /></Link><Link href="/ai" className="group/ai relative inline-flex min-h-13 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 text-sm font-extrabold text-white shadow-[0_18px_45px_-18px_rgba(99,102,241,.75)] transition hover:-translate-y-1 hover:shadow-[0_25px_55px_-18px_rgba(192,38,211,.55)]"><span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover/ai:translate-x-full" /><Sparkles className="relative size-4" /><span className="relative">Ask MyGymAgent</span><ArrowRight className="relative size-4" /></Link></div>
           </div>
         </section>
 
-        {/* Business pulse */}
-        <section>
-          <div className="mb-4 flex items-end justify-between px-1">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-rose-700">Business pulse</p>
-              <h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950">Today at a glance</h2>
-            </div>
-            <span className="hidden rounded-full border border-stone-200 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-stone-500 sm:block">Live context · refreshes every minute</span>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard3D icon={CalendarCheck} label="Today's check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Today" trend="neutral" delay={0} />
-            <MetricCard3D icon={Wallet} label="Net revenue" value={data ? money(revenue?.netRevenue, currency) : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="neutral" delay={80} />
-            <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" hint="14+ days inactive" trend="neutral" delay={160} />
-            <MetricCard3D icon={Sparkles} label="Pending AI actions" value={data?.pendingAiActions} loading={briefing.isLoading} accent="violet" hint="Needs approval" trend="neutral" delay={240} />
-          </div>
-        </section>
+        <section><SectionHeader eyebrow="Business pulse" title="Today at a glance" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Metric icon={CalendarCheck} label="Today's check-ins" value={briefing.isLoading ? "—" : data?.today.checkIns ?? 0} hint="Real-time attendance" tone="cyan" /><Metric icon={Wallet} label="Net revenue" value={briefing.isLoading ? "—" : money(revenue?.netRevenue, currency)} hint="Current period" tone="emerald" /><Metric icon={Users} label="Members at risk" value={briefing.isLoading ? "—" : data?.atRiskMembers.count ?? 0} hint="14+ days inactive" tone="amber" /><Metric icon={Sparkles} label="Pending AI actions" value={briefing.isLoading ? "—" : data?.pendingAiActions ?? 0} hint="Needs approval" tone="violet" /></div></section>
 
-        {/* Decision + sales */}
         <section className="grid gap-5 xl:grid-cols-[1.35fr_.9fr]">
-          <Card className="overflow-hidden border-stone-200/80 bg-white/85 shadow-[0_20px_65px_-42px_rgba(28,25,23,.55)] ring-1 ring-white/70 backdrop-blur-xl">
-            <CardHeader className="border-b border-stone-100 bg-gradient-to-r from-white to-rose-50/40 px-5 py-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="flex items-center gap-2 font-serif text-lg font-semibold text-stone-950"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-100 to-amber-100 text-rose-700"><Zap className="size-4" /></span>Decision queue</CardTitle>
-                  <p className="mt-1 text-xs text-stone-500">Every priority keeps its original action and destination.</p>
-                </div>
-                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-500">Today</span>
-              </div>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-4">
-              {briefing.isLoading ? <div className="space-y-2">{[1, 2, 3].map((item) => <div key={item} className="h-[72px] animate-pulse rounded-2xl bg-stone-100" />)}</div> : priorities.length ? <div className="space-y-2">{priorities.map((item) => { if (!item) return null; const Icon = item.icon; const tone = toneClasses[item.tone as keyof typeof toneClasses]; return <Link key={item.title} href={item.href} className={`group flex items-center gap-3 rounded-2xl border border-transparent p-3.5 transition-all hover:-translate-y-0.5 hover:border-stone-200 hover:bg-white hover:shadow-md ${tone.surface}`}><span className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] ${tone.icon}`}><Icon className="size-5" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-bold text-stone-900">{item.title}</span><span className="mt-1 block text-xs text-stone-500">{item.detail}</span></span><span className="hidden items-center gap-1 text-xs font-bold text-stone-600 sm:flex">{item.action}<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></span></Link>; })}</div> : <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/50 p-9 text-center"><span className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><CheckCircle2 className="size-6" /></span><p className="mt-3 text-sm font-bold text-stone-900">Command queue is clear</p><p className="mt-1 text-xs text-stone-500">No urgent signals were returned by the live briefing.</p></div>}
-            </CardContent>
-          </Card>
-
-          <Card className="overflow-hidden border-0 bg-[linear-gradient(145deg,#172554,#312e81_52%,#701a75)] text-white shadow-[0_28px_70px_-38px_rgba(49,46,129,.75)]">
-            <CardHeader className="border-b border-white/10 px-5 py-4"><CardTitle className="flex items-center gap-2 font-serif text-lg font-semibold"><span className="flex size-9 items-center justify-center rounded-xl bg-white/10"><TrendingUp className="size-4" /></span>Sales health</CardTitle><p className="mt-1 text-xs text-white/65">Pipeline momentum and follow-up discipline.</p></CardHeader>
-            <CardContent className="space-y-4 p-5"><div className="grid grid-cols-2 gap-2.5">{[["Total leads", data?.salesFunnel.totalLeads ?? "—"], ["Won leads", data?.salesFunnel.wonLeads ?? "—"], ["Conversion", data ? `${data.salesFunnel.conversionRatePct}%` : "—"], ["Follow-ups", data ? `${data.salesFunnel.followUps.completionRatePct}%` : "—"]].map(([label, value]) => <div key={label} className="rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/55">{label}</p><p className="mt-1 text-xl font-bold tabular-nums">{value}</p></div>)}</div><Link href="/crm" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-indigo-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">Open Sales OS <ArrowRight className="size-4" /></Link></CardContent>
-          </Card>
+          <Card className="overflow-hidden border-white/80 bg-white/88 shadow-[0_24px_70px_-45px_rgba(28,25,23,.45)] backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-white via-rose-50/35 to-amber-50/35 px-5 py-5"><CardTitle className="flex items-center gap-3 font-serif text-xl font-semibold text-stone-950"><span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-100 to-amber-100 text-rose-700"><Zap className="size-4" /></span>Decision queue</CardTitle><p className="mt-1 text-xs text-stone-500">The highest-value things that deserve attention right now.</p></CardHeader><CardContent className="p-3 sm:p-4">{briefing.isLoading ? <div className="space-y-2">{[1,2,3].map((item)=><div key={item} className="h-[72px] animate-pulse rounded-2xl bg-stone-100" />)}</div> : priorities.length ? <div className="space-y-2">{priorities.map((item)=>{if(!item)return null;const Icon=item.icon;return <Link key={item.title} href={item.href} className={`group flex items-center gap-3 rounded-2xl border p-3.5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-md ${item.cls}`}><span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-white/80 shadow-sm"><Icon className="size-5 text-stone-700" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-bold text-stone-900">{item.title}</span><span className="mt-1 block text-xs text-stone-500">{item.detail}</span></span><span className="hidden items-center gap-1 text-xs font-bold text-stone-600 sm:flex">{item.action}<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" /></span></Link>})}</div> : <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/50 p-9 text-center"><span className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600"><CheckCircle2 className="size-6" /></span><p className="mt-3 text-sm font-bold text-stone-900">Command queue is clear</p><p className="mt-1 text-xs text-stone-500">No urgent signals were returned by the live briefing.</p></div>}</CardContent></Card>
+          <Card className="overflow-hidden border-0 bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)]"><CardHeader className="border-b border-white/10 px-5 py-5"><CardTitle className="flex items-center gap-3 font-serif text-xl"><span className="flex size-10 items-center justify-center rounded-xl bg-white/10"><TrendingUp className="size-4" /></span>Sales health</CardTitle><p className="mt-1 text-xs text-white/65">Pipeline momentum and follow-up discipline.</p></CardHeader><CardContent className="space-y-4 p-5"><div className="grid grid-cols-2 gap-2.5">{[["Total leads",data?.salesFunnel.totalLeads??"—"],["Won leads",data?.salesFunnel.wonLeads??"—"],["Conversion",data?`${data.salesFunnel.conversionRatePct}%`:"—"],["Follow-ups",data?`${data.salesFunnel.followUps.completionRatePct}%`:"—"]].map(([label,value])=><div key={label} className="rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur"><p className="text-[10px] font-semibold uppercase tracking-wider text-white/55">{label}</p><p className="mt-1 text-xl font-black tabular-nums">{value}</p></div>)}</div><Link href="/crm" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3.5 text-sm font-bold text-indigo-800 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">Open Sales OS <ArrowRight className="size-4" /></Link></CardContent></Card>
         </section>
 
-        {/* Operational intelligence */}
+        <section><SectionHeader eyebrow="Financial intelligence" title="Money movement" action="Open billing" href="/billing" /><div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]"><Card className="overflow-hidden border-white/80 bg-white/88 shadow-lg shadow-emerald-900/5 backdrop-blur-xl"><CardContent className="grid gap-4 p-5 sm:grid-cols-3"><div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-cyan-50 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-emerald-700">Net revenue</p><p className="mt-2 text-2xl font-black text-stone-950">{money(revenue?.netRevenue,currency)}</p><p className="mt-1 text-xs text-stone-500">{revenue?.paymentCount??0} payments</p></div><div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-indigo-700">Membership revenue</p><p className="mt-2 text-2xl font-black text-stone-950">{money(revenue?.membershipRevenue,currency)}</p><p className="mt-1 text-xs text-stone-500">Recurring core</p></div><div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 p-4"><p className="text-[10px] font-black uppercase tracking-wider text-amber-700">Outstanding</p><p className="mt-2 text-2xl font-black text-stone-950">{money(outstanding?.outstandingBalance,currency)}</p><p className="mt-1 text-xs text-stone-500">{outstanding?.membershipsWithBalance??0} memberships with balance</p></div></CardContent></Card><Card className="border-white/80 bg-gradient-to-br from-white to-rose-50/60 shadow-lg shadow-rose-900/5"><CardContent className="flex h-full items-center gap-4 p-5"><span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-700"><CreditCard className="size-5" /></span><div><p className="text-sm font-bold text-stone-900">Keep collections moving</p><p className="mt-1 text-xs leading-5 text-stone-500">Review outstanding memberships and keep cash flow healthy.</p></div><Link href="/billing" className="ml-auto flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-stone-700 shadow-sm transition hover:-translate-y-0.5"><ArrowRight className="size-4" /></Link></CardContent></Card></div></section>
+
         <section className="grid gap-5 lg:grid-cols-3">
-          <DataCard title="At-risk members" subtitle="Retention watchlist" icon={Users} href="/members" action="View all" accent="rose">{data?.atRiskMembers.top.length ? data.atRiskMembers.top.map((member) => <div key={member.id} className="flex items-center justify-between gap-3 border-b border-stone-100 py-3 last:border-0"><div className="flex min-w-0 items-center gap-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-orange-100 text-xs font-bold text-rose-700">{member.firstName.charAt(0)}{member.lastName.charAt(0)}</span><div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-900">{member.firstName} {member.lastName}</p><p className="text-xs text-stone-500">{member.neverCheckedIn ? "Never checked in" : `${member.daysSinceLastVisit} days since visit`}</p></div></div><span className="rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold uppercase text-rose-600">Risk</span></div>) : <EmptyState text="No at-risk members returned." />}</DataCard>
-          <DataCard title="Low stock" subtitle="Inventory watchlist" icon={Package} href="/inventory" action="Open inventory" accent="amber">{data?.lowStock.top.length ? data.lowStock.top.map((product) => <div key={product.productId} className="flex items-center justify-between gap-3 border-b border-stone-100 py-3 last:border-0"><div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-900">{product.name}</p><p className="text-xs text-stone-500">{product.sku} · reorder at {product.reorderLevel}</p></div><span className="rounded-xl bg-amber-50 px-2.5 py-1.5 text-sm font-bold tabular-nums text-amber-700">{product.quantityOnHand}</span></div>) : <EmptyState text="Stock levels look healthy." />}</DataCard>
-          <DataCard title="Finance snapshot" subtitle="Revenue & receivables" icon={CreditCard} href="/billing" action="Open billing" accent="emerald"><div className="grid grid-cols-2 gap-2.5"><MiniMetric label="Net revenue" value={data ? money(revenue?.netRevenue, currency) : "—"} /><MiniMetric label="Payments" value={revenue?.paymentCount ?? "—"} /><MiniMetric label="Outstanding" value={data ? money(outstanding?.outstandingBalance, currency) : "—"} /><MiniMetric label="Balances" value={outstanding?.membershipsWithBalance ?? "—"} /></div></DataCard>
+          <Card className="border-white/80 bg-white/88 shadow-lg shadow-rose-900/5"><CardHeader className="px-5 pb-2 pt-5"><CardTitle className="flex items-center gap-2 font-serif text-lg"><span className="flex size-9 items-center justify-center rounded-xl bg-rose-100 text-rose-700"><Users className="size-4" /></span>At-risk members</CardTitle><p className="text-xs text-stone-500">Retention watchlist</p></CardHeader><CardContent className="px-5 pb-5">{data?.atRiskMembers.top.length?data.atRiskMembers.top.map(member=><div key={member.id} className="flex items-center justify-between gap-3 border-b border-stone-100 py-3 last:border-0"><div className="flex min-w-0 items-center gap-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-orange-100 text-xs font-bold text-rose-700">{member.firstName.charAt(0)}{member.lastName.charAt(0)}</span><div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-900">{member.firstName} {member.lastName}</p><p className="text-xs text-stone-500">{member.neverCheckedIn?"Never checked in":`${member.daysSinceLastVisit} days since visit`}</p></div></div><span className="rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold uppercase text-rose-600">Risk</span></div>):<EmptyState text="No at-risk members returned." />}<Link href="/members" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-xs font-bold text-stone-700 transition hover:border-primary/20 hover:text-primary">View all members <ArrowRight className="size-3.5" /></Link></CardContent></Card>
+          <Card className="border-white/80 bg-white/88 shadow-lg shadow-amber-900/5"><CardHeader className="px-5 pb-2 pt-5"><CardTitle className="flex items-center gap-2 font-serif text-lg"><span className="flex size-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><Package className="size-4" /></span>Low stock</CardTitle><p className="text-xs text-stone-500">Inventory watchlist</p></CardHeader><CardContent className="px-5 pb-5">{data?.lowStock.top.length?data.lowStock.top.map(product=><div key={product.productId} className="flex items-center justify-between gap-3 border-b border-stone-100 py-3 last:border-0"><div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-900">{product.name}</p><p className="text-xs text-stone-500">{product.sku} · reorder at {product.reorderLevel}</p></div><span className="rounded-xl bg-amber-50 px-2.5 py-1.5 text-sm font-bold tabular-nums text-amber-700">{product.quantityOnHand}</span></div>):<EmptyState text="Inventory levels look healthy." />}<Link href="/inventory" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-xs font-bold text-stone-700 transition hover:border-primary/20 hover:text-primary">Open inventory <ArrowRight className="size-3.5" /></Link></CardContent></Card>
+          <Card className="border-white/80 bg-white/88 shadow-lg shadow-indigo-900/5"><CardHeader className="px-5 pb-2 pt-5"><CardTitle className="flex items-center gap-2 font-serif text-lg"><span className="flex size-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700"><Dumbbell className="size-4" /></span>Trainer workload</CardTitle><p className="text-xs text-stone-500">People + programming activity</p></CardHeader><CardContent className="px-5 pb-5">{data?.trainerWorkload.top.length?data.trainerWorkload.top.map(trainer=><div key={trainer.userId} className="border-b border-stone-100 py-3 last:border-0"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-stone-900">{trainer.firstName} {trainer.lastName}</p><p className="text-xs text-stone-500">{trainer.assignedMemberCount} assigned members</p></div><span className="rounded-xl bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700">{trainer.workoutPlansAssignedLast30Days+trainer.dietPlansAssignedLast30Days} plans</span></div></div>):<EmptyState text="No trainer workload data returned." />}<Link href="/staff" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white py-2.5 text-xs font-bold text-stone-700 transition hover:border-primary/20 hover:text-primary">Open staff <ArrowRight className="size-3.5" /></Link></CardContent></Card>
         </section>
 
-        {/* Staff + AI */}
-        <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
-          <DataCard title="Trainer workload" subtitle="Capacity and assignment overview" icon={Dumbbell} href="/staff" action="Open staff" accent="blue">{data?.trainerWorkload.top.length ? data.trainerWorkload.top.map((trainer) => <div key={trainer.userId} className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-0"><div className="flex min-w-0 items-center gap-3"><span className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><Dumbbell className="size-4" /></span><div><p className="text-sm font-semibold text-stone-900">{trainer.firstName} {trainer.lastName}</p><p className="text-xs text-stone-500">{trainer.assignedMemberCount} assigned members</p></div></div><div className="text-right text-xs text-stone-500"><p><b className="text-stone-800">{trainer.workoutPlansAssignedLast30Days}</b> workouts</p><p><b className="text-stone-800">{trainer.dietPlansAssignedLast30Days}</b> diets · 30d</p></div></div>) : <EmptyState text="Trainer workload is not available for this context." />}</DataCard>
-          <Card className="relative overflow-hidden border-stone-200/80 bg-white/85 shadow-[0_20px_65px_-42px_rgba(124,58,237,.45)] ring-1 ring-violet-100 backdrop-blur-xl"><div className="pointer-events-none absolute -right-16 -top-16 size-52 rounded-full bg-violet-400/15 blur-3xl" /><CardHeader className="relative px-5 pb-2"><CardTitle className="flex items-center gap-2 font-serif text-lg font-semibold text-stone-950"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700"><Sparkles className="size-4" /></span>AI command layer</CardTitle></CardHeader><CardContent className="relative space-y-4 p-5 pt-2"><div className="rounded-2xl bg-gradient-to-br from-violet-50 via-fuchsia-50/50 to-white p-4"><p className="text-sm leading-6 text-stone-600">{data ? <><span className="font-bold text-violet-700">{data.pendingAiActions} proposals</span> are waiting for approval. MyGymAgent keeps AI decision-support human-controlled.</> : "Loading the AI command layer…"}</p></div><Link href="/ai-actions" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-700 to-fuchsia-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/15 transition hover:-translate-y-0.5 hover:shadow-xl">Open Action Queue <ArrowRight className="size-4" /></Link></CardContent></Card>
-        </section>
+        <section><SectionHeader eyebrow="Command shortcuts" title="Move faster" /><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{hasPermission("attendance.read")&&<Link href="/attendance" className="group flex items-center gap-3 rounded-2xl border border-cyan-100 bg-gradient-to-br from-white to-cyan-50/70 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><span className="flex size-11 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700"><CalendarCheck className="size-5" /></span><span className="flex-1"><span className="block text-sm font-bold text-stone-900">Attendance</span><span className="text-xs text-stone-500">Check-in operations</span></span><ArrowRight className="size-4 text-stone-400 transition group-hover:translate-x-1" /></Link>}{hasPermission("members.read")&&<Link href="/members" className="group flex items-center gap-3 rounded-2xl border border-violet-100 bg-gradient-to-br from-white to-violet-50/70 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><span className="flex size-11 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><Users className="size-5" /></span><span className="flex-1"><span className="block text-sm font-bold text-stone-900">Members</span><span className="text-xs text-stone-500">Member 360</span></span><ArrowRight className="size-4 text-stone-400 transition group-hover:translate-x-1" /></Link>}{hasPermission("payments.read")&&<Link href="/billing" className="group flex items-center gap-3 rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/70 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><span className="flex size-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><Wallet className="size-5" /></span><span className="flex-1"><span className="block text-sm font-bold text-stone-900">Billing</span><span className="text-xs text-stone-500">Collections & payments</span></span><ArrowRight className="size-4 text-stone-400 transition group-hover:translate-x-1" /></Link>}<Link href="/ai-actions" className="group flex items-center gap-3 rounded-2xl border border-fuchsia-100 bg-gradient-to-br from-white to-fuchsia-50/70 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><span className="flex size-11 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-700"><Target className="size-5" /></span><span className="flex-1"><span className="block text-sm font-bold text-stone-900">AI Action Queue</span><span className="text-xs text-stone-500">Approve AI work</span></span><ArrowRight className="size-4 text-stone-400 transition group-hover:translate-x-1" /></Link></div></section>
 
-        {/* ALL original quick destinations retained */}
-        <section>
-          <div className="mb-3 px-1"><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-stone-500">Quick access</p><p className="mt-1 text-xs text-stone-500">Every original Command Center shortcut remains available.</p></div>
-          <div className="grid gap-3 sm:grid-cols-3">{hasPermission("attendance.read") && <QuickLink href="/attendance" icon={CalendarCheck} title="Attendance" text="Check-ins and daily floor activity." tone="cyan" />}{hasPermission("members.read") && <QuickLink href="/members" icon={Users} title="Members" text="Retention, lifecycle and client health." tone="violet" />}{hasPermission("payments.read") && <QuickLink href="/billing" icon={Wallet} title="Cash flow" text="Payments, balances and revenue." tone="emerald" />}</div>
-        </section>
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Link href="/owner-os" className="group rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><BarChart3 className="size-5 text-indigo-600" /><p className="mt-4 text-sm font-black text-stone-900">Owner Insights</p><p className="mt-1 text-xs text-stone-500">Deeper business intelligence</p><ChevronRight className="mt-4 size-4 text-indigo-500 transition group-hover:translate-x-1" /></Link><Link href="/crm" className="group rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-cyan-50 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><TrendingUp className="size-5 text-blue-600" /><p className="mt-4 text-sm font-black text-stone-900">Sales OS</p><p className="mt-1 text-xs text-stone-500">Lead and follow-up engine</p><ChevronRight className="mt-4 size-4 text-blue-500 transition group-hover:translate-x-1" /></Link><Link href="/inventory" className="group rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><Package className="size-5 text-amber-600" /><p className="mt-4 text-sm font-black text-stone-900">Inventory OS</p><p className="mt-1 text-xs text-stone-500">Stock and reorder control</p><ChevronRight className="mt-4 size-4 text-amber-500 transition group-hover:translate-x-1" /></Link><Link href="/ai" className="group rounded-3xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50 to-violet-50 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><Sparkles className="size-5 text-fuchsia-600" /><p className="mt-4 text-sm font-black text-stone-900">MyGymAgent AI</p><p className="mt-1 text-xs text-stone-500">Ask, analyze, decide</p><ChevronRight className="mt-4 size-4 text-fuchsia-500 transition group-hover:translate-x-1" /></Link></section>
       </div>
     </div>
   );
 }
-
-const toneClasses = {
-  rose: { surface: "bg-rose-50/35", icon: "bg-rose-100 text-rose-600" },
-  blue: { surface: "bg-blue-50/35", icon: "bg-blue-100 text-blue-600" },
-  amber: { surface: "bg-amber-50/35", icon: "bg-amber-100 text-amber-600" },
-  violet: { surface: "bg-violet-50/35", icon: "bg-violet-100 text-violet-600" },
-};
-
-function DataCard({ title, subtitle, icon: Icon, href, action, accent, children }: { title: string; subtitle: string; icon: typeof Users; href: string; action: string; accent: "rose" | "amber" | "emerald" | "blue"; children: React.ReactNode }) {
-  const icons = { rose: "bg-rose-100 text-rose-600", amber: "bg-amber-100 text-amber-600", emerald: "bg-emerald-100 text-emerald-600", blue: "bg-blue-100 text-blue-600" };
-  return <Card className="overflow-hidden border-stone-200/80 bg-white/85 shadow-[0_18px_55px_-38px_rgba(28,25,23,.5)] ring-1 ring-white/70 backdrop-blur-xl"><CardHeader className="flex flex-row items-center justify-between border-b border-stone-100 px-4 py-3.5"><div className="flex min-w-0 items-center gap-3"><span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${icons[accent]}`}><Icon className="size-4" /></span><div><CardTitle className="font-serif text-base font-semibold text-stone-950">{title}</CardTitle><p className="text-[11px] text-stone-500">{subtitle}</p></div></div><Link href={href} className="inline-flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-indigo-700">{action}<ChevronRight className="size-3.5" /></Link></CardHeader><CardContent className="p-4">{children}</CardContent></Card>;
-}
-function MiniMetric({ label, value }: { label: string; value: string | number }) { return <div className="rounded-2xl border border-stone-100 bg-stone-50/70 p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">{label}</p><p className="mt-1 text-base font-bold tabular-nums text-stone-900">{value}</p></div>; }
-function EmptyState({ text }: { text: string }) { return <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center text-xs text-stone-500">{text}</div>; }
-function QuickLink({ href, icon: Icon, title, text, tone }: { href: string; icon: typeof Users; title: string; text: string; tone: "cyan" | "violet" | "emerald" }) { const styles = { cyan: "bg-cyan-50 text-cyan-600", violet: "bg-violet-50 text-violet-600", emerald: "bg-emerald-50 text-emerald-600" }; return <Link href={href} className="group flex items-center gap-3 rounded-2xl border border-stone-200/80 bg-white/75 p-4 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg"><span className={`flex size-10 items-center justify-center rounded-xl ${styles[tone]}`}><Icon className="size-4" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-bold text-stone-900">{title}</span><span className="mt-0.5 block text-xs text-stone-500">{text}</span></span><ArrowRight className="size-4 text-stone-300 transition-transform group-hover:translate-x-1 group-hover:text-stone-600" /></Link>; }
