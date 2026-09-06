@@ -18,7 +18,10 @@ const nextConfig: NextConfig = {
             value:
               "default-src 'self'; " +
               "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
-              "script-src 'self' https://cdnjs.cloudflare.com; " +
+              // Next.js App Router/React emit inline bootstrap scripts that are
+              // required for client hydration. Blocking them prevents React from
+              // hydrating, so event handlers (including login onSubmit) never attach.
+              "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
               "img-src 'self' data: https:; " +
               "font-src 'self' https://cdnjs.cloudflare.com; " +
               "connect-src 'self' https:; " +
