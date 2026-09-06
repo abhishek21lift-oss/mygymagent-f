@@ -49,16 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function bootstrap() {
       try {
-        // Prefer an already-issued in-memory access token. This prevents the
-        // startup refresh request from racing a login submitted immediately
-        // after the login page mounts. A stale token is recovered by apiFetch's
-        // single-flight 401 refresh path.
-        if (getAccessToken()) {
-          await loadMe()
-        } else {
-          const refreshed = await refreshSession()
-          if (refreshed && !cancelled) await loadMe()
-        }
+        await loadMe()
       } catch {
         if (!cancelled) {
           setAccessToken(null)
