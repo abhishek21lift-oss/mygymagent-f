@@ -1,135 +1,98 @@
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api/client";
+import { useQuery } from "@tanstack/react-query"
+import { api } from "@/lib/api/client"
 
 export interface RevenueSummary {
-  period: { from: string; to: string };
-  branchId: string | null;
-  revenue: Array<{
-    currency: string;
-    paymentCount: number;
-    grossRevenue: string;
-    membershipRevenue: string;
-    otherRevenue: string;
-    refunded: string;
-    netRevenue: string;
-  }>;
-  outstanding: Array<{
-    currency: string;
-    membershipsWithBalance: number;
-    outstandingBalance: string;
-  }>;
-  notComputable: Array<{ key: string; reason: string }>;
+  period: { from: string; to: string }
+  branchId: string | null
+  revenue: Array<{ currency: string; paymentCount: number; grossRevenue: string; membershipRevenue: string; otherRevenue: string; refunded: string; netRevenue: string }>
+  outstanding: Array<{ currency: string; membershipsWithBalance: number; outstandingBalance: string }>
+  notComputable: Array<{ key: string; reason: string }>
 }
 
 export interface RevenueTrendMonth {
-  month: string;
-  revenue: Array<{
-    currency: string;
-    grossRevenue: string;
-    refunded: string;
-    netRevenue: string;
-  }>;
+  month: string
+  revenue: Array<{ currency: string; grossRevenue: string; refunded: string; netRevenue: string }>
 }
 
 export interface AtRiskMember {
-  id: string;
-  firstName: string;
-  lastName: string;
-  daysSinceLastVisit: number;
-  neverCheckedIn: boolean;
+  id: string
+  firstName: string
+  lastName: string
+  daysSinceLastVisit: number
+  neverCheckedIn: boolean
 }
 
 export interface MemberStatusBreakdown {
-  status: string;
-  count: number;
+  status: string
+  count: number
 }
 
 export interface SalesFunnel {
-  totalLeads: number;
-  wonLeads: number;
-  lostLeads: number;
-  conversionRatePct: number;
-  followUps: {
-    total: number;
-    completed: number;
-    completionRatePct: number;
-  };
+  period?: { from: string | null; to: string | null }
+  byStatus?: { status: string; count: number }[]
+  totalLeads: number
+  wonLeads: number
+  lostLeads?: number
+  conversionRatePct: number | string
+  averageDaysToConversion?: number | null
+  followUps: { total: number; completed: number; completionRatePct: number | string }
+}
+
+export interface SalesSourcePerformance {
+  source: string
+  totalLeads: number
+  wonLeads: number
+  lostLeads: number
+  conversionRatePct: number | string
 }
 
 export interface TrainerWorkload {
-  trainerId: string;
-  trainerName: string;
-  activeMembers: number;
-  pendingPtSessions: number;
-  completedPtSessions: number;
+  trainerId: string
+  trainerName: string
+  activeMembers: number
+  pendingPtSessions: number
+  completedPtSessions: number
 }
 
 export interface InventoryForecast {
-  productId: string;
-  productName: string;
-  currentStock: number;
-  daysUntilStockout: number | null;
-  lowStock: boolean;
+  productId: string
+  productName: string
+  currentStock: number
+  daysUntilStockout: number | null
+  lowStock: boolean
 }
 
-interface RevenueQueryParams {
-  from?: string;
-  to?: string;
-  branchId?: string;
-}
+interface RevenueQueryParams { from?: string; to?: string; branchId?: string }
+interface SalesDateQueryParams { from?: string; to?: string }
 
 export function useRevenueSummary(params: RevenueQueryParams = {}) {
-  return useQuery({
-    queryKey: ["analytics", "revenue", params],
-    queryFn: () =>
-      api.get<RevenueSummary>("/analytics/revenue", {
-        query: params as Record<string, string | number | boolean | undefined>,
-      }),
-  });
+  return useQuery({ queryKey: ["analytics", "revenue", params], queryFn: () => api.get<RevenueSummary>("/analytics/revenue", { query: params as Record<string, string | number | boolean | undefined> }) })
 }
 
 export function useRevenueTrend(months: number = 6, branchId?: string) {
-  return useQuery({
-    queryKey: ["analytics", "revenue-trend", months, branchId],
-    queryFn: () =>
-      api.get<RevenueTrendMonth[]>(`/analytics/revenue/trend`, {
-        query: { months, branchId },
-      }),
-    enabled: months > 0,
-  });
+  return useQuery({ queryKey: ["analytics", "revenue-trend", months, branchId], queryFn: () => api.get<RevenueTrendMonth[]>(`/analytics/revenue/trend`, { query: { months, branchId } }), enabled: months > 0 })
 }
 
 export function useAtRiskMembers(branchId?: string) {
-  return useQuery({
-    queryKey: ["analytics", "at-risk-members", branchId],
-    queryFn: () => api.get<AtRiskMember[]>("/analytics/members/at-risk"),
-  });
+  return useQuery({ queryKey: ["analytics", "at-risk-members", branchId], queryFn: () => api.get<AtRiskMember[]>("/analytics/members/at-risk") })
 }
 
 export function useMemberStatusBreakdown(branchId?: string) {
-  return useQuery({
-    queryKey: ["analytics", "member-status-breakdown", branchId],
-    queryFn: () => api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown"),
-  });
+  return useQuery({ queryKey: ["analytics", "member-status-breakdown", branchId], queryFn: () => api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown") })
 }
 
-export function useSalesFunnel(branchId?: string) {
-  return useQuery({
-    queryKey: ["analytics", "sales-funnel", branchId],
-    queryFn: () => api.get<SalesFunnel>("/analytics/sales/funnel"),
-  });
+export function useSalesFunnel(branchId?: string, params: SalesDateQueryParams = {}) {
+  return useQuery({ queryKey: ["analytics", "sales-funnel", branchId, params], queryFn: () => api.get<SalesFunnel>("/analytics/sales/funnel", { query: params }) })
+}
+
+export function useSalesSourcePerformance(branchId?: string, params: SalesDateQueryParams = {}) {
+  return useQuery({ queryKey: ["analytics", "sales-sources", branchId, params], queryFn: () => api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: params }) })
 }
 
 export function useTrainerWorkload(branchId?: string) {
-  return useQuery({
-    queryKey: ["analytics", "trainer-workload", branchId],
-    queryFn: () => api.get<TrainerWorkload[]>("/analytics/trainers/workload"),
-  });
+  return useQuery({ queryKey: ["analytics", "trainer-workload", branchId], queryFn: () => api.get<TrainerWorkload[]>("/analytics/trainers/workload") })
 }
 
 export function useInventoryForecast() {
-  return useQuery({
-    queryKey: ["analytics", "inventory-forecast"],
-    queryFn: () => api.get<InventoryForecast[]>("/analytics/inventory/forecast"),
-  });
+  return useQuery({ queryKey: ["analytics", "inventory-forecast"], queryFn: () => api.get<InventoryForecast[]>("/analytics/inventory/forecast") })
 }
