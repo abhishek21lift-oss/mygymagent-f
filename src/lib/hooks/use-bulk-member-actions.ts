@@ -60,7 +60,7 @@ function escapeCsvField(value: string): string {
   return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
-function parseBulkExport(csv: string): BulkExportResult {
+export function parseBulkExport(csv: string): BulkExportResult {
   const rows = parseCsvRows(csv);
   const headers = rows[0] ?? [];
   const members = rows.slice(1).map((row) =>
