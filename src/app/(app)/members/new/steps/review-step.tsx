@@ -6,10 +6,11 @@ import { Edit2, User, MapPin, Building2, Heart, CheckCircle2 } from "lucide-reac
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import type { Lead } from "@/lib/types/gym"
 
 interface ReviewStepProps {
   data: {
-    lead?: { firstName: string; lastName: string; email: string; phone: string }
+    lead?: Lead
     personal: { firstName: string; lastName: string; email: string; phone: string; dateOfBirth: string; gender: string }
     contact: { addressLine1: string; city: string; state: string; postalCode: string; emergencyContactName: string; emergencyContactPhone: string }
     gym: { primaryBranchId: string; memberType: string; fitnessGoal: string; assignedTrainerId: string }
