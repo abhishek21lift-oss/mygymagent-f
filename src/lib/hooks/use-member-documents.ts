@@ -34,6 +34,48 @@ export function useUploadMemberDocument(memberId: string) {
   });
 }
 
+export function useSubmitMemberDocument(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ documentId, changeNotes }: { documentId: string; changeNotes?: string }) =>
+      api.post<MemberDocument>(`/members/${memberId}/documents/${documentId}/submit`, { changeNotes }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, memberId] }),
+  });
+}
+
+export function useReviewMemberDocument(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      documentId,
+      action,
+      rejectionReason,
+    }: {
+      documentId: string;
+      action: "approve" | "reject";
+      rejectionReason?: string;
+    }) =>
+      api.patch<MemberDocument>(`/members/${memberId}/documents/${documentId}/review`, {
+        action,
+        rejectionReason,
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, memberId] }),
+  });
+}
+
+export function useUploadMemberDocumentVersion(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ documentId, file, changeNotes }: { documentId: string; file: File; changeNotes?: string }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (changeNotes) formData.append("changeNotes", changeNotes);
+      return api.post<MemberDocument>(`/members/${memberId}/documents/${documentId}/versions`, formData);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, memberId] }),
+  });
+}
+
 export function useDeleteMemberDocument(memberId: string) {
   const queryClient = useQueryClient();
   return useMutation({

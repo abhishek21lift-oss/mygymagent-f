@@ -1,3 +1,5 @@
+export type CommunicationChannel = "EMAIL" | "WHATSAPP" | "SMS" | "PUSH"
+
 export interface Branch {
   id: string
   organizationId: string
@@ -240,16 +242,34 @@ export interface MemberGoal {
 }
 
 export type MemberDocumentCategory = "DOCUMENT" | "PROGRESS_PHOTO" | "ID_SCAN" | "OTHER"
+export type MemberDocumentStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED"
+
+export interface MemberDocumentVersion {
+  id: string
+  version: number
+  changeNotes: string | null
+  originalName: string
+  mimeType: string
+  sizeBytes: number
+  createdAt: string
+}
 
 export interface MemberDocument {
   id: string
   category: MemberDocumentCategory
   description: string | null
+  status: MemberDocumentStatus
+  submittedAt: string | null
+  reviewedAt: string | null
+  rejectionReason: string | null
   createdAt: string
-  originalName: string
-  mimeType: string
-  sizeBytes: number
-  url: string
+  currentVersion: number
+  reviewedBy: { id: string; firstName: string; lastName: string } | null
+  originalName: string | null
+  mimeType: string | null
+  sizeBytes: number | null
+  url: string | null
+  versions: MemberDocumentVersion[]
 }
 
 export interface MembershipPlan {

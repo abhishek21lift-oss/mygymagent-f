@@ -1,16 +1,48 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import type { Member } from "@/lib/types/gym";
-import type { Paginated, PaginationParams } from "@/lib/types/pagination";
+import type { Member, MemberStatus, MemberType } from "@/lib/types/gym";
+import type { Paginated } from "@/lib/types/pagination";
 import type { CreateMemberInput } from "@/lib/validation/gym";
+
+export interface MemberFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  order?: "asc" | "desc";
+  orderBy?: "firstName" | "lastName" | "createdAt" | "memberCode";
+  status?: MemberStatus[];
+  memberType?: MemberType[];
+  trainerId?: string[];
+  branchId?: string[];
+  tagIds?: string[];
+  joinedFrom?: string;
+  joinedTo?: string;
+}
 
 const KEY = "members";
 
-export function useMembers(params: PaginationParams & { branchId?: string } = {}) {
-  const { branchId, ...query } = params;
+export function useMembers(params: MemberFilters = {}) {
+  const { branchId } = params;
+
   return useQuery({
-    queryKey: [KEY, query, branchId],
-    queryFn: () => api.get<Paginated<Member>>("/members", { query, branchId }),
+    queryKey: [KEY, params],
+    queryFn: () => {
+      const query: Record<string, string | number | boolean | string[] | undefined> = {
+        ...(params.page !== undefined && { page: params.page }),
+        ...(params.pageSize !== undefined && { pageSize: params.pageSize }),
+        ...(params.search && { search: params.search }),
+        ...(params.order && { order: params.order }),
+        ...(params.orderBy && { orderBy: params.orderBy }),
+        ...(params.status && params.status.length > 0 && { status: params.status }),
+        ...(params.memberType && params.memberType.length > 0 && { memberType: params.memberType }),
+        ...(params.trainerId && params.trainerId.length > 0 && { trainerId: params.trainerId }),
+        ...(params.tagIds && params.tagIds.length > 0 && { tagIds: params.tagIds }),
+        ...(params.joinedFrom && { joinedFrom: params.joinedFrom }),
+        ...(params.joinedTo && { joinedTo: params.joinedTo }),
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return api.get<Paginated<Member>>("/members", { query, branchId } as any);
+    },
   });
 }
 

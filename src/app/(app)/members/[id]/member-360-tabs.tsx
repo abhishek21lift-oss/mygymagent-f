@@ -34,6 +34,11 @@ import {
   PlayCircle,
   XCircle,
   Pause,
+  CalendarDays,
+  CheckSquare,
+  Tag,
+  Send,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,6 +88,9 @@ import {
   useMemberDocuments,
   useUploadMemberDocument,
   useDeleteMemberDocument,
+  useSubmitMemberDocument,
+  useReviewMemberDocument,
+  useUploadMemberDocumentVersion,
 } from "@/lib/hooks/use-member-documents";
 import { useMember } from "@/lib/hooks/use-members";
 import {
@@ -109,10 +117,27 @@ import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
 import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
+import { useMemberWorkoutAssignments } from "@/lib/hooks/use-member-workouts";
 import { useMemberTimeline } from "@/lib/hooks/use-member-360";
+import {
+  useMemberFollowUps,
+  useCreateMemberFollowUp,
+  useUpdateMemberFollowUp,
+  useCompleteMemberFollowUp,
+  useUncompleteMemberFollowUp,
+  useDeleteMemberFollowUp,
+} from "@/lib/hooks/use-member-follow-ups";
+import {
+  useMemberTags,
+  useMemberTagAssignments,
+  useAssignMemberTags,
+  useAddMemberTag,
+  useRemoveMemberTag,
+} from "@/lib/hooks/use-member-tags";
+import { useMemberCommunications, useSendMemberMessage } from "@/lib/hooks/use-member-communications";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import type { DuplicateDetectionResult, TimelineEventType } from "@/lib/types/gym";
+import type { CommunicationChannel, DuplicateDetectionResult, TimelineEventType } from "@/lib/types/gym";
 
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -1121,10 +1146,20 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
   const query = useMemberDocuments(memberId);
   const upload = useUploadMemberDocument(memberId);
   const remove = useDeleteMemberDocument(memberId);
+  const submit = useSubmitMemberDocument(memberId);
+  const review = useReviewMemberDocument(memberId);
+  const uploadVersion = useUploadMemberDocumentVersion(memberId);
   const [open, setOpen] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
   const [category, setCategory] = React.useState<MemberDocumentCategory>("DOCUMENT");
   const [description, setDescription] = React.useState("");
+  const [versionOpen, setVersionOpen] = React.useState(false);
+  const [reviewOpen, setReviewOpen] = React.useState(false);
+  const [selectedDocId, setSelectedDocId] = React.useState<string | null>(null);
+  const [versionFile, setVersionFile] = React.useState<File | null>(null);
+  const [changeNotes, setChangeNotes] = React.useState("");
+  const [reviewAction, setReviewAction] = React.useState<"approve" | "reject">("approve");
+  const [rejectionReason, setRejectionReason] = React.useState("");
 
   async function handleUpload() {
     if (!file) return;
@@ -1139,6 +1174,54 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
       toast.error(error instanceof ApiError ? error.message : "Failed to upload document");
     }
   }
+
+  async function handleSubmit(docId: string) {
+    try {
+      await submit.mutateAsync({ documentId: docId, changeNotes });
+      toast.success("Document submitted for review");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to submit document");
+    }
+  }
+
+  async function handleReview() {
+    if (!selectedDocId) return;
+    try {
+      await review.mutateAsync({
+        documentId: selectedDocId,
+        action: reviewAction,
+        rejectionReason: reviewAction === "reject" ? rejectionReason : undefined,
+      });
+      toast.success(reviewAction === "approve" ? "Document approved" : "Document rejected");
+      setReviewOpen(false);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to review document");
+    }
+  }
+
+  async function handleUploadVersion() {
+    if (!selectedDocId || !versionFile) return;
+    try {
+      await uploadVersion.mutateAsync({
+        documentId: selectedDocId,
+        file: versionFile,
+        changeNotes: changeNotes || undefined,
+      });
+      toast.success("New version uploaded");
+      setVersionOpen(false);
+      setVersionFile(null);
+      setChangeNotes("");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to upload version");
+    }
+  }
+
+  const statusVariant: Record<string, "default" | "secondary" | "destructive" | "warning" | "outline"> = {
+    DRAFT: "outline",
+    SUBMITTED: "warning",
+    APPROVED: "default",
+    REJECTED: "destructive",
+  };
 
   if (query.isLoading) return <Skeleton className="h-24 w-full" />;
 
@@ -1190,6 +1273,61 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
         </Dialog>
       </div>
 
+      <Dialog open={versionOpen} onOpenChange={setVersionOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload new version</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <Input
+              type="file"
+              accept={ALLOWED_DOCUMENT_TYPES}
+              onChange={(e) => setVersionFile(e.target.files?.[0] ?? null)}
+            />
+            <Textarea
+              placeholder="Change notes (optional)"
+              value={changeNotes}
+              onChange={(e) => setChangeNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setVersionOpen(false)}>Cancel</Button>
+            <Button onClick={handleUploadVersion} disabled={!versionFile || uploadVersion.isPending}>
+              {uploadVersion.isPending ? "Uploading..." : "Upload version"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{reviewAction === "approve" ? "Approve" : "Reject"} document</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            {reviewAction === "reject" && (
+              <Textarea
+                placeholder="Rejection reason (required)"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                rows={3}
+              />
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewOpen(false)}>Cancel</Button>
+            <Button
+              variant={reviewAction === "reject" ? "destructive" : "default"}
+              onClick={handleReview}
+              disabled={reviewAction === "reject" && !rejectionReason.trim() || review.isPending}
+            >
+              {review.isPending ? "Processing..." : reviewAction === "approve" ? "Approve" : "Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {!query.data || query.data.length === 0 ? (
         <EmptyState
           icon={FileText}
@@ -1199,51 +1337,127 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((doc) => (
-            <div key={doc.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
-              <div className="flex min-w-0 items-center gap-3">
-                {doc.mimeType.startsWith("image/") ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- signed URL, not a static asset Next's optimizer can proxy
-                  <img
-                    src={doc.url}
-                    alt={doc.originalName}
-                    className="size-10 shrink-0 rounded object-cover"
-                  />
-                ) : (
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
-                    <FileText className="size-4 text-muted-foreground" />
+            <div key={doc.id} className="flex flex-col gap-2 rounded-md border p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  {doc.mimeType?.startsWith("image/") && doc.url ? (
+                    <img
+                      src={doc.url}
+                      alt={doc.originalName ?? ""}
+                      className="size-10 shrink-0 rounded object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
+                      <FileText className="size-4 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{doc.originalName ?? "Unknown"}</p>
+                    <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                      <Badge variant="outline">{DOCUMENT_CATEGORY_LABELS[doc.category]}</Badge>
+                      <Badge variant={statusVariant[doc.status]}>{doc.status}</Badge>
+                      {doc.sizeBytes && <span>{formatFileSize(doc.sizeBytes)}</span>}
+                      <span>v{doc.currentVersion}</span>
+                      <span>· {fmtDateTime(doc.createdAt)}</span>
+                    </div>
+                    {doc.description && <p className="mt-1 text-xs text-muted-foreground">{doc.description}</p>}
+                    {doc.status === "REJECTED" && doc.rejectionReason && (
+                      <p className="mt-1 text-xs text-destructive">Rejected: {doc.rejectionReason}</p>
+                    )}
+                    {doc.reviewedBy && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {doc.status === "APPROVED" ? "Approved" : "Reviewed"} by {doc.reviewedBy.firstName} {doc.reviewedBy.lastName}
+                      </p>
+                    )}
                   </div>
-                )}
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{doc.originalName}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline">{DOCUMENT_CATEGORY_LABELS[doc.category]}</Badge>
-                    <span>{formatFileSize(doc.sizeBytes)}</span>
-                    <span>· {fmtDateTime(doc.createdAt)}</span>
-                  </div>
-                  {doc.description && <p className="mt-1 text-xs text-muted-foreground">{doc.description}</p>}
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  {doc.url && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={doc.url} target="_blank" rel="noreferrer">View</a>
+                    </Button>
+                  )}
+                  {(doc.status === "DRAFT" || doc.status === "REJECTED") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedDocId(doc.id);
+                        setChangeNotes("");
+                        setVersionOpen(true);
+                      }}
+                    >
+                      <RefreshCw className="size-3.5" />
+                      New version
+                    </Button>
+                  )}
+                  {(doc.status === "DRAFT" || doc.status === "REJECTED") && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleSubmit(doc.id)}
+                      disabled={submit.isPending}
+                    >
+                      <Send className="size-3.5" />
+                      Submit
+                    </Button>
+                  )}
+                  {doc.status === "SUBMITTED" && (
+                    <>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedDocId(doc.id);
+                          setReviewAction("approve");
+                          setRejectionReason("");
+                          setReviewOpen(true);
+                        }}
+                      >
+                        <CheckCircle2 className="size-3.5" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedDocId(doc.id);
+                          setReviewAction("reject");
+                          setRejectionReason("");
+                          setReviewOpen(true);
+                        }}
+                      >
+                        <XCircle className="size-3.5" />
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-destructive"
+                    disabled={remove.isPending}
+                    onClick={() =>
+                      remove
+                        .mutateAsync(doc.id)
+                        .then(() => toast.success("Document deleted"))
+                        .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to delete"))
+                    }
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <Button variant="ghost" size="sm" asChild>
-                  <a href={doc.url} target="_blank" rel="noreferrer">
-                    View
-                  </a>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7"
-                  disabled={remove.isPending}
-                  onClick={() =>
-                    remove
-                      .mutateAsync(doc.id)
-                      .then(() => toast.success("Document deleted"))
-                      .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to delete"))
-                  }
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </div>
+              {doc.versions.length > 1 && (
+                <div className="flex flex-wrap gap-1 rounded bg-muted/50 p-2">
+                  <p className="text-xs font-medium text-muted-foreground">Version history:</p>
+                  {doc.versions.map((v) => (
+                    <Badge key={v.id} variant="secondary" className="text-xs">
+                      v{v.version}: {v.changeNotes ?? "no notes"}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -1723,6 +1937,46 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
   );
 }
 
+// -- Workouts Panel
+function WorkoutsPanel({ memberId }: { memberId: string }) {
+  const query = useMemberWorkoutAssignments(memberId);
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  if (!query.data || query.data.length === 0) {
+    return (
+      <EmptyState
+        icon={Dumbbell}
+        title="No workouts assigned"
+        description="Assign a workout plan to get started."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {query.data.map((assignment) => (
+        <div key={assignment.id} className="rounded-md border p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">{assignment.workoutPlan.name}</p>
+              <p className="text-sm text-muted-foreground">
+                Started {new Date(assignment.startDate).toLocaleDateString()}
+              </p>
+            </div>
+            <Badge
+              variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "secondary" : "outline"}
+            >
+              {assignment.status}
+            </Badge>
+          </div>
+          {assignment.notes && <p className="mt-2 text-sm text-muted-foreground">{assignment.notes}</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // -- PT Sessions Panel
 function PtSessionsPanel({ memberId }: { memberId: string }) {
   const query = useMemberPtSessions(memberId);
@@ -1805,6 +2059,499 @@ function NutritionPanel({ memberId }: { memberId: string }) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+// -- Follow-ups Panel
+const PRIORITY_LABELS: Record<string, string> = {
+  LOW: "Low",
+  MEDIUM: "Medium",
+  HIGH: "High",
+  URGENT: "Urgent",
+};
+
+const PRIORITY_VARIANT: Record<string, "secondary" | "default" | "destructive" | "warning"> = {
+  LOW: "secondary",
+  MEDIUM: "default",
+  HIGH: "warning",
+  URGENT: "destructive",
+};
+
+function FollowUpsPanel({ memberId }: { memberId: string }) {
+  const query = useMemberFollowUps(memberId);
+  const create = useCreateMemberFollowUp(memberId);
+  const complete = useCompleteMemberFollowUp(memberId);
+  const uncomplete = useUncompleteMemberFollowUp(memberId);
+  const remove = useDeleteMemberFollowUp(memberId);
+
+  const [open, setOpen] = React.useState(false);
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [dueAt, setDueAt] = React.useState("");
+  const [priority, setPriority] = React.useState<string>("MEDIUM");
+
+  async function handleCreate() {
+    if (!title.trim()) return;
+    try {
+      await create.mutateAsync({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        dueAt: dueAt || undefined,
+        priority,
+      });
+      toast.success("Follow-up created");
+      setOpen(false);
+      setTitle("");
+      setDescription("");
+      setDueAt("");
+      setPriority("MEDIUM");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to create follow-up");
+    }
+  }
+
+  if (query.isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  const openFollowUps = query.data?.filter((f) => !f.completedAt) ?? [];
+  const completedFollowUps = query.data?.filter((f) => f.completedAt) ?? [];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">
+              <Plus className="size-3.5" />
+              Add follow-up
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add a follow-up</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <Input
+                placeholder="Follow-up title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <Textarea
+                placeholder="Description (optional)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <Input
+                type="datetime-local"
+                placeholder="Due date (optional)"
+                value={dueAt}
+                onChange={(e) => setDueAt(e.target.value)}
+              />
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="LOW">Low</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="URGENT">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleCreate} disabled={!title.trim() || create.isPending}>
+                {create.isPending ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {query.data?.length === 0 ? (
+        <EmptyState
+          icon={CheckSquare}
+          title="No follow-ups yet"
+          description="Add tasks and todo items to track actions for this member."
+        />
+      ) : (
+        <>
+          {openFollowUps.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h4 className="text-sm font-medium">Open ({openFollowUps.length})</h4>
+              {openFollowUps.map((followUp) => (
+                <div key={followUp.id} className="flex items-start justify-between rounded-md border p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <CheckSquare className="size-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{followUp.title}</p>
+                      {followUp.description && (
+                        <p className="mt-0.5 text-sm text-muted-foreground">{followUp.description}</p>
+                      )}
+                      <div className="mt-1 flex items-center gap-2">
+                        <Badge variant={PRIORITY_VARIANT[followUp.priority]}>{PRIORITY_LABELS[followUp.priority]}</Badge>
+                        {followUp.dueAt && (
+                          <span className={`text-xs ${followUp.isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                            {followUp.isOverdue ? "Overdue: " : "Due: "}
+                            {new Date(followUp.dueAt).toLocaleDateString()}
+                          </span>
+                        )}
+                        {followUp.assignedToUser && (
+                          <span className="text-xs text-muted-foreground">
+                            Assigned to {followUp.assignedToUser.firstName} {followUp.assignedToUser.lastName}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7"
+                      onClick={() =>
+                        complete
+                          .mutateAsync(followUp.id)
+                          .then(() => toast.success("Follow-up completed"))
+                          .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to complete"))
+                      }
+                      disabled={complete.isPending}
+                    >
+                      <CheckCircle2 className="size-4 text-emerald-600" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7"
+                      onClick={() =>
+                        remove
+                          .mutateAsync(followUp.id)
+                          .then(() => toast.success("Follow-up deleted"))
+                          .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to delete"))
+                      }
+                      disabled={remove.isPending}
+                    >
+                      <Trash2 className="size-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {completedFollowUps.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h4 className="text-sm font-medium text-muted-foreground">Completed ({completedFollowUps.length})</h4>
+              {completedFollowUps.map((followUp) => (
+                <div key={followUp.id} className="flex items-start justify-between rounded-md border bg-muted/30 p-3">
+                  <div className="flex items-start gap-3 opacity-60">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                      <CheckCircle2 className="size-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium line-through">{followUp.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Completed {new Date(followUp.completedAt!).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    onClick={() =>
+                      uncomplete
+                        .mutateAsync(followUp.id)
+                        .then(() => toast.success("Follow-up reopened"))
+                        .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to reopen"))
+                    }
+                    disabled={uncomplete.isPending}
+                  >
+                    <Undo2 className="size-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// -- Tags Panel
+function TagsPanel({ memberId }: { memberId: string }) {
+  const tagsQuery = useMemberTags();
+  const assignmentsQuery = useMemberTagAssignments(memberId);
+  const assignTags = useAssignMemberTags(memberId);
+  const addTag = useAddMemberTag(memberId);
+  const removeTag = useRemoveMemberTag(memberId);
+  const [open, setOpen] = React.useState(false);
+  const [selectedTagIds, setSelectedTagIds] = React.useState<string[]>([]);
+  React.useEffect(() => {
+    if (assignmentsQuery.data) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedTagIds(assignmentsQuery.data.map((a) => a.tagId));
+    }
+  }, [assignmentsQuery.data]);
+
+  async function handleSaveTags() {
+    try {
+      await assignTags.mutateAsync(selectedTagIds);
+      toast.success("Tags updated");
+      setOpen(false);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to update tags");
+    }
+  }
+
+  async function handleAddTag(tagId: string) {
+    try {
+      await addTag.mutateAsync(tagId);
+      toast.success("Tag added");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to add tag");
+    }
+  }
+
+  async function handleRemoveTag(tagId: string) {
+    try {
+      await removeTag.mutateAsync(tagId);
+      toast.success("Tag removed");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to remove tag");
+    }
+  }
+
+  if (tagsQuery.isLoading || assignmentsQuery.isLoading) {
+    return <Skeleton className="h-24 w-full" />;
+  }
+
+  const assignedTagIds = assignmentsQuery.data?.map((a) => a.tagId) ?? [];
+  const assignedTags = assignmentsQuery.data?.map((a) => a.tag) ?? [];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">
+              <Plus className="size-3.5" />
+              Manage tags
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Manage tags</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-muted-foreground">
+                Select tags to assign to this member:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {tagsQuery.data?.map((tag) => {
+                  const isSelected = selectedTagIds.includes(tag.id);
+                  return (
+                    <Button
+                      key={tag.id}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedTagIds(selectedTagIds.filter((id) => id !== tag.id));
+                        } else {
+                          setSelectedTagIds([...selectedTagIds, tag.id]);
+                        }
+                      }}
+                      style={{
+                        backgroundColor: isSelected ? tag.color : "transparent",
+                        borderColor: tag.color,
+                        color: isSelected ? "white" : tag.color,
+                      }}
+                    >
+                      {tag.name}
+                    </Button>
+                  );
+                })}
+                {tagsQuery.data?.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No tags created yet.</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveTags} disabled={assignTags.isPending}>
+                {assignTags.isPending ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {assignedTags.length === 0 ? (
+        <EmptyState
+          icon={Tag}
+          title="No tags assigned"
+          description="Add tags to categorize and segment this member."
+        />
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {assignedTags.map((tag) => (
+            <div
+              key={tag.id}
+              className="flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium"
+              style={{ backgroundColor: tag.color + "20", color: tag.color }}
+            >
+              <Tag className="size-3" />
+              {tag.name}
+              <button
+                className="ml-1 rounded-full p-0.5 hover:bg-black/10"
+                onClick={() => handleRemoveTag(tag.id)}
+              >
+                <XCircle className="size-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Communications Panel
+function CommunicationsPanel({ memberId }: { memberId: string }) {
+  const query = useMemberCommunications(memberId);
+  const sendMessage = useSendMemberMessage(memberId);
+  const [sendOpen, setSendOpen] = React.useState(false);
+  const [channel, setChannel] = React.useState<CommunicationChannel>("EMAIL");
+  const [customBody, setCustomBody] = React.useState("");
+  const [customSubject, setCustomSubject] = React.useState("");
+
+  async function handleSend() {
+    if (!customBody.trim()) return;
+    try {
+      await sendMessage.mutateAsync({
+        channel,
+        customBody,
+        customSubject: channel === "EMAIL" ? customSubject : undefined,
+      });
+      toast.success("Message sent");
+      setSendOpen(false);
+      setCustomBody("");
+      setCustomSubject("");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to send message");
+    }
+  }
+
+  const statusVariant: Record<string, "default" | "secondary" | "destructive" | "warning"> = {
+    PENDING: "warning",
+    SENT: "default",
+    FAILED: "destructive",
+    SKIPPED_NO_CONSENT: "secondary",
+  };
+
+  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-end">
+        <Dialog open={sendOpen} onOpenChange={setSendOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">
+              <Mail className="size-3.5" />
+              Send message
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send message to member</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <div>
+                <Label className="text-xs">Channel</Label>
+                <Select value={channel} onValueChange={(v) => setChannel(v as CommunicationChannel)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EMAIL">Email</SelectItem>
+                    <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {channel === "EMAIL" && (
+                <div>
+                  <Label className="text-xs">Subject</Label>
+                  <Input
+                    placeholder="Email subject..."
+                    value={customSubject}
+                    onChange={(e) => setCustomSubject(e.target.value)}
+                  />
+                </div>
+              )}
+              <div>
+                <Label className="text-xs">Message</Label>
+                <Textarea
+                  placeholder="Write your message..."
+                  value={customBody}
+                  onChange={(e) => setCustomBody(e.target.value)}
+                  rows={5}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSendOpen(false)}>Cancel</Button>
+              <Button onClick={handleSend} disabled={!customBody.trim() || sendMessage.isPending}>
+                {sendMessage.isPending ? "Sending..." : "Send"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {!query.data || query.data.length === 0 ? (
+        <EmptyState
+          icon={Mail}
+          title="No messages yet"
+          description="Send emails or WhatsApp messages to this member."
+        />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {query.data.map((msg) => (
+            <div key={msg.id} className="flex items-start gap-3 rounded-md border p-3">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                {msg.channel === "EMAIL" ? <Mail className="size-4" /> : <MessageSquare className="size-4" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{msg.channel}</p>
+                  <Badge variant={statusVariant[msg.status] ?? "outline"}>{msg.status}</Badge>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{msg.recipient}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {fmtDateTime(msg.createdAt)}
+                </p>
+                {msg.errorMessage && (
+                  <p className="mt-1 text-xs text-destructive">{msg.errorMessage}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -2109,6 +2856,12 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
             Overview
           </TabsTrigger>
           <TabsTrigger
+            value="tags"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Tags
+          </TabsTrigger>
+          <TabsTrigger
             value="addresses"
             className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
@@ -2181,10 +2934,28 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
             PT Sessions
           </TabsTrigger>
           <TabsTrigger
+            value="workouts"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Workouts
+          </TabsTrigger>
+          <TabsTrigger
             value="nutrition"
             className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
           >
             Nutrition
+          </TabsTrigger>
+          <TabsTrigger
+            value="follow-ups"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Follow-ups
+          </TabsTrigger>
+          <TabsTrigger
+            value="communications"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Messages
           </TabsTrigger>
           <TabsTrigger
             value="timeline"
@@ -2202,6 +2973,9 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
       </div>
       <TabsContent value="overview" className="mt-6">
         <MemberOverviewPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="tags">
+        <TagsPanel memberId={memberId} />
       </TabsContent>
       <TabsContent value="addresses">
         <AddressesPanel memberId={memberId} />
@@ -2239,8 +3013,17 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
       <TabsContent value="pt-sessions">
         <PtSessionsPanel memberId={memberId} />
       </TabsContent>
+      <TabsContent value="workouts">
+        <WorkoutsPanel memberId={memberId} />
+      </TabsContent>
       <TabsContent value="nutrition">
         <NutritionPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="follow-ups">
+        <FollowUpsPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="communications">
+        <CommunicationsPanel memberId={memberId} />
       </TabsContent>
       <TabsContent value="timeline">
         <TimelinePanel memberId={memberId} />

@@ -28,10 +28,10 @@ export class ApiError extends Error {
   }
 }
 
-interface RequestOptions {
+export interface RequestOptions {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE"
   body?: unknown
-  query?: Record<string, string | number | boolean | undefined>
+  query?: Record<string, string | number | boolean | (string | number | boolean)[] | undefined>
   branchId?: string
   /** Internal: prevents infinite retry loops around a 401 refresh attempt. */
   _isRetry?: boolean
@@ -95,7 +95,15 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
   const url = new URL(path.replace(/^\//, ""), `${API_URL}/`)
   if (query) {
     for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined) url.searchParams.set(key, String(value))
+      if (value !== undefined) {
+        if (Array.isArray(value)) {
+          for (const item of value) {
+            url.searchParams.append(key, String(item))
+          }
+        } else {
+          url.searchParams.set(key, String(value))
+        }
+      }
     }
   }
   return url.toString()

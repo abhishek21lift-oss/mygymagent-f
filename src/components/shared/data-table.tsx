@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
+  type RowSelectionState,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -29,17 +30,19 @@ interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data: Paginated<T> | T[] | undefined;
   isLoading: boolean;
-  isError: boolean;
+  isError?: boolean;
   onRetry?: () => void;
   onRowClick?: (row: T) => void;
-  page: number;
-  onPageChange: (page: number) => void;
+  page?: number;
+  onPageChange?: (page: number) => void;
   search?: string;
   onSearchChange?: (search: string) => void;
   searchPlaceholder?: string;
   emptyTitle?: string;
   emptyDescription?: string;
   emptyAction?: React.ReactNode;
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: (selection: RowSelectionState) => void;
 }
 
 export function DataTable<T>({
@@ -57,11 +60,13 @@ export function DataTable<T>({
   emptyTitle = "Nothing here yet",
   emptyDescription,
   emptyAction,
+  rowSelection,
+  onRowSelectionChange,
 }: DataTableProps<T>) {
   const normalizedData: Paginated<T> | undefined = Array.isArray(data)
     ? {
         items: data,
-        page,
+        page: page ?? 1,
         pageSize: data.length || 1,
         total: data.length,
         totalPages: 1,
@@ -72,6 +77,11 @@ export function DataTable<T>({
     data: normalizedData?.items ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: { rowSelection },
+    onRowSelectionChange: (updater) => {
+      const newSelection = typeof updater === "function" ? updater(rowSelection ?? {}) : updater;
+      onRowSelectionChange?.(newSelection);
+    },
   });
 
   return (
@@ -129,6 +139,7 @@ export function DataTable<T>({
             </Table>
           </div>
 
+          {page !== undefined && onPageChange ? (
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>
               Page {normalizedData.page} of {normalizedData.totalPages} &middot; {normalizedData.total} total
@@ -152,6 +163,7 @@ export function DataTable<T>({
               </Button>
             </div>
           </div>
+          ) : null}
         </>
       )}
     </div>
