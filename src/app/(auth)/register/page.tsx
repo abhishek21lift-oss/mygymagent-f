@@ -36,7 +36,7 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register(values);
-      router.push("/dashboard");
+      router.push("/onboarding");
     } catch (error) {
       const message = error instanceof ApiError ? error.message : "Something went wrong";
       toast.error(message);
@@ -49,7 +49,7 @@ export default function RegisterPage() {
     <Card>
       <CardHeader>
         <CardTitle className="text-xl">Set up your gym</CardTitle>
-        <CardDescription>Creates your organization and its first branch</CardDescription>
+        <CardDescription>Creates your organization and first branch, then takes you to setup wizard</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
