@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -33,6 +35,7 @@ export default function SettingsPage() {
   const orgQuery = useOrganization();
   const updateOrg = useUpdateOrganization();
   const canEdit = hasPermission("organizations.update");
+  const canManageSettings = hasPermission("settings.manage");
 
   const form = useForm<OrgSettingsForm>({ defaultValues: { name: "", timezone: "UTC", currency: "USD" } });
 
@@ -80,9 +83,7 @@ export default function SettingsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Organization name</FormLabel>
-                      <FormControl>
-                        <Input disabled={!canEdit} {...field} />
-                      </FormControl>
+                      <FormControl><Input disabled={!canEdit} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -94,9 +95,7 @@ export default function SettingsPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Timezone</FormLabel>
-                        <FormControl>
-                          <Input disabled={!canEdit} {...field} />
-                        </FormControl>
+                        <FormControl><Input disabled={!canEdit} {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -107,9 +106,7 @@ export default function SettingsPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Currency</FormLabel>
-                        <FormControl>
-                          <Input disabled={!canEdit} {...field} />
-                        </FormControl>
+                        <FormControl><Input disabled={!canEdit} {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -117,9 +114,7 @@ export default function SettingsPage() {
                 </div>
                 {canEdit && (
                   <div className="flex justify-end">
-                    <Button type="submit" disabled={updateOrg.isPending}>
-                      {updateOrg.isPending ? "Saving..." : "Save changes"}
-                    </Button>
+                    <Button type="submit" disabled={updateOrg.isPending}>{updateOrg.isPending ? "Saving..." : "Save changes"}</Button>
                   </div>
                 )}
               </form>
@@ -127,6 +122,21 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {canManageSettings && (
+        <Card className="max-w-xl">
+          <CardContent className="flex items-center justify-between gap-4 pt-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-3"><MessageCircle className="h-5 w-5 text-primary" /></div>
+              <div>
+                <div className="font-medium">WhatsApp Business</div>
+                <div className="text-sm text-muted-foreground">Connect this gym's own WhatsApp number through Meta.</div>
+              </div>
+            </div>
+            <Button asChild variant="outline"><Link href="/settings/whatsapp">Manage</Link></Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
