@@ -9,15 +9,17 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { primaryNav, comingSoonNav, settingsNav, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 
-function NavLink({ item, active, nested = false, collapsed = false, onNavigate }: { item: NavItem; active: boolean; nested?: boolean; collapsed?: boolean; onNavigate?: () => void }) {
+function NavLink({ item, active, nested = false, collapsed = false, onNavigate, parentMarker = false }: { item: NavItem; active: boolean; nested?: boolean; collapsed?: boolean; onNavigate?: () => void; parentMarker?: boolean }) {
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
       onClick={onNavigate}
       title={collapsed ? item.title : undefined}
+      data-mobile-nav-parent={parentMarker ? "true" : undefined}
+      data-active={parentMarker ? String(active) : undefined}
       className={cn(
-        "group relative flex items-center overflow-hidden transition-all duration-200",
+        "group relative flex min-h-11 items-center overflow-hidden transition-all duration-200",
         collapsed ? "justify-center rounded-2xl px-2 py-3" : nested ? "ml-3 gap-3 rounded-xl px-3 py-2 text-xs" : "gap-3 rounded-2xl px-3 py-2.5 text-sm",
         active
           ? "bg-gradient-to-r from-primary via-primary/90 to-ai text-primary-foreground shadow-lg shadow-primary/20"
@@ -41,7 +43,7 @@ function permissionVisible(item: NavItem, hasPermission: (permission: string | s
   return !item.permission || hasPermission(item.permission);
 }
 
-export function SidebarNav({ className, collapsed = false, onNavigate }: { className?: string; collapsed?: boolean; onNavigate?: () => void }) {
+export function SidebarNav({ className, collapsed = false, onNavigate, mobile = false }: { className?: string; collapsed?: boolean; onNavigate?: () => void; mobile?: boolean }) {
   const pathname = usePathname();
   const { hasPermission } = useAuth();
   const visiblePrimary = primaryNav.filter((item) => permissionVisible(item, hasPermission));
@@ -50,21 +52,30 @@ export function SidebarNav({ className, collapsed = false, onNavigate }: { class
 
   return (
     <nav className={cn("flex h-full flex-col bg-gradient-to-b from-white/90 via-stone-50/92 to-violet-50/55 p-3 backdrop-blur-2xl", className)}>
-      <Link href="/command-center" onClick={onNavigate} title={collapsed ? "MyGymAgent" : undefined} className={cn("mb-5 flex items-center rounded-2xl border border-white/80 bg-white/60 py-2 shadow-sm backdrop-blur-xl", collapsed ? "justify-center px-1.5" : "gap-2.5 px-2.5")}>
+      <Link href="/command-center" onClick={onNavigate} title={collapsed ? "MyGymAgent" : undefined} className={cn("mb-5 flex shrink-0 items-center rounded-2xl border border-white/80 bg-white/60 py-2 shadow-sm backdrop-blur-xl", collapsed ? "justify-center px-1.5" : "gap-2.5 px-2.5")}>
         <Image src="/logo-mark.webp" alt="" width={38} height={38} className="size-9 shrink-0 object-contain" priority />
         {!collapsed && <div className="min-w-0"><div className="truncate text-[15px] font-bold tracking-tight">MyGymAgent</div><div className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60">Gym OS</div></div>}
       </Link>
-      {!collapsed && <div className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/40">Workspace</div>}
-      <div className="flex flex-1 flex-col gap-1 overflow-y-auto pr-0.5">
+      {!collapsed && <div className="mb-2 shrink-0 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/40">Workspace</div>}
+      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5 pb-2 [scrollbar-width:thin]">
         {visiblePrimary.map((item) => {
           const active = pathname.startsWith(item.href);
           const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
-          return <div key={item.href}><NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} />{!collapsed && active && children.length > 0 && <div className="mt-1 mb-2 space-y-0.5 border-l border-primary/15 pl-1">{children.map((child) => <NavLink key={child.href} item={child} active={pathname.startsWith(child.href)} nested onNavigate={onNavigate} />)}</div>}</div>;
+          return (
+            <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined}>
+              <NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} parentMarker={mobile && !collapsed} />
+              {!collapsed && active && children.length > 0 && (
+                <div className="mt-1 mb-2 space-y-0.5 border-l border-primary/15 pl-1">
+                  {children.map((child) => <NavLink key={child.href} item={child} active={pathname.startsWith(child.href)} nested onNavigate={onNavigate} />)}
+                </div>
+              )}
+            </div>
+          );
         })}
         {!collapsed && visibleComingSoon.length > 0 && <div className="mt-5"><div className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.2em] text-sidebar-foreground/40">Coming soon</div><div className="space-y-1">{visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} onNavigate={onNavigate} />)}</div></div>}
         {collapsed && visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} collapsed onNavigate={onNavigate} />)}
       </div>
-      <div className="mt-3 border-t border-sidebar-border/70 pt-3">{showSettings && <NavLink item={settingsNav} active={pathname.startsWith(settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}</div>
+      <div className="mt-3 shrink-0 border-t border-sidebar-border/70 pt-3">{showSettings && <NavLink item={settingsNav} active={pathname.startsWith(settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}</div>
     </nav>
   );
 }
