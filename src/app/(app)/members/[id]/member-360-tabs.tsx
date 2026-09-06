@@ -24,6 +24,10 @@ import {
   Users,
   TrendingUp,
   Award,
+  Undo2,
+  AlertCircle,
+  RefreshCw,
+  TrendingDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,6 +58,7 @@ import type {
   MemberDocumentCategory,
   MemberGoalCategory,
   MemberGoalMilestone,
+  Payment,
 } from "@/lib/types/gym";
 import {
   useMemberMeasurements,
@@ -92,6 +97,9 @@ import {
 } from "@/lib/hooks/use-member-details";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
+import { useRefundPayment } from "@/lib/hooks/use-payments";
+import { useMemberships, useCreateMembership } from "@/lib/hooks/use-memberships";
+import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
 import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
@@ -1278,52 +1286,323 @@ function AttendancePanel({ memberId }: { memberId: string }) {
 
 // -- Payments Panel
 function PaymentsPanel({ memberId }: { memberId: string }) {
-  const query = useMemberPayments(memberId);
+  const paymentsQuery = useMemberPayments(memberId);
+  const membershipsQuery = useMemberships({ memberId });
+  const refundPayment = useRefundPayment();
+  const [refundOpen, setRefundOpen] = React.useState(false);
+  const [selectedPayment, setSelectedPayment] = React.useState<Payment | null>(null);
+  const [renewOpen, setRenewOpen] = React.useState(false);
+  const [renewPlanId, setRenewPlanId] = React.useState("");
+  const createMembership = useCreateMembership();
+  const plansQuery = useMembershipPlans({ pageSize: 100 });
 
-  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+  if (paymentsQuery.isLoading || membershipsQuery.isLoading) return <Skeleton className="h-24 w-full" />;
 
-  const totalSpent = query.data?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+  const payments = paymentsQuery.data ?? [];
+  const memberships = membershipsQuery.data?.items ?? [];
 
-  if (!query.data || query.data.length === 0) {
+  const totalFromMemberships = memberships.reduce((sum, m) => sum + Number(m.price), 0);
+  const totalDiscounts = memberships.reduce((sum, m) => {
+    const planPrice = Number(m.membershipPlan?.price ?? m.price);
+    return sum + Math.max(0, planPrice - Number(m.price));
+  }, 0);
+  const finalAmount = totalFromMemberships - totalDiscounts;
+
+  const totalPaid = payments
+    .filter((p) => p.status === "COMPLETED")
+    .reduce((sum, p) => sum + Number(p.amount), 0);
+  const totalRefunded = payments.flatMap((p) => p.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
+  const outstandingBalance = finalAmount - totalPaid + totalRefunded;
+
+  const currency = payments[0]?.currency ?? memberships[0]?.currency ?? "USD";
+
+  const activeOrExpiring = memberships.filter(
+    (m) => m.status === "ACTIVE" || m.status === "EXPIRED" || m.status === "PENDING"
+  );
+  const canRenew = activeOrExpiring.length > 0;
+
+  function openRefundDialog(payment: Payment) {
+    setSelectedPayment(payment);
+    setRefundOpen(true);
+  }
+
+  async function handleRefund(amount: number, reason: string) {
+    if (!selectedPayment) return;
+    try {
+      await refundPayment.mutateAsync({
+        id: selectedPayment.id,
+        input: { amount, reason },
+      });
+      toast.success("Refund recorded");
+      setRefundOpen(false);
+      setSelectedPayment(null);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Refund failed");
+    }
+  }
+
+  async function handleRenew() {
+    if (!renewPlanId) return;
+    try {
+      await createMembership.mutateAsync({ memberId, membershipPlanId: renewPlanId });
+      toast.success("Membership renewed successfully");
+      setRenewOpen(false);
+      setRenewPlanId("");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to renew membership");
+    }
+  }
+
+  if (payments.length === 0 && memberships.length === 0) {
     return (
       <EmptyState
         icon={CreditCard}
-        title="No payments yet"
-        description="Payment history will appear here."
+        title="No billing history"
+        description="Membership and payment history will appear here."
       />
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-xl border bg-muted/20 p-4">
-        <p className="text-sm text-muted-foreground">Total spent</p>
-        <p className="text-2xl font-semibold">
-          {query.data[0]?.currency ?? "USD"} {totalSpent.toLocaleString()}
-        </p>
+      <div className="flex justify-end">
+        {canRenew && (
+          <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline">
+                <RefreshCw className="size-3.5" />
+                Renew Membership
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Renew Membership</DialogTitle>
+              </DialogHeader>
+              <Select value={renewPlanId} onValueChange={setRenewPlanId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {plansQuery.data?.items
+                    .filter((plan) => plan.isActive)
+                    .map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} — {plan.currency} {plan.price} / {plan.durationDays}d
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <DialogFooter>
+                <Button onClick={handleRenew} disabled={!renewPlanId || createMembership.isPending}>
+                  {createMembership.isPending ? "Renewing..." : "Renew"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        {query.data.map((payment) => (
-          <div key={payment.id} className="flex items-center justify-between rounded-md border p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
-                <CreditCard className="size-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">
-                  {payment.currency} {Number(payment.amount).toLocaleString()}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {payment.method} &bull; {new Date(payment.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <Badge variant={payment.status === "COMPLETED" ? "default" : "secondary"}>{payment.status}</Badge>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="rounded-xl border bg-muted/20 p-3">
+          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-lg font-semibold tabular-nums">
+            {currency} {totalFromMemberships.toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-xl border bg-muted/20 p-3">
+          <p className="text-xs text-muted-foreground">Discounts</p>
+          <p className="text-lg font-semibold tabular-nums text-muted-foreground">
+            -{currency} {totalDiscounts.toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-xl border bg-primary/5 p-3">
+          <p className="text-xs text-muted-foreground">Final</p>
+          <p className="text-lg font-semibold tabular-nums">
+            {currency} {finalAmount.toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-xl border bg-muted/20 p-3">
+          <p className="text-xs text-muted-foreground">Paid</p>
+          <p className="text-lg font-semibold tabular-nums text-emerald-600">
+            {currency} {totalPaid.toLocaleString()}
+          </p>
+        </div>
+        <div className="rounded-xl border bg-muted/20 p-3">
+          <p className="text-xs text-muted-foreground">Outstanding</p>
+          <p className={`text-lg font-semibold tabular-nums ${outstandingBalance > 0 ? "text-red-600" : "text-emerald-600"}`}>
+            {currency} {Math.abs(outstandingBalance).toLocaleString()}
+            {outstandingBalance > 0 ? " due" : ""}
+          </p>
+        </div>
       </div>
+
+      {memberships.length > 0 && (
+        <div>
+          <h4 className="mb-2 text-sm font-medium">Memberships</h4>
+          <div className="flex flex-col gap-2">
+            {memberships.map((membership) => (
+              <div key={membership.id} className="flex items-center justify-between rounded-md border p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                    <Dumbbell className="size-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {membership.membershipPlan?.name ?? "Membership"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {membership.membershipPlan?.durationDays ?? 0} days &bull;{" "}
+                      {new Date(membership.startDate).toLocaleDateString()} -{" "}
+                      {new Date(membership.endDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={
+                      membership.status === "ACTIVE"
+                        ? "default"
+                        : membership.status === "EXPIRED"
+                        ? "destructive"
+                        : membership.status === "FROZEN"
+                        ? "warning"
+                        : "secondary"
+                    }
+                  >
+                    {membership.status}
+                  </Badge>
+                  <span className="text-sm font-medium tabular-nums">
+                    {membership.currency} {Number(membership.price).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {payments.length > 0 && (
+        <div>
+          <h4 className="mb-2 text-sm font-medium">Payments</h4>
+          <div className="flex flex-col gap-2">
+            {payments.map((payment) => {
+              const refunded = (payment.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
+              const statusVariant =
+                payment.status === "COMPLETED"
+                  ? "success"
+                  : payment.status === "PARTIALLY_REFUNDED"
+                  ? "warning"
+                  : "secondary";
+              return (
+                <div key={payment.id} className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                      <CreditCard className="size-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {payment.currency} {Number(payment.amount).toLocaleString()}
+                        {refunded > 0 && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            (refunded: {payment.currency} {refunded.toLocaleString()})
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {payment.method} &bull; {new Date(payment.createdAt).toLocaleDateString()}
+                        {payment.note && <> &bull; {payment.note}</>}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={statusVariant as "success" | "warning" | "secondary"}>
+                      {payment.status}
+                    </Badge>
+                    {payment.status === "COMPLETED" && (
+                      <Button variant="ghost" size="sm" onClick={() => openRefundDialog(payment)}>
+                        <Undo2 className="size-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Refund Payment</DialogTitle>
+          </DialogHeader>
+          {selectedPayment && (
+            <RefundPaymentForm
+              payment={selectedPayment}
+              onSubmit={handleRefund}
+              onCancel={() => setRefundOpen(false)}
+              isPending={refundPayment.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+function RefundPaymentForm({
+  payment,
+  onSubmit,
+  onCancel,
+  isPending,
+}: {
+  payment: Payment;
+  onSubmit: (amount: number, reason: string) => void;
+  onCancel: () => void;
+  isPending: boolean;
+}) {
+  const [amount, setAmount] = React.useState("");
+  const [reason, setReason] = React.useState("");
+  const alreadyRefunded = (payment.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
+  const remaining = Number(payment.amount) - alreadyRefunded;
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    onSubmit(Number(amount) || remaining, reason);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        Remaining refundable balance: {payment.currency} {remaining.toFixed(2)}
+      </p>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium">Amount</label>
+        <Input
+          type="number"
+          step="0.01"
+          placeholder={remaining.toFixed(2)}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium">Reason (optional)</label>
+        <Input
+          placeholder="Customer request, service issue, ..."
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </div>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="destructive" disabled={isPending}>
+          {isPending ? "Refunding..." : "Issue refund"}
+        </Button>
+      </DialogFooter>
+    </form>
   );
 }
 
