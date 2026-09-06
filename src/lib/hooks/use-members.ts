@@ -21,6 +21,10 @@ export interface MemberFilters {
 
 const KEY = "members";
 
+type MemberDetailPayload = Member & {
+  memberships?: unknown;
+};
+
 export function useMembers(params: MemberFilters = {}) {
   const { branchId } = params;
 
@@ -49,7 +53,16 @@ export function useMembers(params: MemberFilters = {}) {
 export function useMember(id: string | undefined) {
   return useQuery({
     queryKey: [KEY, id],
-    queryFn: () => api.get<Member>(`/members/${id}`),
+    queryFn: async () => {
+      const data = await api.get<MemberDetailPayload>(`/members/${id}`);
+      // Member 360 expects memberships to always be an array. Keep the UI
+      // resilient to older/partial backend payloads without changing the
+      // API contract or hiding request failures.
+      return {
+        ...data,
+        memberships: Array.isArray(data?.memberships) ? data.memberships : [],
+      } as Member;
+    },
     enabled: !!id,
   });
 }
