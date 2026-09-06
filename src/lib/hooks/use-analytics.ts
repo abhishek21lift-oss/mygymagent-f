@@ -14,18 +14,8 @@ export interface RevenueTrendMonth {
   revenue: Array<{ currency: string; grossRevenue: string; refunded: string; netRevenue: string }>
 }
 
-export interface AtRiskMember {
-  id: string
-  firstName: string
-  lastName: string
-  daysSinceLastVisit: number
-  neverCheckedIn: boolean
-}
-
-export interface MemberStatusBreakdown {
-  status: string
-  count: number
-}
+export interface AtRiskMember { id: string; firstName: string; lastName: string; daysSinceLastVisit: number; neverCheckedIn: boolean }
+export interface MemberStatusBreakdown { status: string; count: number }
 
 export interface SalesFunnel {
   period?: { from: string | null; to: string | null }
@@ -33,9 +23,14 @@ export interface SalesFunnel {
   totalLeads: number
   wonLeads: number
   lostLeads?: number
-  conversionRatePct: number | string
+  conversionRatePct: number
   averageDaysToConversion?: number | null
-  followUps: { total: number; completed: number; completionRatePct: number | string }
+  followUps: { total: number; completed: number; completionRatePct: number }
+}
+
+interface SalesFunnelApi extends Omit<SalesFunnel, "conversionRatePct" | "followUps"> {
+  conversionRatePct: string | number
+  followUps: { total: number; completed: number; completionRatePct: string | number }
 }
 
 export interface SalesSourcePerformance {
@@ -46,27 +41,16 @@ export interface SalesSourcePerformance {
   conversionRatePct: number | string
 }
 
-export interface TrainerWorkload {
-  trainerId: string
-  trainerName: string
-  activeMembers: number
-  pendingPtSessions: number
-  completedPtSessions: number
-}
-
-export interface InventoryForecast {
-  productId: string
-  productName: string
-  currentStock: number
-  daysUntilStockout: number | null
-  lowStock: boolean
-}
+export interface TrainerWorkload { trainerId: string; trainerName: string; activeMembers: number; pendingPtSessions: number; completedPtSessions: number }
+export interface InventoryForecast { productId: string; productName: string; currentStock: number; daysUntilStockout: number | null; lowStock: boolean }
 
 interface RevenueQueryParams { from?: string; to?: string; branchId?: string }
 interface SalesDateQueryParams { from?: string; to?: string }
 
+type QueryParams = Record<string, string | number | boolean | undefined>
+
 export function useRevenueSummary(params: RevenueQueryParams = {}) {
-  return useQuery({ queryKey: ["analytics", "revenue", params], queryFn: () => api.get<RevenueSummary>("/analytics/revenue", { query: params as Record<string, string | number | boolean | undefined> }) })
+  return useQuery({ queryKey: ["analytics", "revenue", params], queryFn: () => api.get<RevenueSummary>("/analytics/revenue", { query: params as QueryParams }) })
 }
 
 export function useRevenueTrend(months: number = 6, branchId?: string) {
@@ -82,11 +66,21 @@ export function useMemberStatusBreakdown(branchId?: string) {
 }
 
 export function useSalesFunnel(branchId?: string, params: SalesDateQueryParams = {}) {
-  return useQuery({ queryKey: ["analytics", "sales-funnel", branchId, params], queryFn: () => api.get<SalesFunnel>("/analytics/sales/funnel", { query: params }) })
+  return useQuery({
+    queryKey: ["analytics", "sales-funnel", branchId, params],
+    queryFn: async () => {
+      const data = await api.get<SalesFunnelApi>("/analytics/sales/funnel", { query: params as QueryParams })
+      return {
+        ...data,
+        conversionRatePct: Number(data.conversionRatePct),
+        followUps: { ...data.followUps, completionRatePct: Number(data.followUps.completionRatePct) },
+      }
+    },
+  })
 }
 
 export function useSalesSourcePerformance(branchId?: string, params: SalesDateQueryParams = {}) {
-  return useQuery({ queryKey: ["analytics", "sales-sources", branchId, params], queryFn: () => api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: params }) })
+  return useQuery({ queryKey: ["analytics", "sales-sources", branchId, params], queryFn: () => api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: params as QueryParams }) })
 }
 
 export function useTrainerWorkload(branchId?: string) {
