@@ -40,3 +40,11 @@ export function useStockMovements(params: PaginationParams & { productId?: strin
     queryFn: () => api.get<Paginated<StockMovement>>("/stock-movements", { query: params }),
   });
 }
+
+/** Resolves a scanned QR/barcode value to a product via
+ * GET /products/scan/:code. Not a query cache -- each scan must hit the
+ * backend so tenant scoping and current stock are always server-derived;
+ * only used imperatively from the scanner. */
+export async function lookupProductByScanCode(code: string): Promise<Product> {
+  return api.get<Product>(`/products/scan/${encodeURIComponent(code)}`);
+}

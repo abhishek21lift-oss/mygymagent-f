@@ -9,6 +9,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable } from "@/components/shared/data-table";
+import { ScanStockDialog } from "@/components/shared/scan-stock-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -416,7 +417,12 @@ export default function InventoryPage() {
       <PageHeader
         title="Inventory"
         description="Product catalog and stock movements"
-        actions={hasPermission("inventory.manage") && <AddProductDialog />}
+        actions={
+          <div className="flex items-center gap-2">
+            {hasPermission("inventory.read") && <ScanStockDialog />}
+            {hasPermission("inventory.manage") && <AddProductDialog />}
+          </div>
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
