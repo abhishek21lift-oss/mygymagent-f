@@ -30,7 +30,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const me = await api.get<MeResponse>("/auth/me")
-      if (getAccessToken() !== tokenAtStart) return
+
+      // A token change during this request is normally the silent refresh that
+      // apiFetch performs after an expired access token. The response is still
+      // the authoritative /auth/me result for the current session, so it must
+      // hydrate the user instead of being discarded. This fixes the reload path
+      // where refresh succeeded but the UI stayed unauthenticated.
+      //
+      // Keep the stale-request protection for a genuine login/register race:
+      // when the request started with a token and that token was replaced by a
+      // different session before /auth/me completed, don't overwrite the newer
+      // session with the older response.
+      if (tokenAtStart !== null && getAccessToken() !== tokenAtStart) {
+        const currentToken = getAccessToken()
+        if (currentToken === null) return
+      }
+
       setUser(me.user)
       setPermissions(me.permissions)
     } catch {
