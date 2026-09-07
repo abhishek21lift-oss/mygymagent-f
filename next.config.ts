@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     "3000-56d39e1e-dfbb-4e33-a41e-4b5e25e67684.daytonaproxy01.net",
   ],
   async headers() {
+    // Local development talks to the local API over plain http; the
+    // production CSP (https: only) must stay untouched.
+    const devApiOrigin =
+      process.env.NODE_ENV === "development" ? " http://localhost:4000" : "";
     return [
       {
         source: "/(.*)",
@@ -18,7 +22,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://connect.facebook.net https://www.facebook.com; " +
               "img-src 'self' data: https:; " +
               "font-src 'self' https://cdnjs.cloudflare.com; " +
-              "connect-src 'self' https:; " +
+              "connect-src 'self' https:" + devApiOrigin + "; " +
               "frame-src https://www.facebook.com https://*.facebook.com https://*.facebook.net; " +
               "object-src 'none'; " +
               "base-uri 'self'; " +
