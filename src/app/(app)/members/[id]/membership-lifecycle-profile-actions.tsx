@@ -42,6 +42,34 @@ import {
 } from "@/lib/hooks/use-memberships";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 
+type LifecycleMembership = {
+  id: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  membershipPlan?: {
+    id?: string;
+    name?: string;
+    currency?: string;
+    price?: number;
+  };
+};
+
+type MemberWithMemberships = {
+  memberships?: unknown;
+};
+
+function isLifecycleMembership(value: unknown): value is LifecycleMembership {
+  if (typeof value !== "object" || value === null) return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.id === "string" &&
+    typeof item.status === "string" &&
+    typeof item.startDate === "string" &&
+    typeof item.endDate === "string"
+  );
+}
+
 export function MembershipLifecycleProfileActions({ memberId }: { memberId: string }) {
   const memberQuery = useMember(memberId);
   const plansQuery = useMembershipPlans({ pageSize: 100 });
@@ -59,9 +87,10 @@ export function MembershipLifecycleProfileActions({ memberId }: { memberId: stri
   const cancel = useCancelMembership();
   const paymentFailure = useRecordPaymentFailure();
 
-  const memberships = (memberQuery.data as any)?.memberships ?? [];
-  const membership = memberships.find((m: any) =>
-    ["PENDING", "ACTIVE", "FROZEN"].includes(m.status),
+  const rawMemberships = (memberQuery.data as MemberWithMemberships | undefined)?.memberships;
+  const memberships = Array.isArray(rawMemberships) ? rawMemberships.filter(isLifecycleMembership) : [];
+  const membership = memberships.find((item) =>
+    ["PENDING", "ACTIVE", "FROZEN"].includes(item.status),
   ) ?? memberships[0];
 
   if (memberQuery.isLoading) return null;
