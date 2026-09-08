@@ -46,7 +46,7 @@ export function useCreateMembership() {
   });
 }
 
-function lifecycleMutation<T>(path: string, queryClient: ReturnType<typeof useQueryClient>) {
+function lifecycleMutation<T>(path: string) {
   return (input: { id: string } & T) => {
     const { id, ...body } = input;
     return api.post<Membership>(`/memberships/${id}/${path}`, body);
@@ -54,13 +54,13 @@ function lifecycleMutation<T>(path: string, queryClient: ReturnType<typeof useQu
 }
 
 export function useActivateMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/activate`), onSuccess: () => invalidate(qc) }); }
-export function usePauseMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number; reason?: string }>("pause", qc), onSuccess: () => invalidate(qc) }); }
+export function usePauseMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days?: number; reason?: string }>("pause"), onSuccess: () => invalidate(qc) }); }
 export function useUnpauseMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/unpause`), onSuccess: () => invalidate(qc) }); }
-export function useFreezeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("freeze", qc), onSuccess: () => invalidate(qc) }); }
+export function useFreezeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("freeze"), onSuccess: () => invalidate(qc) }); }
 export function useResumeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/resume`), onSuccess: () => invalidate(qc) }); }
-export function useExtendMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("extend", qc), onSuccess: () => invalidate(qc) }); }
-export function useUpgradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }>("upgrade", qc), onSuccess: () => invalidate(qc) }); }
-export function useDowngradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }>("downgrade", qc), onSuccess: () => invalidate(qc) }); }
+export function useExtendMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("extend"), onSuccess: () => invalidate(qc) }); }
+export function useUpgradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }>("upgrade"), onSuccess: () => invalidate(qc) }); }
+export function useDowngradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }>("downgrade"), onSuccess: () => invalidate(qc) }); }
 
 /** Plan change with server-side proration. Direction is derived from the
  * plan prices by the backend; the result carries the credit/amount-due

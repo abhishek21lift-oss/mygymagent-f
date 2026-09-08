@@ -198,7 +198,7 @@ export function MembershipLifecycleProfileActions({ memberId }: { memberId: stri
                 </Button>
                 <Button size="sm" variant="outline" className="rounded-xl" onClick={() => {
                   const targetMemberId = window.prompt("Transfer membership to Member ID:");
-                  if (targetMemberId) void run(transfer.mutateAsync({ id: membership.id, memberId: targetMemberId }), "Membership transferred");
+                  if (targetMemberId) void run(transfer.mutateAsync({ id: membership.id, toMemberId: targetMemberId }), "Membership transferred");
                 }} disabled={transfer.isPending}>
                   <ArrowUp className="size-3.5" /> Transfer
                 </Button>

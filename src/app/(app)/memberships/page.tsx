@@ -32,7 +32,7 @@ export default function MembershipLifecyclePage() {
       if (action === "renew") await run(renew.mutateAsync({ id: membership.id }))
       if (action === "cancel") { const reason = window.prompt("Cancellation reason") ?? "Cancelled by staff"; await run(cancel.mutateAsync({ id: membership.id, reason })) }
       if (action === "upgrade" || action === "downgrade") { if (!selectedPlan) { window.alert("Select a target plan first"); return }; const fn = action === "upgrade" ? upgrade : downgrade; await run(fn.mutateAsync({ id: membership.id, membershipPlanId: selectedPlan })) }
-      if (action === "transfer") { const memberId = window.prompt("Target member ID"); if (memberId) await run(transfer.mutateAsync({ id: membership.id, memberId })) }
+      if (action === "transfer") { const memberId = window.prompt("Target member ID"); if (memberId) await run(transfer.mutateAsync({ id: membership.id, toMemberId: memberId })) }
     } catch (error) { window.alert(error instanceof Error ? error.message : "Membership action failed") }
   }
 
