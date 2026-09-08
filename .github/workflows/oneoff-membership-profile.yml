@@ -1,0 +1,185 @@
+name: One-off Membership Profile Wiring
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Patch member profile lifecycle controls
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/app/(app)/members/[id]/member-detail-view.tsx')
+          text = path.read_text()
+
+          old_import = '''import {\n  useCreateMembership,\n  useFreezeMembership,\n  useResumeMembership,\n  useCancelMembership,\n} from "@/lib/hooks/use-memberships";'''
+          new_import = '''import {\n  useCreateMembership,\n  useActivateMembership,\n  usePauseMembership,\n  useFreezeMembership,\n  useResumeMembership,\n  useExtendMembership,\n  useUpgradeMembership,\n  useDowngradeMembership,\n  useRenewMembership,\n  useTransferMembership,\n  useCancelMembership,\n  useRecordPaymentFailure,\n} from "@/lib/hooks/use-memberships";'''
+          if old_import not in text:
+              raise SystemExit('membership hook import block not found')
+          text = text.replace(old_import, new_import, 1)
+
+          marker = '''function MembershipActions({\n  membershipId,\n  status,\n}: {'''
+          idx = text.find(marker)
+          if idx < 0:
+              raise SystemExit('MembershipActions marker not found')
+
+          component = r'''function MembershipLifecycleMenu({
+  memberId,
+  membership,
+}: {
+  memberId: string;
+  membership: {
+    id: string;
+    status: string;
+    membershipPlan?: { id: string; name: string; price: string };
+  };
+}) {
+  const activate = useActivateMembership();
+  const pause = usePauseMembership();
+  const extend = useExtendMembership();
+  const upgrade = useUpgradeMembership();
+  const downgrade = useDowngradeMembership();
+  const renew = useRenewMembership();
+  const transfer = useTransferMembership();
+  const paymentFailure = useRecordPaymentFailure();
+  const plans = useMembershipPlans({ pageSize: 100 });
+  const [open, setOpen] = React.useState(false);
+  const [planId, setPlanId] = React.useState("");
+
+  const run = async (action: Promise<unknown>, success: string) => {
+    try {
+      await action;
+      toast.success(success);
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Membership action failed");
+    }
+  };
+
+  const askDays = (label: string, fallback: string) => {
+    const value = window.prompt(label, fallback);
+    if (value === null) return null;
+    const days = Number(value);
+    return Number.isFinite(days) && days > 0 ? Math.floor(days) : null;
+  };
+
+  const handlePlanChange = async (mode: "upgrade" | "downgrade") => {
+    if (!planId) return;
+    const mutation = mode === "upgrade" ? upgrade : downgrade;
+    await run(
+      mutation.mutateAsync({ id: membership.id, membershipPlanId: planId }),
+      mode === "upgrade" ? "Membership upgraded" : "Membership downgraded",
+    );
+    setOpen(false);
+    setPlanId("");
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" variant="outline" className="rounded-xl">
+          <Sparkles className="size-3.5" />
+          Membership
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuLabel>Membership Lifecycle</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {membership.status === "PENDING" && (
+          <DropdownMenuItem onClick={() => void run(activate.mutateAsync(membership.id), "Membership activated")}>
+            Activate
+          </DropdownMenuItem>
+        )}
+        {(membership.status === "ACTIVE" || membership.status === "FROZEN") && (
+          <>
+            <DropdownMenuItem onClick={() => {
+              const days = askDays("Pause/freeze for how many days?", "7");
+              if (days) void run(pause.mutateAsync({ id: membership.id, days }), "Membership paused");
+            }}>
+              Pause / Freeze
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              const days = askDays("Extend membership by how many days?", "7");
+              if (days) void run(extend.mutateAsync({ id: membership.id, days }), "Membership extended");
+            }}>
+              Extend
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => void run(renew.mutateAsync({ id: membership.id }), "Membership renewed")}>
+              Renew
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              const target = window.prompt("Transfer membership to Member ID:");
+              if (target) void run(transfer.mutateAsync({ id: membership.id, memberId: target }), "Membership transferred");
+            }}>
+              Transfer
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Change Plan</DropdownMenuLabel>
+            <div className="px-2 py-1.5">
+              <Select value={planId} onValueChange={setPlanId}>
+                <SelectTrigger className="h-8 w-full text-xs">
+                  <SelectValue placeholder="Select new plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {plans.data?.items
+                    .filter((plan) => plan.id !== membership.membershipPlan?.id)
+                    .map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} — {plan.currency} {plan.price}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2 px-2 pb-1.5 pt-1">
+              <Button size="sm" variant="outline" disabled={!planId || upgrade.isPending} onClick={() => void handlePlanChange("upgrade")}>
+                Upgrade
+              </Button>
+              <Button size="sm" variant="outline" disabled={!planId || downgrade.isPending} onClick={() => void handlePlanChange("downgrade")}>
+                Downgrade
+              </Button>
+            </div>
+            <DropdownMenuItem onClick={() => {
+              const reason = window.prompt("Payment failure reason:", "Payment failed");
+              if (reason !== null) void run(paymentFailure.mutateAsync({ id: membership.id, reason }), "Payment failure recorded");
+            }}>
+              Record Payment Failure
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+'''
+          text = text[:idx] + component + text[idx:]
+
+          old_call = '''<MembershipActions\n                membershipId={activeMembership.id}\n                status={activeMembership.status as MembershipStatus}\n              />'''
+          new_call = '''<MembershipLifecycleMenu\n                memberId={member?.id ?? ""}\n                membership={activeMembership}\n              />\n              <MembershipActions\n                membershipId={activeMembership.id}\n                status={activeMembership.status as MembershipStatus}\n              />'''
+          if old_call not in text:
+              raise SystemExit('MemberHeader membership action call not found')
+          text = text.replace(old_call, new_call, 1)
+
+          path.write_text(text)
+          print('patched', path)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "src/app/(app)/members/[id]/member-detail-view.tsx"
+          git diff --cached --quiet && exit 0
+          git commit -m "fix: expose membership lifecycle actions in member profile"
+          git push
