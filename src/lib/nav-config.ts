@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, Brain, Building2, CalendarCheck, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, ListChecks, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
+import { BarChart3, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, ListChecks, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
 
 export interface NavItem { title: string; href: string; icon: LucideIcon; permission?: string | string[]; children?: NavItem[]; accent?: "ai" | "default"; comingSoon?: boolean }
 
@@ -14,6 +14,7 @@ export const primaryNav: NavItem[] = [
   { title: "Training", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read", children: [
     { title: "PT OS", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read" },
     { title: "PT Sessions", href: "/pt-operations/sessions", icon: CalendarCheck, permission: "pt-sessions.read" },
+    { title: "Calendar", href: "/calendar", icon: CalendarDays, permission: ["appointments.read", "appointments.read_assigned"] },
     { title: "Today's Sessions", href: "/workout-sessions", icon: CalendarCheck, permission: "workouts.read" },
     { title: "Workouts", href: "/workouts", icon: Dumbbell, permission: "workouts.read" },
     { title: "Nutrition", href: "/nutrition", icon: Salad, permission: "nutrition.read" },

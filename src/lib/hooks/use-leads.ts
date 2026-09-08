@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
-import type { Lead, LeadFollowUp, LeadStatus, Member } from "@/lib/types/gym"
+import type { Lead, LeadFollowUp, LeadScore, LeadStatus, Member } from "@/lib/types/gym"
 import type { Paginated, PaginationParams } from "@/lib/types/pagination"
 import type { CreateFollowUpInput, CreateLeadInput } from "@/lib/validation/gym"
 
@@ -29,6 +29,10 @@ export function useLead(id: string | null) {
   return useQuery({ queryKey: [KEY, id], queryFn: () => api.get<Lead>(`/leads/${id}`), enabled: !!id })
 }
 
+export function useLeadScore(id: string | null) {
+  return useQuery({ queryKey: [KEY, id, "score"], queryFn: () => api.get<LeadScore>(`/leads/${id}/score`), enabled: !!id })
+}
+
 export function useLeadFollowUps(params: PaginationParams & { status?: "OPEN" | "COMPLETED" | "ALL"; from?: string; to?: string } = {}) {
   return useQuery({ queryKey: ["lead-follow-ups", params], queryFn: () => api.get<Paginated<LeadFollowUpRow>>("/lead-follow-ups", { query: params }) })
 }
@@ -40,7 +44,20 @@ export function useCreateLead() {
 
 export function useUpdateLeadStatus() {
   const queryClient = useQueryClient()
-  return useMutation({ mutationFn: ({ id, status }: { id: string; status: LeadStatus }) => api.patch<Lead>(`/leads/${id}/status`, { status }), onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }) })
+  return useMutation({
+    mutationFn: ({ id, status, reason }: { id: string; status: LeadStatus; reason?: string }) =>
+      api.patch<Lead>(`/leads/${id}/status`, { status, ...(reason ? { reason } : {}) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  })
+}
+
+export function useSendLeadMessage() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, channel, subject, customBody }: { id: string; channel: "EMAIL" | "WHATSAPP"; subject?: string; customBody: string }) =>
+      api.post<Lead>(`/leads/${id}/message`, { channel, customBody, ...(subject ? { subject } : {}) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  })
 }
 
 export function useConvertLead() {

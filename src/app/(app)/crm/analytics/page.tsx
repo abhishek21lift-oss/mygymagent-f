@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { useSalesFunnel, useSalesSourcePerformance } from "@/lib/hooks/use-analytics"
+import { useSalesFunnel, useSalesSourcePerformance, useSalesLostReasons, useSalesAssigneePerformance } from "@/lib/hooks/use-analytics"
 
-const statusLabels: Record<string, string> = { NEW: "New", CONTACTED: "Contacted", QUALIFIED: "Qualified", TRIAL: "Trial", WON: "Won", LOST: "Lost" }
+const statusLabels: Record<string, string> = { NEW: "New", CONTACTED: "Contacted", QUALIFIED: "Qualified", TRIAL: "Trial", PROPOSAL: "Proposal", WON: "Won", LOST: "Lost" }
 
 export default function SalesAnalyticsPage() {
   const [from, setFrom] = React.useState("")
@@ -19,8 +19,12 @@ export default function SalesAnalyticsPage() {
   const params = React.useMemo(() => ({ from: from ? new Date(`${from}T00:00:00`).toISOString() : undefined, to: to ? new Date(`${to}T23:59:59`).toISOString() : undefined }), [from, to])
   const funnel = useSalesFunnel(undefined, params)
   const sources = useSalesSourcePerformance(undefined, params)
+  const lostReasons = useSalesLostReasons(undefined, params)
+  const assignees = useSalesAssigneePerformance(undefined, params)
   const data = funnel.data
   const sourceRows = sources.data ?? []
+  const lostReasonRows = lostReasons.data ?? []
+  const assigneeRows = assignees.data ?? []
   const statusRows = data?.byStatus ?? []
 
   return (
@@ -47,7 +51,7 @@ export default function SalesAnalyticsPage() {
           <CardHeader className="border-b bg-muted/15"><div className="flex items-center justify-between"><div><CardTitle className="text-base">Pipeline distribution</CardTitle><p className="mt-1 text-xs text-muted-foreground">Every lead in the selected window by current stage.</p></div><Flame className="size-4 text-rose-500" /></div></CardHeader>
           <CardContent className="space-y-4 p-5">
             {statusRows.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No sales data for this window.</p>}
-            {statusRows.map((row) => { const percent = data?.totalLeads ? Math.round((row.count / data.totalLeads) * 100) : 0; return <div key={row.status}><div className="mb-2 flex items-center justify-between text-sm"><div className="flex items-center gap-2"><Badge variant={row.status === "WON" ? "success" : row.status === "LOST" ? "destructive" : row.status === "TRIAL" ? "warning" : "secondary"}>{statusLabels[row.status] ?? row.status}</Badge><span className="text-muted-foreground">{row.count} leads</span></div><span className="font-semibold tabular-nums">{percent}%</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} /></div></div> })}
+            {statusRows.map((row) => { const percent = data?.totalLeads ? Math.round((row.count / data.totalLeads) * 100) : 0; return <div key={row.status}><div className="mb-2 flex items-center justify-between text-sm"><div className="flex items-center gap-2"><Badge variant={row.status === "WON" ? "success" : row.status === "LOST" ? "destructive" : row.status === "TRIAL" || row.status === "QUALIFIED" ? "warning" : row.status === "PROPOSAL" ? "secondary" : "secondary"}>{statusLabels[row.status] ?? row.status}</Badge><span className="text-muted-foreground">{row.count} leads</span></div><span className="font-semibold tabular-nums">{percent}%</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} /></div></div> })}
           </CardContent>
         </Card>
 
@@ -58,12 +62,30 @@ export default function SalesAnalyticsPage() {
       </div>
 
       <Card className="border-0 shadow-sm ring-1 ring-border/70">
-        <CardHeader className="border-b bg-muted/15"><div className="flex items-center justify-between"><div><CardTitle className="text-base">Lead source performance</CardTitle><p className="mt-1 text-xs text-muted-foreground">Real source strings grouped with won/lost conversion performance.</p></div><Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch() }} disabled={funnel.isFetching || sources.isFetching}><RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} /> Refresh</Button></div></CardHeader>
+        <CardHeader className="border-b bg-muted/15"><div className="flex items-center justify-between"><div><CardTitle className="text-base">Lead source performance</CardTitle><p className="mt-1 text-xs text-muted-foreground">Real source strings grouped with won/lost conversion performance.</p></div><Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching}><RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} /> Refresh</Button></div></CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-sm"><thead><tr className="border-b bg-muted/10 text-left text-xs text-muted-foreground"><th className="px-5 py-3 font-medium">Source</th><th className="px-5 py-3 font-medium">Leads</th><th className="px-5 py-3 font-medium">Won</th><th className="px-5 py-3 font-medium">Lost</th><th className="px-5 py-3 font-medium">Conversion</th></tr></thead><tbody>{sourceRows.map((row) => <tr key={row.source} className="border-b last:border-0"><td className="px-5 py-4 font-medium">{row.source}</td><td className="px-5 py-4 tabular-nums">{row.totalLeads}</td><td className="px-5 py-4 tabular-nums text-emerald-600">{row.wonLeads}</td><td className="px-5 py-4 tabular-nums text-rose-600">{row.lostLeads}</td><td className="px-5 py-4 font-semibold tabular-nums">{row.conversionRatePct}%</td></tr>)}</tbody></table></div>
           {sourceRows.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No source data available for this window.</p>}
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Card className="border-0 shadow-sm ring-1 ring-border/70">
+          <CardHeader className="border-b bg-muted/15"><div className="flex items-center justify-between"><div><CardTitle className="text-base">Why leads are lost</CardTitle><p className="mt-1 text-xs text-muted-foreground">Reasons recorded when deals are marked lost.</p></div><Flame className="size-4 text-rose-500" /></div></CardHeader>
+          <CardContent className="space-y-3 p-5">
+            {lostReasonRows.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">No lost leads recorded in this window.</p>}
+            {lostReasonRows.map((row) => { const max = Math.max(...lostReasonRows.map((r) => r.lostLeads), 1); const percent = Math.round((row.lostLeads / max) * 100); return <div key={row.reason}><div className="mb-1 flex items-center justify-between text-sm"><span className="pr-2">{row.reason}</span><span className="font-semibold tabular-nums text-muted-foreground">{row.lostLeads}</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-rose-500/80" style={{ width: `${percent}%` }} /></div></div> })}
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm ring-1 ring-border/70">
+          <CardHeader className="border-b bg-muted/15"><div className="flex items-center justify-between"><div><CardTitle className="text-base">Rep performance</CardTitle><p className="mt-1 text-xs text-muted-foreground">Leads per assignee with real conversion outcomes.</p></div><Users className="size-4 text-primary" /></div></CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b bg-muted/10 text-left text-xs text-muted-foreground"><th className="px-5 py-3 font-medium">Rep</th><th className="px-5 py-3 font-medium">Total</th><th className="px-5 py-3 font-medium">Open</th><th className="px-5 py-3 font-medium">Won</th><th className="px-5 py-3 font-medium">Lost</th><th className="px-5 py-3 font-medium">Conv.</th></tr></thead><tbody>{assigneeRows.map((row) => <tr key={row.assigneeId ?? "unassigned"} className="border-b last:border-0"><td className="px-5 py-4 font-medium">{row.assigneeName}</td><td className="px-5 py-4 tabular-nums">{row.totalLeads}</td><td className="px-5 py-4 tabular-nums text-muted-foreground">{row.openLeads}</td><td className="px-5 py-4 tabular-nums text-emerald-600">{row.wonLeads}</td><td className="px-5 py-4 tabular-nums text-rose-600">{row.lostLeads}</td><td className="px-5 py-4 font-semibold tabular-nums">{row.conversionRatePct}%</td></tr>)}</tbody></table></div>
+            {assigneeRows.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No assignment data for this window.</p>}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

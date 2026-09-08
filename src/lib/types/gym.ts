@@ -288,7 +288,7 @@ export interface MembershipPlan {
   updatedAt: string
 }
 
-export type MembershipStatus = "PENDING" | "ACTIVE" | "FROZEN" | "EXPIRED" | "CANCELLED"
+export type MembershipStatus = "PENDING" | "ACTIVE" | "FROZEN" | "PAUSED" | "EXPIRED" | "CANCELLED"
 
 export interface Membership {
   id: string
@@ -307,10 +307,21 @@ export interface Membership {
   autoRenew: boolean
   cancelledAt: string | null
   cancellationReason: string | null
+  previousMembershipId: string | null
   createdAt: string
   updatedAt: string
   membershipPlan?: MembershipPlan
   member?: { id: string; firstName: string; lastName: string }
+}
+
+export interface MembershipStatusHistoryEntry {
+  id: string
+  membershipId: string
+  fromStatus: MembershipStatus | null
+  toStatus: MembershipStatus
+  detail: string | null
+  changedByUser?: { id: string; firstName: string; lastName: string } | null
+  createdAt: string
 }
 
 export type AttendanceMethod = "QR" | "MANUAL" | "KIOSK" | "APP" | "STAFF"
@@ -331,7 +342,7 @@ export interface Attendance {
 }
 
 export type PaymentMethod = "CASH" | "CARD" | "UPI" | "BANK_TRANSFER" | "OTHER"
-export type PaymentStatus = "COMPLETED" | "REFUNDED" | "PARTIALLY_REFUNDED"
+export type PaymentStatus = "COMPLETED" | "REFUNDED" | "PARTIALLY_REFUNDED" | "FAILED"
 
 export interface Refund {
   id: string
@@ -431,7 +442,7 @@ export interface WorkoutAssignment {
   member?: { id: string; firstName: string; lastName: string }
 }
 
-export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "TRIAL" | "WON" | "LOST"
+export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "TRIAL" | "PROPOSAL" | "WON" | "LOST"
 
 export interface LeadFollowUp {
   id: string
@@ -454,6 +465,8 @@ export interface Lead {
   source: string | null
   status: LeadStatus
   notes: string | null
+  lostReason: string | null
+  trialScheduledFor: string | null
   assignedToUserId: string | null
   convertedMemberId: string | null
   convertedAt: string | null
@@ -462,6 +475,15 @@ export interface Lead {
   assignedToUser?: { id: string; firstName: string; lastName: string } | null
   followUps?: LeadFollowUp[]
   _count?: { followUps: number }
+}
+
+export type LeadGrade = "HOT" | "WARM" | "COLD"
+
+export interface LeadScore {
+  leadId: string
+  score: number
+  grade: LeadGrade
+  factors: { label: string; points: number }[]
 }
 
 export interface FoodItem {

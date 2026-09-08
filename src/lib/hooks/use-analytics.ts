@@ -121,6 +121,45 @@ export function useSalesSourcePerformance(branchId?: string, params: SalesDateQu
   })
 }
 
+export interface SalesLostReason {
+  reason: string
+  lostLeads: number
+}
+
+export function useSalesLostReasons(branchId?: string, params: SalesDateQueryParams = {}) {
+  return useQuery({
+    queryKey: ["analytics", "sales-lost-reasons", branchId, params],
+    queryFn: async () => asArray<SalesLostReason>(await api.get<SalesLostReason[]>("/analytics/sales/lost-reasons", { query: params as QueryParams })),
+  })
+}
+
+export interface SalesAssigneePerformance {
+  assigneeId: string | null
+  assigneeName: string
+  totalLeads: number
+  wonLeads: number
+  lostLeads: number
+  openLeads: number
+  conversionRatePct: number
+}
+
+export function useSalesAssigneePerformance(branchId?: string, params: SalesDateQueryParams = {}) {
+  return useQuery({
+    queryKey: ["analytics", "sales-assignees", branchId, params],
+    queryFn: async () =>
+      asArray<SalesAssigneePerformance>(
+        (await api.get<SalesAssigneePerformance[]>("/analytics/sales/assignees", { query: params as QueryParams })).map((row) => ({
+          ...row,
+          totalLeads: Number(row.totalLeads ?? 0),
+          wonLeads: Number(row.wonLeads ?? 0),
+          lostLeads: Number(row.lostLeads ?? 0),
+          openLeads: Number(row.openLeads ?? 0),
+          conversionRatePct: Number(row.conversionRatePct ?? 0),
+        })),
+    ),
+  })
+}
+
 export function useTrainerWorkload(branchId?: string) {
   return useQuery({
     queryKey: ["analytics", "trainer-workload", branchId],
@@ -153,6 +192,44 @@ export function useInventoryForecast() {
         daysUntilStockout: item.daysUntilStockout ?? null,
         lowStock: Boolean(item.lowStock ?? item.atOrBelowReorderLevel ?? false),
       }))
+    },
+  })
+}
+
+export interface MembershipLifecycleAnalytics {
+  statusCounts: Array<{ status: string; count: number }>
+  activePlanDistribution: Array<{ planId: string; planName: string; count: number }>
+  renewalRatePct: number | string
+  freezeUtilizationRatePct: number | string
+  expiringWithin30Days: number
+  newLast90Days: number
+  renewedLast90Days: number
+  avgClosedTenureDays: number | null
+  outstandingByCurrency: Array<{ currency: string; membershipsWithBalance: number; outstandingBalance: string }>
+}
+
+interface MembershipLifecycleApi extends Omit<MembershipLifecycleAnalytics, "renewalRatePct" | "freezeUtilizationRatePct"> {
+  renewalRatePct?: string | number
+  freezeUtilizationRatePct?: string | number
+}
+
+export function useMembershipLifecycle(branchId?: string) {
+  return useQuery({
+    queryKey: ["analytics", "membership-lifecycle", branchId],
+    queryFn: async (): Promise<MembershipLifecycleAnalytics> => {
+      const data = await api.get<MembershipLifecycleApi>("/analytics/memberships/lifecycle", { query: { branchId } })
+      return {
+        ...data,
+        statusCounts: asArray<MembershipLifecycleAnalytics["statusCounts"][number]>(data?.statusCounts),
+        activePlanDistribution: asArray<MembershipLifecycleAnalytics["activePlanDistribution"][number]>(data?.activePlanDistribution),
+        renewalRatePct: Number(data?.renewalRatePct ?? 0),
+        freezeUtilizationRatePct: Number(data?.freezeUtilizationRatePct ?? 0),
+        expiringWithin30Days: Number(data?.expiringWithin30Days ?? 0),
+        newLast90Days: Number(data?.newLast90Days ?? 0),
+        renewedLast90Days: Number(data?.renewedLast90Days ?? 0),
+        avgClosedTenureDays: data?.avgClosedTenureDays === null || data?.avgClosedTenureDays === undefined ? null : Number(data.avgClosedTenureDays),
+        outstandingByCurrency: asArray<MembershipLifecycleAnalytics["outstandingByCurrency"][number]>(data?.outstandingByCurrency),
+      }
     },
   })
 }

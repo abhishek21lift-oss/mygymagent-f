@@ -23,8 +23,8 @@ import { createLeadSchema, createFollowUpSchema, type CreateLeadInput, type Crea
 import type { LeadStatus } from "@/lib/types/gym"
 import { ApiError } from "@/lib/api/client"
 
-const statuses: LeadStatus[] = ["NEW", "CONTACTED", "QUALIFIED", "TRIAL", "WON", "LOST"]
-const scoreByStatus: Record<LeadStatus, number> = { NEW: 35, CONTACTED: 50, QUALIFIED: 72, TRIAL: 88, WON: 100, LOST: 5 }
+const statuses: LeadStatus[] = ["NEW", "CONTACTED", "QUALIFIED", "TRIAL", "PROPOSAL", "WON", "LOST"]
+const scoreByStatus: Record<LeadStatus, number> = { NEW: 35, CONTACTED: 50, QUALIFIED: 72, TRIAL: 88, PROPOSAL: 92, WON: 100, LOST: 5 }
 
 function scoreLead(status: LeadStatus, hasPhone: boolean, hasEmail: boolean, hasSource: boolean, openFollowUps: number) {
   return Math.min(100, scoreByStatus[status] + (hasPhone ? 5 : 0) + (hasEmail ? 5 : 0) + (hasSource ? 5 : 0) + Math.min(10, openFollowUps * 2))

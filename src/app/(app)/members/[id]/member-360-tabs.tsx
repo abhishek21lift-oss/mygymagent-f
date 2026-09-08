@@ -112,7 +112,7 @@ import {
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
 import { useRefundPayment } from "@/lib/hooks/use-payments";
-import { useMemberships, useCreateMembership } from "@/lib/hooks/use-memberships";
+import { useMemberships, useRenewMembership, useMembershipHistory } from "@/lib/hooks/use-memberships";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
@@ -1516,8 +1516,9 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
   const [refundOpen, setRefundOpen] = React.useState(false);
   const [selectedPayment, setSelectedPayment] = React.useState<Payment | null>(null);
   const [renewOpen, setRenewOpen] = React.useState(false);
-  const [renewPlanId, setRenewPlanId] = React.useState("");
-  const createMembership = useCreateMembership();
+  const [renewMembershipId, setRenewMembershipId] = React.useState("");
+  const [renewDiscount, setRenewDiscount] = React.useState("");
+  const renewMembership = useRenewMembership();
   const plansQuery = useMembershipPlans({ pageSize: 100 });
 
   if (paymentsQuery.isLoading || membershipsQuery.isLoading) return <Skeleton className="h-24 w-full" />;
@@ -1541,9 +1542,10 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
   const currency = payments[0]?.currency ?? memberships[0]?.currency ?? "USD";
 
   const activeOrExpiring = memberships.filter(
-    (m) => m.status === "ACTIVE" || m.status === "EXPIRED" || m.status === "PENDING"
+    (m) => m.status === "ACTIVE" || m.status === "EXPIRED" || m.status === "PENDING" || m.status === "FROZEN" || m.status === "PAUSED"
   );
   const canRenew = activeOrExpiring.length > 0;
+  const renewTarget = activeOrExpiring.find((m) => m.id === renewMembershipId) ?? activeOrExpiring[0];
 
   function openRefundDialog(payment: Payment) {
     setSelectedPayment(payment);
@@ -1566,12 +1568,13 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
   }
 
   async function handleRenew() {
-    if (!renewPlanId) return;
+    if (!renewTarget) return;
     try {
-      await createMembership.mutateAsync({ memberId, membershipPlanId: renewPlanId });
+      const discount = renewDiscount ? Number(renewDiscount) : undefined;
+      await renewMembership.mutateAsync({ id: renewTarget.id, discount });
       toast.success("Membership renewed successfully");
       setRenewOpen(false);
-      setRenewPlanId("");
+      setRenewDiscount("");
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : "Failed to renew membership");
     }
@@ -1602,23 +1605,46 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
               <DialogHeader>
                 <DialogTitle>Renew Membership</DialogTitle>
               </DialogHeader>
-              <Select value={renewPlanId} onValueChange={setRenewPlanId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {plansQuery.data?.items
-                    .filter((plan) => plan.isActive)
-                    .map((plan) => (
-                      <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name} — {plan.currency} {plan.price} / {plan.durationDays}d
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="renew-membership">Membership</Label>
+                <Select
+                  value={renewTarget?.id ?? ""}
+                  onValueChange={setRenewMembershipId}
+                >
+                  <SelectTrigger className="w-full" id="renew-membership">
+                    <SelectValue placeholder="Select membership" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeOrExpiring.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.membershipPlan?.name ?? "Plan"} — {m.status} (ends{" "}
+                        {m.endDate ? new Date(m.endDate).toLocaleDateString() : "—"})
                       </SelectItem>
                     ))}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+                <Label htmlFor="renew-discount">Discount (optional)</Label>
+                <Input
+                  id="renew-discount"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="e.g. 10"
+                  value={renewDiscount}
+                  onChange={(e) => setRenewDiscount(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Renewing extends the current term at the plan&apos;s duration and price; the
+                  selected membership&apos;s plan is used. Payment is recorded separately in
+                  billing.
+                </p>
+              </div>
               <DialogFooter>
-                <Button onClick={handleRenew} disabled={!renewPlanId || createMembership.isPending}>
-                  {createMembership.isPending ? "Renewing..." : "Renew"}
+                <Button
+                  onClick={handleRenew}
+                  disabled={!renewTarget || renewMembership.isPending}
+                >
+                  {renewMembership.isPending ? "Renewing..." : "Renew"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -2844,6 +2870,85 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
 
 // -- Root -----------------------------------------------------------------------
 
+// -- Membership History Panel
+function MembershipHistoryPanel({ memberId }: { memberId: string }) {
+  const membershipsQuery = useMemberships({ memberId });
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const activeId = selectedId ?? membershipsQuery.data?.items?.[0]?.id ?? null;
+  const historyQuery = useMembershipHistory(activeId);
+
+  if (membershipsQuery.isLoading) return <Skeleton className="h-24 w-full" />;
+
+  const memberships = membershipsQuery.data?.items ?? [];
+  if (memberships.length === 0) {
+    return (
+      <EmptyState
+        icon={History}
+        title="No memberships yet"
+        description="Membership purchases and their lifecycle history will appear here."
+      />
+    );
+  }
+
+  const entries = historyQuery.data ?? [];
+  const selected = memberships.find((m) => m.id === activeId);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="membership-select">Membership</Label>
+        <Select value={activeId ?? ""} onValueChange={setSelectedId}>
+          <SelectTrigger className="w-full" id="membership-select">
+            <SelectValue placeholder="Select membership" />
+          </SelectTrigger>
+          <SelectContent>
+            {memberships.map((m) => (
+              <SelectItem key={m.id} value={m.id}>
+                {m.membershipPlan?.name ?? "Plan"} — {m.status} (ends{" "}
+                {m.endDate ? new Date(m.endDate).toLocaleDateString() : "—"})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selected?.previousMembershipId && (
+          <p className="text-xs text-muted-foreground">
+            Renewed/continued from a previous membership — full chain is preserved in the audit
+            trail.
+          </p>
+        )}
+      </div>
+
+      {historyQuery.isLoading ? (
+        <Skeleton className="h-40 w-full" />
+      ) : entries.length === 0 ? (
+        <EmptyState
+          icon={History}
+          title="No lifecycle events"
+          description="Actions like freeze, resume, upgrade and transfer will be recorded here."
+        />
+      ) : (
+        <ol className="relative ml-3 border-l border-border">
+          {entries.map((entry) => (
+            <li key={entry.id} className="mb-6 ml-6">
+              <span className="absolute -left-[7px] mt-1.5 size-3.5 rounded-full border-2 border-background bg-primary/40" />
+              <p className="text-sm font-medium">
+                {entry.fromStatus ? `${entry.fromStatus} → ${entry.toStatus}` : `Created as ${entry.toStatus}`}
+              </p>
+              {entry.detail && <p className="text-sm text-muted-foreground">{entry.detail}</p>}
+              <p className="text-xs text-muted-foreground">
+                {fmtDateTime(entry.createdAt)}
+                {entry.changedByUser
+                  ? ` — by ${entry.changedByUser.firstName} ${entry.changedByUser.lastName}`.trim()
+                  : ""}
+              </p>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
 export function Member360Tabs({ memberId }: { memberId: string }) {
   return (
     <Tabs defaultValue="overview" className="w-full">
@@ -2969,6 +3074,12 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
           >
             Duplicates
           </TabsTrigger>
+          <TabsTrigger
+            value="membership-history"
+            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+          >
+            Membership History
+          </TabsTrigger>
         </TabsList>
       </div>
       <TabsContent value="overview" className="mt-6">
@@ -3030,6 +3141,9 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
       </TabsContent>
       <TabsContent value="duplicates">
         <DuplicatesPanel memberId={memberId} />
+      </TabsContent>
+      <TabsContent value="membership-history">
+        <MembershipHistoryPanel memberId={memberId} />
       </TabsContent>
     </Tabs>
   );

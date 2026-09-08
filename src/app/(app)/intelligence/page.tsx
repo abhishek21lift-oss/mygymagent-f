@@ -8,6 +8,7 @@ import {
   ArrowRight,
   BarChart3,
   Boxes,
+  Calendar,
   CheckCircle2,
   ChevronRight,
   CreditCard,
@@ -41,6 +42,7 @@ import {
   useAtRiskMembers,
   useInventoryForecast,
   useMemberStatusBreakdown,
+  useMembershipLifecycle,
   useRevenueSummary,
   useRevenueTrend,
   useSalesFunnel,
@@ -48,6 +50,7 @@ import {
   useTrainerWorkload,
   type AtRiskMember,
   type InventoryForecast,
+  type MembershipLifecycleAnalytics,
   type RevenueSummary,
   type RevenueTrendMonth,
   type SalesFunnel,
@@ -206,6 +209,72 @@ function SourcePerformance({ data }: { data: SalesSourcePerformance[] | undefine
   return <div className="space-y-2">{data.slice(0, 6).map((item) => <div key={item.source} className="rounded-2xl border border-slate-100 bg-white/70 p-3"><div className="flex items-center justify-between gap-3"><p className="truncate text-sm font-bold text-slate-800">{item.source || "Unknown"}</p><Badge variant="secondary" className="rounded-full">{Number(item.conversionRatePct).toFixed(1)}%</Badge></div><div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500"><span>{item.totalLeads} leads</span><span>·</span><span>{item.wonLeads} won</span><span>·</span><span>{item.lostLeads} lost</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${Math.min(Math.max(Number(item.conversionRatePct), 0), 100)}%` }} /></div></div>)}</div>;
 }
 
+function MembershipLifecycleCard({ data, loading }: { data: MembershipLifecycleAnalytics | undefined; loading: boolean }) {
+  if (loading) return <Skeleton className="h-48 w-full rounded-[30px]" />;
+  if (!data) return <div className="py-12 text-center text-sm text-slate-400">No membership lifecycle data available</div>;
+  const totalStatus = data.statusCounts.reduce((sum, item) => sum + item.count, 0) || 1;
+  const statusColors: Record<string, string> = { ACTIVE: "bg-emerald-500", FROZEN: "bg-sky-500", PAUSED: "bg-amber-400", PENDING: "bg-violet-400", EXPIRED: "bg-rose-500", CANCELLED: "bg-slate-400" };
+  const topPlans = data.activePlanDistribution.slice(0, 5);
+  const maxPlanCount = Math.max(...topPlans.map((p) => p.count), 1);
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-2">
+        {data.statusCounts.map((item) => (
+          <Badge key={item.status} variant="secondary" className="rounded-full">
+            <span className={`mr-1.5 size-2 rounded-full ${statusColors[item.status] ?? "bg-slate-400"}`} />
+            {item.status}: {item.count}
+          </Badge>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-2xl bg-slate-50 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Renewal rate</p>
+          <p className="mt-1 text-xl font-extrabold text-emerald-700">{Number(data.renewalRatePct).toFixed(1)}%</p>
+        </div>
+        <div className="rounded-2xl bg-slate-50 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Freeze utilization</p>
+          <p className="mt-1 text-xl font-extrabold text-sky-700">{Number(data.freezeUtilizationRatePct).toFixed(1)}%</p>
+        </div>
+        <div className="rounded-2xl bg-slate-50 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Expiring ≤ 30d</p>
+          <p className="mt-1 text-xl font-extrabold text-amber-600">{data.expiringWithin30Days}</p>
+        </div>
+        <div className="rounded-2xl bg-slate-50 p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">New (90d)</p>
+          <p className="mt-1 text-xl font-extrabold text-violet-700">{data.newLast90Days}</p>
+          <p className="text-[10px] text-slate-400">{data.renewedLast90Days} renewed</p>
+        </div>
+      </div>
+      {topPlans.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active plan distribution</p>
+          {topPlans.map((plan) => (
+            <div key={plan.planId} className="flex items-center gap-3">
+              <span className="w-32 truncate text-xs font-semibold text-slate-700">{plan.planName}</span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${(plan.count / maxPlanCount) * 100}%` }} />
+              </div>
+              <span className="font-mono text-xs font-bold text-slate-600">{plan.count}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {data.outstandingByCurrency.length > 0 && (
+        <div className="border-t border-slate-100 pt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Outstanding balance</p>
+          {data.outstandingByCurrency.map((item) => (
+            <div key={item.currency} className="mt-1 flex items-center justify-between text-sm">
+              <span className="text-slate-600">{item.membershipsWithBalance} memberships</span>
+              <span className="font-mono font-bold text-rose-600">{formatMoney(item.outstandingBalance, item.currency)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="text-[11px] text-slate-400">{totalStatus} total membership records analyzed</p>
+    </div>
+  );
+}
+
 function InventoryList({ items }: { items: InventoryForecast[] | undefined }) {
   if (!items?.length) return <div className="py-12 text-center text-sm text-slate-400">No inventory forecast available</div>;
   return <div className="space-y-2">{items.slice(0, 6).map((item) => <div key={item.productId} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white/80 p-3"><div className="flex min-w-0 items-center gap-3"><div className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${item.lowStock ? "bg-rose-50 text-rose-600" : "bg-cyan-50 text-cyan-600"}`}><Package className="size-4" /></div><div className="min-w-0"><p className="truncate text-sm font-bold text-slate-800">{item.productName}</p><p className="text-xs text-slate-500">{item.currentStock} units · {item.lowStock ? "Low stock" : "Healthy stock"}</p></div></div><div className="text-right"><p className={`font-mono text-sm font-bold ${item.daysUntilStockout !== null && item.daysUntilStockout <= 7 ? "text-rose-600" : "text-slate-800"}`}>{item.daysUntilStockout === null ? "—" : `${item.daysUntilStockout}d`}</p><p className="text-[10px] uppercase tracking-wider text-slate-400">stockout</p></div></div>)}</div>;
@@ -224,6 +293,7 @@ export default function IntelligencePage() {
   const sources = useSalesSourcePerformance(branch);
   const trainers = useTrainerWorkload(branch);
   const inventory = useInventoryForecast();
+  const lifecycle = useMembershipLifecycle(branch);
 
   const revenueRow = revenue.data?.revenue?.[0];
   const outstanding = revenue.data?.outstanding?.[0];
@@ -232,7 +302,7 @@ export default function IntelligencePage() {
   const riskCount = atRisk.data?.length ?? 0;
   const lowStockCount = inventory.data?.filter((item) => item.lowStock).length ?? 0;
   const refresh = () => {
-    void Promise.all([revenue.refetch(), trend.refetch(), atRisk.refetch(), status.refetch(), sales.refetch(), sources.refetch(), trainers.refetch(), inventory.refetch()]);
+    void Promise.all([revenue.refetch(), trend.refetch(), atRisk.refetch(), status.refetch(), sales.refetch(), sources.refetch(), trainers.refetch(), inventory.refetch(), lifecycle.refetch()]);
     toast.success("Intelligence refreshed");
   };
 
@@ -271,6 +341,14 @@ export default function IntelligencePage() {
         <section className="grid gap-5 xl:grid-cols-[1.55fr_0.9fr]">
           <Card className={`rounded-[30px] ${glass}`}><CardHeader className="border-b border-slate-100/80 pb-4"><div className="flex items-center justify-between gap-4"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-violet-600">02 · finance</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Revenue trajectory</CardTitle><p className="mt-1 text-xs text-slate-500">Net revenue by month, using the selected branch scope.</p></div><Badge variant="secondary" className="rounded-full bg-violet-50 text-violet-700">{months}M view</Badge></div></CardHeader><CardContent className="p-5"><RevenueChart data={trend.data} /></CardContent></Card>
           <Card className={`rounded-[30px] ${glass}`}><CardHeader className="border-b border-slate-100/80 pb-4"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-600">03 · member health</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Member status mix</CardTitle></CardHeader><CardContent className="p-5"><StatusBreakdown data={status.data} /></CardContent></Card>
+        </section>
+
+        <section>
+          <SectionHeader eyebrow="02 · lifecycle" title="Membership lifecycle" description="Live portfolio health across the full lifecycle — status mix, renewal behavior, freeze utilization, and upcoming expiries." />
+          <div className="grid gap-5 xl:grid-cols-[1.55fr_0.9fr]">
+            <Card className={`rounded-[30px] ${glass}`}><CardHeader className="border-b border-slate-100/80 pb-4"><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">lifecycle · portfolio</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Status &amp; renewal health</CardTitle></div><RefreshCw className="size-5 text-emerald-600" /></div></CardHeader><CardContent className="p-5"><MembershipLifecycleCard data={lifecycle.data} loading={lifecycle.isLoading} /></CardContent></Card>
+            <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><CardTitle className="text-lg font-extrabold">Expiring soon</CardTitle><p className="mt-1 text-xs text-slate-500">Memberships entering renewal window (30 days).</p></div><div className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><Calendar className="size-5" /></div></div></CardHeader><CardContent className="pt-0"><div className="flex h-40 flex-col items-center justify-center text-center"><p className="text-4xl font-extrabold text-amber-600">{lifecycle.data?.expiringWithin30Days ?? "—"}</p><p className="mt-1 text-xs text-slate-500">memberships expire within 30 days</p><p className="mt-2 text-[11px] text-slate-400">Renewal reminders run automatically on the daily automation scan.</p></div></CardContent></Card>
+          </div>
         </section>
 
         <section>

@@ -22,7 +22,7 @@ import { ApiError } from "@/lib/api/client";
 import { createPaymentSchema, refundPaymentSchema, type CreatePaymentInput, type RefundPaymentInput } from "@/lib/validation/gym";
 import type { Payment, PaymentStatus } from "@/lib/types/gym";
 
-const statusVariant: Record<PaymentStatus, "success" | "warning" | "secondary"> = { COMPLETED: "success", PARTIALLY_REFUNDED: "warning", REFUNDED: "secondary" };
+const statusVariant: Record<PaymentStatus, "success" | "warning" | "secondary" | "destructive"> = { COMPLETED: "success", PARTIALLY_REFUNDED: "warning", REFUNDED: "secondary", FAILED: "destructive" };
 
 function RecordPaymentDialog() {
   const [open, setOpen] = React.useState(false); const [member, setMember] = React.useState<{ id: string; label: string } | null>(null); const createPayment = useCreatePayment();
