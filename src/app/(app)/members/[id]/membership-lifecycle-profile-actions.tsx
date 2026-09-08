@@ -10,7 +10,6 @@ import {
   PauseCircle,
   RefreshCw,
   Snowflake,
-  UserRoundArrowUp,
   XCircle,
   Zap,
 } from "lucide-react";
@@ -172,7 +171,7 @@ export function MembershipLifecycleProfileActions({ memberId }: { memberId: stri
                   const targetMemberId = window.prompt("Transfer membership to Member ID:");
                   if (targetMemberId) void run(transfer.mutateAsync({ id: membership.id, memberId: targetMemberId }), "Membership transferred");
                 }} disabled={transfer.isPending}>
-                  <UserRoundArrowUp className="size-3.5" /> Transfer
+                  <ArrowUp className="size-3.5" /> Transfer
                 </Button>
                 <Button size="sm" variant="outline" className="rounded-xl" onClick={() => {
                   const reason = window.prompt("Payment failure reason:", "Payment failed");
