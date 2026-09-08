@@ -1,15 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { BarChart3, Brain, Building2, CalendarCheck, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, ListChecks, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
 
-export interface NavItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  permission?: string | string[];
-  children?: NavItem[];
-  accent?: "ai" | "default";
-  comingSoon?: boolean;
-}
+export interface NavItem { title: string; href: string; icon: LucideIcon; permission?: string | string[]; children?: NavItem[]; accent?: "ai" | "default"; comingSoon?: boolean }
 
 export const primaryNav: NavItem[] = [
   { title: "Command Center", href: "/command-center", icon: LayoutDashboard },
@@ -28,6 +20,7 @@ export const primaryNav: NavItem[] = [
   ] },
   { title: "Finance", href: "/billing", icon: Wallet, permission: "payments.read", children: [
     { title: "Payments", href: "/billing", icon: Wallet, permission: "payments.read" },
+    { title: "Membership Lifecycle", href: "/memberships", icon: CreditCard, permission: "memberships.read" },
     { title: "Membership Plans", href: "/membership-plans", icon: CreditCard, permission: "membership_plans.read" },
   ] },
   { title: "Operations", href: "/attendance", icon: CalendarCheck, permission: "attendance.read", children: [
