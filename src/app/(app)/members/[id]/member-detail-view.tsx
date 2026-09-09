@@ -83,16 +83,9 @@ import {
   useFreezeMembership,
   useResumeMembership,
   useCancelMembership,
-  usePauseMembership,
-  useUnpauseMembership,
-  useExtendMembership,
-  useChangeMembershipPlan,
-  useTransferMembership,
   useRenewMembership,
-  useActivateMembership,
 } from "@/lib/hooks/use-memberships";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
-import { useMembers } from "@/lib/hooks/use-members";
 import { ApiError } from "@/lib/api/client";
 import type { MembershipStatus } from "@/lib/types/gym";
 import { useCreatePayment } from "@/lib/hooks/use-payments";
@@ -386,46 +379,19 @@ function CollectPaymentDialog({
 function MembershipActions({
   membershipId,
   status,
-  memberId,
-  planPrice,
-  planId,
 }: {
   membershipId: string;
   status: MembershipStatus;
-  memberId: string;
-  planPrice: string;
-  planId: string;
 }) {
   const freeze = useFreezeMembership();
   const resume = useResumeMembership();
   const cancel = useCancelMembership();
-  const pause = usePauseMembership();
-  const unpause = useUnpauseMembership();
-  const extend = useExtendMembership();
-  const changePlan = useChangeMembershipPlan();
-  const transfer = useTransferMembership();
   const renew = useRenewMembership();
-  const activate = useActivateMembership();
-  const plansQuery = useMembershipPlans({ pageSize: 100 });
-  const membersQuery = useMembers({ pageSize: 100 });
 
   const [freezeOpen, setFreezeOpen] = React.useState(false);
   const [freezeDays, setFreezeDays] = React.useState(7);
-  const [extendOpen, setExtendOpen] = React.useState(false);
-  const [extendDays, setExtendDays] = React.useState(30);
-  const [extendReason, setExtendReason] = React.useState("");
-  const [changeOpen, setChangeOpen] = React.useState(false);
-  const [newPlanId, setNewPlanId] = React.useState("");
-  const [direction, setDirection] = React.useState<"UPGRADE" | "DOWNGRADE">("UPGRADE");
-  const [changePayment, setChangePayment] = React.useState(0);
-  const [transferOpen, setTransferOpen] = React.useState(false);
-  const [toMemberId, setToMemberId] = React.useState("");
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [cancelReason, setCancelReason] = React.useState("");
-
-  const selectedNewPlan = plansQuery.data?.items.find((p) => p.id === newPlanId);
-  const otherPlans = plansQuery.data?.items.filter((p) => p.id !== planId) ?? [];
-  const otherMembers = (membersQuery.data?.items ?? []).filter((m) => m.id !== memberId);
 
   const handle = (promise: Promise<unknown>, successMsg: string, close?: () => void) =>
     promise
@@ -435,45 +401,25 @@ function MembershipActions({
       })
       .catch((e) => toast.error(e instanceof ApiError ? e.message : "Action failed"));
 
-  const live = status === "ACTIVE" || status === "FROZEN" || status === "PAUSED";
+  // Only freeze/resume/renew/cancel have real backend support today
+  // (see memberships.service.ts). Activate/Pause/Extend/Upgrade-Downgrade/
+  // Transfer/Payment-failure were removed here because they called
+  // endpoints that don't exist server-side; PAUSED is also not a status
+  // the backend's MembershipStatus enum defines.
+  const live = status === "ACTIVE" || status === "FROZEN";
 
   return (
     <div className="flex flex-wrap gap-2">
-      {status === "PENDING" && (
+      {status === "ACTIVE" && (
         <Button
+          variant="outline"
           size="sm"
-          disabled={activate.isPending}
-          onClick={() =>
-            handle(activate.mutateAsync(membershipId), "Membership activated")
-          }
+          onClick={() => setFreezeOpen(true)}
           className="rounded-xl"
         >
-          <PlayCircle className="size-3.5" />
-          Activate
+          <Snowflake className="size-3.5" />
+          Freeze
         </Button>
-      )}
-
-      {status === "ACTIVE" && (
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setFreezeOpen(true)}
-            className="rounded-xl"
-          >
-            <Snowflake className="size-3.5" />
-            Freeze
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setChangeOpen(true)}
-            className="rounded-xl"
-          >
-            <TrendingUp className="size-3.5" />
-            Upgrade / Downgrade
-          </Button>
-        </>
       )}
 
       {status === "FROZEN" && (
@@ -489,30 +435,8 @@ function MembershipActions({
         </Button>
       )}
 
-      {status === "PAUSED" && (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={unpause.isPending}
-          onClick={() => handle(unpause.mutateAsync(membershipId), "Membership unpaused")}
-          className="rounded-xl"
-        >
-          <PlayCircle className="size-3.5" />
-          Unpause
-        </Button>
-      )}
-
       {live && (
         <>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setExtendOpen(true)}
-            className="rounded-xl"
-          >
-            <CalendarCheck className="size-3.5" />
-            Extend
-          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -523,31 +447,6 @@ function MembershipActions({
             <Sparkles className="size-3.5" />
             Renew
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setTransferOpen(true)}
-            className="rounded-xl"
-          >
-            <Users className="size-3.5" />
-            Transfer
-          </Button>
-          {status === "ACTIVE" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                pause
-                  .mutateAsync({ id: membershipId, reason: "Paused from member profile" })
-                  .then(() => toast.success("Membership paused"))
-                  .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to pause"))
-              }
-              className="rounded-xl"
-            >
-              <Clock className="size-3.5" />
-              Pause
-            </Button>
-          )}
           <Button
             variant="outline"
             size="sm"
@@ -593,187 +492,6 @@ function MembershipActions({
               }
             >
               {freeze.isPending ? "Freezing..." : "Freeze"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Extend dialog */}
-      <Dialog open={extendOpen} onOpenChange={setExtendOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Extend Membership</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Days to Add</Label>
-              <Input
-                type="number"
-                min={1}
-                max={365}
-                value={extendDays}
-                onChange={(e) => setExtendDays(Math.max(1, Number(e.target.value) || 1))}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Reason (optional)</Label>
-              <Input
-                value={extendReason}
-                onChange={(e) => setExtendReason(e.target.value)}
-                placeholder="Goodwill, compensation, ..."
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              disabled={extend.isPending}
-              onClick={() =>
-                handle(
-                  extend.mutateAsync({ id: membershipId, days: extendDays }),
-                  `Extended by ${extendDays} days`,
-                  () => setExtendOpen(false)
-                )
-              }
-            >
-              {extend.isPending ? "Extending..." : "Extend"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Change plan dialog */}
-      <Dialog open={changeOpen} onOpenChange={setChangeOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upgrade / Downgrade Membership</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Direction</Label>
-              <Select value={direction} onValueChange={(v) => setDirection(v as "UPGRADE" | "DOWNGRADE")}>
-                <SelectTrigger className="mt-1 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UPGRADE">Upgrade</SelectItem>
-                  <SelectItem value="DOWNGRADE">Downgrade</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>New Plan</Label>
-              <Select value={newPlanId} onValueChange={setNewPlanId}>
-                <SelectTrigger className="mt-1 w-full">
-                  <SelectValue placeholder="Select a new plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {otherPlans.map((plan) => (
-                    <SelectItem key={plan.id} value={plan.id}>
-                      {plan.name} — {plan.currency} {plan.price} / {plan.durationDays}d
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {selectedNewPlan && (
-              <div className="rounded-lg border bg-muted/50 p-3 text-sm">
-                <p>Current plan value: {planPrice}</p>
-                <p>
-                  New plan: {selectedNewPlan.name} — {selectedNewPlan.currency}{" "}
-                  {selectedNewPlan.price} / {selectedNewPlan.durationDays}d
-                </p>
-                <p className="text-muted-foreground">
-                  Unused time on the current plan is credited automatically (prorated) and the
-                  amount due is computed server-side.
-                </p>
-              </div>
-            )}
-            <div>
-              <Label>Initial Payment (optional)</Label>
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                value={changePayment}
-                onChange={(e) => setChangePayment(Math.max(0, Number(e.target.value) || 0))}
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              disabled={!newPlanId || changePlan.isPending}
-              onClick={() =>
-                changePlan
-                  .mutateAsync({
-                    id: membershipId,
-                    newMembershipPlanId: newPlanId,
-                    direction,
-                    ...(changePayment > 0 ? { initialPayment: changePayment } : {}),
-                  })
-                  .then((res) => {
-                    toast.success(
-                      `Plan changed. Credit ${res.credit}, amount due ${res.amountDue}`
-                    );
-                    setChangeOpen(false);
-                    setNewPlanId("");
-                    setChangePayment(0);
-                  })
-                  .catch((e) =>
-                    toast.error(e instanceof ApiError ? e.message : "Failed to change plan")
-                  )
-              }
-            >
-              {changePlan.isPending ? "Changing..." : "Confirm"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Transfer dialog */}
-      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Transfer Membership</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Transfer To Member</Label>
-              <Select value={toMemberId} onValueChange={setToMemberId}>
-                <SelectTrigger className="mt-1 w-full">
-                  <SelectValue placeholder="Select a member" />
-                </SelectTrigger>
-                <SelectContent>
-                  {otherMembers.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.firstName} {m.lastName} {m.memberCode ? `(${m.memberCode})` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="mt-1 text-xs text-muted-foreground">
-                A new membership row is created for the recipient, linked to this one. Payment
-                history stays with the original member.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              disabled={!toMemberId || transfer.isPending}
-              onClick={() =>
-                handle(
-                  transfer.mutateAsync({ id: membershipId, toMemberId }),
-                  "Membership transferred",
-                  () => {
-                    setTransferOpen(false);
-                    setToMemberId("");
-                  }
-                )
-              }
-            >
-              {transfer.isPending ? "Transferring..." : "Transfer"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1770,9 +1488,6 @@ function MemberHeader({
               <MembershipActions
                 membershipId={activeMembership.id}
                 status={activeMembership.status as MembershipStatus}
-                memberId={member?.id ?? ""}
-                planPrice={activeMembership.membershipPlan?.price ?? ""}
-                planId={activeMembership.membershipPlan?.id ?? ""}
               />
             )}
             <SellMembershipDialog memberId={member?.id ?? ""} />
