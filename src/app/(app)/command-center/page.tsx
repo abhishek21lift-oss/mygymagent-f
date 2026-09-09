@@ -41,7 +41,53 @@ function timeAgo(iso: string | undefined) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Stat band: one card, hairline dividers — not four competing tiles. */
+/* Shared tone palette — literal class strings so Tailwind can see    */
+/* every combination statically, however they get composed at runtime.*/
+/* ------------------------------------------------------------------ */
+
+const TONE_STYLES = {
+  primary: {
+    chip: "bg-primary/10 text-primary",
+    bar: "from-primary to-primary/10",
+    glow: "hover:shadow-primary/15",
+    ring: "hover:bg-primary/5",
+  },
+  ai: {
+    chip: "bg-ai/10 text-ai",
+    bar: "from-ai to-ai/10",
+    glow: "hover:shadow-ai/15",
+    ring: "hover:bg-ai/5",
+  },
+  success: {
+    chip: "bg-success/10 text-success",
+    bar: "from-success to-success/10",
+    glow: "hover:shadow-success/15",
+    ring: "hover:bg-success/5",
+  },
+  warning: {
+    chip: "bg-warning/15 text-warning-foreground",
+    bar: "from-warning to-warning/10",
+    glow: "hover:shadow-warning/15",
+    ring: "hover:bg-warning/5",
+  },
+  info: {
+    chip: "bg-info/10 text-info",
+    bar: "from-info to-info/10",
+    glow: "hover:shadow-info/15",
+    ring: "hover:bg-info/5",
+  },
+  destructive: {
+    chip: "bg-destructive/10 text-destructive",
+    bar: "from-destructive to-destructive/10",
+    glow: "hover:shadow-destructive/15",
+    ring: "hover:bg-destructive/5",
+  },
+} as const;
+
+type Tone = keyof typeof TONE_STYLES;
+
+/* ------------------------------------------------------------------ */
+/* Stat cards: one vivid tile per metric, colour-coded by meaning.     */
 /* ------------------------------------------------------------------ */
 
 function Stat({
@@ -50,43 +96,46 @@ function Stat({
   value,
   hint,
   loading,
+  tone,
 }: {
   icon: typeof Users;
   label: string;
   value: string;
   hint: string;
   loading: boolean;
+  tone: Tone;
 }) {
+  const t = TONE_STYLES[tone];
   return (
-    <div className="flex min-w-0 flex-col gap-2 p-5 lg:p-6">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Icon className="size-3.5" aria-hidden />
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em]">{label}</p>
-      </div>
-      <p className="metric-number font-mono text-[28px] leading-none lg:text-3xl">
-        {loading ? <span className="text-muted-foreground/40">—</span> : value}
-      </p>
-      <p className="text-xs text-muted-foreground">{hint}</p>
-    </div>
+    <Card className={`relative overflow-hidden transition-shadow duration-300 ${t.glow}`}>
+      <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} aria-hidden />
+      <CardContent className="flex flex-col gap-3 p-5 lg:p-6">
+        <span className={`flex size-9 items-center justify-center rounded-xl ${t.chip}`}>
+          <Icon className="size-4.5" aria-hidden />
+        </span>
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            {label}
+          </p>
+          <p className="metric-number mt-1 font-mono text-[28px] leading-none lg:text-3xl">
+            {loading ? <span className="text-muted-foreground/40">—</span> : value}
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      </CardContent>
+    </Card>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Decision queue rows: mono index, severity tick, quiet hover.       */
+/* Decision queue rows: tinted icon chip, colour tick, quiet hover.    */
 /* ------------------------------------------------------------------ */
 
-const severityTick: Record<string, string> = {
-  risk: "bg-destructive",
-  sales: "bg-info",
-  stock: "bg-warning",
-  ai: "bg-primary",
-};
-
-const severityText: Record<string, string> = {
-  risk: "text-destructive",
-  sales: "text-info",
-  stock: "text-warning",
-  ai: "text-primary",
+const severityTone: Record<string, Tone> = {
+  risk: "destructive",
+  sales: "info",
+  stock: "warning",
+  ai: "ai",
 };
 
 function PriorityRow({
@@ -104,22 +153,22 @@ function PriorityRow({
   title: string;
   detail: string;
   action: string;
-  severity: keyof typeof severityTick;
+  severity: keyof typeof severityTone;
 }) {
+  const t = TONE_STYLES[severityTone[severity]];
   return (
     <Link
       href={href}
-      className="group/pri flex items-center gap-4 rounded-xl px-3 py-3.5 transition-colors duration-200 hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className={`group/pri flex items-center gap-4 rounded-xl px-3 py-3.5 transition-colors duration-200 ${t.ring} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
     >
       <span className="w-7 shrink-0 font-mono text-xs text-muted-foreground/70">
         {String(index + 1).padStart(2, "0")}
       </span>
-      <span className={`h-8 w-0.5 shrink-0 rounded-full ${severityTick[severity]}`} aria-hidden />
+      <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${t.chip}`}>
+        <Icon className="size-4" aria-hidden />
+      </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <Icon className={`size-4 shrink-0 ${severityText[severity]}`} aria-hidden />
-          <span className="truncate text-sm font-semibold">{title}</span>
-        </span>
+        <span className="truncate text-sm font-semibold">{title}</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span>
       </span>
       <span className="hidden shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover/pri:text-foreground sm:flex">
@@ -143,7 +192,7 @@ function EmptyState({ text }: { text: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Watchlist rows: label left, mono figure right, hairline between.    */
+/* Watchlist rows: label left, coloured figure right, hairline between.*/
 /* ------------------------------------------------------------------ */
 
 function ListRow({
@@ -155,14 +204,18 @@ function ListRow({
   primary: string;
   secondary?: string;
   figure: string;
-  figureTone?: "default" | "warning" | "muted";
+  figureTone?: "default" | "warning" | "destructive" | "info" | "muted";
 }) {
   const tone =
     figureTone === "warning"
-      ? "bg-warning/10 text-warning-foreground"
-      : figureTone === "muted"
-        ? "bg-muted text-muted-foreground"
-        : "bg-primary/[0.06] text-foreground";
+      ? "bg-warning/15 text-warning-foreground"
+      : figureTone === "destructive"
+        ? "bg-destructive/10 text-destructive"
+        : figureTone === "info"
+          ? "bg-info/10 text-info"
+          : figureTone === "muted"
+            ? "bg-muted text-muted-foreground"
+            : "bg-primary/[0.08] text-primary";
   return (
     <div className="flex items-center justify-between gap-3 border-b border-border/60 py-3 last:border-0">
       <div className="min-w-0">
@@ -181,6 +234,8 @@ function WatchlistCard({
   caption,
   href,
   actionLabel,
+  icon: Icon,
+  tone,
   children,
   footer,
 }: {
@@ -188,19 +243,26 @@ function WatchlistCard({
   caption: string;
   href: string;
   actionLabel: string;
+  icon: typeof Users;
+  tone: Tone;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
+  const t = TONE_STYLES[tone];
   return (
-    <Card className="gap-0">
+    <Card className="relative gap-0 overflow-hidden">
+      <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} aria-hidden />
       <CardContent className="flex h-full flex-col gap-0 p-0">
-        <div className="flex items-baseline justify-between gap-3 px-5 pb-3 pt-5">
-          <div>
+        <div className="flex items-start gap-3 px-5 pb-3 pt-6">
+          <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${t.chip}`}>
+            <Icon className="size-4.5" aria-hidden />
+          </span>
+          <div className="min-w-0">
             <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">{caption}</p>
           </div>
         </div>
-        <div className="flex-1 px-5">{children}</div>
+        <div className="flex-1 px-5 pt-2">{children}</div>
         {footer && <div className="px-5 pb-2 pt-3 text-[11px] text-muted-foreground">{footer}</div>}
         <div className="px-5 pb-5 pt-3">
           <Link
@@ -217,7 +279,7 @@ function WatchlistCard({
 }
 
 /* ------------------------------------------------------------------ */
-/* Shortcut tiles: icon + label only — depth of one glance.            */
+/* Shortcut tiles: coloured icon chip + label — one glance, one hue.   */
 /* ------------------------------------------------------------------ */
 
 function Shortcut({
@@ -225,18 +287,25 @@ function Shortcut({
   icon: Icon,
   label,
   sublabel,
+  tone,
 }: {
   href: string;
   icon: typeof Users;
   label: string;
   sublabel: string;
+  tone: Tone;
 }) {
+  const t = TONE_STYLES[tone];
   return (
     <Link
       href={href}
-      className="group/sc flex flex-col gap-3 rounded-xl border border-border/70 bg-card/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/5"
+      className={`group/sc flex flex-col gap-3 rounded-xl border border-border/70 bg-card/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-transparent hover:shadow-lg ${t.glow}`}
     >
-      <Icon className="size-5 text-muted-foreground transition-colors group-hover/sc:text-primary" aria-hidden />
+      <span
+        className={`flex size-9 items-center justify-center rounded-lg ${t.chip} transition-transform duration-300 group-hover/sc:scale-110`}
+      >
+        <Icon className="size-4.5" aria-hidden />
+      </span>
       <span>
         <span className="block text-sm font-semibold">{label}</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">{sublabel}</span>
@@ -305,73 +374,84 @@ export default function CommandCenterPage() {
   return (
     <div className="flex flex-col gap-8">
       {/* ------------------------------------------------ Header */}
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Command Center</h1>
-          <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Your business pulse, decision queue, and growth engine — all in one place.
-          </p>
+      <header className="relative overflow-hidden rounded-[1.75rem] border border-border/60 bg-card/50 px-6 py-8 shadow-sm backdrop-blur-xl sm:px-8 lg:px-10">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -left-16 -top-24 size-72 rounded-full bg-primary/20 blur-3xl animate-blob" />
+          <div className="absolute -right-16 -top-20 size-72 rounded-full bg-ai/20 blur-3xl animate-blob [animation-delay:2.5s]" />
+          <div className="absolute -bottom-20 left-1/3 size-72 rounded-full bg-warning/10 blur-3xl animate-pulse-slow" />
         </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          {updatedAgo && (
-            <span className="mr-1 hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-              <span className="relative flex size-2" aria-hidden>
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60" />
-                <span className="relative inline-flex size-2 rounded-full bg-success" />
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="bg-gradient-to-r from-primary via-ai to-primary bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-3xl">
+              Command Center
+            </h1>
+            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Your business pulse, decision queue, and growth engine — all in one place.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {updatedAgo && (
+              <span className="mr-1 hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
+                <span className="relative flex size-2" aria-hidden>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-success" />
+                </span>
+                Updated {updatedAgo}
               </span>
-              Updated {updatedAgo}
-            </span>
-          )}
-          <Link
-            href="/owner-os"
-            className="inline-flex h-10 items-center gap-2 rounded-[0.78rem] border border-border bg-card/70 px-4 text-sm font-medium shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-          >
-            <BarChart3 className="size-4 text-primary" aria-hidden />
-            Insights
-          </Link>
-          <Link
-            href="/ai"
-            className="inline-flex h-10 items-center gap-2 rounded-[0.78rem] bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30"
-          >
-            <Sparkles className="size-4" aria-hidden />
-            Ask MyGymAgent
-          </Link>
+            )}
+            <Link
+              href="/owner-os"
+              className="inline-flex h-10 items-center gap-2 rounded-[0.78rem] border border-border bg-card/70 px-4 text-sm font-medium shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
+            >
+              <BarChart3 className="size-4 text-primary" aria-hidden />
+              Insights
+            </Link>
+            <Link
+              href="/ai"
+              className="inline-flex h-10 items-center gap-2 rounded-[0.78rem] bg-gradient-to-r from-primary to-ai px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-ai/30"
+            >
+              <Sparkles className="size-4" aria-hidden />
+              Ask MyGymAgent
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* ------------------------------------------------ Stat band */}
-      <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <CardContent className="grid grid-cols-1 divide-y divide-border/60 p-0 sm:grid-cols-2 sm:divide-x lg:grid-cols-4">
-          <Stat
-            icon={CalendarCheck}
-            label="Check-ins today"
-            value={String(data?.today.checkIns ?? 0)}
-            hint="Real-time attendance"
-            loading={briefing.isLoading}
-          />
-          <Stat
-            icon={Wallet}
-            label="Net revenue"
-            value={money(revenue?.netRevenue, currency)}
-            hint="Current period"
-            loading={briefing.isLoading}
-          />
-          <Stat
-            icon={Users}
-            label="Members at risk"
-            value={String(data?.atRiskMembers.count ?? 0)}
-            hint="14+ days inactive"
-            loading={briefing.isLoading}
-          />
-          <Stat
-            icon={Sparkles}
-            label="Pending AI actions"
-            value={String(data?.pendingAiActions ?? 0)}
-            hint="Needs approval"
-            loading={briefing.isLoading}
-          />
-        </CardContent>
-      </Card>
+      <section className="grid animate-in fade-in slide-in-from-bottom-2 grid-cols-1 gap-4 duration-500 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat
+          icon={CalendarCheck}
+          label="Check-ins today"
+          value={String(data?.today.checkIns ?? 0)}
+          hint="Real-time attendance"
+          loading={briefing.isLoading}
+          tone="info"
+        />
+        <Stat
+          icon={Wallet}
+          label="Net revenue"
+          value={money(revenue?.netRevenue, currency)}
+          hint="Current period"
+          loading={briefing.isLoading}
+          tone="success"
+        />
+        <Stat
+          icon={Users}
+          label="Members at risk"
+          value={String(data?.atRiskMembers.count ?? 0)}
+          hint="14+ days inactive"
+          loading={briefing.isLoading}
+          tone="destructive"
+        />
+        <Stat
+          icon={Sparkles}
+          label="Pending AI actions"
+          value={String(data?.pendingAiActions ?? 0)}
+          hint="Needs approval"
+          loading={briefing.isLoading}
+          tone="ai"
+        />
+      </section>
 
       {/* ------------------------------------------------ Decision queue + Sales health */}
       <section className="grid animate-in fade-in slide-in-from-bottom-2 gap-6 duration-500 xl:grid-cols-[1.35fr_0.9fr]">
@@ -380,7 +460,9 @@ export default function CommandCenterPage() {
             <div className="flex items-center justify-between gap-3 px-6 pb-4 pt-6">
               <div>
                 <h2 className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
-                  <Zap className="size-4 text-primary" aria-hidden />
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Zap className="size-4" aria-hidden />
+                  </span>
                   Decision queue
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -388,7 +470,7 @@ export default function CommandCenterPage() {
                 </p>
               </div>
               {data && priorities.length > 0 && (
-                <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-xs tabular-nums text-muted-foreground">
+                <span className="rounded-full bg-gradient-to-r from-primary/15 to-ai/15 px-2.5 py-1 font-mono text-xs tabular-nums text-primary">
                   {priorities.length}
                 </span>
               )}
@@ -421,21 +503,23 @@ export default function CommandCenterPage() {
           </CardContent>
         </Card>
 
-        {/* Ink panel — the one inverted contrast moment on the page. */}
+        {/* Gradient hero panel — the vivid, premium moment on the page. */}
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:100ms]">
-          <div className="flex h-full flex-col rounded-[1.15rem] bg-foreground text-background shadow-xl">
-            <div className="flex items-center justify-between gap-3 border-b border-background/15 px-6 pb-4 pt-6">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[1.15rem] bg-gradient-to-br from-primary via-primary to-ai text-primary-foreground shadow-xl shadow-primary/25">
+            <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
+            <div className="relative flex items-center justify-between gap-3 border-b border-white/15 px-6 pb-4 pt-6">
               <div>
                 <h2 className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
                   <TrendingUp className="size-4" aria-hidden />
                   Sales health
                 </h2>
-                <p className="mt-1 text-xs text-background/60">
+                <p className="mt-1 text-xs text-primary-foreground/70">
                   Pipeline momentum and follow-up discipline.
                 </p>
               </div>
             </div>
-            <div className="flex flex-1 flex-col gap-5 px-6 py-6">
+            <div className="relative flex flex-1 flex-col gap-5 px-6 py-6">
               <div className="grid grid-cols-2 gap-x-5 gap-y-5">
                 {(
                   [
@@ -450,7 +534,7 @@ export default function CommandCenterPage() {
                   ] as const
                 ).map(([label, value]) => (
                   <div key={label} className="flex flex-col gap-1.5">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-background/50">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-primary-foreground/60">
                       {label}
                     </p>
                     <p className="font-mono text-3xl leading-none tabular-nums">{value}</p>
@@ -459,7 +543,7 @@ export default function CommandCenterPage() {
               </div>
               <Link
                 href="/crm"
-                className="group/ink mt-auto inline-flex items-center justify-center gap-2 rounded-[0.78rem] bg-background px-5 py-3.5 text-sm font-semibold text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                className="group/ink mt-auto inline-flex items-center justify-center gap-2 rounded-[0.78rem] bg-primary-foreground px-5 py-3.5 text-sm font-semibold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
               >
                 Open Sales OS
                 <ArrowRight
@@ -477,7 +561,9 @@ export default function CommandCenterPage() {
         <div className="mb-4 flex items-baseline justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
-              <CreditCard className="size-4 text-primary" aria-hidden />
+              <span className="flex size-7 items-center justify-center rounded-lg bg-success/10 text-success">
+                <CreditCard className="size-4" aria-hidden />
+              </span>
               Money movement
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -494,63 +580,74 @@ export default function CommandCenterPage() {
             <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover/mm:-translate-y-0.5 group-hover/mm:translate-x-0.5" />
           </Link>
         </div>
-        <Card className="gap-0">
-          <CardContent className="p-0">
-            <div className="divide-y divide-border/60">
-              <div className="grid grid-cols-1 divide-y divide-border/60 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-                {(
-                  [
-                    {
-                      label: "Net revenue",
-                      value: money(revenue?.netRevenue, currency),
-                      hint: revenue ? `${revenue.paymentCount} payments` : "—",
-                    },
-                    {
-                      label: "Membership revenue",
-                      value: money(revenue?.membershipRevenue, currency),
-                      hint: "Recurring core",
-                    },
-                    {
-                      label: "Outstanding",
-                      value: money(outstanding?.outstandingBalance, currency),
-                      hint: outstanding
-                        ? `${outstanding.membershipsWithBalance} memberships with balance`
-                        : "—",
-                    },
-                  ] as const
-                ).map((item) => (
-                  <div key={item.label} className="flex flex-col gap-2 p-5 lg:px-6 lg:py-7">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {(
+            [
+              {
+                label: "Net revenue",
+                value: money(revenue?.netRevenue, currency),
+                hint: revenue ? `${revenue.paymentCount} payments` : "—",
+                icon: Wallet,
+                tone: "success" as const,
+              },
+              {
+                label: "Membership revenue",
+                value: money(revenue?.membershipRevenue, currency),
+                hint: "Recurring core",
+                icon: Users,
+                tone: "primary" as const,
+              },
+              {
+                label: "Outstanding",
+                value: money(outstanding?.outstandingBalance, currency),
+                hint: outstanding
+                  ? `${outstanding.membershipsWithBalance} memberships with balance`
+                  : "—",
+                icon: CreditCard,
+                tone: "warning" as const,
+              },
+            ] satisfies { label: string; value: string; hint: string; icon: typeof Users; tone: Tone }[]
+          ).map((item) => {
+            const t = TONE_STYLES[item.tone];
+            return (
+              <Card key={item.label} className="relative overflow-hidden">
+                <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} aria-hidden />
+                <CardContent className="flex flex-col gap-3 p-5 lg:p-6">
+                  <span className={`flex size-9 items-center justify-center rounded-xl ${t.chip}`}>
+                    <item.icon className="size-4.5" aria-hidden />
+                  </span>
+                  <div>
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                       {item.label}
                     </p>
-                    <p className="metric-number font-mono text-[28px] leading-none lg:text-3xl">
+                    <p className="metric-number mt-1 font-mono text-[28px] leading-none lg:text-3xl">
                       {item.value}
                     </p>
-                    <p className="text-xs text-muted-foreground">{item.hint}</p>
                   </div>
-                ))}
-              </div>
-              <Link
-                href="/billing"
-                className="group/collect flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40 lg:px-6"
-              >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-warning/10 text-warning-foreground">
-                  <CreditCard className="size-4.5" aria-hidden />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium">Keep collections moving</span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
-                    Review outstanding memberships and keep cash flow healthy.
-                  </span>
-                </span>
-                <ArrowRight
-                  className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/collect:translate-x-0.5"
-                  aria-hidden
-                />
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+                  <p className="text-xs text-muted-foreground">{item.hint}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        <Link
+          href="/billing"
+          className="group/collect mt-4 flex items-center gap-4 rounded-2xl border border-warning/20 bg-warning/[0.05] px-5 py-4 transition-colors hover:bg-warning/[0.09] lg:px-6"
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning-foreground">
+            <CreditCard className="size-4.5" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium">Keep collections moving</span>
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              Review outstanding memberships and keep cash flow healthy.
+            </span>
+          </span>
+          <ArrowRight
+            className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/collect:translate-x-0.5"
+            aria-hidden
+          />
+        </Link>
       </section>
 
       {/* ------------------------------------------------ Watchlists */}
@@ -560,6 +657,8 @@ export default function CommandCenterPage() {
           caption="Retention watchlist"
           href="/members"
           actionLabel="View all members"
+          icon={AlertTriangle}
+          tone="destructive"
           footer={data ? `${data.atRiskMembers.count} total on watchlist` : undefined}
         >
           {data?.atRiskMembers.top.length ? (
@@ -573,7 +672,7 @@ export default function CommandCenterPage() {
                     : `${member.daysSinceLastVisit} days since visit`
                 }
                 figure="Risk"
-                figureTone="warning"
+                figureTone="destructive"
               />
             ))
           ) : (
@@ -586,6 +685,8 @@ export default function CommandCenterPage() {
           caption="Inventory watchlist"
           href="/inventory"
           actionLabel="Open inventory"
+          icon={Package}
+          tone="warning"
           footer={data ? `${data.lowStock.count} products below reorder level` : undefined}
         >
           {data?.lowStock.top.length ? (
@@ -608,6 +709,8 @@ export default function CommandCenterPage() {
           caption="People + programming activity"
           href="/staff"
           actionLabel="Open staff"
+          icon={Users}
+          tone="info"
           footer={
             data
               ? `${data.trainerWorkload.trainerCount} trainers · plans assigned last 30 days`
@@ -621,7 +724,7 @@ export default function CommandCenterPage() {
                 primary={`${trainer.firstName} ${trainer.lastName}`}
                 secondary={`${trainer.assignedMemberCount} assigned members`}
                 figure={`${trainer.workoutPlansAssignedLast30Days + trainer.dietPlansAssignedLast30Days} plans`}
-                figureTone="muted"
+                figureTone="info"
               />
             ))
           ) : (
@@ -638,21 +741,39 @@ export default function CommandCenterPage() {
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
           {hasPermission("attendance.read") && (
-            <Shortcut href="/attendance" icon={CalendarCheck} label="Attendance" sublabel="Check-ins" />
+            <Shortcut
+              href="/attendance"
+              icon={CalendarCheck}
+              label="Attendance"
+              sublabel="Check-ins"
+              tone="info"
+            />
           )}
           {hasPermission("members.read") && (
-            <Shortcut href="/members" icon={Users} label="Members" sublabel="Member 360" />
+            <Shortcut href="/members" icon={Users} label="Members" sublabel="Member 360" tone="primary" />
           )}
           {hasPermission("payments.read") && (
-            <Shortcut href="/billing" icon={Wallet} label="Billing" sublabel="Collections" />
+            <Shortcut href="/billing" icon={Wallet} label="Billing" sublabel="Collections" tone="success" />
           )}
           {hasPermission("workouts.edit") && (
-            <Shortcut href="/workouts" icon={Dumbbell} label="Workout OS" sublabel="Programs" />
+            <Shortcut
+              href="/workouts"
+              icon={Dumbbell}
+              label="Workout OS"
+              sublabel="Programs"
+              tone="destructive"
+            />
           )}
-          <Shortcut href="/owner-os" icon={BarChart3} label="Owner Insights" sublabel="Deep dive" />
-          <Shortcut href="/crm" icon={TrendingUp} label="Sales OS" sublabel="Pipeline" />
-          <Shortcut href="/inventory" icon={Package} label="Inventory OS" sublabel="Stock" />
-          <Shortcut href="/ai" icon={Sparkles} label="MyGymAgent AI" sublabel="Ask anything" />
+          <Shortcut
+            href="/owner-os"
+            icon={BarChart3}
+            label="Owner Insights"
+            sublabel="Deep dive"
+            tone="warning"
+          />
+          <Shortcut href="/crm" icon={TrendingUp} label="Sales OS" sublabel="Pipeline" tone="info" />
+          <Shortcut href="/inventory" icon={Package} label="Inventory OS" sublabel="Stock" tone="success" />
+          <Shortcut href="/ai" icon={Sparkles} label="MyGymAgent AI" sublabel="Ask anything" tone="ai" />
         </div>
       </section>
 
