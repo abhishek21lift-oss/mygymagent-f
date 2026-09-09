@@ -38,6 +38,7 @@ import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,7 +69,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { useMember, useUpdateMember } from "@/lib/hooks/use-members";
+import { useMember, useUpdateMember, useDeleteMember } from "@/lib/hooks/use-members";
 import { useMemberWorkoutHistory } from "@/lib/hooks/use-workout-history";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
@@ -1599,6 +1600,22 @@ function MemberHeader({
     membershipPlan?: { id: string; name: string; price: string };
   }>;
 }) {
+  const router = useRouter();
+  const { hasPermission } = useAuth();
+  const deleteMember = useDeleteMember();
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+
+  async function handleDelete() {
+    try {
+      await deleteMember.mutateAsync(member.id);
+      toast.success(`${member.firstName} ${member.lastName} has been deleted`);
+      setDeleteOpen(false);
+      router.push("/members");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Failed to delete member");
+    }
+  }
+
   return (
     <div className="relative overflow-hidden rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 shadow-sm sm:p-8">
       {/* Decorative gradient orbs */}
@@ -1804,24 +1821,44 @@ function MemberHeader({
                   <Mail className="size-3.5 mr-2" />
                   Email Member
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (confirm("Are you sure you want to delete this member? This action cannot be undone.")) {
-                      // Delete member logic would go here
-                      toast.success("Member deletion not implemented in this view");
-                    }
-                  }}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="size-3.5 mr-2" />
-                  Delete Member
-                </DropdownMenuItem>
+                {hasPermission("members.delete") && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setDeleteOpen(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="size-3.5 mr-2" />
+                      Delete Member
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </div>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete member</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {member.firstName} {member.lastName} will be marked inactive and removed from active
+            member views. Their membership, payment, and activity history is preserved and this
+            can be reversed by support if needed.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleteMember.isPending}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => void handleDelete()} disabled={deleteMember.isPending}>
+              {deleteMember.isPending ? "Deleting..." : "Delete member"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
