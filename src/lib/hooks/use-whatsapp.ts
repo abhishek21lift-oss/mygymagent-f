@@ -32,7 +32,7 @@ export function useWhatsAppMessages(limit = 100) {
 export function useSendWhatsAppMessage() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: { to: string; text: string }) => api.post<{ providerMessageId: string | null; status: string }>("/whatsapp/messages", input),
+    mutationFn: (input: { to: string; text: string }) => api.post<{ id: string; status: string }>("/whatsapp/messages", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "messages"] }),
   })
 }

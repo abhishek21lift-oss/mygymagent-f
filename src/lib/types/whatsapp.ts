@@ -1,25 +1,33 @@
+// Shapes returned by the NestJS backend (camelCase, matching Prisma):
+// GET /whatsapp/integration -> WhatsappIntegration | null
+// GET /whatsapp/messages -> MessageLog[] (WHATSAPP channel only)
+
 export interface WhatsAppIntegration {
   id: string
-  organization_id: string
-  waba_id: string | null
-  phone_number_id: string
-  business_account_id: string | null
-  display_phone_number: string | null
-  display_name: string | null
-  status: "CONNECTED" | "DISCONNECTED" | string
-  last_verified_at: string | null
+  organizationId: string
+  status: "NOT_CONNECTED" | "CONNECTED" | "DISCONNECTED" | "ERROR"
+  wabaId: string | null
+  phoneNumberId: string | null
+  displayPhoneNumber: string | null
+  displayName: string | null
+  businessAccountId: string | null
+  lastError: string | null
+  connectedAt: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface WhatsAppMessage {
   id: string
-  phone_number_id: string
-  provider_message_id: string | null
-  direction: "INBOUND" | "OUTBOUND" | string
-  from_number: string | null
-  to_number: string | null
-  message_type: string
-  text: string | null
-  status: string
-  created_at: string
-  updated_at: string
+  organizationId: string | null
+  channel: "WHATSAPP"
+  category: string
+  templateKey: string
+  recipient: string
+  memberId: string | null
+  status: "PENDING" | "SENT" | "FAILED" | "SKIPPED_NO_CONSENT"
+  attempts: number
+  errorMessage: string | null
+  sentAt: string | null
+  createdAt: string
 }

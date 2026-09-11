@@ -30,7 +30,7 @@ export const primaryNav: NavItem[] = [
     { title: "Staff", href: "/staff", icon: UserCog, permission: "users.read" },
     { title: "Branches", href: "/branches", icon: Building2, permission: "branches.read" },
   ] },
-  { title: "Insights", href: "/owner-os", icon: BarChart3, permission: "organizations.read" },
+  { title: "Insights", href: "/owner-os", icon: BarChart3, permission: "reports.view" },
   { title: "Intelligence", href: "/intelligence", icon: Brain, permission: "reports.view", accent: "ai" },
   { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai", children: [
     { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },

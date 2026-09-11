@@ -330,10 +330,10 @@ export default function IntelligencePage() {
           <SectionHeader eyebrow="01 · pulse" title="Executive signal layer" description="The fastest read on financial health, member health, sales velocity, and operational pressure." />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
             <MetricCard label="Net revenue" value={formatMoney(revenueRow?.netRevenue)} detail={`${revenueRow?.paymentCount ?? 0} recorded payments`} icon={DollarSign} tone="violet" loading={revenue.isLoading} />
-            <MetricCard label="Outstanding" value={formatMoney(outstanding?.outstandingBalance)} detail={`${outstanding?.membershipsWithBalance ?? 0} memberships with balance`} icon={WalletCards} tone="rose" loading={revenue.isLoading} href="/finance" />
+            <MetricCard label="Outstanding" value={formatMoney(outstanding?.outstandingBalance)} detail={`${outstanding?.membershipsWithBalance ?? 0} memberships with balance`} icon={WalletCards} tone="rose" loading={revenue.isLoading} href="/billing" />
             <MetricCard label="Members" value={totalMembers} detail={`${activeMembers} currently active`} icon={Users} tone="cyan" loading={status.isLoading} href="/members" />
             <MetricCard label="At risk" value={riskCount} detail="14+ day inactivity signal" icon={AlertTriangle} tone="amber" loading={atRisk.isLoading} href="/members?filter=at-risk" />
-            <MetricCard label="Conversion" value={`${Number(sales.data?.conversionRatePct ?? 0)}%`} detail={`${sales.data?.wonLeads ?? 0} won leads`} icon={TrendingUp} tone="emerald" loading={sales.isLoading} href="/sales" />
+            <MetricCard label="Conversion" value={`${Number(sales.data?.conversionRatePct ?? 0)}%`} detail={`${sales.data?.wonLeads ?? 0} won leads`} icon={TrendingUp} tone="emerald" loading={sales.isLoading} href="/crm" />
             <MetricCard label="Low stock" value={lowStockCount} detail="Products requiring attention" icon={Boxes} tone="blue" loading={inventory.isLoading} href="/inventory" />
           </div>
         </section>

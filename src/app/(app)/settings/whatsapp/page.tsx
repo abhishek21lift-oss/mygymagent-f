@@ -140,7 +140,7 @@ export default function WhatsAppSettingsPage() {
             <CardContent className="space-y-6 pt-6">
               {connected ? (
                 <div className="space-y-5">
-                  <div className="grid gap-4 sm:grid-cols-2"><Info label="Business number" value={integration?.display_phone_number ?? "—"} /><Info label="Business name" value={integration?.display_name ?? "—"} /><Info label="WABA ID" value={integration?.waba_id ?? integration?.business_account_id ?? "—"} mono /><Info label="Phone Number ID" value={integration?.phone_number_id ?? "—"} mono /></div>
+                  <div className="grid gap-4 sm:grid-cols-2"><Info label="Business number" value={integration?.displayPhoneNumber ?? "—"} /><Info label="Business name" value={integration?.displayName ?? "—"} /><Info label="WABA ID" value={integration?.wabaId ?? integration?.businessAccountId ?? "—"} mono /><Info label="Phone Number ID" value={integration?.phoneNumberId ?? "—"} mono /></div>
                   <div className="flex items-center gap-2 rounded-xl border p-4 text-sm"><ShieldCheck className="h-5 w-5 text-primary" /><span>Access credentials are kept server-side and encrypted at rest.</span></div>
                   <Button variant="outline" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}>{disconnect.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unplug className="mr-2 h-4 w-4" />}Disconnect WhatsApp</Button>
                 </div>

@@ -24,6 +24,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
+import { useMemberStatusBreakdown, useRevenueTrend } from "@/lib/hooks/use-analytics";
+import { useOrganization } from "@/lib/hooks/use-organization";
 import { SceneBackground } from "@/components/three/scene-bg";
 import { MetricCard3D } from "@/components/three/metric-card-3d";
 import { Chart3D } from "@/components/three/chart-3d";
@@ -38,35 +40,24 @@ const QUICK_ACTIONS = [
   ["Add a lead", "Track a new prospect", "/crm", Megaphone, "leads.manage"],
 ] as const;
 
-const WEEKLY_CHECKINS = [
-  { day: "Mon", value: 42 },
-  { day: "Tue", value: 58 },
-  { day: "Wed", value: 35 },
-  { day: "Thu", value: 67 },
-  { day: "Fri", value: 89 },
-  { day: "Sat", value: 76 },
-  { day: "Sun", value: 45 },
-];
+const STATUS_COLORS: Record<string, string> = {
+  ACTIVE: "#818cf8",
+  INACTIVE: "#f59e0b",
+  FROZEN: "#06b6d4",
+  EXPIRED: "#f43f5e",
+};
 
-const MEMBERSHIP_TYPES = [
-  { label: "Monthly", value: 45, color: "#818cf8" },
-  { label: "Quarterly", value: 25, color: "#06b6d4" },
-  { label: "Annual", value: 20, color: "#10b981" },
-  { label: "Premium", value: 10, color: "#f59e0b" },
-];
-
-const ACTIVITIES = [
-  { label: "Check-ins", time: "9:00 AM", color: "#06b6d4", value: 0.8 },
-  { label: "Payments", time: "10:30 AM", color: "#10b981", value: 0.6 },
-  { label: "New Members", time: "11:00 AM", color: "#818cf8", value: 0.4 },
-  { label: "Workouts", time: "2:00 PM", color: "#f59e0b", value: 0.9 },
-  { label: "Follow-ups", time: "4:00 PM", color: "#f43f5e", value: 0.5 },
-];
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export default function DashboardPage() {
   const { hasPermission } = useAuth();
   const briefing = useDailyBriefing();
   const data = briefing.data;
+  const organization = useOrganization();
+  const revenueTrend = useRevenueTrend(6);
+  const statusBreakdown = useMemberStatusBreakdown();
+
+  const gymName = organization.data?.name?.toUpperCase() ?? "MY GYM";
 
   const currency = data?.revenue.revenue[0]?.currency ?? "INR";
   const revenue =
@@ -114,39 +105,35 @@ export default function DashboardPage() {
     : [];
 
   const weeklyData = useMemo(() => {
-    if (data?.today.checkIns) {
-      return WEEKLY_CHECKINS.map((d) => ({
-        ...d,
-        value: Math.round(d.value * (data.today.checkIns / 60)),
-      }));
-    }
-    return WEEKLY_CHECKINS;
-  }, [data]);
+    const months = revenueTrend.data ?? [];
+    if (months.length === 0) return [];
+    const firstCurrency = months[0]?.revenue[0]?.currency;
+    return months.map((m) => {
+      const [year, month] = m.month.split("-").map(Number);
+      const label = month >= 1 && month <= 12 ? MONTH_LABELS[month - 1] : m.month;
+      const row = m.revenue.find((r) => r.currency === firstCurrency);
+      void year;
+      return { day: label, value: Math.max(0, Math.round(Number(row?.netRevenue ?? 0))) };
+    });
+  }, [revenueTrend.data]);
 
   const membershipData = useMemo(() => {
-    if (data?.salesFunnel) {
-      const total = data.salesFunnel.totalLeads || 100;
-      return [
-        { label: "Active", value: Math.round(total * 0.45), color: "#818cf8" },
-        { label: "Pending", value: Math.round(total * 0.25), color: "#06b6d4" },
-        { label: "At Risk", value: data.atRiskMembers.count || Math.round(total * 0.15), color: "#f59e0b" },
-        { label: "New", value: Math.round(total * 0.15), color: "#10b981" },
-      ];
-    }
-    return MEMBERSHIP_TYPES;
-  }, [data]);
+    const rows = statusBreakdown.data ?? [];
+    return rows.map((row, index) => ({
+      label: row.status,
+      value: row.count,
+      color: STATUS_COLORS[row.status] ?? ["#818cf8", "#06b6d4", "#10b981", "#f59e0b"][index % 4],
+    }));
+  }, [statusBreakdown.data]);
 
   const activityTimeline = useMemo(() => {
-    if (data) {
-      return [
-        { label: "Check-ins", time: "9:00 AM", color: "#06b6d4", value: Math.min(1, data.today.checkIns / 50) },
-        { label: "Revenue", time: "10:30 AM", color: "#10b981", value: Math.min(1, Number(data.revenue.revenue[0]?.netRevenue || 0) / 10000) },
-        { label: "Members", time: "11:00 AM", color: "#818cf8", value: Math.min(1, data.salesFunnel.wonLeads / 20) },
-        { label: "Workouts", time: "2:00 PM", color: "#f59e0b", value: 0.7 },
-        { label: "Follow-ups", time: "4:00 PM", color: "#f43f5e", value: Math.min(1, data.salesFunnel.followUps.total / 10) },
-      ];
-    }
-    return ACTIVITIES;
+    if (!data) return [];
+    return [
+      { label: "Check-ins", time: "Today", color: "#06b6d4", value: Math.min(1, data.today.checkIns / 50) },
+      { label: "Revenue", time: "This month", color: "#10b981", value: Math.min(1, Number(data.revenue.revenue[0]?.netRevenue || 0) / 10000) },
+      { label: "Conversions", time: "This month", color: "#818cf8", value: Math.min(1, data.salesFunnel.wonLeads / 20) },
+      { label: "Follow-ups", time: "Tracked", color: "#f43f5e", value: Math.min(1, data.salesFunnel.followUps.total / 10) },
+    ];
   }, [data]);
 
   return (
@@ -162,7 +149,7 @@ export default function DashboardPage() {
 
         <div className="relative z-10 flex w-full max-w-3xl flex-col items-center justify-center gap-6 text-center">
           <h1 className="select-none bg-gradient-to-r from-blue-600 via-violet-600 via-50% to-fuchsia-500 bg-clip-text text-4xl font-black uppercase leading-[0.95] tracking-[-0.045em] text-transparent drop-shadow-[0_8px_25px_rgba(99,102,241,0.18)] sm:text-6xl lg:text-7xl">
-            619 FITNESS STUDIO
+            {gymName}
           </h1>
           <Link
             href="/ai"
@@ -181,14 +168,14 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold tracking-tight">Business pulse</h2>
             <p className="text-xs text-muted-foreground">The numbers that matter today.</p>
           </div>
-          <Link href="/insights" className="text-xs font-medium text-primary hover:underline">
+          <Link href="/intelligence" className="text-xs font-medium text-primary hover:underline">
             View insights
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard3D icon={CalendarCheck} label="Today&apos;s check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Real-time" trend="up" trendValue="+12%" delay={0} />
-          <MetricCard3D icon={Wallet} label="Net revenue" value={data ? `${currency} ${revenue}` : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="up" trendValue="+8%" delay={100} />
-          <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" hint="14+ days inactive" trend="down" trendValue="-3" delay={200} />
+          <MetricCard3D icon={CalendarCheck} label="Today&apos;s check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Real-time" trend="neutral" delay={0} />
+          <MetricCard3D icon={Wallet} label="Net revenue" value={data ? `${currency} ${revenue}` : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="neutral" delay={100} />
+          <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" hint="14+ days inactive" trend="neutral" delay={200} />
           <MetricCard3D icon={Sparkles} label="AI actions" value={data?.pendingAiActions} loading={briefing.isLoading} accent="violet" hint="Awaiting approval" trend="neutral" delay={300} />
         </div>
       </section>
@@ -198,17 +185,23 @@ export default function DashboardPage() {
           <CardHeader className="border-b border-blue-100/70 bg-gradient-to-r from-cyan-50/80 via-white/50 to-blue-50/80 pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 text-base"><Activity className="size-4 text-cyan-500" />Weekly check-ins</CardTitle>
-                <p className="mt-1 text-xs text-muted-foreground">Interactive 3D attendance visualization.</p>
+                <CardTitle className="flex items-center gap-2 text-base"><Activity className="size-4 text-cyan-500" />Revenue trend</CardTitle>
+                <p className="mt-1 text-xs text-muted-foreground">Net revenue by month, in {revenueTrend.data?.[0]?.revenue[0]?.currency ?? currency}.</p>
               </div>
-              <Link href="/attendance" className="text-xs font-medium text-primary hover:underline">Details</Link>
+              <Link href="/billing" className="text-xs font-medium text-primary hover:underline">Details</Link>
             </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-4">
             <div className="h-64">
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
-                <Chart3D data={weeklyData} />
-              </Suspense>
+              {revenueTrend.isLoading ? (
+                <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
+              ) : weeklyData.length === 0 ? (
+                <div className="flex h-full items-center justify-center"><p className="text-sm text-muted-foreground">Data unavailable — no revenue recorded yet.</p></div>
+              ) : (
+                <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
+                  <Chart3D data={weeklyData} />
+                </Suspense>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -217,17 +210,23 @@ export default function DashboardPage() {
           <CardHeader className="border-b border-violet-100/70 bg-gradient-to-r from-violet-50/80 via-white/50 to-fuchsia-50/80 pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 text-base"><Zap className="size-4 text-violet-500" />Membership distribution</CardTitle>
-                <p className="mt-1 text-xs text-muted-foreground">Live membership status orbiting in 3D space.</p>
+                <CardTitle className="flex items-center gap-2 text-base"><Zap className="size-4 text-violet-500" />Member status</CardTitle>
+                <p className="mt-1 text-xs text-muted-foreground">Live member statuses across your gym.</p>
               </div>
               <Link href="/members" className="text-xs font-medium text-primary hover:underline">Members</Link>
             </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-4">
             <div className="h-64">
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
-                <DataOrb data={membershipData} />
-              </Suspense>
+              {statusBreakdown.isLoading ? (
+                <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
+              ) : membershipData.length === 0 ? (
+                <div className="flex h-full items-center justify-center"><p className="text-sm text-muted-foreground">Data unavailable — no members yet.</p></div>
+              ) : (
+                <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
+                  <DataOrb data={membershipData} />
+                </Suspense>
+              )}
             </div>
             <div className="mt-3 flex flex-wrap gap-3">
               {membershipData.map((item) => (
@@ -253,9 +252,15 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="p-2 sm:p-4">
             <div className="h-48">
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
-                <ActivityTimeline3D activities={activityTimeline} />
-              </Suspense>
+              {briefing.isLoading ? (
+                <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
+              ) : activityTimeline.length === 0 ? (
+                <div className="flex h-full items-center justify-center"><p className="text-sm text-muted-foreground">Data unavailable.</p></div>
+              ) : (
+                <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
+                  <ActivityTimeline3D activities={activityTimeline} />
+                </Suspense>
+              )}
             </div>
           </CardContent>
         </Card>
