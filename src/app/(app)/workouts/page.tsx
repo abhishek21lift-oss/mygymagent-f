@@ -4,11 +4,12 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, Dumbbell, Layers3, Plus, Sparkles, Target, Trash2, UserPlus, Users, Zap } from "lucide-react";
+import { ArrowRight, Dumbbell, Flame, Layers3, Plus, Sparkles, Target, Trash2, UserPlus, Users, Zap } from "lucide-react";
+import Link from "next/link";
 import { MemberPicker } from "@/components/shared/member-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -20,14 +21,376 @@ import { ApiError } from "@/lib/api/client";
 import { assignWorkoutPlanSchema, createExerciseSchema, createWorkoutPlanSchema, type AssignWorkoutPlanInput, type CreateExerciseInput, type CreateWorkoutPlanInput } from "@/lib/validation/gym";
 import type { WorkoutAssignment } from "@/lib/types/gym";
 
-function AddExerciseDialog() { const [open,setOpen]=React.useState(false); const create=useCreateExercise(); const form=useForm<CreateExerciseInput>({resolver:zodResolver(createExerciseSchema),defaultValues:{name:"",muscleGroup:"",equipment:"",description:""}}); async function submit(v:CreateExerciseInput){try{await create.mutateAsync(v);toast.success("Exercise added");setOpen(false);form.reset()}catch(e){toast.error(e instanceof ApiError?e.message:"Failed to add exercise")}} return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button variant="outline" className="rounded-xl"><Plus className="size-4"/>Add exercise</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>New exercise</DialogTitle></DialogHeader><Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4"><FormField control={form.control} name="name" render={({field})=><FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Back Squat" {...field}/></FormControl><FormMessage/></FormItem>}/><div className="grid grid-cols-2 gap-3"><FormField control={form.control} name="muscleGroup" render={({field})=><FormItem><FormLabel>Muscle group</FormLabel><FormControl><Input placeholder="Legs" {...field}/></FormControl></FormItem>}/><FormField control={form.control} name="equipment" render={({field})=><FormItem><FormLabel>Equipment</FormLabel><FormControl><Input placeholder="Barbell" {...field}/></FormControl></FormItem>}/></div><DialogFooter><Button type="submit" disabled={create.isPending}>{create.isPending?"Adding...":"Add exercise"}</Button></DialogFooter></form></Form></DialogContent></Dialog> }
+function AddExerciseDialog() {
+  const [open, setOpen] = React.useState(false);
+  const create = useCreateExercise();
+  const form = useForm<CreateExerciseInput>({ resolver: zodResolver(createExerciseSchema), defaultValues: { name: "", muscleGroup: "", equipment: "", description: "" } });
+  async function submit(v: CreateExerciseInput) {
+    try {
+      await create.mutateAsync(v);
+      toast.success("Exercise added");
+      setOpen(false);
+      form.reset();
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Failed to add exercise");
+    }
+  }
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="min-h-11 rounded-2xl border-stone-200 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+          <Plus className="size-4" aria-hidden="true" />Add exercise
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>New exercise</DialogTitle></DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
+            <FormField control={form.control} name="name" render={({ field }) => (
+              <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Back Squat" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField control={form.control} name="muscleGroup" render={({ field }) => (
+                <FormItem><FormLabel>Muscle group</FormLabel><FormControl><Input placeholder="Legs" {...field} /></FormControl></FormItem>
+              )} />
+              <FormField control={form.control} name="equipment" render={({ field }) => (
+                <FormItem><FormLabel>Equipment</FormLabel><FormControl><Input placeholder="Barbell" {...field} /></FormControl></FormItem>
+              )} />
+            </div>
+            <DialogFooter><Button type="submit" disabled={create.isPending} className="min-h-11">{create.isPending ? "Adding..." : "Add exercise"}</Button></DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-function CreatePlanDialog(){const [open,setOpen]=React.useState(false);const exercises=useExercises();const create=useCreateWorkoutPlan();const form=useForm<CreateWorkoutPlanInput>({resolver:zodResolver(createWorkoutPlanSchema),defaultValues:{name:"",description:"",exercises:[]}});const {fields,append,remove}=useFieldArray({control:form.control,name:"exercises"});function add(){append({exerciseId:"",order:fields.length+1,sets:3,reps:"8-12",restSeconds:60,notes:""})}async function submit(v:CreateWorkoutPlanInput){try{await create.mutateAsync(v);toast.success("Workout plan created");setOpen(false);form.reset({name:"",description:"",exercises:[]})}catch(e){toast.error(e instanceof ApiError?e.message:"Failed to create plan")}}return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button className="rounded-xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)]"><Plus className="size-4"/>New plan</Button></DialogTrigger><DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>New workout plan</DialogTitle></DialogHeader><Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4"><FormField control={form.control} name="name" render={({field})=><FormItem><FormLabel>Plan name</FormLabel><FormControl><Input placeholder="Beginner Strength" {...field}/></FormControl><FormMessage/></FormItem>}/><FormField control={form.control} name="description" render={({field})=><FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={2} {...field}/></FormControl></FormItem>}/><div className="flex items-center justify-between"><p className="text-sm font-bold">Exercises</p><Button type="button" variant="outline" size="sm" onClick={add}><Plus className="size-3.5"/>Add exercise</Button></div>{fields.length===0?<p className="rounded-xl bg-stone-50 p-4 text-xs text-stone-500">Add at least one exercise to this plan.</p>:<div className="max-h-72 space-y-3 overflow-y-auto pr-1">{fields.map((field,index)=><div key={field.id} className="rounded-2xl border bg-stone-50/70 p-3"><div className="flex gap-2"><FormField control={form.control} name={`exercises.${index}.exerciseId`} render={({field:f})=><FormItem className="flex-1"><Select value={f.value} onValueChange={f.onChange}><FormControl><SelectTrigger><SelectValue placeholder="Select an exercise"/></SelectTrigger></FormControl><SelectContent>{exercises.data?.map(ex=><SelectItem key={ex.id} value={ex.id}>{ex.name}</SelectItem>)}</SelectContent></Select><FormMessage/></FormItem>}/><Button type="button" variant="ghost" size="icon" onClick={()=>remove(index)}><Trash2 className="size-4"/></Button></div><div className="mt-2 grid grid-cols-3 gap-2"><FormField control={form.control} name={`exercises.${index}.sets`} render={({field:f})=><FormItem><FormLabel className="text-xs">Sets</FormLabel><FormControl><Input type="number" {...f}/></FormControl></FormItem>}/><FormField control={form.control} name={`exercises.${index}.reps`} render={({field:f})=><FormItem><FormLabel className="text-xs">Reps</FormLabel><FormControl><Input {...f}/></FormControl></FormItem>}/><FormField control={form.control} name={`exercises.${index}.restSeconds`} render={({field:f})=><FormItem><FormLabel className="text-xs">Rest (s)</FormLabel><FormControl><Input type="number" {...f}/></FormControl></FormItem>}/></div></div>)}</div>}<DialogFooter><Button type="submit" disabled={create.isPending}>{create.isPending?"Creating...":"Create plan"}</Button></DialogFooter></form></Form></DialogContent></Dialog>}
+function CreatePlanDialog() {
+  const [open, setOpen] = React.useState(false);
+  const exercises = useExercises();
+  const create = useCreateWorkoutPlan();
+  const form = useForm<CreateWorkoutPlanInput>({ resolver: zodResolver(createWorkoutPlanSchema), defaultValues: { name: "", description: "", exercises: [] } });
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: "exercises" });
+  function add() {
+    append({ exerciseId: "", order: fields.length + 1, sets: 3, reps: "8-12", restSeconds: 60, notes: "" });
+  }
+  async function submit(v: CreateWorkoutPlanInput) {
+    try {
+      await create.mutateAsync(v);
+      toast.success("Workout plan created");
+      setOpen(false);
+      form.reset({ name: "", description: "", exercises: [] });
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Failed to create plan");
+    }
+  }
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#e11d48,#f97316_55%,#0891b2)] text-white shadow-lg shadow-rose-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+          <Plus className="size-4" aria-hidden="true" />New plan
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader><DialogTitle>New workout plan</DialogTitle></DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
+            <FormField control={form.control} name="name" render={({ field }) => (
+              <FormItem><FormLabel>Plan name</FormLabel><FormControl><Input placeholder="Beginner Strength" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="description" render={({ field }) => (
+              <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl></FormItem>
+            )} />
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-bold">Exercises</p>
+              <Button type="button" variant="outline" size="sm" onClick={add} className="min-h-11"><Plus className="size-3.5" aria-hidden="true" />Add exercise</Button>
+            </div>
+            {fields.length === 0 ? (
+              <p className="rounded-xl bg-stone-50 p-4 text-xs font-medium text-stone-600">Add at least one exercise to this plan.</p>
+            ) : (
+              <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/60 to-orange-50/40 p-3">
+                    <div className="flex gap-2">
+                      <FormField control={form.control} name={`exercises.${index}.exerciseId`} render={({ field: f }) => (
+                        <FormItem className="flex-1">
+                          <Select value={f.value} onValueChange={f.onChange}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select an exercise" /></SelectTrigger></FormControl>
+                            <SelectContent>{exercises.data?.map((ex) => <SelectItem key={ex.id} value={ex.id}>{ex.name}</SelectItem>)}</SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} aria-label="Remove exercise" className="min-h-11 min-w-11"><Trash2 className="size-4" aria-hidden="true" /></Button>
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      <FormField control={form.control} name={`exercises.${index}.sets`} render={({ field: f }) => (
+                        <FormItem><FormLabel className="text-xs">Sets</FormLabel><FormControl><Input type="number" {...f} /></FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name={`exercises.${index}.reps`} render={({ field: f }) => (
+                        <FormItem><FormLabel className="text-xs">Reps</FormLabel><FormControl><Input {...f} /></FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name={`exercises.${index}.restSeconds`} render={({ field: f }) => (
+                        <FormItem><FormLabel className="text-xs">Rest (s)</FormLabel><FormControl><Input type="number" {...f} /></FormControl></FormItem>
+                      )} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <DialogFooter><Button type="submit" disabled={create.isPending} className="min-h-11">{create.isPending ? "Creating..." : "Create plan"}</Button></DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-function AssignDialog({planId,planName}:{planId:string;planName:string}){const [open,setOpen]=React.useState(false);const [member,setMember]=React.useState<{id:string;label:string}|null>(null);const assign=useAssignWorkoutPlan();const form=useForm<Omit<AssignWorkoutPlanInput,"memberId">>({resolver:zodResolver(assignWorkoutPlanSchema.omit({memberId:true})),defaultValues:{notes:""}});async function submit(v:Omit<AssignWorkoutPlanInput,"memberId">){if(!member)return toast.error("Select a member first");try{await assign.mutateAsync({planId,input:{...v,memberId:member.id}});toast.success(`Assigned "${planName}" to ${member.label}`);setOpen(false);setMember(null);form.reset()}catch(e){toast.error(e instanceof ApiError?e.message:"Failed to assign plan")}}return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button variant="outline" size="sm" className="rounded-xl"><UserPlus className="size-3.5"/>Assign</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Assign &quot;{planName}&quot;</DialogTitle></DialogHeader><div className="space-y-4"><MemberPicker value={member} onChange={setMember}/><Form {...form}><form onSubmit={form.handleSubmit(submit)}><FormField control={form.control} name="notes" render={({field})=><FormItem><FormLabel>Notes (optional)</FormLabel><FormControl><Textarea rows={2} {...field}/></FormControl></FormItem>}/><DialogFooter className="mt-4"><Button type="submit" disabled={assign.isPending}>{assign.isPending?"Assigning...":"Assign plan"}</Button></DialogFooter></form></Form></div></DialogContent></Dialog>}
+function AssignDialog({ planId, planName }: { planId: string; planName: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [member, setMember] = React.useState<{ id: string; label: string } | null>(null);
+  const assign = useAssignWorkoutPlan();
+  const form = useForm<Omit<AssignWorkoutPlanInput, "memberId">>({ resolver: zodResolver(assignWorkoutPlanSchema.omit({ memberId: true })), defaultValues: { notes: "" } });
+  async function submit(v: Omit<AssignWorkoutPlanInput, "memberId">) {
+    if (!member) return toast.error("Select a member first");
+    try {
+      await assign.mutateAsync({ planId, input: { ...v, memberId: member.id } });
+      toast.success(`Assigned "${planName}" to ${member.label}`);
+      setOpen(false);
+      setMember(null);
+      form.reset();
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Failed to assign plan");
+    }
+  }
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="min-h-11 rounded-xl border-rose-200 bg-rose-50/60 text-rose-800 hover:bg-rose-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+          <UserPlus className="size-3.5" aria-hidden="true" />Assign
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Assign &quot;{planName}&quot;</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <MemberPicker value={member} onChange={setMember} />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(submit)}>
+              <FormField control={form.control} name="notes" render={({ field }) => (
+                <FormItem><FormLabel>Notes (optional)</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl></FormItem>
+              )} />
+              <DialogFooter className="mt-4"><Button type="submit" disabled={assign.isPending} className="min-h-11">{assign.isPending ? "Assigning..." : "Assign plan"}</Button></DialogFooter>
+            </form>
+          </Form>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-function AssignmentRow({assignment}:{assignment:WorkoutAssignment}){const {hasPermission}=useAuth();const update=useUpdateWorkoutAssignmentStatus();const member=assignment.member;async function complete(){try{await update.mutateAsync({id:assignment.id,status:"COMPLETED"});toast.success("Marked complete")}catch(e){toast.error(e instanceof ApiError?e.message:"Failed to update")}}return <div className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center"><div className="flex min-w-0 flex-1 items-center gap-3"><span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-100 to-violet-100 text-violet-700"><UserPlus className="size-4"/></span><div className="min-w-0"><p className="truncate text-sm font-bold text-stone-900">{member?`${member.firstName} ${member.lastName}`:"Member unavailable"}</p><p className="truncate text-xs text-stone-500">{assignment.workoutPlan?.name??"Workout plan"}</p></div></div><Badge variant={assignment.status==="ACTIVE"?"default":assignment.status==="COMPLETED"?"success":"secondary"}>{assignment.status}</Badge>{assignment.status==="ACTIVE"&&hasPermission("workouts.assign")&&<Button size="sm" variant="ghost" disabled={update.isPending} onClick={complete}>Complete</Button>}</div>}
+function AssignmentRow({ assignment }: { assignment: WorkoutAssignment }) {
+  const { hasPermission } = useAuth();
+  const update = useUpdateWorkoutAssignmentStatus();
+  const member = assignment.member;
+  async function complete() {
+    try {
+      await update.mutateAsync({ id: assignment.id, status: "COMPLETED" });
+      toast.success("Marked complete");
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Failed to update");
+    }
+  }
+  return (
+    <div className="group flex flex-col gap-3 rounded-[22px] border border-stone-200/80 bg-white/70 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-white hover:shadow-[0_20px_50px_-30px_rgba(244,63,94,.4)] sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25 transition-transform duration-200 group-hover:scale-110" aria-hidden="true">
+          <UserPlus className="size-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-extrabold text-stone-900">{member ? `${member.firstName} ${member.lastName}` : "Member unavailable"}</p>
+          <p className="truncate text-xs font-medium text-stone-600">{assignment.workoutPlan?.name ?? "Workout plan"}</p>
+        </div>
+      </div>
+      <Badge variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "success" : "secondary"}>{assignment.status}</Badge>
+      {assignment.status === "ACTIVE" && hasPermission("workouts.assign") && (
+        <Button size="sm" variant="ghost" disabled={update.isPending} onClick={complete} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">Complete</Button>
+      )}
+    </div>
+  );
+}
 
-export default function WorkoutsPage(){const {hasPermission}=useAuth();const ex=useExercises();const plans=useWorkoutPlans({page:1,pageSize:50});const assignments=useWorkoutAssignments({page:1,pageSize:10,order:"desc"});const items=assignments.data?.items??[];const active=items.filter(x=>x.status==="ACTIVE").length;return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5"><div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_35%,rgba(217,70,239,.10),transparent_25%)]"/><div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6"><section className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10"><div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-300/25 blur-3xl"/><div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-violet-300/25 blur-3xl"/><div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-violet-700"><Sparkles className="size-3.5"/> Workout studio</div><h1 className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">Training Studio</h1><p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-500">Build programs, curate the exercise library and deliver training plans from one premium workspace.</p></div><div className="flex flex-wrap gap-3">{hasPermission("workouts.create")&&<AddExerciseDialog/>}{hasPermission("workouts.create")&&<CreatePlanDialog/>}</div></div></section><section className="grid gap-4 sm:grid-cols-3"><Metric icon={Dumbbell} label="Exercises" value={ex.isLoading?"—":ex.data?.length??0} hint="Library ready to program"/><Metric icon={Layers3} label="Workout plans" value={plans.isLoading?"—":plans.data?.total??0} hint="Programs in your studio"/><Metric icon={Users} label="Active assignments" value={assignments.isLoading?"—":active} hint="Clients currently training"/></section><section className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]"><Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-white via-cyan-50/40 to-violet-50/50"><CardTitle className="font-serif text-xl">Workout plans</CardTitle><p className="text-xs text-stone-500">Your program library, ready to assign.</p></CardHeader><CardContent className="p-4">{plans.isError?<p className="rounded-xl bg-rose-50 p-4 text-sm text-rose-700">Unable to load workout plans.</p>:<div className="grid gap-3 sm:grid-cols-2">{plans.data?.items.map(plan=><div key={plan.id} className="group rounded-2xl border border-stone-200/80 bg-white/70 p-4 transition hover:-translate-y-1 hover:shadow-lg"><div className="flex items-start justify-between gap-3"><span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-fuchsia-100 text-indigo-700"><Dumbbell className="size-5"/></span><Badge variant="outline">{plan.exercises.length} exercises</Badge></div><h3 className="mt-4 font-bold text-stone-900">{plan.name}</h3><p className="mt-1 line-clamp-2 text-xs leading-5 text-stone-500">{plan.description||"Structured training program"}</p><div className="mt-4 flex items-center justify-between"><span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Program</span>{hasPermission("workouts.assign")&&<AssignDialog planId={plan.id} planName={plan.name}/>}</div></div>)}</div>}{plans.data?.items.length===0&&!plans.isLoading&&<p className="py-8 text-center text-sm text-stone-500">No workout plans yet.</p>}</CardContent></Card><Card className="overflow-hidden border-0 bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)]"><CardHeader className="border-b border-white/10"><CardTitle className="flex items-center gap-2 font-serif text-xl"><Target className="size-5"/>Training pulse</CardTitle></CardHeader><CardContent className="space-y-3 p-5"><Pulse icon={Zap} title="Program delivery" text="Assign the right plan to the right client, then track completion."/><Pulse icon={Users} title="Client context" text="Open Member 360 before making major programming changes."/><Pulse icon={Sparkles} title="AI coaching" text="Use AI Coach as the next layer for program ideas and review."/><Button asChild variant="secondary" className="w-full rounded-xl bg-white text-indigo-800 hover:bg-white/90"><a href="/ai">Open AI Coach <ArrowRight className="size-4"/></a></Button></CardContent></Card></section><Card className="overflow-hidden border-white/90 bg-white/85 shadow-lg backdrop-blur-xl"><CardHeader><CardTitle className="font-serif text-xl">Recent assignments</CardTitle></CardHeader><CardContent className="space-y-3">{items.length===0?<p className="text-sm text-stone-500">No workout assignments yet.</p>:items.map(x=><AssignmentRow key={x.id} assignment={x}/>)}</CardContent></Card></div></div>}
-function Metric({icon:Icon,label,value,hint}:{icon:typeof Users;label:string;value:React.ReactNode;hint:string}){return <Card className="relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl"><div className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-violet-200/30 blur-2xl"/><CardContent className="relative flex items-center gap-4 p-5"><span className="flex size-13 items-center justify-center rounded-[18px] bg-gradient-to-br from-cyan-100 to-violet-100 text-violet-700"><Icon className="size-6"/></span><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-400">{label}</p><p className="mt-1 text-2xl font-black text-stone-950">{value}</p><p className="text-[11px] text-stone-400">{hint}</p></div></CardContent></Card>}
-function Pulse({icon:Icon,title,text}:{icon:typeof Zap;title:string;text:string}){return <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur"><Icon className="size-4 text-white/80"/><p className="mt-2 text-sm font-extrabold">{title}</p><p className="mt-1 text-xs leading-5 text-white/60">{text}</p></div>}
+type MetricTone = "rose" | "orange" | "cyan";
+
+const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string; ring: string }> = {
+  rose: {
+    bar: "from-rose-500 via-red-500 to-orange-500",
+    tile: "from-rose-500 to-orange-500 shadow-rose-500/30",
+    orb: "bg-rose-400/20",
+    ring: "hover:border-rose-200 hover:shadow-rose-500/10",
+  },
+  orange: {
+    bar: "from-orange-400 via-amber-500 to-rose-500",
+    tile: "from-orange-500 to-amber-500 shadow-orange-500/30",
+    orb: "bg-orange-400/20",
+    ring: "hover:border-orange-200 hover:shadow-orange-500/10",
+  },
+  cyan: {
+    bar: "from-cyan-400 via-sky-500 to-blue-600",
+    tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30",
+    orb: "bg-cyan-400/20",
+    ring: "hover:border-cyan-200 hover:shadow-cyan-500/10",
+  },
+};
+
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: MetricTone }) {
+  const t = METRIC_TONES[tone];
+  return (
+    <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.ring}`}>
+      <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} aria-hidden="true" />
+      <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
+      <CardContent className="relative flex items-center gap-4 p-5">
+        <span className={`flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
+          <Icon className="size-6" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
+          <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
+          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Pulse({ icon: Icon, title, text }: { icon: typeof Zap; title: string; text: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+      <Icon className="size-4 text-white/80" aria-hidden="true" />
+      <p className="mt-2 text-sm font-extrabold">{title}</p>
+      <p className="mt-1 text-xs leading-5 text-white/60">{text}</p>
+    </div>
+  );
+}
+
+export default function WorkoutsPage() {
+  const { hasPermission } = useAuth();
+  const ex = useExercises();
+  const plans = useWorkoutPlans({ page: 1, pageSize: 50 });
+  const assignments = useWorkoutAssignments({ page: 1, pageSize: 10, order: "desc" });
+  const items = assignments.data?.items ?? [];
+  const active = items.filter((x) => x.status === "ACTIVE").length;
+  return (
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        <section aria-labelledby="workouts-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-rose-300/25 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-orange-300/25 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-rose-700">
+                <Sparkles className="size-3.5" aria-hidden="true" /> Workout studio
+              </div>
+              <h1 id="workouts-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Training Studio</h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">Build programs, curate the exercise library and deliver training plans from one premium workspace.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {hasPermission("workouts.create") && <AddExerciseDialog />}
+              {hasPermission("workouts.create") && <CreatePlanDialog />}
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="workouts-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <h2 id="workouts-stats" className="sr-only">Studio numbers</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Metric icon={Dumbbell} label="Exercises" value={ex.isLoading ? "—" : ex.data?.length ?? 0} hint="Library ready to program" tone="rose" />
+            <Metric icon={Layers3} label="Workout plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} hint="Programs in your studio" tone="orange" />
+            <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} hint="Clients currently training" tone="cyan" />
+          </div>
+        </section>
+
+        <section aria-label="Programs and pulse" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:100ms] xl:grid-cols-[1.2fr_.8fr]">
+          <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-rose-900/5 backdrop-blur-xl">
+            <div className="flex items-start gap-3 border-b border-stone-100/80 bg-gradient-to-r from-rose-50/90 via-white to-orange-50/60 px-5 py-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">
+                <Dumbbell className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Workout plans</h2>
+                <p className="mt-0.5 text-xs font-medium text-stone-600">Your program library, ready to assign.</p>
+              </div>
+            </div>
+            <CardContent className="p-4">
+              {plans.isError ? (
+                <p role="alert" className="rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50 p-4 text-sm font-semibold text-rose-700">Unable to load workout plans.</p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {plans.data?.items.map((plan) => (
+                    <div key={plan.id} className="group rounded-[20px] border border-stone-200/80 bg-white/70 p-4 transition duration-200 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_20px_50px_-30px_rgba(244,63,94,.4)]">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25 transition-transform duration-200 group-hover:scale-110" aria-hidden="true">
+                          <Dumbbell className="size-5" />
+                        </span>
+                        <Badge variant="outline" className="border-orange-200 bg-orange-50 text-orange-800">{plan.exercises.length} exercises</Badge>
+                      </div>
+                      <h3 className="mt-4 text-sm font-extrabold tracking-tight text-stone-950">{plan.name}</h3>
+                      <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-stone-600">{plan.description || "Structured training program"}</p>
+                      <div className="mt-4 flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Program</span>
+                        {hasPermission("workouts.assign") && <AssignDialog planId={plan.id} planName={plan.name} />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {plans.data?.items.length === 0 && !plans.isLoading && <p className="py-8 text-center text-sm font-medium text-stone-600">No workout plans yet.</p>}
+            </CardContent>
+          </Card>
+
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#4c0519,#9a3412_45%,#0e7490)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(244,63,94,.55)] lg:p-7">
+            <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-orange-400/25 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
+            <div className="relative flex items-center gap-3">
+              <span className="flex size-11 items-center justify-center rounded-[15px] bg-white/15 ring-1 ring-white/20 backdrop-blur" aria-hidden="true">
+                <Target className="size-5" />
+              </span>
+              <div>
+                <h2 className="font-serif text-xl font-semibold tracking-tight">Training pulse</h2>
+                <p className="mt-0.5 text-xs font-medium text-white/70">Program delivery, from plan to completion.</p>
+              </div>
+            </div>
+            <div className="relative mt-6 space-y-3">
+              <Pulse icon={Zap} title="Program delivery" text="Assign the right plan to the right client, then track completion." />
+              <Pulse icon={Users} title="Client context" text="Open Member 360 before making major programming changes." />
+              <Pulse icon={Flame} title="AI coaching" text="Use AI Coach as the next layer for program ideas and review." />
+            </div>
+            <Button asChild variant="secondary" className="relative mt-6 min-h-11 w-full rounded-2xl bg-white text-rose-900 hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              <Link href="/ai">Open AI Coach <ArrowRight className="size-4" aria-hidden="true" /></Link>
+            </Button>
+          </div>
+        </section>
+
+        <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/85 shadow-lg backdrop-blur-xl">
+          <div className="flex items-start gap-3 border-b border-stone-100/80 bg-gradient-to-r from-orange-50/80 via-white to-cyan-50/50 px-5 py-5">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow-md shadow-orange-500/25" aria-hidden="true">
+              <Users className="size-5" />
+            </span>
+            <div>
+              <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Recent assignments</h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">Latest program deliveries and completions.</p>
+            </div>
+          </div>
+          <CardContent className="space-y-3 p-4">
+            {items.length === 0 ? (
+              <p className="text-sm font-medium text-stone-600">No workout assignments yet.</p>
+            ) : (
+              items.map((x) => <AssignmentRow key={x.id} assignment={x} />)
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

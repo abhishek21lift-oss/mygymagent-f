@@ -145,12 +145,12 @@ function SellMembershipDialog({ memberId }: { memberId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="rounded-xl">
-          <Plus className="size-3.5" />
+        <Button size="sm" className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] text-white shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+          <Plus className="size-3.5" aria-hidden="true" />
           Sell Membership
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="border-white/90 bg-white/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>Sell a Membership</DialogTitle>
         </DialogHeader>
@@ -175,14 +175,14 @@ function SellMembershipDialog({ memberId }: { memberId: string }) {
               </div>
               <div className="flex items-center gap-2">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-muted-foreground">Discount</p>
+                  <p className="text-sm font-medium text-stone-600">Discount</p>
                   <p className="text-sm font-medium text-destructive">-{selectedPlan.currency} {discount}</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
               <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">Final Amount</p>
+                <p className="text-sm font-medium text-stone-600">Final Amount</p>
                 <p className="text-xl font-bold text-primary">{selectedPlan.currency} {finalPrice}</p>
               </div>
             </div>
@@ -268,12 +268,12 @@ function CollectPaymentDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button size="sm" className="rounded-xl">
-          <IndianRupee className="size-3.5" />
+        <Button size="sm" className="min-h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+          <IndianRupee className="size-3.5" aria-hidden="true" />
           Collect Payment
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="border-white/90 bg-white/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>Collect Payment</DialogTitle>
         </DialogHeader>
@@ -415,7 +415,7 @@ function MembershipActions({
           variant="outline"
           size="sm"
           onClick={() => setFreezeOpen(true)}
-          className="rounded-xl"
+          className="min-h-11 rounded-2xl"
         >
           <Snowflake className="size-3.5" />
           Freeze
@@ -428,7 +428,7 @@ function MembershipActions({
           size="sm"
           disabled={resume.isPending}
           onClick={() => handle(resume.mutateAsync(membershipId), "Membership resumed")}
-          className="rounded-xl"
+          className="min-h-11 rounded-2xl"
         >
           <PlayCircle className="size-3.5" />
           Resume
@@ -442,7 +442,7 @@ function MembershipActions({
             size="sm"
             disabled={renew.isPending}
             onClick={() => handle(renew.mutateAsync({ id: membershipId }), "Membership renewed")}
-            className="rounded-xl"
+            className="min-h-11 rounded-2xl"
           >
             <Sparkles className="size-3.5" />
             Renew
@@ -475,7 +475,7 @@ function MembershipActions({
                 onChange={(e) => setFreezeDays(Math.max(1, Number(e.target.value) || 1))}
                 className="mt-1"
               />
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-xs text-stone-600">
                 Frozen days are added back to the end date on resume. Counts against the plan freeze quota.
               </p>
             </div>
@@ -613,12 +613,11 @@ function ProgressStat({
   color?: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border bg-gradient-to-br from-card to-muted/20 p-4 transition-all hover:shadow-md">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+    <div className="group relative overflow-hidden rounded-[20px] border border-stone-200/70 bg-white/80 p-4 transition-all duration-200 hover:-translate-y-px hover:shadow-md">
       <div className="relative">
-        <Icon className={`size-5 ${color}`} />
-        <p className="mt-3 text-xl font-bold">{value}</p>
-        <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+        <Icon className={`size-5 ${color}`} aria-hidden="true" />
+        <p className="mt-3 font-mono text-xl font-black tabular-nums text-stone-950">{value}</p>
+        <p className="mt-0.5 text-xs font-medium text-stone-600">
           {label}
         </p>
       </div>
@@ -633,7 +632,7 @@ function AttendanceStats({ memberId }: { memberId: string }) {
 
   if (!attendance || attendance.length === 0)
     return (
-      <p className="text-sm text-muted-foreground">No attendance records</p>
+      <p className="text-sm font-medium text-stone-600">No attendance records</p>
     );
 
   const thisMonth = attendance.filter((a) => {
@@ -655,21 +654,21 @@ function AttendanceStats({ memberId }: { memberId: string }) {
   const streak = calculateStreak(attendance.map((a) => a.checkInAt));
 
   return (
-    <div className="flex flex-wrap gap-4">
-      <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-        <CalendarCheck className="size-4 text-emerald-500" />
-        <span className="text-sm font-medium">{thisMonth}</span>
-        <span className="text-xs text-muted-foreground">this month</span>
+    <div className="flex flex-wrap gap-2.5">
+      <div className="flex items-center gap-2 rounded-[16px] border border-emerald-200/70 bg-emerald-50/70 px-3 py-2">
+        <CalendarCheck className="size-4 text-emerald-600" aria-hidden="true" />
+        <span className="font-mono text-sm font-black tabular-nums text-stone-900">{thisMonth}</span>
+        <span className="text-xs font-medium text-stone-600">this month</span>
       </div>
-      <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-        <Clock className="size-4 text-blue-500" />
-        <span className="text-sm font-medium">{last30Days}</span>
-        <span className="text-xs text-muted-foreground">last 30 days</span>
+      <div className="flex items-center gap-2 rounded-[16px] border border-cyan-200/70 bg-cyan-50/70 px-3 py-2">
+        <Clock className="size-4 text-cyan-700" aria-hidden="true" />
+        <span className="font-mono text-sm font-black tabular-nums text-stone-900">{last30Days}</span>
+        <span className="text-xs font-medium text-stone-600">last 30 days</span>
       </div>
-      <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-        <Sparkles className="size-4 text-amber-500" />
-        <span className="text-sm font-medium">{streak}</span>
-        <span className="text-xs text-muted-foreground">day streak</span>
+      <div className="flex items-center gap-2 rounded-[16px] border border-violet-200/70 bg-violet-50/70 px-3 py-2">
+        <Sparkles className="size-4 text-violet-600" aria-hidden="true" />
+        <span className="font-mono text-sm font-black tabular-nums text-stone-900">{streak}</span>
+        <span className="text-xs font-medium text-stone-600">day streak</span>
       </div>
     </div>
   );
@@ -708,31 +707,31 @@ function PaymentSummary({ memberId }: { memberId: string }) {
   if (isLoading) return <Skeleton className="h-16 w-full rounded-xl" />;
 
   if (!payments || payments.length === 0)
-    return <p className="text-sm text-muted-foreground">No payments recorded</p>;
+    return <p className="text-sm font-medium text-stone-600">No payments recorded</p>;
 
   const total = payments.reduce((sum, p) => sum + Number(p.amount), 0);
   const paid = payments.filter((p) => p.status === "COMPLETED").length;
   const refunded = payments.filter((p) => p.status === "REFUNDED").length;
 
   return (
-    <div className="flex flex-wrap gap-4">
-      <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-        <Wallet className="size-4 text-emerald-500" />
-        <span className="text-sm font-bold">
+    <div className="flex flex-wrap gap-2.5">
+      <div className="flex items-center gap-2 rounded-[16px] border border-emerald-200/70 bg-emerald-50/70 px-3 py-2">
+        <Wallet className="size-4 text-emerald-600" aria-hidden="true" />
+        <span className="font-mono text-sm font-black tabular-nums text-stone-900">
           {payments[0]?.currency || "USD"} {total.toLocaleString()}
         </span>
-        <span className="text-xs text-muted-foreground">total paid</span>
+        <span className="text-xs font-medium text-stone-600">total paid</span>
       </div>
-      <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-        <CheckCircle2 className="size-4 text-blue-500" />
-        <span className="text-sm font-medium">{paid}</span>
-        <span className="text-xs text-muted-foreground">completed</span>
+      <div className="flex items-center gap-2 rounded-[16px] border border-cyan-200/70 bg-cyan-50/70 px-3 py-2">
+        <CheckCircle2 className="size-4 text-cyan-700" aria-hidden="true" />
+        <span className="font-mono text-sm font-black tabular-nums text-stone-900">{paid}</span>
+        <span className="text-xs font-medium text-stone-600">completed</span>
       </div>
       {refunded > 0 && (
-        <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-          <AlertCircle className="size-4 text-amber-500" />
-          <span className="text-sm font-medium">{refunded}</span>
-          <span className="text-xs text-muted-foreground">refunded</span>
+        <div className="flex items-center gap-2 rounded-[16px] border border-amber-200/70 bg-amber-50/70 px-3 py-2">
+          <AlertCircle className="size-4 text-amber-600" aria-hidden="true" />
+          <span className="font-mono text-sm font-black tabular-nums text-stone-900">{refunded}</span>
+          <span className="text-xs font-medium text-stone-600">refunded</span>
         </div>
       )}
     </div>
@@ -763,35 +762,35 @@ function HealthOverview({ memberId }: { memberId: string }) {
     : false;
 
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-wrap gap-2.5">
       {latestMeasurement && (
-        <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-          <BarChart3 className="size-4 text-violet-500" />
-          <span className="text-sm font-medium">
+        <div className="flex items-center gap-2 rounded-[16px] border border-violet-200/70 bg-violet-50/70 px-3 py-2">
+          <BarChart3 className="size-4 text-violet-600" aria-hidden="true" />
+          <span className="font-mono text-sm font-black tabular-nums text-stone-900">
             {latestMeasurement.weightKg ?? "—"}{" "}
             {latestMeasurement.weightKg ? "kg" : ""}
           </span>
-          <span className="text-xs text-muted-foreground">weight</span>
+          <span className="text-xs font-medium text-stone-600">weight</span>
         </div>
       )}
       {activeGoals > 0 && (
-        <div className="flex items-center gap-2 rounded-xl bg-card border px-3 py-2">
-          <Target className="size-4 text-emerald-500" />
-          <span className="text-sm font-medium">{activeGoals}</span>
-          <span className="text-xs text-muted-foreground">active goals</span>
+        <div className="flex items-center gap-2 rounded-[16px] border border-emerald-200/70 bg-emerald-50/70 px-3 py-2">
+          <Target className="size-4 text-emerald-600" aria-hidden="true" />
+          <span className="font-mono text-sm font-black tabular-nums text-stone-900">{activeGoals}</span>
+          <span className="text-xs font-medium text-stone-600">active goals</span>
         </div>
       )}
       {hasHealthConcerns || latestScreening?.flaggedForMedicalClearance ? (
-        <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">
-          <AlertCircle className="size-4 text-amber-500" />
-          <span className="text-sm font-medium text-amber-700">
+        <div className="flex items-center gap-2 rounded-[16px] border border-amber-200 bg-amber-50 px-3 py-2">
+          <AlertCircle className="size-4 text-amber-600" aria-hidden="true" />
+          <span className="text-sm font-bold text-amber-800">
             Medical attention
           </span>
         </div>
       ) : (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2">
-          <Shield className="size-4 text-emerald-500" />
-          <span className="text-sm font-medium text-emerald-700">Cleared</span>
+        <div className="flex items-center gap-2 rounded-[16px] border border-emerald-200 bg-emerald-50 px-3 py-2">
+          <Shield className="size-4 text-emerald-600" aria-hidden="true" />
+          <span className="text-sm font-bold text-emerald-700">Cleared</span>
         </div>
       )}
     </div>
@@ -878,19 +877,19 @@ function EditMemberDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-white/90 bg-white/95 backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle>Edit Member</DialogTitle>
+          <DialogTitle className="font-serif text-xl tracking-tight">Edit Member</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="personal">Personal</TabsTrigger>
-                <TabsTrigger value="address">Address</TabsTrigger>
-                <TabsTrigger value="emergency">Emergency</TabsTrigger>
-                <TabsTrigger value="fitness">Fitness</TabsTrigger>
-                <TabsTrigger value="assignment">Assignment</TabsTrigger>
+              <TabsList className="grid h-auto w-full grid-cols-5 rounded-[18px] border border-violet-100/70 bg-gradient-to-r from-violet-50/80 via-white to-cyan-50/70 p-1.5">
+                <TabsTrigger value="personal" className="min-h-11 rounded-xl font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Personal</TabsTrigger>
+                <TabsTrigger value="address" className="min-h-11 rounded-xl font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Address</TabsTrigger>
+                <TabsTrigger value="emergency" className="min-h-11 rounded-xl font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Emergency</TabsTrigger>
+                <TabsTrigger value="fitness" className="min-h-11 rounded-xl font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Fitness</TabsTrigger>
+                <TabsTrigger value="assignment" className="min-h-11 rounded-xl font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Assignment</TabsTrigger>
               </TabsList>
 
               <TabsContent value="personal" className="space-y-4 pt-4">
@@ -1335,37 +1334,41 @@ function MemberHeader({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-primary/10 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 shadow-sm sm:p-8">
-      {/* Decorative gradient orbs */}
-      <div className="absolute -right-20 -top-20 size-64 rounded-full bg-gradient-to-br from-primary/20 to-transparent blur-3xl" />
-      <div className="absolute -bottom-10 -left-10 size-40 rounded-full bg-gradient-to-tr from-violet-200/30 to-transparent blur-2xl" />
+    <div className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
+      {/* Decorative blobs — members accent violet + cyan + fuchsia */}
+      <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-violet-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+      <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+      <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-fuchsia-300/20 blur-3xl" aria-hidden="true" />
 
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Avatar + Info */}
         <div className="flex items-center gap-5">
           {/* Avatar */}
           <div className="relative">
-            <div className="flex size-18 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-violet-500 shadow-lg shadow-primary/20">
-              <span className="text-2xl font-bold text-white">
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,#7c3aed,#c026d3_55%,#06b6d4)] shadow-lg shadow-violet-500/30 ring-1 ring-white/60">
+              <span className="text-2xl font-black tracking-tight text-white">
                 {member?.firstName?.[0]}
                 {member?.lastName?.[0]}
               </span>
             </div>
             <div
-              className={`absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-card ${
+              className={`absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-white ${
                 member?.status === "ACTIVE"
                   ? "bg-emerald-500"
                   : member?.status === "FROZEN"
-                    ? "bg-amber-500"
-                    : "bg-muted-foreground"
+                    ? "bg-cyan-500"
+                    : member?.status === "INACTIVE"
+                      ? "bg-amber-500"
+                      : "bg-rose-500"
               }`}
+              aria-hidden="true"
             />
           </div>
 
           {/* Info */}
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="font-serif text-3xl font-semibold tracking-[-.03em] text-stone-950 sm:text-4xl">
                 {member?.firstName} {member?.lastName}
               </h1>
               <Badge
@@ -1376,20 +1379,28 @@ function MemberHeader({
                       ? "warning"
                       : "secondary"
                 }
-                className="rounded-full"
+                className={`rounded-full px-2.5 py-1 text-[10px] font-black tracking-widest ring-1 ${
+                  member?.status === "ACTIVE"
+                    ? "bg-emerald-500/10 text-emerald-700 ring-emerald-200/70"
+                    : member?.status === "FROZEN"
+                      ? "bg-cyan-500/10 text-cyan-800 ring-cyan-200/70"
+                      : member?.status === "INACTIVE"
+                        ? "bg-amber-500/15 text-amber-800 ring-amber-200/70"
+                        : "bg-rose-500/10 text-rose-700 ring-rose-200/70"
+                }`}
               >
                 {member?.status}
               </Badge>
               {member?.memberType && (
-                <Badge variant="outline" className="rounded-full">
+                <Badge variant="outline" className="rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-black tracking-widest text-violet-700 ring-1 ring-violet-200/60">
                   {MEMBER_TYPE_LABELS[member.memberType] || member.memberType}
                 </Badge>
               )}
             </div>
 
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span className="font-mono">{member?.memberCode}</span>
-              <span>·</span>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-stone-600">
+              <span className="font-mono tabular-nums">{member?.memberCode}</span>
+              <span aria-hidden="true">·</span>
               <span>
                 Joined{" "}
                 {member?.joinedAt
@@ -1402,9 +1413,9 @@ function MemberHeader({
               </span>
               {member?.assignedTrainer && (
                 <>
-                  <span>·</span>
+                  <span aria-hidden="true">·</span>
                   <span className="flex items-center gap-1">
-                    <Users className="size-3.5" />
+                    <Users className="size-3.5" aria-hidden="true" />
                     {member.assignedTrainer.firstName}{" "}
                     {member.assignedTrainer.lastName}
                   </span>
@@ -1413,16 +1424,16 @@ function MemberHeader({
             </div>
 
             {/* Contact info */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-stone-600">
               {member?.phone && (
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <Phone className="size-3.5" />
+                <span className="flex items-center gap-1.5">
+                  <Phone className="size-3.5" aria-hidden="true" />
                   {member.phone}
                 </span>
               )}
               {member?.email && (
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <MapPin className="size-3.5" />
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="size-3.5" aria-hidden="true" />
                   {member.email}
                 </span>
               )}
@@ -1433,19 +1444,19 @@ function MemberHeader({
         {/* Right: Membership + Actions */}
         <div className="flex flex-col items-start gap-4 lg:items-end">
           {activeMembership ? (
-            <div className="rounded-2xl border bg-card/80 backdrop-blur-sm px-4 py-3">
+            <div className="rounded-[22px] border border-white/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur">
               <div className="flex items-center gap-3">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">
                     Active Membership
                   </p>
-                  <p className="font-semibold">
+                  <p className="font-extrabold tracking-tight text-stone-950">
                     {activeMembership.membershipPlan?.name || "Plan"}
                   </p>
                 </div>
                 <Separator orientation="vertical" className="h-8" />
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">
                     Status
                   </p>
                   <Badge
@@ -1462,11 +1473,11 @@ function MemberHeader({
                   <>
                     <Separator orientation="vertical" className="h-8" />
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground">
+                      <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">
                         Days Left
                       </p>
                       <p
-                        className={`font-bold ${daysLeft <= 7 ? "text-amber-600" : "text-emerald-600"}`}
+                        className={`font-mono font-black tabular-nums ${daysLeft <= 7 ? "text-amber-700" : "text-emerald-600"}`}
                       >
                         {daysLeft}
                       </p>
@@ -1476,8 +1487,8 @@ function MemberHeader({
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-3">
-              <p className="text-sm text-muted-foreground">
+            <div className="rounded-[22px] border border-dashed border-violet-200 bg-violet-50/50 px-4 py-3">
+              <p className="text-sm font-semibold text-stone-600">
                 No active membership
               </p>
             </div>
@@ -1496,15 +1507,15 @@ function MemberHeader({
               memberships={allMemberships}
             />
             <EditMemberDialog member={member}>
-              <Button size="sm" variant="outline" className="rounded-xl">
-                <Pencil className="size-3.5" />
+              <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+                <Pencil className="size-3.5" aria-hidden="true" />
                 Edit
               </Button>
             </EditMemberDialog>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline" className="rounded-xl">
-                  <MoreHorizontal className="size-3.5" />
+                <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+                  <MoreHorizontal className="size-3.5" aria-hidden="true" />
                   More
                 </Button>
               </DropdownMenuTrigger>
@@ -1559,7 +1570,7 @@ function MemberHeader({
           <DialogHeader>
             <DialogTitle>Delete member</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-stone-600">
             {member.firstName} {member.lastName} will be marked inactive and removed from active
             member views. Their membership, payment, and activity history is preserved and this
             can be reversed by support if needed.
@@ -1580,59 +1591,63 @@ function MemberHeader({
 
 function QuickStatsRow({ memberId }: { memberId: string }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Card className="border-0 shadow-sm">
-        <CardContent className="flex items-center gap-4 p-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
-            <Dumbbell className="size-6 text-emerald-600" />
+    <section aria-label="Member quick stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <Card className="group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1">
+        <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-green-600" aria-hidden="true" />
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110">
+            <Dumbbell className="size-6" aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Workout</p>
-            <WorkoutProgress memberId={memberId} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">Workout</p>
+            <div className="mt-2"><WorkoutProgress memberId={memberId} /></div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-sm">
-        <CardContent className="flex items-center gap-4 p-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5">
-            <CalendarCheck className="size-6 text-blue-600" />
+      <Card className="group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1">
+        <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600" aria-hidden="true" />
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30 transition-transform duration-300 group-hover:scale-110">
+            <CalendarCheck className="size-6" aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">
               Attendance
             </p>
-            <AttendanceStats memberId={memberId} />
+            <div className="mt-2"><AttendanceStats memberId={memberId} /></div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-sm">
-        <CardContent className="flex items-center gap-4 p-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5">
-            <Wallet className="size-6 text-amber-600" />
+      <Card className="group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1">
+        <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600" aria-hidden="true" />
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 transition-transform duration-300 group-hover:scale-110">
+            <Wallet className="size-6" aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">
               Payments
             </p>
-            <PaymentSummary memberId={memberId} />
+            <div className="mt-2"><PaymentSummary memberId={memberId} /></div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-sm">
-        <CardContent className="flex items-center gap-4 p-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/10 to-violet-500/5">
-            <Heart className="size-6 text-violet-600" />
+      <Card className="group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1">
+        <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500" aria-hidden="true" />
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110">
+            <Heart className="size-6" aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Health</p>
-            <HealthOverview memberId={memberId} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">Health</p>
+            <div className="mt-2"><HealthOverview memberId={memberId} /></div>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }
 
@@ -1672,15 +1687,15 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
     : null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Back button */}
       <Button
         variant="ghost"
         size="sm"
-        className="-ml-2 w-fit text-muted-foreground hover:text-foreground"
+        className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-2 font-bold text-stone-600 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
         onClick={() => router.push("/members")}
       >
-        <ArrowLeft className="size-4" />
+        <ArrowLeft className="size-4" aria-hidden="true" />
         Back to members
       </Button>
 
@@ -1696,15 +1711,15 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
       <QuickStatsRow memberId={memberId} />
 
       {/* AI Progress Card */}
-      <Card className="border-0 shadow-sm">
+      <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 p-0 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
         <CardContent className="p-0">
           <MemberAiProgress memberId={memberId} />
         </CardContent>
       </Card>
 
       {/* Tabbed Content */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-6">
+      <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+        <CardContent className="p-4 sm:p-6">
           <Member360Tabs memberId={memberId} />
         </CardContent>
       </Card>

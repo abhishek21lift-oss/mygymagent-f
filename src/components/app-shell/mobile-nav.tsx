@@ -26,13 +26,14 @@ export function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="top-0 left-0 h-[100svh] w-[min(20rem,88vw)] max-w-none translate-x-0 translate-y-0 rounded-none border-r border-white/80 bg-background/95 p-0 shadow-2xl backdrop-blur-2xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-none"
+        className="top-0 left-0 h-[100svh] w-[min(20rem,88vw)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-r-[28px] border-white/90 bg-white/95 p-0 shadow-[0_35px_110px_-48px_rgba(79,70,229,.55)] backdrop-blur-xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-none dark:border-white/10 dark:bg-card/95"
       >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
         <VisuallyHidden>
           <DialogTitle>Navigation</DialogTitle>
         </VisuallyHidden>
         <SidebarNav
-          className="h-full"
+          className="h-full border-0 shadow-none"
           mobile
           onNavigate={() => onOpenChange(false)}
         />

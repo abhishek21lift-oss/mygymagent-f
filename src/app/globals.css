@@ -243,3 +243,48 @@
     animation: pulse-slow 6s ease-in-out infinite;
   }
 }
+
+@layer utilities {
+  /* Athletic Luxe ambient canvas for the app-shell content area. */
+  .page-ambient {
+    isolation: isolate;
+    background-color: var(--background);
+    background-image:
+      radial-gradient(circle at 5% 2%, rgba(6, 182, 212, 0.14), transparent 19%),
+      radial-gradient(circle at 96% 4%, rgba(99, 102, 241, 0.16), transparent 22%),
+      radial-gradient(circle at 70% 38%, rgba(217, 70, 239, 0.11), transparent 25%),
+      radial-gradient(circle at 12% 72%, rgba(16, 185, 129, 0.09), transparent 24%);
+  }
+  .dark .page-ambient {
+    background-image:
+      radial-gradient(circle at 5% 2%, rgba(6, 182, 212, 0.12), transparent 20%),
+      radial-gradient(circle at 96% 4%, rgba(139, 92, 246, 0.16), transparent 24%),
+      radial-gradient(circle at 70% 38%, rgba(217, 70, 239, 0.1), transparent 26%),
+      radial-gradient(circle at 12% 72%, rgba(16, 185, 129, 0.08), transparent 26%);
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float {
+    animation: float 7s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.7) 50%, transparent 80%);
+    animation: shimmer 1.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+}

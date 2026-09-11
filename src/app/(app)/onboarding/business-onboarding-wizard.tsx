@@ -108,40 +108,42 @@ interface OnboardingData {
 
 function ProgressIndicator({ currentStep }: { currentStep: number }) {
   return (
-    <div className="relative">
-      <div className="flex items-center justify-between">
+    <div className="relative" aria-label={`Step ${currentStep + 1} of ${STEPS.length}`}>
+      <div className="relative z-10 flex items-start justify-between gap-1">
         {STEPS.map((step, index) => (
-          <div key={step.id} className="flex flex-col items-center">
+          <div key={step.id} className="flex flex-1 flex-col items-center gap-2">
             <div
               className={`flex size-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
                 index < currentStep
-                  ? "border-primary bg-primary text-primary-foreground"
+                  ? "border-transparent bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25"
                   : index === currentStep
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-muted bg-muted text-muted-foreground"
+                    ? "border-transparent bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30"
+                    : "border-stone-200 bg-white text-stone-500"
               }`}
+              aria-current={index === currentStep ? "step" : undefined}
             >
               {index < currentStep ? (
-                <CheckCircle2 className="size-5" />
+                <CheckCircle2 className="size-5" aria-hidden="true" />
               ) : (
-                <span className="text-sm font-semibold">{index + 1}</span>
+                <span className="text-sm font-black">{index + 1}</span>
               )}
             </div>
-            <div className="mt-2 hidden text-center sm:block">
+            <div className="hidden text-center sm:block">
               <p
-                className={`text-xs font-medium ${
-                  index <= currentStep ? "text-foreground" : "text-muted-foreground"
+                className={`text-xs font-extrabold ${
+                  index <= currentStep ? "text-stone-900" : "text-stone-500"
                 }`}
               >
                 {step.title}
               </p>
+              <p className="mt-0.5 text-[11px] font-medium text-stone-600">{step.description}</p>
             </div>
           </div>
         ))}
       </div>
-      <div className="absolute left-0 top-5 h-0.5 w-full bg-muted">
+      <div className="absolute left-5 right-5 top-5 h-1 rounded-full bg-stone-100" aria-hidden="true">
         <div
-          className="h-full bg-primary transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 transition-all duration-500"
           style={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }}
         />
       </div>
@@ -152,32 +154,36 @@ function ProgressIndicator({ currentStep }: { currentStep: number }) {
 function WelcomeStep({ onUpdate }: { onUpdate: (data: Partial<OnboardingData>) => void }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="mb-6 flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-violet-500 shadow-lg">
-        <Sparkles className="size-10 text-white" />
+      <div className="mb-6 flex size-20 items-center justify-center rounded-[26px] bg-[linear-gradient(135deg,#0f0c29,#6d28d9_55%,#be185d)] shadow-[0_20px_50px_-20px_rgba(124,58,237,.6)]">
+        <Sparkles className="size-10 text-white" aria-hidden="true" />
       </div>
-      <h1 className="text-3xl font-bold tracking-tight">Welcome to MyGymAgent</h1>
-      <p className="mt-3 max-w-md text-muted-foreground">
+      <h2 className="font-serif text-3xl font-semibold tracking-tight text-stone-950">Welcome to MyGymAgent</h2>
+      <p className="mt-3 max-w-md text-sm font-medium leading-6 text-stone-600">
         Let&apos;s set up your gym business in just a few minutes. We&apos;ll help you configure your organization, branch, and team.
       </p>
 
-      <div className="mt-8 grid w-full max-w-lg grid-cols-2 gap-4">
+      <div className="mt-8 grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
         <FeatureCard
           icon={Building2}
+          tile="from-violet-600 to-fuchsia-600 shadow-violet-500/25"
           title="Business Setup"
           description="Configure your gym details"
         />
         <FeatureCard
           icon={MapPin}
+          tile="from-cyan-500 to-blue-600 shadow-cyan-500/25"
           title="Branch Location"
           description="Set up your primary location"
         />
         <FeatureCard
           icon={Settings}
+          tile="from-amber-500 to-orange-600 shadow-amber-500/25"
           title="Preferences"
           description="Timezone, currency & more"
         />
         <FeatureCard
           icon={Users}
+          tile="from-emerald-500 to-teal-600 shadow-emerald-500/25"
           title="Team"
           description="Invite trainers & staff"
         />
@@ -185,11 +191,11 @@ function WelcomeStep({ onUpdate }: { onUpdate: (data: Partial<OnboardingData>) =
 
       <Button
         size="lg"
-        className="mt-8 rounded-xl px-8"
+        className="mt-8 min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-8 shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
         onClick={() => onUpdate({})}
       >
         Let&apos;s Get Started
-        <ChevronRight className="ml-2 size-4" />
+        <ChevronRight className="ml-2 size-4" aria-hidden="true" />
       </Button>
     </div>
   );
@@ -199,20 +205,34 @@ function FeatureCard({
   icon: Icon,
   title,
   description,
+  tile,
 }: {
   icon: typeof Building2;
   title: string;
   description: string;
+  tile: string;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border bg-card/50 p-4 text-left transition-colors hover:bg-card">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        <Icon className="size-5 text-primary" />
+    <div className="flex items-start gap-3 rounded-[20px] border border-stone-200/70 bg-white/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md">
+      <div className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md ${tile}`}>
+        <Icon className="size-5" aria-hidden="true" />
       </div>
       <div>
-        <p className="font-semibold">{title}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-sm font-extrabold text-stone-900">{title}</p>
+        <p className="mt-0.5 text-xs font-medium text-stone-600">{description}</p>
       </div>
+    </div>
+  );
+}
+
+function StepHeading({ icon: Icon, tile, title, subtitle }: { icon: typeof Building2; tile: string; title: string; subtitle: string }) {
+  return (
+    <div className="text-center">
+      <div className={`mb-4 inline-flex size-14 items-center justify-center rounded-[19px] bg-gradient-to-br text-white shadow-lg ${tile}`}>
+        <Icon className="size-6" aria-hidden="true" />
+      </div>
+      <h2 className="font-serif text-2xl font-semibold tracking-tight text-stone-950">{title}</h2>
+      <p className="mt-2 text-sm font-medium text-stone-600">{subtitle}</p>
     </div>
   );
 }
@@ -226,13 +246,7 @@ function BusinessStep({
 }) {
   return (
     <div className="mx-auto max-w-xl">
-      <div className="text-center">
-        <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
-          <Building2 className="size-6 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold">Business Details</h2>
-        <p className="mt-2 text-muted-foreground">Tell us about your gym or fitness business</p>
-      </div>
+      <StepHeading icon={Building2} tile="from-violet-600 to-fuchsia-600 shadow-violet-500/25" title="Business Details" subtitle="Tell us about your gym or fitness business" />
 
       <div className="mt-8 flex flex-col gap-5">
         <div className="space-y-2">
@@ -244,6 +258,7 @@ function BusinessStep({
             placeholder="Iron Paradise Gym"
             value={data.businessName}
             onChange={(e) => onUpdate({ businessName: e.target.value })}
+            className="min-h-11 rounded-xl focus-visible:ring-violet-600"
           />
         </div>
 
@@ -252,7 +267,7 @@ function BusinessStep({
             Business Type <span className="text-destructive">*</span>
           </Label>
           <Select value={data.businessType} onValueChange={(v) => onUpdate({ businessType: v })}>
-            <SelectTrigger>
+            <SelectTrigger className="min-h-11 rounded-xl">
               <SelectValue placeholder="Select your business type" />
             </SelectTrigger>
             <SelectContent>
@@ -268,10 +283,10 @@ function BusinessStep({
         <Separator className="my-4" />
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Owner Information</h3>
+          <h3 className="text-sm font-extrabold text-stone-900">Owner Information</h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="ownerFirstName">
               First Name <span className="text-destructive">*</span>
@@ -281,6 +296,7 @@ function BusinessStep({
               placeholder="John"
               value={data.ownerFirstName}
               onChange={(e) => onUpdate({ ownerFirstName: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
           <div className="space-y-2">
@@ -292,6 +308,7 @@ function BusinessStep({
               placeholder="Doe"
               value={data.ownerLastName}
               onChange={(e) => onUpdate({ ownerLastName: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
         </div>
@@ -304,6 +321,7 @@ function BusinessStep({
             placeholder="john@example.com"
             value={data.ownerEmail}
             onChange={(e) => onUpdate({ ownerEmail: e.target.value })}
+            className="min-h-11 rounded-xl"
           />
         </div>
 
@@ -314,6 +332,7 @@ function BusinessStep({
             placeholder="+1 (555) 123-4567"
             value={data.ownerPhone}
             onChange={(e) => onUpdate({ ownerPhone: e.target.value })}
+            className="min-h-11 rounded-xl"
           />
         </div>
       </div>
@@ -330,13 +349,7 @@ function BranchStep({
 }) {
   return (
     <div className="mx-auto max-w-xl">
-      <div className="text-center">
-        <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
-          <MapPin className="size-6 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold">Branch Location</h2>
-        <p className="mt-2 text-muted-foreground">Set up your primary gym location</p>
-      </div>
+      <StepHeading icon={MapPin} tile="from-cyan-500 to-blue-600 shadow-cyan-500/25" title="Branch Location" subtitle="Set up your primary gym location" />
 
       <div className="mt-8 flex flex-col gap-5">
         <div className="space-y-2">
@@ -348,8 +361,9 @@ function BranchStep({
             placeholder="Main Location"
             value={data.branchName}
             onChange={(e) => onUpdate({ branchName: e.target.value })}
+            className="min-h-11 rounded-xl"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs font-medium text-stone-600">
             This is how your branch will appear in the system
           </p>
         </div>
@@ -363,10 +377,11 @@ function BranchStep({
             placeholder="123 Main Street"
             value={data.branchAddress}
             onChange={(e) => onUpdate({ branchAddress: e.target.value })}
+            className="min-h-11 rounded-xl"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="branchCity">City</Label>
             <Input
@@ -374,6 +389,7 @@ function BranchStep({
               placeholder="New York"
               value={data.branchCity}
               onChange={(e) => onUpdate({ branchCity: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
           <div className="space-y-2">
@@ -383,11 +399,12 @@ function BranchStep({
               placeholder="NY"
               value={data.branchState}
               onChange={(e) => onUpdate({ branchState: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="branchPostalCode">Postal Code</Label>
             <Input
@@ -395,6 +412,7 @@ function BranchStep({
               placeholder="10001"
               value={data.branchPostalCode}
               onChange={(e) => onUpdate({ branchPostalCode: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
           <div className="space-y-2">
@@ -404,13 +422,14 @@ function BranchStep({
               placeholder="United States"
               value={data.branchCountry}
               onChange={(e) => onUpdate({ branchCountry: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
         </div>
 
         <Separator className="my-4" />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="branchPhone">Phone</Label>
             <Input
@@ -418,6 +437,7 @@ function BranchStep({
               placeholder="+1 (555) 123-4567"
               value={data.branchPhone}
               onChange={(e) => onUpdate({ branchPhone: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
           <div className="space-y-2">
@@ -428,6 +448,7 @@ function BranchStep({
               placeholder="gym@example.com"
               value={data.branchEmail}
               onChange={(e) => onUpdate({ branchEmail: e.target.value })}
+              className="min-h-11 rounded-xl"
             />
           </div>
         </div>
@@ -445,13 +466,7 @@ function ConfigurationStep({
 }) {
   return (
     <div className="mx-auto max-w-xl">
-      <div className="text-center">
-        <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
-          <Settings className="size-6 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold">Configuration</h2>
-        <p className="mt-2 text-muted-foreground">Set your preferences and defaults</p>
-      </div>
+      <StepHeading icon={Settings} tile="from-amber-500 to-orange-600 shadow-amber-500/25" title="Configuration" subtitle="Set your preferences and defaults" />
 
       <div className="mt-8 flex flex-col gap-5">
         <div className="space-y-2">
@@ -459,7 +474,7 @@ function ConfigurationStep({
             Timezone <span className="text-destructive">*</span>
           </Label>
           <Select value={data.timezone} onValueChange={(v) => onUpdate({ timezone: v })}>
-            <SelectTrigger>
+            <SelectTrigger className="min-h-11 rounded-xl">
               <SelectValue placeholder="Select timezone" />
             </SelectTrigger>
             <SelectContent>
@@ -470,7 +485,7 @@ function ConfigurationStep({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs font-medium text-stone-600">
             Used for scheduling and reporting
           </p>
         </div>
@@ -480,7 +495,7 @@ function ConfigurationStep({
             Currency <span className="text-destructive">*</span>
           </Label>
           <Select value={data.currency} onValueChange={(v) => onUpdate({ currency: v })}>
-            <SelectTrigger>
+            <SelectTrigger className="min-h-11 rounded-xl">
               <SelectValue placeholder="Select currency" />
             </SelectTrigger>
             <SelectContent>
@@ -491,21 +506,21 @@ function ConfigurationStep({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs font-medium text-stone-600">
             All prices and payments will be in this currency
           </p>
         </div>
 
         <Separator className="my-4" />
 
-        <div className="rounded-xl border bg-muted/20 p-4">
+        <div className="rounded-[20px] border border-violet-100 bg-gradient-to-br from-violet-50/80 to-fuchsia-50/50 p-4">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Zap className="size-5 text-primary" />
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md">
+              <Zap className="size-5" aria-hidden="true" />
             </div>
             <div>
-              <p className="font-semibold">Smart Defaults</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-sm font-extrabold text-stone-900">Smart Defaults</p>
+              <p className="mt-1 text-xs font-medium leading-5 text-stone-600">
                 You can change these settings anytime in your business preferences.
                 All new members and bookings will use these defaults.
               </p>
@@ -540,15 +555,7 @@ function TeamStep({
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="text-center">
-        <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
-          <Users className="size-6 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold">Invite Your Team</h2>
-        <p className="mt-2 text-muted-foreground">
-          Add trainers and staff members (optional, you can skip this)
-        </p>
-      </div>
+      <StepHeading icon={Users} tile="from-emerald-500 to-teal-600 shadow-emerald-500/25" title="Invite Your Team" subtitle="Add trainers and staff members (optional, you can skip this)" />
 
       <div className="mt-8 flex flex-col gap-5">
         <div className="space-y-2">
@@ -566,12 +573,13 @@ function TeamStep({
                   addEmail();
                 }
               }}
+              className="min-h-11 rounded-xl"
             />
-            <Button variant="outline" onClick={addEmail}>
+            <Button variant="outline" onClick={addEmail} className="min-h-11 rounded-xl border-stone-200 bg-white/80">
               Add
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs font-medium text-stone-600">
             They&apos;ll receive an invitation to join your organization
           </p>
         </div>
@@ -581,11 +589,13 @@ function TeamStep({
             <Label>Invited Team Members</Label>
             <div className="flex flex-wrap gap-2">
               {data.staffEmails.map((email) => (
-                <Badge key={email} variant="secondary" className="px-3 py-1">
+                <Badge key={email} variant="secondary" className="rounded-full px-3 py-1.5">
                   {email}
                   <button
-                    className="ml-2 text-muted-foreground hover:text-foreground"
+                    type="button"
+                    className="ml-2 min-h-11 min-w-11 text-stone-500 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 sm:min-h-0 sm:min-w-0"
                     onClick={() => removeEmail(email)}
+                    aria-label={`Remove ${email}`}
                   >
                     ×
                   </button>
@@ -597,14 +607,14 @@ function TeamStep({
 
         <Separator className="my-4" />
 
-        <div className="rounded-xl border bg-muted/20 p-4">
+        <div className="rounded-[20px] border border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 p-4">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Shield className="size-5 text-primary" />
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
+              <Shield className="size-5" aria-hidden="true" />
             </div>
             <div>
-              <p className="font-semibold">Role-Based Access</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-sm font-extrabold text-stone-900">Role-Based Access</p>
+              <p className="mt-1 text-xs font-medium leading-5 text-stone-600">
                 Team members will be assigned the Trainer role by default.
                 You can change their roles and permissions later in Settings &gt; Staff.
               </p>
@@ -612,7 +622,7 @@ function TeamStep({
           </div>
         </div>
 
-        <Button variant="outline" className="mt-4" onClick={() => onUpdate({})}>
+        <Button variant="outline" className="mt-4 min-h-11 rounded-2xl" onClick={() => onUpdate({})}>
           Skip for Now
         </Button>
       </div>
@@ -625,32 +635,36 @@ function CompleteStep() {
 
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="mb-6 flex size-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
-        <CheckCircle2 className="size-12 text-white" />
+      <div className="mb-6 flex size-24 items-center justify-center rounded-[28px] bg-gradient-to-br from-emerald-500 to-teal-600 shadow-[0_20px_50px_-20px_rgba(16,185,129,.6)]">
+        <CheckCircle2 className="size-12 text-white" aria-hidden="true" />
       </div>
-      <h1 className="text-3xl font-bold">Your Gym is Ready!</h1>
-      <p className="mt-3 max-w-md text-muted-foreground">
+      <h2 className="font-serif text-3xl font-semibold tracking-tight text-stone-950">Your Gym is Ready!</h2>
+      <p className="mt-3 max-w-md text-sm font-medium leading-6 text-stone-600">
         Your business has been configured. Start adding members, creating workout plans, and growing your gym!
       </p>
 
-      <div className="mt-8 grid w-full max-w-lg grid-cols-2 gap-4">
+      <div className="mt-8 grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
         <FeatureCard
           icon={Users}
+          tile="from-violet-600 to-fuchsia-600 shadow-violet-500/25"
           title="Add Members"
           description="Start onboarding your first members"
         />
         <FeatureCard
           icon={Calendar}
+          tile="from-cyan-500 to-blue-600 shadow-cyan-500/25"
           title="Schedule Sessions"
           description="Book PT sessions and classes"
         />
         <FeatureCard
           icon={CreditCard}
+          tile="from-emerald-500 to-teal-600 shadow-emerald-500/25"
           title="Membership Plans"
           description="Create your pricing packages"
         />
         <FeatureCard
           icon={Settings}
+          tile="from-amber-500 to-orange-600 shadow-amber-500/25"
           title="Configure"
           description="Fine-tune your business settings"
         />
@@ -658,11 +672,11 @@ function CompleteStep() {
 
       <Button
         size="lg"
-        className="mt-8 rounded-xl px-8"
+        className="mt-8 min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-8 shadow-lg shadow-violet-500/25"
         onClick={() => router.push("/dashboard")}
       >
         Go to Dashboard
-        <ChevronRight className="ml-2 size-4" />
+        <ChevronRight className="ml-2 size-4" aria-hidden="true" />
       </Button>
     </div>
   );
@@ -681,15 +695,9 @@ function ReviewStep({
 }) {
   return (
     <div className="mx-auto max-w-xl">
-      <div className="text-center">
-        <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-primary/10">
-          <CheckCircle2 className="size-6 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold">Review & Launch</h2>
-        <p className="mt-2 text-muted-foreground">Here&apos;s what we&apos;ll set up for you</p>
-      </div>
+      <StepHeading icon={CheckCircle2} tile="from-violet-600 to-fuchsia-600 shadow-violet-500/25" title="Review & Launch" subtitle="Here's what we'll set up for you" />
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-8 space-y-3">
         <ReviewCard
           icon={Building2}
           title="Business"
@@ -733,21 +741,21 @@ function ReviewStep({
         )}
       </div>
 
-      <div className="mt-8 flex gap-4">
-        <Button variant="outline" onClick={onBack} disabled={isSubmitting}>
-          <ChevronLeft className="mr-2 size-4" />
+      <div className="mt-8 flex gap-3">
+        <Button variant="outline" onClick={onBack} disabled={isSubmitting} className="min-h-11 rounded-2xl">
+          <ChevronLeft className="mr-2 size-4" aria-hidden="true" />
           Back
         </Button>
-        <Button className="flex-1" onClick={onComplete} disabled={isSubmitting}>
+        <Button className="min-h-11 flex-1 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/25" onClick={onComplete} disabled={isSubmitting}>
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
+              <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
               Setting up...
             </>
           ) : (
             <>
               Launch Dashboard
-              <ChevronRight className="ml-2 size-4" />
+              <ChevronRight className="ml-2 size-4" aria-hidden="true" />
             </>
           )}
         </Button>
@@ -766,16 +774,18 @@ function ReviewCard({
   items: { label: string; value: string }[];
 }) {
   return (
-    <div className="rounded-xl border p-4">
+    <div className="rounded-[20px] border border-stone-200/70 bg-white/70 p-4">
       <div className="flex items-center gap-2">
-        <Icon className="size-4 text-primary" />
-        <span className="font-semibold">{title}</span>
+        <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md">
+          <Icon className="size-4" aria-hidden="true" />
+        </span>
+        <span className="text-sm font-extrabold text-stone-900">{title}</span>
       </div>
-      <div className="mt-2 space-y-1">
+      <div className="mt-3 space-y-1.5">
         {items.map((item) => (
-          <div key={item.label} className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{item.label}</span>
-            <span className="font-medium">{item.value}</span>
+          <div key={item.label} className="flex justify-between gap-4 text-sm">
+            <span className="font-medium text-stone-600">{item.label}</span>
+            <span className="truncate font-bold text-stone-900">{item.value}</span>
           </div>
         ))}
       </div>
@@ -910,8 +920,8 @@ export function BusinessOnboardingWizard() {
 
   if (orgLoading) {
     return (
-      <div className="flex min-h-[600px] items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-primary" />
+      <div className="flex min-h-[600px] items-center justify-center" role="status" aria-label="Loading setup">
+        <Loader2 className="size-8 animate-spin text-violet-600" aria-hidden="true" />
       </div>
     );
   }
@@ -919,8 +929,9 @@ export function BusinessOnboardingWizard() {
   return (
     <div className="flex min-h-[600px] flex-col">
       {currentStep < STEPS.length - 1 && (
-        <div className="mb-8 px-4 pt-4 sm:px-8">
+        <div className="mb-8 border-b border-stone-100/80 bg-gradient-to-r from-violet-50/60 via-white to-cyan-50/50 px-4 pt-6 sm:px-8">
           <ProgressIndicator currentStep={currentStep} />
+          <div className="h-6" aria-hidden="true" />
         </div>
       )}
 
@@ -932,24 +943,26 @@ export function BusinessOnboardingWizard() {
         {currentStep === 4 && <TeamStep data={data} onUpdate={updateData} />}
         {currentStep === 5 && <CompleteStep />}
         {currentStep === 4 && (
-          <ReviewStep
-            data={data}
-            onBack={goBack}
-            onComplete={handleComplete}
-            isSubmitting={isSubmitting}
-          />
+          <div className="mt-8">
+            <ReviewStep
+              data={data}
+              onBack={goBack}
+              onComplete={handleComplete}
+              isSubmitting={isSubmitting}
+            />
+          </div>
         )}
       </div>
 
       {currentStep > 0 && currentStep < STEPS.length - 1 && currentStep !== 4 && (
-        <div className="flex justify-between border-t bg-muted/20 px-4 py-4 sm:px-8">
-          <Button variant="outline" onClick={goBack}>
-            <ChevronLeft className="mr-2 size-4" />
+        <div className="flex justify-between gap-3 border-t border-stone-100 bg-stone-50/60 px-4 py-4 sm:px-8">
+          <Button variant="outline" onClick={goBack} className="min-h-11 rounded-2xl border-stone-200 bg-white/80">
+            <ChevronLeft className="mr-2 size-4" aria-hidden="true" />
             Back
           </Button>
-          <Button onClick={goNext}>
+          <Button onClick={goNext} className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/25">
             Continue
-            <ChevronRight className="ml-2 size-4" />
+            <ChevronRight className="ml-2 size-4" aria-hidden="true" />
           </Button>
         </div>
       )}

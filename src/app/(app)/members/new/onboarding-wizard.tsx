@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Check } from "lucide-react"
+import { Check, Sparkles } from "lucide-react"
 
 import { LeadSelectionStep } from "./steps/lead-selection-step"
 import { PersonalInfoStep } from "./steps/personal-info-step"
@@ -196,38 +196,61 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-      {/* Stepper */}
-      <div className="flex items-center justify-between px-4">
-        {STEPS.map((step, idx) => (
-          <React.Fragment key={step.id}>
-            <div className="flex flex-col items-center gap-1">
-              <div
-                className={`size-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                  idx < currentStep
-                    ? "bg-primary text-primary-foreground"
-                    : idx === currentStep
-                    ? "bg-primary text-primary-foreground ring-2 ring-primary/30"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {idx < currentStep ? <Check className="size-4" /> : step.id + 1}
-              </div>
-              <span className="text-xs text-muted-foreground">{step.label}</span>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <section aria-label="Onboarding progress" className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+        <div className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/70 px-5 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/25">
+              <Sparkles className="size-4" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="font-serif text-lg font-semibold tracking-tight text-stone-950">
+                Step {currentStep + 1} of {STEPS.length} — {STEPS[currentStep].label}
+              </h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">Every step saves into the review screen before anything is created.</p>
             </div>
-            {idx < STEPS.length - 1 && (
-              <div
-                className={`flex-1 h-0.5 mx-2 ${
-                  idx < currentStep ? "bg-primary" : "bg-muted"
-                }`}
-              />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+            <span className="ml-auto hidden rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md sm:inline-block">
+              {Math.round(((currentStep + 1) / STEPS.length) * 100)}%
+            </span>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-100" role="presentation">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 transition-all duration-500 motion-safe:animate-none"
+              style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+        <ol className="flex items-start justify-between gap-1 px-4 py-5 sm:px-6">
+          {STEPS.map((step, idx) => (
+            <React.Fragment key={step.id}>
+              <li className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center" aria-current={idx === currentStep ? "step" : undefined}>
+                <span
+                  className={`flex size-9 items-center justify-center rounded-full text-sm font-black shadow-md transition-all duration-300 ${
+                    idx < currentStep
+                      ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-violet-500/30"
+                      : idx === currentStep
+                        ? "bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-lg shadow-violet-500/30 ring-4 ring-violet-500/15"
+                        : "border border-stone-200 bg-white text-stone-400"
+                  }`}
+                  aria-hidden="true"
+                >
+                  {idx < currentStep ? <Check className="size-4" /> : step.id + 1}
+                </span>
+                <span className={`truncate text-[11px] font-extrabold ${idx === currentStep ? "text-violet-800" : idx < currentStep ? "text-stone-700" : "text-stone-400"}`}>{step.label}</span>
+              </li>
+              {idx < STEPS.length - 1 && (
+                <span
+                  className={`mt-4 h-1 min-w-2 flex-1 rounded-full sm:mx-1 ${idx < currentStep ? "bg-gradient-to-r from-violet-600 to-fuchsia-500" : "bg-stone-200"}`}
+                  aria-hidden="true"
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </ol>
+      </section>
 
       {/* Step Content */}
-      <div className="min-h-[400px]">
+      <section aria-label={`Step ${currentStep + 1}: ${STEPS[currentStep].label}`} className="min-h-[400px] overflow-hidden rounded-[28px] border-white/90 bg-white/88 p-5 shadow-xl shadow-violet-900/5 backdrop-blur-xl sm:p-7">
         {currentStep === 0 && (
           <LeadSelectionStep
             onSelectLead={(lead) => {
@@ -288,7 +311,7 @@ export function OnboardingWizard() {
             isSubmitting={completeOnboarding.isPending}
           />
         )}
-      </div>
+      </section>
     </div>
   )
 }

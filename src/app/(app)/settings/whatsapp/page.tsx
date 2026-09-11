@@ -2,10 +2,10 @@
 
 import * as React from "react"
 import Script from "next/script"
-import { CheckCircle2, Loader2, MessageCircle, ShieldCheck, Unplug } from "lucide-react"
+import Link from "next/link"
+import { ArrowLeft, CheckCircle2, Loader2, MessageCircle, ShieldCheck, Sparkles, Unplug } from "lucide-react"
 import { toast } from "sonner"
 
-import { PageHeader } from "@/components/shared/page-header"
 import { ErrorState } from "@/components/shared/error-state"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -119,51 +119,82 @@ export default function WhatsAppSettingsPage() {
   }
 
   if (!canManage) {
-    return <div className="flex flex-col gap-6"><PageHeader title="WhatsApp" description="Connect your gym's official WhatsApp Business number" /><ErrorState message="You need settings.manage permission to manage WhatsApp." /></div>
+    return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5"><div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" /><div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6"><h1 className="font-serif text-3xl font-semibold text-stone-950">WhatsApp</h1><ErrorState message="You need settings.manage permission to manage WhatsApp." /></div></div>
   }
 
   return (
     <>
       {META_APP_ID && <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="afterInteractive" onLoad={initMetaSdk} />}
-      <div className="flex flex-col gap-6">
-        <PageHeader title="WhatsApp" description="Connect your gym's official WhatsApp Business number with Meta Cloud API" />
-        {integrationQuery.isLoading ? (
-          <Card className="max-w-3xl"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full" /><Skeleton className="h-10 w-40" /></CardContent></Card>
-        ) : integrationQuery.isError ? <ErrorState onRetry={() => integrationQuery.refetch()} /> : (
-          <Card className="max-w-3xl overflow-hidden">
-            <CardHeader className="border-b bg-muted/20">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3"><div className="rounded-xl bg-primary/10 p-3"><MessageCircle className="h-6 w-6 text-primary" /></div><div><CardTitle className="text-lg">WhatsApp Business</CardTitle><p className="mt-1 text-sm text-muted-foreground">Each gym connects its own WABA and business phone number.</p></div></div>
-                <Badge variant={connected ? "default" : "secondary"}>{connected ? "Connected" : "Not connected"}</Badge>
+      <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+        <div
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]"
+          aria-hidden="true"
+        />
+        <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+          <section aria-labelledby="wa-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-emerald-300/25 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-teal-300/25 blur-3xl" aria-hidden="true" />
+            <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4">
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30">
+                  <MessageCircle className="size-6" aria-hidden="true" />
+                </span>
+                <div>
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/75 px-3 py-1 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">
+                    <Sparkles className="size-3.5" aria-hidden="true" /> Meta Cloud API
+                  </div>
+                  <h1 id="wa-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">WhatsApp</h1>
+                  <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-stone-600">Connect your gym&apos;s official WhatsApp Business number with Meta Cloud API.</p>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
-              {connected ? (
-                <div className="space-y-5">
-                  <div className="grid gap-4 sm:grid-cols-2"><Info label="Business number" value={integration?.displayPhoneNumber ?? "—"} /><Info label="Business name" value={integration?.displayName ?? "—"} /><Info label="WABA ID" value={integration?.wabaId ?? integration?.businessAccountId ?? "—"} mono /><Info label="Phone Number ID" value={integration?.phoneNumberId ?? "—"} mono /></div>
-                  <div className="flex items-center gap-2 rounded-xl border p-4 text-sm"><ShieldCheck className="h-5 w-5 text-primary" /><span>Access credentials are kept server-side and encrypted at rest.</span></div>
-                  <Button variant="outline" onClick={() => disconnect.mutate()} disabled={disconnect.isPending}>{disconnect.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unplug className="mr-2 h-4 w-4" />}Disconnect WhatsApp</Button>
+              <Link href="/settings" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white/80 px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+                <ArrowLeft className="size-4" aria-hidden="true" /> Back to settings
+              </Link>
+            </div>
+          </section>
+
+          {integrationQuery.isLoading ? (
+            <Card className="max-w-3xl border-white/90 bg-white/88 backdrop-blur-xl"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full rounded-2xl" /><Skeleton className="h-11 w-40 rounded-2xl" /></CardContent></Card>
+          ) : integrationQuery.isError ? <ErrorState onRetry={() => integrationQuery.refetch()} /> : (
+            <Card className="max-w-3xl overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+              <span className="block h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-400" aria-hidden="true" />
+              <CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-emerald-50/80 via-white to-teal-50/60">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-[18px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg"><MessageCircle className="size-6" aria-hidden="true" /></span>
+                    <div><CardTitle className="font-serif text-lg tracking-tight text-stone-950">WhatsApp Business</CardTitle><p className="mt-1 text-xs font-medium text-stone-600">Each gym connects its own WABA and business phone number.</p></div>
+                  </div>
+                  <Badge variant={connected ? "default" : "secondary"} className={connected ? "rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white" : "rounded-full"}>{connected ? "Connected" : "Not connected"}</Badge>
                 </div>
-              ) : (
-                <div className="space-y-5">
-                  <div className="grid gap-3 sm:grid-cols-3"><Step n="1" text="Click Connect WhatsApp" /><Step n="2" text="Complete Meta onboarding" /><Step n="3" text="Confirm the business number" /></div>
-                  <div className="rounded-xl border bg-muted/20 p-4 text-sm text-muted-foreground">Meta will guide the gym owner through Business Portfolio and WhatsApp onboarding. If the number already runs on the WhatsApp Business app, the coexistence flow lets the owner keep using that same number on the phone while MyGymAgent gets Cloud API access.</div>
-                  <Button onClick={launchSignup} disabled={!sdkReady || !configured || signupBusy} size="lg">{signupBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageCircle className="mr-2 h-4 w-4" />}{configured ? "Connect WhatsApp" : "Meta setup required"}</Button>
-                  {!configured && <p className="text-xs text-muted-foreground">Set NEXT_PUBLIC_META_APP_ID and NEXT_PUBLIC_META_WHATSAPP_CONFIG_ID in the frontend deployment.</p>}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+              </CardHeader>
+              <CardContent className="space-y-6 p-5 sm:p-6">
+                {connected ? (
+                  <div className="space-y-5">
+                    <div className="grid gap-3 sm:grid-cols-2"><Info label="Business number" value={integration?.displayPhoneNumber ?? "—"} /><Info label="Business name" value={integration?.displayName ?? "—"} /><Info label="WABA ID" value={integration?.wabaId ?? integration?.businessAccountId ?? "—"} mono /><Info label="Phone Number ID" value={integration?.phoneNumberId ?? "—"} mono /></div>
+                    <div className="flex items-center gap-3 rounded-[20px] border border-emerald-100 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 p-4 text-sm font-medium text-stone-700"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md"><ShieldCheck className="size-5" aria-hidden="true" /></span>Access credentials are kept server-side and encrypted at rest.</div>
+                    <Button variant="outline" onClick={() => disconnect.mutate()} disabled={disconnect.isPending} className="min-h-11 rounded-2xl hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700">{disconnect.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Unplug className="mr-2 h-4 w-4" aria-hidden="true" />}Disconnect WhatsApp</Button>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    <div className="grid gap-3 sm:grid-cols-3"><Step n="1" text="Click Connect WhatsApp" /><Step n="2" text="Complete Meta onboarding" /><Step n="3" text="Confirm the business number" /></div>
+                    <div className="rounded-[20px] border border-stone-200/70 bg-stone-50/70 p-4 text-xs font-medium leading-5 text-stone-600">Meta will guide the gym owner through Business Portfolio and WhatsApp onboarding. If the number already runs on the WhatsApp Business app, the coexistence flow lets the owner keep using that same number on the phone while MyGymAgent gets Cloud API access.</div>
+                    <Button onClick={launchSignup} disabled={!sdkReady || !configured || signupBusy} size="lg" className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#059669,#0d9488_55%,#0891b2)] shadow-lg shadow-emerald-500/25">{signupBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />}{configured ? "Connect WhatsApp" : "Meta setup required"}</Button>
+                    {!configured && <p className="text-xs font-medium text-stone-600">Set NEXT_PUBLIC_META_APP_ID and NEXT_PUBLIC_META_WHATSAPP_CONFIG_ID in the frontend deployment.</p>}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </>
   )
 }
 
 function Info({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <div className="rounded-xl border p-4"><div className="text-xs text-muted-foreground">{label}</div><div className={`mt-1 break-all text-sm font-medium ${mono ? "font-mono" : ""}`}>{value}</div></div>
+  return <div className="rounded-[20px] border border-stone-200/70 bg-white/70 p-4"><div className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">{label}</div><div className={`mt-1 break-all text-sm font-bold text-stone-900 ${mono ? "font-mono" : ""}`}>{value}</div></div>
 }
 
 function Step({ n, text }: { n: string; text: string }) {
-  return <div className="flex items-center gap-3 rounded-xl border p-4"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{n}</span><span className="text-sm font-medium">{text}</span><CheckCircle2 className="ml-auto h-4 w-4 text-muted-foreground" /></div>
+  return <div className="flex items-center gap-3 rounded-[20px] border border-stone-200/70 bg-white/70 p-4"><span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-black text-white shadow-md">{n}</span><span className="text-xs font-bold text-stone-700">{text}</span><CheckCircle2 className="ml-auto size-4 shrink-0 text-emerald-500" aria-hidden="true" /></div>
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, UserX } from "lucide-react";
+import { ArrowRight, Plus, Sparkles, UserRound, UserX, Users } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
-import { PageHeader } from "@/components/shared/page-header";
 import { DataTable } from "@/components/shared/data-table";
 import { BranchSelect } from "@/components/shared/branch-select";
 import { Button } from "@/components/ui/button";
@@ -82,8 +82,8 @@ function InviteStaffDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus />
+        <Button className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(105deg,#0891b2,#2563eb_55%,#4f46e5)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-cyan-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+          <Plus className="size-4" aria-hidden="true" />
           Invite staff
         </Button>
       </DialogTrigger>
@@ -203,11 +203,16 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
       header: "Name",
       accessorKey: "firstName",
       cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="font-medium">
-            {row.original.firstName} {row.original.lastName}
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25" aria-hidden="true">
+            <UserRound className="size-4" aria-hidden="true" />
           </span>
-          <span className="text-xs text-muted-foreground">{row.original.email}</span>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate font-bold text-stone-900 dark:text-stone-100">
+              {row.original.firstName} {row.original.lastName}
+            </span>
+            <span className="truncate text-xs font-medium text-stone-600 dark:text-stone-400">{row.original.email}</span>
+          </div>
         </div>
       ),
     },
@@ -217,7 +222,7 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
       cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
           {row.original.userRoles.map((ur) => (
-            <Badge key={ur.id} variant="secondary">
+            <Badge key={ur.id} variant="secondary" className="rounded-full bg-cyan-500/10 text-cyan-800 ring-1 ring-cyan-200/60">
               {ur.role.name}
             </Badge>
           ))}
@@ -228,7 +233,7 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
       header: "Status",
       accessorKey: "status",
       cell: ({ row }) => (
-        <Badge variant={row.original.status === "ACTIVE" ? "default" : "secondary"}>
+        <Badge variant={row.original.status === "ACTIVE" ? "default" : "secondary"} className={row.original.status === "ACTIVE" ? "rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm" : "rounded-full"}>
           {row.original.status}
         </Badge>
       ),
@@ -244,6 +249,7 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
           <Button
             variant="ghost"
             size="sm"
+            className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
             disabled={deactivate.isPending}
             onClick={() =>
               deactivate
@@ -252,7 +258,7 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
                 .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to deactivate"))
             }
           >
-            <UserX className="size-3.5" />
+            <UserX className="size-3.5" aria-hidden="true" />
             Deactivate
           </Button>
         ) : null,
@@ -270,24 +276,55 @@ export default function StaffPage() {
   const columns = useColumns(canManage);
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Staff"
-        description="Trainers and team members at your gym"
-        actions={hasPermission("users.create") && <InviteStaffDialog />}
-      />
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        <section aria-labelledby="staff-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10 dark:border-white/10 dark:bg-stone-950/80">
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-teal-300/25 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-sky-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-200/70 bg-cyan-50/80 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-cyan-800">
+                <Users className="size-3.5" aria-hidden="true" /> Team roster
+              </div>
+              <h1 id="staff-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl dark:text-white">Staff</h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600 dark:text-stone-400">Trainers and team members at your gym — roles, status and access in one vivid roster.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {hasPermission("users.create") && <InviteStaffDialog />}
+              <Link href="/attendance" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-cyan-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+                <Sparkles className="size-4" aria-hidden="true" /> Attendance <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
 
-      <DataTable
-        columns={columns}
-        data={staffQuery.data}
-        isLoading={staffQuery.isLoading}
-        isError={staffQuery.isError}
-        onRetry={() => staffQuery.refetch()}
-        page={page}
-        onPageChange={setPage}
-        emptyTitle="No staff yet"
-        emptyDescription="Invite your first team member."
-      />
+        <section aria-labelledby="staff-roster" className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-500 dark:border-white/10 dark:bg-stone-950/80">
+          <div className="flex items-center gap-3 border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/90 via-white to-teal-50/60 px-5 py-5 sm:px-6 dark:from-cyan-950/40 dark:via-stone-950 dark:to-teal-950/30">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25">
+              <Users className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="staff-roster" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Team roster</h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Trainers, coaches and operators across every branch.</p>
+            </div>
+          </div>
+          <div className="p-4 sm:p-5">
+            <DataTable
+              columns={columns}
+              data={staffQuery.data}
+              isLoading={staffQuery.isLoading}
+              isError={staffQuery.isError}
+              onRetry={() => staffQuery.refetch()}
+              page={page}
+              onPageChange={setPage}
+              emptyTitle="No staff yet"
+              emptyDescription="Invite your first team member."
+            />
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

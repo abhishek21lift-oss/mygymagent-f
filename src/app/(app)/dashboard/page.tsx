@@ -49,6 +49,14 @@ const STATUS_COLORS: Record<string, string> = {
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const QUICK_TILES = [
+  "from-cyan-500 to-blue-600 shadow-cyan-500/25",
+  "from-emerald-500 to-teal-600 shadow-emerald-500/25",
+  "from-violet-600 to-fuchsia-600 shadow-violet-500/25",
+  "from-rose-500 to-orange-500 shadow-rose-500/25",
+  "from-amber-500 to-orange-600 shadow-amber-500/25",
+];
+
 export default function DashboardPage() {
   const { hasPermission } = useAuth();
   const briefing = useDailyBriefing();
@@ -137,208 +145,325 @@ export default function DashboardPage() {
   }, [data]);
 
   return (
-    <div className="relative flex flex-col gap-7 overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_12%_8%,rgba(59,130,246,0.08),transparent_26%),radial-gradient(circle_at_88%_18%,rgba(168,85,247,0.08),transparent_28%),radial-gradient(circle_at_50%_100%,rgba(6,182,212,0.06),transparent_30%)]">
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]"
+        aria-hidden="true"
+      />
       <SceneBackground />
-
-      {/* Premium brand hero */}
-      <section className="relative isolate flex min-h-[205px] items-center justify-center overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,245,255,0.86)_42%,rgba(250,245,255,0.92))] px-5 py-6 shadow-[0_24px_70px_-30px_rgba(59,130,246,0.35)] ring-1 ring-primary/10 backdrop-blur-xl sm:min-h-[220px] sm:px-8">
-        <div className="pointer-events-none absolute -left-24 -top-24 size-64 rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -right-20 -top-28 size-72 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 left-1/3 size-72 rounded-full bg-fuchsia-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.045)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-
-        <div className="relative z-10 flex w-full max-w-3xl flex-col items-center justify-center gap-6 text-center">
-          <h1 className="select-none bg-gradient-to-r from-blue-600 via-violet-600 via-50% to-fuchsia-500 bg-clip-text text-4xl font-black uppercase leading-[0.95] tracking-[-0.045em] text-transparent drop-shadow-[0_8px_25px_rgba(99,102,241,0.18)] sm:text-6xl lg:text-7xl">
-            {gymName}
-          </h1>
-          <Link
-            href="/ai"
-            className="group inline-flex items-center justify-center gap-2.5 rounded-2xl border border-white/70 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 px-6 py-3 text-sm font-bold text-white shadow-[0_12px_30px_-10px_rgba(79,70,229,0.55)] transition duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_18px_38px_-12px_rgba(79,70,229,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 sm:px-7 sm:py-3.5 sm:text-base"
-          >
-            <Sparkles className="size-4 transition-transform duration-300 group-hover:rotate-12 sm:size-5" />
-            Ask MyGymAgent
-            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 sm:size-5" />
-          </Link>
-        </div>
-      </section>
-
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold tracking-tight">Business pulse</h2>
-            <p className="text-xs text-muted-foreground">The numbers that matter today.</p>
-          </div>
-          <Link href="/intelligence" className="text-xs font-medium text-primary hover:underline">
-            View insights
-          </Link>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard3D icon={CalendarCheck} label="Today&apos;s check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Real-time" trend="neutral" delay={0} />
-          <MetricCard3D icon={Wallet} label="Net revenue" value={data ? `${currency} ${revenue}` : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="neutral" delay={100} />
-          <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" hint="14+ days inactive" trend="neutral" delay={200} />
-          <MetricCard3D icon={Sparkles} label="AI actions" value={data?.pendingAiActions} loading={briefing.isLoading} accent="violet" hint="Awaiting approval" trend="neutral" delay={300} />
-        </div>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
-        <Card className="overflow-hidden border-0 bg-white/75 shadow-[0_18px_45px_-28px_rgba(59,130,246,0.35)] ring-1 ring-blue-100/80 backdrop-blur-xl">
-          <CardHeader className="border-b border-blue-100/70 bg-gradient-to-r from-cyan-50/80 via-white/50 to-blue-50/80 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base"><Activity className="size-4 text-cyan-500" />Revenue trend</CardTitle>
-                <p className="mt-1 text-xs text-muted-foreground">Net revenue by month, in {revenueTrend.data?.[0]?.revenue[0]?.currency ?? currency}.</p>
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        {/* Premium midnight hero — 3D scene stays mounted behind */}
+        <section
+          aria-labelledby="dashboard-title"
+          className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10"
+        >
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-amber-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
+          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 flex-1 text-center lg:text-left">
+              <div className="mb-4 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur">
+                  <span className="relative flex size-2" aria-hidden="true">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-emerald-300" />
+                  </span>
+                  Live gym pulse
+                </span>
+                <span className="inline-flex items-center rounded-full bg-black/20 px-3 py-1.5 text-[11px] font-bold text-white/80">
+                  {briefing.isLoading ? "Syncing…" : `${data?.today.checkIns ?? 0} check-ins today`}
+                </span>
               </div>
-              <Link href="/billing" className="text-xs font-medium text-primary hover:underline">Details</Link>
-            </div>
-          </CardHeader>
-          <CardContent className="p-2 sm:p-4">
-            <div className="h-64">
-              {revenueTrend.isLoading ? (
-                <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
-              ) : weeklyData.length === 0 ? (
-                <div className="flex h-full items-center justify-center"><p className="text-sm text-muted-foreground">Data unavailable — no revenue recorded yet.</p></div>
-              ) : (
-                <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
-                  <Chart3D data={weeklyData} />
-                </Suspense>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 bg-white/75 shadow-[0_18px_45px_-28px_rgba(139,92,246,0.4)] ring-1 ring-violet-100/80 backdrop-blur-xl">
-          <CardHeader className="border-b border-violet-100/70 bg-gradient-to-r from-violet-50/80 via-white/50 to-fuchsia-50/80 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base"><Zap className="size-4 text-violet-500" />Member status</CardTitle>
-                <p className="mt-1 text-xs text-muted-foreground">Live member statuses across your gym.</p>
+              <h1
+                id="dashboard-title"
+                className="font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl"
+              >
+                {gymName}
+              </h1>
+              <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75 lg:mx-0">
+                Your athletic-luxe command deck — live attendance, revenue flow, retention
+                risk and AI approvals wrapped around an immersive 3D pulse.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
+                <Link
+                  href="/ai"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <Sparkles className="size-4" aria-hidden="true" />
+                  Ask MyGymAgent
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/command-center"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <Zap className="size-4" aria-hidden="true" />
+                  Command Center
+                </Link>
               </div>
-              <Link href="/members" className="text-xs font-medium text-primary hover:underline">Members</Link>
             </div>
-          </CardHeader>
-          <CardContent className="p-2 sm:p-4">
-            <div className="h-64">
-              {statusBreakdown.isLoading ? (
-                <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
-              ) : membershipData.length === 0 ? (
-                <div className="flex h-full items-center justify-center"><p className="text-sm text-muted-foreground">Data unavailable — no members yet.</p></div>
-              ) : (
-                <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
-                  <DataOrb data={membershipData} />
-                </Suspense>
-              )}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-3">
-              {membershipData.map((item) => (
-                <div key={item.label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
-                  {item.label} ({item.value})
+            <div className="w-full shrink-0 rounded-[24px] border border-white/20 bg-white/10 p-5 backdrop-blur-xl lg:max-w-[340px]">
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-white/80">
+                <Activity className="size-4 text-cyan-300" aria-hidden="true" />
+                Today at a glance
+              </p>
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10">
+                  <span className="text-xs font-bold text-white/70">Net revenue</span>
+                  <span className="font-mono text-lg font-black tabular-nums">
+                    {briefing.isLoading ? "—" : `${currency} ${revenue}`}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <Card className="overflow-hidden border-0 bg-white/75 shadow-sm ring-1 ring-cyan-100/80 backdrop-blur-xl">
-          <CardHeader className="border-b border-cyan-100/70 bg-gradient-to-r from-cyan-50/70 to-white/40 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base"><Activity className="size-4 text-cyan-500" />Today&apos;s activity flow</CardTitle>
-                <p className="mt-1 text-xs text-muted-foreground">Animated timeline of gym events.</p>
+                <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10">
+                  <span className="text-xs font-bold text-white/70">Members at risk</span>
+                  <span className="font-mono text-lg font-black tabular-nums">
+                    {briefing.isLoading ? "—" : (data?.atRiskMembers.count ?? 0)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10">
+                  <span className="text-xs font-bold text-white/70">AI awaiting approval</span>
+                  <span className="font-mono text-lg font-black tabular-nums">
+                    {briefing.isLoading ? "—" : (data?.pendingAiActions ?? 0)}
+                  </span>
+                </div>
               </div>
+              <Link
+                href="/intelligence"
+                className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-3 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                View full intelligence
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
             </div>
-          </CardHeader>
-          <CardContent className="p-2 sm:p-4">
-            <div className="h-48">
+          </div>
+        </section>
+
+        <section aria-labelledby="dash-pulse" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 id="dash-pulse" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
+                Business pulse
+              </h2>
+              <p className="mt-1 text-xs font-medium text-stone-600">
+                Immersive 3D metric cards — live numbers that matter today.
+              </p>
+            </div>
+            <Link
+              href="/intelligence"
+              className="hidden min-h-11 items-center gap-1 text-xs font-extrabold text-violet-700 hover:text-violet-900 sm:inline-flex"
+            >
+              View insights <ChevronRight className="size-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard3D icon={CalendarCheck} label="Today's check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Real-time" trend="neutral" delay={0} />
+            <MetricCard3D icon={Wallet} label="Net revenue" value={data ? `${currency} ${revenue}` : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="neutral" delay={100} />
+            <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" hint="14+ days inactive" trend="neutral" delay={200} />
+            <MetricCard3D icon={Sparkles} label="AI actions" value={data?.pendingAiActions} loading={briefing.isLoading} accent="violet" hint="Awaiting approval" trend="neutral" delay={300} />
+          </div>
+        </section>
+
+        <section aria-label="Revenue and membership visuals" className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/90 via-white to-blue-50/60 pb-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25">
+                    <Activity className="size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Revenue trend</CardTitle>
+                    <p className="mt-0.5 text-xs font-medium text-stone-600">Net revenue by month, in {revenueTrend.data?.[0]?.revenue[0]?.currency ?? currency}.</p>
+                  </div>
+                </div>
+                <Link href="/billing" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-xs font-extrabold text-cyan-700 transition hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Details</Link>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-4">
+              <div className="h-64">
+                {revenueTrend.isLoading ? (
+                  <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>
+                ) : weeklyData.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No revenue yet</p><p className="text-xs font-medium text-stone-600">Data unavailable — no revenue recorded yet.</p></div>
+                ) : (
+                  <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>}>
+                    <Chart3D data={weeklyData} />
+                  </Suspense>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-fuchsia-50/60 pb-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+                    <Zap className="size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Member status</CardTitle>
+                    <p className="mt-0.5 text-xs font-medium text-stone-600">Live member statuses across your gym.</p>
+                  </div>
+                </div>
+                <Link href="/members" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-xs font-extrabold text-violet-700 transition hover:bg-violet-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">Members</Link>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-4">
+              <div className="h-64">
+                {statusBreakdown.isLoading ? (
+                  <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>
+                ) : membershipData.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No members yet</p><p className="text-xs font-medium text-stone-600">Data unavailable — no members yet.</p></div>
+                ) : (
+                  <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>}>
+                    <DataOrb data={membershipData} />
+                  </Suspense>
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {membershipData.map((item) => (
+                  <span key={item.label} className="inline-flex items-center gap-1.5 rounded-full bg-stone-100/80 px-2.5 py-1 text-xs font-bold text-stone-700 ring-1 ring-stone-200/60">
+                    <span className="size-2 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
+                    {item.label} ({item.value})
+                  </span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section aria-label="Activity and priorities" className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-white via-cyan-50/50 to-violet-50/50 pb-4">
+              <div className="flex items-center gap-3">
+                <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25">
+                  <Activity className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Today&apos;s activity flow</CardTitle>
+                  <p className="mt-0.5 text-xs font-medium text-stone-600">Animated timeline of gym events.</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-4">
+              <div className="h-48">
+                {briefing.isLoading ? (
+                  <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>
+                ) : activityTimeline.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No activity yet</p><p className="text-xs font-medium text-stone-600">Data unavailable.</p></div>
+                ) : (
+                  <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>}>
+                    <ActivityTimeline3D activities={activityTimeline} />
+                  </Suspense>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-amber-50/90 via-white to-orange-50/60 pb-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25">
+                    <AlertTriangle className="size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Today&apos;s priorities</CardTitle>
+                    <p className="mt-0.5 text-xs font-medium text-stone-600">Signals that may need a decision.</p>
+                  </div>
+                </div>
+                <Link href="/owner-os" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">Owner OS</Link>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4">
               {briefing.isLoading ? (
-                <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
-              ) : activityTimeline.length === 0 ? (
-                <div className="flex h-full items-center justify-center"><p className="text-sm text-muted-foreground">Data unavailable.</p></div>
+                <div className="space-y-2" aria-label="Loading priorities">{[1, 2, 3].map((item) => <div key={item} className="h-16 animate-pulse rounded-[20px] bg-gradient-to-r from-stone-100 to-stone-50" />)}</div>
+              ) : priorities.length ? (
+                <div className="flex flex-col gap-1">
+                  {priorities.map((item) => {
+                    if (!item) return null;
+                    const Icon = item.icon;
+                    const tone = item.tone === "danger" ? "from-rose-500 to-orange-500 shadow-rose-500/25" : item.tone === "ai" ? "from-violet-600 to-fuchsia-600 shadow-violet-500/25" : "from-amber-500 to-orange-600 shadow-amber-500/25";
+                    return (
+                      <Link key={item.title} href={item.href} className="group flex items-center gap-3 rounded-[20px] border border-transparent px-3 py-3 transition hover:-translate-y-px hover:border-violet-200 hover:bg-violet-50/60 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+                        <span className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md ${tone}`}><Icon className="size-5" aria-hidden="true" /></span>
+                        <span className="min-w-0 flex-1"><span className="block truncate text-sm font-extrabold text-stone-900">{item.title}</span><span className="mt-0.5 block truncate text-xs font-medium text-stone-600">{item.detail}</span></span>
+                        <span className="hidden items-center gap-1 text-xs font-extrabold text-violet-700 sm:flex">{item.action}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></span>
+                      </Link>
+                    );
+                  })}
+                </div>
               ) : (
-                <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>}>
-                  <ActivityTimeline3D activities={activityTimeline} />
-                </Suspense>
+                <div className="flex flex-col items-center justify-center gap-2 rounded-[22px] border border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 px-5 py-10 text-center"><span className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25"><CheckCircle2 className="size-6" aria-hidden="true" /></span><p className="text-sm font-extrabold text-stone-900">You&apos;re all caught up</p><p className="text-xs font-medium text-stone-600">No urgent operational signals right now.</p></div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </section>
 
-        <Card className="overflow-hidden border-0 bg-white/75 shadow-sm ring-1 ring-amber-100/80 backdrop-blur-xl">
-          <CardHeader className="border-b border-amber-100/70 bg-gradient-to-r from-amber-50/80 to-white/40 pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Today&apos;s priorities</CardTitle>
-                <p className="mt-1 text-xs text-muted-foreground">AI-ranked signals that may need a decision.</p>
-              </div>
-              <Link href="/owner-os" className="text-xs font-medium text-primary hover:underline">Owner OS</Link>
+        <section aria-labelledby="dash-ai" className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] lg:p-7">
+          <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
+          <div className="relative flex items-center gap-3">
+            <span className="flex size-11 items-center justify-center rounded-[15px] bg-white/15 ring-1 ring-white/20 backdrop-blur">
+              <Sparkles className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="dash-ai" className="font-serif text-xl font-semibold tracking-tight">AI briefing</h2>
+              <p className="mt-0.5 text-xs font-medium text-white/70">A one-line read of today, then go deeper.</p>
             </div>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4">
-            {briefing.isLoading ? (
-              <div className="space-y-3">{[1, 2, 3].map((item) => <div key={item} className="h-16 animate-pulse rounded-xl bg-muted" />)}</div>
-            ) : priorities.length ? (
-              <div className="space-y-2">
-                {priorities.map((item) => {
-                  if (!item) return null;
-                  const Icon = item.icon;
-                  const tone = item.tone === "danger" ? "bg-destructive/10 text-destructive" : item.tone === "ai" ? "bg-primary/10 text-primary" : "bg-warning/15 text-warning-foreground";
-                  return (
-                    <Link key={item.title} href={item.href} className="group flex items-center gap-3 rounded-2xl border border-transparent p-3 transition hover:border-border hover:bg-muted/30">
-                      <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${tone}`}><Icon className="size-4.5" /></span>
-                      <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{item.title}</span><span className="mt-0.5 block text-xs text-muted-foreground">{item.detail}</span></span>
-                      <span className="hidden items-center gap-1 text-xs font-medium text-primary sm:flex">{item.action}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center"><CheckCircle2 className="size-8 text-success" /><p className="mt-3 text-sm font-semibold">You&apos;re all caught up</p><p className="mt-1 text-xs text-muted-foreground">No urgent operational signals right now.</p></div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      <Card className="border-0 bg-gradient-to-br from-violet-50/90 via-white/80 to-cyan-50/80 shadow-[0_20px_55px_-35px_rgba(124,58,237,0.5)] ring-1 ring-violet-100/80 backdrop-blur-xl">
-        <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Sparkles className="size-4 text-primary" />AI briefing</CardTitle></CardHeader>
-        <CardContent className="space-y-5">
-          <p className="text-sm leading-6 text-muted-foreground">{data ? `${data.today.checkIns} check-ins today, ${data.atRiskMembers.count} members need attention, ${data.salesFunnel.followUps.total} follow-ups are tracked, and ${data.pendingAiActions} AI proposals await decisions.` : "Loading today&apos;s operational briefing…"}</p>
-          <div className="grid grid-cols-2 gap-2">
+          </div>
+          <p className="relative mt-4 text-sm leading-6 text-white/80">{data ? `${data.today.checkIns} check-ins today, ${data.atRiskMembers.count} members need attention, ${data.salesFunnel.followUps.total} follow-ups are tracked, and ${data.pendingAiActions} AI proposals await decisions.` : "Loading today's operational briefing…"}</p>
+          <div className="relative mt-4 grid grid-cols-2 gap-3">
             <MiniInsight icon={TrendingUp} label="Conversion" value={data ? `${data.salesFunnel.conversionRatePct}%` : "—"} />
             <MiniInsight icon={Clock3} label="Follow-ups" value={data?.salesFunnel.followUps.total ?? 0} />
           </div>
-          <Link href="/ai" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-100 bg-white/70 px-4 py-2.5 text-sm font-semibold transition hover:bg-white">Open AI command center <ArrowRight className="size-4" /></Link>
-        </CardContent>
-      </Card>
+          <Link href="/ai" className="relative mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Open AI command center <ArrowRight className="size-4" aria-hidden="true" /></Link>
+        </section>
 
-      <section>
-        <div className="mb-3 flex items-center gap-2"><h2 className="text-base font-semibold tracking-tight">Quick actions</h2><span className="text-xs text-muted-foreground">Common workflows</span></div>
-        {visibleActions.length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleActions.map(([title, description, href, Icon]) => (
-              <Link key={href} href={href}>
-                <Card className="group h-full border-0 bg-white/70 shadow-sm ring-1 ring-border/70 transition hover:-translate-y-1 hover:ring-primary/25 hover:shadow-lg backdrop-blur-xl"><CardContent className="flex items-center gap-3 p-4"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-violet-500/15 text-primary"><Icon className="size-5" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{title}</span><span className="mt-0.5 block truncate text-xs text-muted-foreground">{description}</span></span><ArrowRight className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary" /></CardContent></Card>
-              </Link>
-            ))}
+        <section aria-labelledby="dash-quick">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 via-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+              <Zap className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="dash-quick" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">Quick actions</h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">Common workflows — every tile owns a color.</p>
+            </div>
           </div>
-        )}
-      </section>
+          {visibleActions.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {visibleActions.map(([title, description, href, Icon], i) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="group flex min-h-11 items-center gap-3 rounded-[22px] border border-white/90 bg-white/85 p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+                >
+                  <span className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${QUICK_TILES[i % QUICK_TILES.length]}`}><Icon className="size-5" aria-hidden="true" /></span>
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-extrabold tracking-tight text-stone-950">{title}</span><span className="mt-0.5 block truncate text-xs font-medium text-stone-600">{description}</span></span>
+                  <ArrowRight className="size-4 shrink-0 text-stone-400 transition group-hover:translate-x-1 group-hover:text-violet-700" aria-hidden="true" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <Link href="/members" className="rounded-2xl border border-blue-100/80 bg-white/70 p-4 backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-md"><div className="flex items-center gap-2 text-sm font-semibold"><Users className="size-4 text-primary" /> Member health</div><p className="mt-1 text-xs text-muted-foreground">Explore retention, attendance and member lifecycle.</p></Link>
-        <Link href="/crm" className="rounded-2xl border border-violet-100/80 bg-white/70 p-4 backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-md"><div className="flex items-center gap-2 text-sm font-semibold"><Megaphone className="size-4 text-primary" /> Sales pipeline</div><p className="mt-1 text-xs text-muted-foreground">Prioritize leads and follow-ups with context.</p></Link>
-        <Link href="/billing" className="rounded-2xl border border-cyan-100/80 bg-white/70 p-4 backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-md"><div className="flex items-center gap-2 text-sm font-semibold"><CreditCard className="size-4 text-primary" /> Cash flow</div><p className="mt-1 text-xs text-muted-foreground">Outstanding balances and payment activity.</p></Link>
-      </section>
+        <section aria-label="Explore surfaces" className="grid gap-3 sm:grid-cols-3">
+          <Link href="/members" className="rounded-[22px] border border-white/90 bg-white/85 p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"><div className="flex items-center gap-2 text-sm font-extrabold text-stone-900"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md"><Users className="size-4" aria-hidden="true" /></span> Member health</div><p className="mt-2 text-xs font-medium text-stone-600">Explore retention, attendance and member lifecycle.</p></Link>
+          <Link href="/crm" className="rounded-[22px] border border-white/90 bg-white/85 p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"><div className="flex items-center gap-2 text-sm font-extrabold text-stone-900"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-md"><Megaphone className="size-4" aria-hidden="true" /></span> Sales pipeline</div><p className="mt-2 text-xs font-medium text-stone-600">Prioritize leads and follow-ups with context.</p></Link>
+          <Link href="/billing" className="rounded-[22px] border border-white/90 bg-white/85 p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"><div className="flex items-center gap-2 text-sm font-extrabold text-stone-900"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md"><CreditCard className="size-4" aria-hidden="true" /></span> Cash flow</div><p className="mt-2 text-xs font-medium text-stone-600">Outstanding balances and payment activity.</p></Link>
+        </section>
+      </div>
     </div>
   );
 }
 
 function MiniInsight({ icon: Icon, label, value }: { icon: typeof TrendingUp; label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-violet-100/70 bg-white/60 p-3">
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Icon className="size-3.5" />{label}</div>
-      <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
+    <div className="rounded-[20px] border border-white/15 bg-white/10 p-4 backdrop-blur">
+      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.14em] text-white/60"><Icon className="size-3.5" aria-hidden="true" />{label}</div>
+      <p className="mt-1 font-mono text-2xl font-black tabular-nums">{value}</p>
     </div>
   );
 }

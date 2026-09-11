@@ -91,7 +91,7 @@ export function DataTable<T>({
           value={search ?? ""}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="max-w-sm"
+          className="max-w-sm rounded-[19px] border-white/90 bg-white/85 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5"
         />
       )}
 
@@ -103,13 +103,14 @@ export function DataTable<T>({
         <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />
       ) : (
         <>
-          <div className="overflow-hidden rounded-xl border">
+          <div className="overflow-hidden rounded-[22px] border border-white/90 bg-white/88 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl dark:border-white/10 dark:bg-card/90">
+            <div aria-hidden="true" className="h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
             <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="bg-muted/40 hover:bg-muted/40">
+                  <TableRow key={headerGroup.id} className="bg-gradient-to-r from-stone-50 via-violet-50/50 to-cyan-50/50 hover:bg-stone-50 dark:from-white/5 dark:via-white/5 dark:to-transparent dark:hover:bg-white/5">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                      <TableHead key={header.id} className="text-[11px] font-black uppercase tracking-[.14em] text-stone-600 dark:text-stone-300">
                         {header.isPlaceholder
                           ? null
                           : flexRender(header.column.columnDef.header, header.getContext())}
@@ -123,13 +124,13 @@ export function DataTable<T>({
                   <TableRow
                     key={row.id}
                     className={cn(
-                      "transition-colors",
+                      "transition-colors hover:bg-violet-50/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-violet-600 dark:hover:bg-white/5",
                       onRowClick && "cursor-pointer",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="font-medium text-stone-900 dark:text-stone-100">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -140,8 +141,8 @@ export function DataTable<T>({
           </div>
 
           {page !== undefined && onPageChange ? (
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm font-medium text-stone-600 dark:text-stone-300">
+            <span className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 font-mono text-xs font-bold tabular-nums shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
               Page {normalizedData.page} of {normalizedData.totalPages} &middot; {normalizedData.total} total
             </span>
             <div className="flex items-center gap-2">
@@ -150,16 +151,20 @@ export function DataTable<T>({
                 size="icon"
                 disabled={page <= 1}
                 onClick={() => onPageChange(page - 1)}
+                aria-label="Previous page"
+                className="min-h-11 min-w-11 rounded-[15px] border-white/80 bg-white/85 shadow-sm backdrop-blur-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft className="size-4" aria-hidden="true" />
               </Button>
               <Button
                 variant="outline"
                 size="icon"
                 disabled={page >= normalizedData.totalPages}
                 onClick={() => onPageChange(page + 1)}
+                aria-label="Next page"
+                className="min-h-11 min-w-11 rounded-[15px] border-white/80 bg-white/85 shadow-sm backdrop-blur-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5"
               >
-                <ChevronRight className="size-4" />
+                <ChevronRight className="size-4" aria-hidden="true" />
               </Button>
             </div>
           </div>

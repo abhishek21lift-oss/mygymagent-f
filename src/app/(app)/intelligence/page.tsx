@@ -19,7 +19,6 @@ import {
   RefreshCw,
   Sparkles,
   Target,
-  TrendingDown,
   TrendingUp,
   Users,
   WalletCards,
@@ -51,15 +50,12 @@ import {
   type AtRiskMember,
   type InventoryForecast,
   type MembershipLifecycleAnalytics,
-  type RevenueSummary,
   type RevenueTrendMonth,
   type SalesFunnel,
   type SalesSourcePerformance,
   type TrainerWorkload,
 } from "@/lib/hooks/use-analytics";
 import { useBranches } from "@/lib/hooks/use-branches";
-
-const glass = "border-white/70 bg-white/75 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.38)] backdrop-blur-2xl";
 
 function formatMoney(value: string | number | undefined, currency = "INR") {
   const amount = Number(value ?? 0);
@@ -70,6 +66,17 @@ function formatMoney(value: string | number | undefined, currency = "INR") {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+type MetricTone = "violet" | "cyan" | "emerald" | "amber" | "rose" | "blue";
+
+const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; ring: string }> = {
+  violet: { bar: "from-violet-600 via-purple-600 to-fuchsia-600", tile: "from-violet-600 to-fuchsia-600 shadow-violet-500/30", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
+  cyan: { bar: "from-cyan-400 via-sky-500 to-blue-600", tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
+  emerald: { bar: "from-emerald-400 via-teal-500 to-green-600", tile: "from-emerald-500 to-teal-600 shadow-emerald-500/30", ring: "hover:border-emerald-200 hover:shadow-emerald-500/10" },
+  amber: { bar: "from-amber-400 to-orange-500", tile: "from-amber-500 to-orange-600 shadow-amber-500/30", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
+  rose: { bar: "from-rose-500 via-red-500 to-orange-500", tile: "from-rose-500 to-orange-500 shadow-rose-500/30", ring: "hover:border-rose-200 hover:shadow-rose-500/10" },
+  blue: { bar: "from-blue-600 via-indigo-600 to-violet-600", tile: "from-blue-600 to-indigo-600 shadow-blue-500/30", ring: "hover:border-blue-200 hover:shadow-blue-500/10" },
+};
 
 function MetricCard({
   label,
@@ -85,47 +92,40 @@ function MetricCard({
   value: string | number;
   detail: string;
   icon: typeof Activity;
-  tone: "violet" | "cyan" | "emerald" | "amber" | "rose" | "blue";
+  tone: MetricTone;
   trend?: string;
   href?: string;
   loading?: boolean;
 }) {
-  const tones = {
-    violet: "from-violet-500/18 via-fuchsia-500/10 to-transparent text-violet-700",
-    cyan: "from-cyan-500/18 via-sky-500/10 to-transparent text-cyan-700",
-    emerald: "from-emerald-500/18 via-teal-500/10 to-transparent text-emerald-700",
-    amber: "from-amber-500/18 via-orange-500/10 to-transparent text-amber-700",
-    rose: "from-rose-500/18 via-pink-500/10 to-transparent text-rose-700",
-    blue: "from-blue-500/18 via-indigo-500/10 to-transparent text-blue-700",
-  };
+  const t = METRIC_TONES[tone];
   const body = (
-    <Card className={`group relative overflow-hidden rounded-[28px] border transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-38px_rgba(15,23,42,0.45)] ${glass}`}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${tones[tone]} opacity-90`} />
+    <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}>
+      <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} aria-hidden="true" />
       <CardContent className="relative p-5">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-white/80 ring-1 ring-black/5 shadow-sm">
-            <Icon className="size-5" />
-          </div>
-          {trend ? <Badge variant="secondary" className="rounded-full bg-white/75 px-2.5 py-1 text-[11px] font-semibold">{trend}</Badge> : null}
+          <span className={`flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
+            <Icon className="size-5" aria-hidden="true" />
+          </span>
+          {trend ? <Badge variant="secondary" className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-bold ring-1 ring-stone-200/60">{trend}</Badge> : null}
         </div>
-        <div className="mt-6">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
-          {loading ? <Skeleton className="mt-2 h-9 w-32" /> : <p className="mt-1 font-sans text-3xl font-extrabold tracking-[-0.04em] text-slate-950">{value}</p>}
-          <p className="mt-1 text-xs leading-5 text-slate-500">{detail}</p>
+        <div className="mt-5">
+          <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
+          {loading ? <Skeleton className="mt-2 h-9 w-32 rounded-xl" /> : <p className="mt-1 text-3xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>}
+          <p className="mt-1 text-xs font-medium text-stone-600">{detail}</p>
         </div>
       </CardContent>
     </Card>
   );
-  return href ? <Link href={href} className="block">{body}</Link> : body;
+  return href ? <Link href={href} className="block min-h-11 rounded-[22px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">{body}</Link> : body;
 }
 
 function SectionHeader({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: React.ReactNode }) {
   return (
     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600">{eyebrow}</p>
-        <h2 className="mt-1 font-sans text-xl font-extrabold tracking-[-0.035em] text-slate-950">{title}</h2>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500">{description}</p>
+        <p className="text-[10px] font-black uppercase tracking-[.2em] text-violet-700">{eyebrow}</p>
+        <h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950">{title}</h2>
+        <p className="mt-1 max-w-2xl text-xs font-medium text-stone-600">{description}</p>
       </div>
       {action}
     </div>
@@ -133,7 +133,7 @@ function SectionHeader({ eyebrow, title, description, action }: { eyebrow: strin
 }
 
 function RevenueChart({ data }: { data: RevenueTrendMonth[] | undefined }) {
-  if (!data?.length) return <div className="flex h-56 items-center justify-center text-sm text-slate-400">No revenue data available</div>;
+  if (!data?.length) return <div className="flex h-56 items-center justify-center rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center text-sm font-medium text-stone-600">No revenue data available</div>;
   const values = data.map((m) => Number(m.revenue?.[0]?.netRevenue ?? 0));
   const max = Math.max(...values, 1);
   return (
@@ -146,38 +146,38 @@ function RevenueChart({ data }: { data: RevenueTrendMonth[] | undefined }) {
           return (
             <div key={month.month} className="group flex min-w-0 flex-1 flex-col items-center justify-end gap-2">
               <div className="relative flex h-44 w-full items-end justify-center">
-                <div className="absolute bottom-0 h-full w-px bg-slate-100" />
+                <div className="absolute bottom-0 h-full w-px bg-stone-100" aria-hidden="true" />
                 <div className="relative w-full max-w-10 rounded-t-2xl bg-gradient-to-t from-violet-600 via-indigo-500 to-cyan-400 shadow-[0_14px_30px_-18px_rgba(79,70,229,0.9)] transition-all duration-500 group-hover:from-violet-500 group-hover:to-cyan-300" style={{ height: `${height}%` }}>
-                  <span className="absolute -top-7 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-slate-950 px-2 py-1 font-mono text-[9px] text-white group-hover:block">{formatMoney(value)}</span>
+                  <span className="absolute -top-7 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-stone-950 px-2 py-1 font-mono text-[9px] text-white group-hover:block">{formatMoney(value)}</span>
                 </div>
               </div>
-              <span className="font-mono text-[10px] font-semibold uppercase text-slate-400">{label}</span>
+              <span className="font-mono text-[10px] font-semibold uppercase text-stone-500">{label}</span>
             </div>
           );
         })}
       </div>
-      <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-        <span className="text-xs text-slate-500">Net revenue</span>
-        <span className="font-mono text-xs font-semibold text-slate-700">{formatMoney(values.reduce((a, b) => a + b, 0))}</span>
+      <div className="flex items-center justify-between border-t border-stone-100 pt-3">
+        <span className="text-xs font-medium text-stone-600">Net revenue</span>
+        <span className="font-mono text-xs font-bold text-stone-900">{formatMoney(values.reduce((a, b) => a + b, 0))}</span>
       </div>
     </div>
   );
 }
 
 function StatusBreakdown({ data }: { data: { status: string; count: number }[] | undefined }) {
-  if (!data?.length) return <div className="py-12 text-center text-sm text-slate-400">No member data available</div>;
+  if (!data?.length) return <div className="py-12 text-center text-sm font-medium text-stone-600">No member data available</div>;
   const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
-  const colors: Record<string, string> = { ACTIVE: "bg-emerald-500", INACTIVE: "bg-amber-400", FROZEN: "bg-sky-500", EXPIRED: "bg-rose-500", CANCELLED: "bg-slate-400" };
+  const colors: Record<string, string> = { ACTIVE: "bg-emerald-500", INACTIVE: "bg-amber-400", FROZEN: "bg-sky-500", EXPIRED: "bg-rose-500", CANCELLED: "bg-stone-400" };
   return (
     <div className="space-y-5">
-      <div className="flex h-5 overflow-hidden rounded-full bg-slate-100 p-0.5">
-        {data.map((item) => <div key={item.status} className={`${colors[item.status] ?? "bg-slate-400"} first:rounded-l-full last:rounded-r-full transition-all`} style={{ width: `${(item.count / total) * 100}%` }} title={`${item.status}: ${item.count}`} />)}
+      <div className="flex h-5 overflow-hidden rounded-full bg-stone-100 p-0.5">
+        {data.map((item) => <div key={item.status} className={`${colors[item.status] ?? "bg-stone-400"} first:rounded-l-full last:rounded-r-full transition-all`} style={{ width: `${(item.count / total) * 100}%` }} title={`${item.status}: ${item.count}`} />)}
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {data.map((item) => (
-          <div key={item.status} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
-            <div className="flex items-center gap-2"><span className={`size-2 rounded-full ${colors[item.status] ?? "bg-slate-400"}`} /><span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{item.status}</span></div>
-            <p className="mt-1 text-xl font-extrabold tracking-tight text-slate-900">{item.count}</p>
+          <div key={item.status} className="rounded-2xl border border-stone-100 bg-stone-50/70 p-3">
+            <div className="flex items-center gap-2"><span className={`size-2 rounded-full ${colors[item.status] ?? "bg-stone-400"}`} aria-hidden="true" /><span className="text-[10px] font-bold uppercase tracking-wider text-stone-600">{item.status}</span></div>
+            <p className="mt-1 text-xl font-black tracking-tight text-stone-900">{item.count}</p>
           </div>
         ))}
       </div>
@@ -186,34 +186,34 @@ function StatusBreakdown({ data }: { data: { status: string; count: number }[] |
 }
 
 function AtRiskList({ members }: { members: AtRiskMember[] | undefined }) {
-  if (!members?.length) return <div className="flex flex-col items-center justify-center py-12 text-center"><CheckCircle2 className="size-9 text-emerald-500" /><p className="mt-3 text-sm font-bold text-slate-800">No immediate inactivity signals</p><p className="mt-1 text-xs text-slate-500">No members have been inactive for 14+ days.</p></div>;
-  return <div className="space-y-2">{members.slice(0, 6).map((member) => <Link key={member.id} href={`/members/${member.id}`} className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-white/80 p-3 transition hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-md"><div className="flex min-w-0 items-center gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><AlertTriangle className="size-4" /></div><div className="min-w-0"><p className="truncate text-sm font-bold text-slate-800">{member.firstName} {member.lastName}</p><p className="text-xs text-slate-500">{member.neverCheckedIn ? "Never checked in" : `${member.daysSinceLastVisit} days since last visit`}</p></div></div><ChevronRight className="size-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-700" /></Link>)}{members.length > 6 ? <Link href="/members?filter=at-risk" className="flex items-center justify-center gap-1 pt-2 text-xs font-bold text-violet-600">View all {members.length} at-risk members <ArrowRight className="size-3.5" /></Link> : null}</div>;
+  if (!members?.length) return <div className="flex flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 py-12 text-center"><CheckCircle2 className="size-9 text-emerald-600" aria-hidden="true" /><p className="text-sm font-extrabold text-stone-900">No immediate inactivity signals</p><p className="text-xs font-medium text-stone-600">No members have been inactive for 14+ days.</p></div>;
+  return <div className="flex flex-col gap-2">{members.slice(0, 6).map((member) => <Link key={member.id} href={`/members/${member.id}`} className="group flex min-h-11 items-center justify-between gap-3 rounded-[20px] border border-stone-100 bg-white/80 p-3 transition hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"><div className="flex min-w-0 items-center gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md"><AlertTriangle className="size-4" aria-hidden="true" /></div><div className="min-w-0"><p className="truncate text-sm font-bold text-stone-900">{member.firstName} {member.lastName}</p><p className="text-xs font-medium text-stone-600">{member.neverCheckedIn ? "Never checked in" : `${member.daysSinceLastVisit} days since last visit`}</p></div></div><ChevronRight className="size-4 shrink-0 text-stone-300 transition group-hover:translate-x-0.5 group-hover:text-stone-700" aria-hidden="true" /></Link>)}{members.length > 6 ? <Link href="/members?filter=at-risk" className="flex min-h-11 items-center justify-center gap-1 pt-2 text-xs font-extrabold text-violet-700 hover:text-violet-900">View all {members.length} at-risk members <ArrowRight className="size-3.5" aria-hidden="true" /></Link> : null}</div>;
 }
 
 function TrainerList({ trainers }: { trainers: TrainerWorkload[] | undefined }) {
-  if (!trainers?.length) return <div className="py-12 text-center text-sm text-slate-400">No trainers assigned</div>;
-  return <div className="space-y-2">{trainers.map((trainer) => <div key={trainer.trainerId} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white/80 p-3"><div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-2xl bg-violet-50 text-violet-600"><Dumbbell className="size-4" /></div><div><p className="text-sm font-bold text-slate-800">{trainer.trainerName}</p><p className="text-xs text-slate-500">{trainer.activeMembers} active members · {trainer.pendingPtSessions} pending</p></div></div><div className="text-right"><p className="font-mono text-sm font-bold text-slate-800">{trainer.completedPtSessions}</p><p className="text-[10px] uppercase tracking-wider text-slate-400">completed</p></div></div>)}</div>;
+  if (!trainers?.length) return <div className="py-12 text-center text-sm font-medium text-stone-600">No trainers assigned</div>;
+  return <div className="flex flex-col gap-2">{trainers.map((trainer) => <div key={trainer.trainerId} className="flex items-center justify-between gap-3 rounded-[20px] border border-stone-100 bg-white/80 p-3"><div className="flex min-w-0 items-center gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md"><Dumbbell className="size-4" aria-hidden="true" /></div><div className="min-w-0"><p className="truncate text-sm font-bold text-stone-900">{trainer.trainerName}</p><p className="text-xs font-medium text-stone-600">{trainer.activeMembers} active members · {trainer.pendingPtSessions} pending</p></div></div><div className="text-right"><p className="font-mono text-sm font-bold text-stone-900">{trainer.completedPtSessions}</p><p className="text-[10px] uppercase tracking-wider text-stone-500">completed</p></div></div>)}</div>;
 }
 
 function SalesFunnel({ data }: { data: SalesFunnel | undefined }) {
-  if (!data) return <Skeleton className="h-48 w-full rounded-2xl" />;
+  if (!data) return <Skeleton className="h-48 w-full rounded-[20px]" />;
   const won = data.wonLeads;
   const lost = data.lostLeads ?? Math.max(data.totalLeads - won, 0);
   const conversion = Math.min(Math.max(Number(data.conversionRatePct) || 0, 0), 100);
   const follow = Math.min(Math.max(Number(data.followUps.completionRatePct) || 0, 0), 100);
-  return <div className="space-y-5"><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">Conversion</p><p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">{conversion}%</p></div><div className="flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-8 ring-emerald-50/50"><Target className="size-6" /></div></div><div className="h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400" style={{ width: `${conversion}%` }} /></div><div className="grid grid-cols-3 gap-2 text-center"><div className="rounded-2xl bg-emerald-50 p-3"><p className="text-lg font-extrabold text-emerald-700">{won}</p><p className="text-[10px] uppercase tracking-wider text-slate-500">Won</p></div><div className="rounded-2xl bg-rose-50 p-3"><p className="text-lg font-extrabold text-rose-700">{lost}</p><p className="text-[10px] uppercase tracking-wider text-slate-500">Lost</p></div><div className="rounded-2xl bg-sky-50 p-3"><p className="text-lg font-extrabold text-sky-700">{data.totalLeads}</p><p className="text-[10px] uppercase tracking-wider text-slate-500">Total</p></div></div><div className="border-t border-slate-100 pt-4"><div className="flex items-center justify-between text-xs"><span className="text-slate-500">Follow-up completion</span><span className="font-mono font-bold text-slate-800">{follow}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-violet-500" style={{ width: `${follow}%` }} /></div><p className="mt-2 text-[11px] text-slate-400">{data.followUps.completed} of {data.followUps.total} follow-ups completed</p></div></div>;
+  return <div className="space-y-5"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">Conversion</p><p className="mt-1 text-3xl font-black tracking-tight text-stone-950">{conversion}%</p></div><div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25"><Target className="size-6" aria-hidden="true" /></div></div><div className="h-3 overflow-hidden rounded-full bg-stone-100"><div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400" style={{ width: `${conversion}%` }} /></div><div className="grid grid-cols-3 gap-2 text-center"><div className="rounded-2xl bg-emerald-50 p-3 ring-1 ring-emerald-100"><p className="text-lg font-black text-emerald-700">{won}</p><p className="text-[10px] uppercase tracking-wider text-stone-600">Won</p></div><div className="rounded-2xl bg-rose-50 p-3 ring-1 ring-rose-100"><p className="text-lg font-black text-rose-700">{lost}</p><p className="text-[10px] uppercase tracking-wider text-stone-600">Lost</p></div><div className="rounded-2xl bg-sky-50 p-3 ring-1 ring-sky-100"><p className="text-lg font-black text-sky-700">{data.totalLeads}</p><p className="text-[10px] uppercase tracking-wider text-stone-600">Total</p></div></div><div className="border-t border-stone-100 pt-4"><div className="flex items-center justify-between text-xs"><span className="font-medium text-stone-600">Follow-up completion</span><span className="font-mono font-bold text-stone-900">{follow}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100"><div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500" style={{ width: `${follow}%` }} /></div><p className="mt-2 text-[11px] font-medium text-stone-600">{data.followUps.completed} of {data.followUps.total} follow-ups completed</p></div></div>;
 }
 
 function SourcePerformance({ data }: { data: SalesSourcePerformance[] | undefined }) {
-  if (!data?.length) return <div className="py-10 text-center text-sm text-slate-400">No source performance data available</div>;
-  return <div className="space-y-2">{data.slice(0, 6).map((item) => <div key={item.source} className="rounded-2xl border border-slate-100 bg-white/70 p-3"><div className="flex items-center justify-between gap-3"><p className="truncate text-sm font-bold text-slate-800">{item.source || "Unknown"}</p><Badge variant="secondary" className="rounded-full">{Number(item.conversionRatePct).toFixed(1)}%</Badge></div><div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500"><span>{item.totalLeads} leads</span><span>·</span><span>{item.wonLeads} won</span><span>·</span><span>{item.lostLeads} lost</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${Math.min(Math.max(Number(item.conversionRatePct), 0), 100)}%` }} /></div></div>)}</div>;
+  if (!data?.length) return <div className="py-10 text-center text-sm font-medium text-stone-600">No source performance data available</div>;
+  return <div className="flex flex-col gap-2">{data.slice(0, 6).map((item) => <div key={item.source} className="rounded-[20px] border border-stone-100 bg-white/70 p-3"><div className="flex items-center justify-between gap-3"><p className="truncate text-sm font-bold text-stone-900">{item.source || "Unknown"}</p><Badge variant="secondary" className="shrink-0 rounded-full">{Number(item.conversionRatePct).toFixed(1)}%</Badge></div><div className="mt-2 flex items-center gap-2 text-[10px] font-medium text-stone-600"><span>{item.totalLeads} leads</span><span aria-hidden="true">·</span><span>{item.wonLeads} won</span><span aria-hidden="true">·</span><span>{item.lostLeads} lost</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100"><div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${Math.min(Math.max(Number(item.conversionRatePct), 0), 100)}%` }} /></div></div>)}</div>;
 }
 
 function MembershipLifecycleCard({ data, loading }: { data: MembershipLifecycleAnalytics | undefined; loading: boolean }) {
-  if (loading) return <Skeleton className="h-48 w-full rounded-[30px]" />;
-  if (!data) return <div className="py-12 text-center text-sm text-slate-400">No membership lifecycle data available</div>;
+  if (loading) return <Skeleton className="h-48 w-full rounded-[20px]" />;
+  if (!data) return <div className="py-12 text-center text-sm font-medium text-stone-600">No membership lifecycle data available</div>;
   const totalStatus = data.statusCounts.reduce((sum, item) => sum + item.count, 0) || 1;
-  const statusColors: Record<string, string> = { ACTIVE: "bg-emerald-500", FROZEN: "bg-sky-500", PAUSED: "bg-amber-400", PENDING: "bg-violet-400", EXPIRED: "bg-rose-500", CANCELLED: "bg-slate-400" };
+  const statusColors: Record<string, string> = { ACTIVE: "bg-emerald-500", FROZEN: "bg-sky-500", PAUSED: "bg-amber-400", PENDING: "bg-violet-400", EXPIRED: "bg-rose-500", CANCELLED: "bg-stone-400" };
   const topPlans = data.activePlanDistribution.slice(0, 5);
   const maxPlanCount = Math.max(...topPlans.map((p) => p.count), 1);
   return (
@@ -221,63 +221,63 @@ function MembershipLifecycleCard({ data, loading }: { data: MembershipLifecycleA
       <div className="flex flex-wrap items-center gap-2">
         {data.statusCounts.map((item) => (
           <Badge key={item.status} variant="secondary" className="rounded-full">
-            <span className={`mr-1.5 size-2 rounded-full ${statusColors[item.status] ?? "bg-slate-400"}`} />
+            <span className={`mr-1.5 size-2 rounded-full ${statusColors[item.status] ?? "bg-stone-400"}`} aria-hidden="true" />
             {item.status}: {item.count}
           </Badge>
         ))}
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl bg-slate-50 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Renewal rate</p>
-          <p className="mt-1 text-xl font-extrabold text-emerald-700">{Number(data.renewalRatePct).toFixed(1)}%</p>
+        <div className="rounded-2xl bg-emerald-50/80 p-3 ring-1 ring-emerald-100">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Renewal rate</p>
+          <p className="mt-1 text-xl font-black text-emerald-700">{Number(data.renewalRatePct).toFixed(1)}%</p>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Freeze utilization</p>
-          <p className="mt-1 text-xl font-extrabold text-sky-700">{Number(data.freezeUtilizationRatePct).toFixed(1)}%</p>
+        <div className="rounded-2xl bg-sky-50/80 p-3 ring-1 ring-sky-100">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Freeze utilization</p>
+          <p className="mt-1 text-xl font-black text-sky-700">{Number(data.freezeUtilizationRatePct).toFixed(1)}%</p>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Expiring ≤ 30d</p>
-          <p className="mt-1 text-xl font-extrabold text-amber-600">{data.expiringWithin30Days}</p>
+        <div className="rounded-2xl bg-amber-50/80 p-3 ring-1 ring-amber-100">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Expiring ≤ 30d</p>
+          <p className="mt-1 text-xl font-black text-amber-700">{data.expiringWithin30Days}</p>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">New (90d)</p>
-          <p className="mt-1 text-xl font-extrabold text-violet-700">{data.newLast90Days}</p>
-          <p className="text-[10px] text-slate-400">{data.renewedLast90Days} renewed</p>
+        <div className="rounded-2xl bg-violet-50/80 p-3 ring-1 ring-violet-100">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">New (90d)</p>
+          <p className="mt-1 text-xl font-black text-violet-700">{data.newLast90Days}</p>
+          <p className="text-[10px] font-medium text-stone-600">{data.renewedLast90Days} renewed</p>
         </div>
       </div>
       {topPlans.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active plan distribution</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Active plan distribution</p>
           {topPlans.map((plan) => (
             <div key={plan.planId} className="flex items-center gap-3">
-              <span className="w-32 truncate text-xs font-semibold text-slate-700">{plan.planName}</span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+              <span className="w-32 truncate text-xs font-semibold text-stone-700">{plan.planName}</span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-100">
                 <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" style={{ width: `${(plan.count / maxPlanCount) * 100}%` }} />
               </div>
-              <span className="font-mono text-xs font-bold text-slate-600">{plan.count}</span>
+              <span className="font-mono text-xs font-bold text-stone-700">{plan.count}</span>
             </div>
           ))}
         </div>
       )}
       {data.outstandingByCurrency.length > 0 && (
-        <div className="border-t border-slate-100 pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Outstanding balance</p>
+        <div className="border-t border-stone-100 pt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Outstanding balance</p>
           {data.outstandingByCurrency.map((item) => (
             <div key={item.currency} className="mt-1 flex items-center justify-between text-sm">
-              <span className="text-slate-600">{item.membershipsWithBalance} memberships</span>
+              <span className="font-medium text-stone-600">{item.membershipsWithBalance} memberships</span>
               <span className="font-mono font-bold text-rose-600">{formatMoney(item.outstandingBalance, item.currency)}</span>
             </div>
           ))}
         </div>
       )}
-      <p className="text-[11px] text-slate-400">{totalStatus} total membership records analyzed</p>
+      <p className="text-[11px] font-medium text-stone-500">{totalStatus} total membership records analyzed</p>
     </div>
   );
 }
 
 function InventoryList({ items }: { items: InventoryForecast[] | undefined }) {
-  if (!items?.length) return <div className="py-12 text-center text-sm text-slate-400">No inventory forecast available</div>;
-  return <div className="space-y-2">{items.slice(0, 6).map((item) => <div key={item.productId} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white/80 p-3"><div className="flex min-w-0 items-center gap-3"><div className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${item.lowStock ? "bg-rose-50 text-rose-600" : "bg-cyan-50 text-cyan-600"}`}><Package className="size-4" /></div><div className="min-w-0"><p className="truncate text-sm font-bold text-slate-800">{item.productName}</p><p className="text-xs text-slate-500">{item.currentStock} units · {item.lowStock ? "Low stock" : "Healthy stock"}</p></div></div><div className="text-right"><p className={`font-mono text-sm font-bold ${item.daysUntilStockout !== null && item.daysUntilStockout <= 7 ? "text-rose-600" : "text-slate-800"}`}>{item.daysUntilStockout === null ? "—" : `${item.daysUntilStockout}d`}</p><p className="text-[10px] uppercase tracking-wider text-slate-400">stockout</p></div></div>)}</div>;
+  if (!items?.length) return <div className="py-12 text-center text-sm font-medium text-stone-600">No inventory forecast available</div>;
+  return <div className="flex flex-col gap-2">{items.slice(0, 6).map((item) => <div key={item.productId} className="flex items-center justify-between gap-3 rounded-[20px] border border-stone-100 bg-white/80 p-3"><div className="flex min-w-0 items-center gap-3"><div className={`flex size-10 shrink-0 items-center justify-center rounded-[15px] text-white shadow-md ${item.lowStock ? "bg-gradient-to-br from-rose-500 to-orange-500" : "bg-gradient-to-br from-cyan-500 to-blue-600"}`}><Package className="size-4" aria-hidden="true" /></div><div className="min-w-0"><p className="truncate text-sm font-bold text-stone-900">{item.productName}</p><p className="text-xs font-medium text-stone-600">{item.currentStock} units · {item.lowStock ? "Low stock" : "Healthy stock"}</p></div></div><div className="text-right"><p className={`font-mono text-sm font-bold ${item.daysUntilStockout !== null && item.daysUntilStockout <= 7 ? "text-rose-600" : "text-stone-900"}`}>{item.daysUntilStockout === null ? "—" : `${item.daysUntilStockout}d`}</p><p className="text-[10px] uppercase tracking-wider text-stone-500">stockout</p></div></div>)}</div>;
 }
 
 export default function IntelligencePage() {
@@ -307,26 +307,39 @@ export default function IntelligencePage() {
   };
 
   return (
-    <main className="min-h-full overflow-hidden bg-[radial-gradient(circle_at_10%_0%,rgba(124,58,237,0.13),transparent_28%),radial-gradient(circle_at_90%_8%,rgba(6,182,212,0.12),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f5f7fb_55%,#eef2f7_100%)] text-slate-950">
-      <div className="mx-auto max-w-[1600px] space-y-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <section className="relative overflow-hidden rounded-[36px] border border-white/80 bg-slate-950 p-6 text-white shadow-[0_40px_120px_-55px_rgba(15,23,42,0.8)] sm:p-8 lg:p-10">
-          <div className="absolute -right-24 -top-28 size-80 rounded-full bg-cyan-400/20 blur-3xl" />
-          <div className="absolute -bottom-36 left-1/3 size-96 rounded-full bg-violet-500/25 blur-3xl" />
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]"
+        aria-hidden="true"
+      />
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        <section aria-labelledby="intel-title" className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10">
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-400/25 blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
           <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="flex flex-wrap items-center gap-2"><Badge className="rounded-full border border-white/15 bg-white/10 font-mono text-[10px] uppercase tracking-[0.18em] text-cyan-200 hover:bg-white/10"><Sparkles className="mr-1.5 size-3" /> Intelligence OS</Badge><span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">Decision layer · live data</span></div>
-              <h1 className="mt-5 font-sans text-4xl font-extrabold tracking-[-0.055em] sm:text-5xl lg:text-6xl">See the gym.<br /><span className="bg-gradient-to-r from-white via-cyan-100 to-violet-200 bg-clip-text text-transparent">Decide what happens next.</span></h1>
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">A premium intelligence cockpit for revenue, member health, sales performance, trainer capacity, and inventory signals — without replacing any of the underlying analytics.</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur"><Sparkles className="size-3.5" aria-hidden="true" /> Intelligence OS</span>
+                <span className="text-[10px] font-bold uppercase tracking-[.18em] text-white/50">Decision layer · live data</span>
+              </div>
+              <h1 id="intel-title" className="mt-5 font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl">See the gym.<br /><span className="bg-gradient-to-r from-white via-cyan-100 to-fuchsia-200 bg-clip-text text-transparent">Decide what happens next.</span></h1>
+              <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-white/75">A premium intelligence cockpit for revenue, member health, sales performance, trainer capacity, and inventory signals.</p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:min-w-[260px]">
-              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl"><Filter className="ml-2 size-4 text-cyan-200" /><Select value={branchId} onValueChange={setBranchId}><SelectTrigger className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue placeholder="All branches" /></SelectTrigger><SelectContent>{<SelectItem value="all">All branches</SelectItem>}{branches?.items?.map((item: { id: string; name: string }) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl"><BarChart3 className="ml-2 size-4 text-violet-200" /><Select value={months} onValueChange={setMonths}><SelectTrigger className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select><Button size="icon" variant="ghost" onClick={refresh} className="text-white hover:bg-white/10 hover:text-white" title="Refresh intelligence"><RefreshCw className="size-4" /></Button></div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:min-w-[280px] lg:flex-col">
+              <div className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl"><Filter className="ml-2 size-4 shrink-0 text-cyan-200" aria-hidden="true" /><Select value={branchId} onValueChange={setBranchId}><SelectTrigger aria-label="Filter by branch" className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue placeholder="All branches" /></SelectTrigger><SelectContent>{<SelectItem value="all">All branches</SelectItem>}{branches?.items?.map((item: { id: string; name: string }) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
+              <div className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl"><BarChart3 className="ml-2 size-4 shrink-0 text-violet-200" aria-hidden="true" /><Select value={months} onValueChange={setMonths}><SelectTrigger aria-label="Select month range" className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select><Button size="icon" variant="ghost" onClick={refresh} className="min-h-11 min-w-11 text-white hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" title="Refresh intelligence" aria-label="Refresh intelligence"><RefreshCw className="size-4" aria-hidden="true" /></Button></div>
             </div>
           </div>
-          <div className="relative mt-8 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="font-mono text-[9px] uppercase tracking-widest text-white/40">Decision signals</p><p className="mt-1 text-2xl font-extrabold">{riskCount + lowStockCount}</p><p className="text-xs text-white/50">member + inventory attention</p></div><div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="font-mono text-[9px] uppercase tracking-widest text-white/40">Member health</p><p className="mt-1 text-2xl font-extrabold">{totalMembers ? Math.round((activeMembers / totalMembers) * 100) : 0}%</p><p className="text-xs text-white/50">active member ratio</p></div><div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="font-mono text-[9px] uppercase tracking-widest text-white/40">Cash visibility</p><p className="mt-1 text-2xl font-extrabold">{formatMoney(revenueRow?.netRevenue)}</p><p className="text-xs text-white/50">current net revenue snapshot</p></div></div>
+          <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Decision signals</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{riskCount + lowStockCount}</p><p className="text-xs font-medium text-white/60">member + inventory attention</p></div>
+            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Member health</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{totalMembers ? Math.round((activeMembers / totalMembers) * 100) : 0}%</p><p className="text-xs font-medium text-white/60">active member ratio</p></div>
+            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Cash visibility</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{formatMoney(revenueRow?.netRevenue)}</p><p className="text-xs font-medium text-white/60">current net revenue snapshot</p></div>
+          </div>
         </section>
 
-        <section>
+        <section aria-labelledby="intel-pulse">
           <SectionHeader eyebrow="01 · pulse" title="Executive signal layer" description="The fastest read on financial health, member health, sales velocity, and operational pressure." />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
             <MetricCard label="Net revenue" value={formatMoney(revenueRow?.netRevenue)} detail={`${revenueRow?.paymentCount ?? 0} recorded payments`} icon={DollarSign} tone="violet" loading={revenue.isLoading} />
@@ -338,39 +351,48 @@ export default function IntelligencePage() {
           </div>
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-[1.55fr_0.9fr]">
-          <Card className={`rounded-[30px] ${glass}`}><CardHeader className="border-b border-slate-100/80 pb-4"><div className="flex items-center justify-between gap-4"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-violet-600">02 · finance</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Revenue trajectory</CardTitle><p className="mt-1 text-xs text-slate-500">Net revenue by month, using the selected branch scope.</p></div><Badge variant="secondary" className="rounded-full bg-violet-50 text-violet-700">{months}M view</Badge></div></CardHeader><CardContent className="p-5"><RevenueChart data={trend.data} /></CardContent></Card>
-          <Card className={`rounded-[30px] ${glass}`}><CardHeader className="border-b border-slate-100/80 pb-4"><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-600">03 · member health</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Member status mix</CardTitle></CardHeader><CardContent className="p-5"><StatusBreakdown data={status.data} /></CardContent></Card>
+        <section aria-label="Finance and member health" className="grid gap-5 xl:grid-cols-[1.55fr_0.9fr]">
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/80 via-white to-cyan-50/60 pb-4"><div className="flex items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg"><BarChart3 className="size-5" aria-hidden="true" /></span><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-violet-700">02 · finance</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Revenue trajectory</CardTitle><p className="mt-0.5 text-xs font-medium text-stone-600">Net revenue by month, using the selected branch scope.</p></div></div><Badge variant="secondary" className="rounded-full bg-violet-50 text-violet-700 ring-1 ring-violet-100">{months}M view</Badge></div></CardHeader><CardContent className="p-5"><RevenueChart data={trend.data} /></CardContent></Card>
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/80 via-white to-blue-50/60 pb-4"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg"><Users className="size-5" aria-hidden="true" /></span><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-cyan-700">03 · member health</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Member status mix</CardTitle></div></div></CardHeader><CardContent className="p-5"><StatusBreakdown data={status.data} /></CardContent></Card>
         </section>
 
-        <section>
+        <section aria-labelledby="intel-lifecycle">
           <SectionHeader eyebrow="02 · lifecycle" title="Membership lifecycle" description="Live portfolio health across the full lifecycle — status mix, renewal behavior, freeze utilization, and upcoming expiries." />
           <div className="grid gap-5 xl:grid-cols-[1.55fr_0.9fr]">
-            <Card className={`rounded-[30px] ${glass}`}><CardHeader className="border-b border-slate-100/80 pb-4"><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">lifecycle · portfolio</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Status &amp; renewal health</CardTitle></div><RefreshCw className="size-5 text-emerald-600" /></div></CardHeader><CardContent className="p-5"><MembershipLifecycleCard data={lifecycle.data} loading={lifecycle.isLoading} /></CardContent></Card>
-            <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><CardTitle className="text-lg font-extrabold">Expiring soon</CardTitle><p className="mt-1 text-xs text-slate-500">Memberships entering renewal window (30 days).</p></div><div className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><Calendar className="size-5" /></div></div></CardHeader><CardContent className="pt-0"><div className="flex h-40 flex-col items-center justify-center text-center"><p className="text-4xl font-extrabold text-amber-600">{lifecycle.data?.expiringWithin30Days ?? "—"}</p><p className="mt-1 text-xs text-slate-500">memberships expire within 30 days</p><p className="mt-2 text-[11px] text-slate-400">Renewal reminders run automatically on the daily automation scan.</p></div></CardContent></Card>
+            <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-emerald-50/80 via-white to-teal-50/60 pb-4"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg"><Activity className="size-5" aria-hidden="true" /></span><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">lifecycle · portfolio</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Status &amp; renewal health</CardTitle></div></div><RefreshCw className="size-5 text-emerald-600" aria-hidden="true" /></div></CardHeader><CardContent className="p-5"><MembershipLifecycleCard data={lifecycle.data} loading={lifecycle.isLoading} /></CardContent></Card>
+            <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="pb-2"><div className="flex items-center justify-between gap-3"><div><CardTitle className="font-serif text-lg tracking-tight text-stone-950">Expiring soon</CardTitle><p className="mt-1 text-xs font-medium text-stone-600">Memberships entering renewal window (30 days).</p></div><div className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg"><Calendar className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-0"><div className="flex h-40 flex-col items-center justify-center rounded-[20px] bg-gradient-to-br from-amber-50/80 to-orange-50/50 text-center ring-1 ring-amber-100"><p className="font-mono text-4xl font-black text-amber-700 tabular-nums">{lifecycle.data?.expiringWithin30Days ?? "—"}</p><p className="mt-1 text-xs font-medium text-stone-600">memberships expire within 30 days</p><p className="mt-2 text-[11px] font-medium text-stone-600">Renewal reminders run automatically on the daily automation scan.</p></div></CardContent></Card>
           </div>
         </section>
 
-        <section>
-          <SectionHeader eyebrow="04 · attention queue" title="Signals that need a decision" description="Turn analytics into action without leaving the intelligence workspace." action={<Link href="/members"><Button variant="outline" className="rounded-full bg-white/70">Open Members <ArrowRight className="ml-2 size-4" /></Button></Link>} />
+        <section aria-labelledby="intel-queue">
+          <SectionHeader eyebrow="04 · attention queue" title="Signals that need a decision" description="Turn analytics into action without leaving the intelligence workspace." action={<Link href="/members"><Button variant="outline" className="min-h-11 rounded-full border-stone-200 bg-white/80">Open Members <ArrowRight className="ml-2 size-4" aria-hidden="true" /></Button></Link>} />
           <div className="grid gap-5 lg:grid-cols-2">
-            <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><CardTitle className="text-lg font-extrabold">At-risk members</CardTitle><p className="mt-1 text-xs text-slate-500">Members with 14+ days of inactivity.</p></div><div className="flex size-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><AlertTriangle className="size-5" /></div></div></CardHeader><CardContent className="pt-0"><AtRiskList members={atRisk.data} /></CardContent></Card>
-            <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><CardTitle className="text-lg font-extrabold">Trainer workload</CardTitle><p className="mt-1 text-xs text-slate-500">Active members and PT session pressure.</p></div><div className="flex size-10 items-center justify-center rounded-2xl bg-violet-50 text-violet-600"><Dumbbell className="size-5" /></div></div></CardHeader><CardContent className="pt-0"><TrainerList trainers={trainers.data} /></CardContent></Card>
+            <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-amber-50/80 via-white to-orange-50/60"><div className="flex items-center justify-between gap-3"><div><CardTitle className="font-serif text-lg tracking-tight text-stone-950">At-risk members</CardTitle><p className="mt-1 text-xs font-medium text-stone-600">Members with 14+ days of inactivity.</p></div><div className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg"><AlertTriangle className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-4"><AtRiskList members={atRisk.data} /></CardContent></Card>
+            <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/80 via-white to-fuchsia-50/60"><div className="flex items-center justify-between gap-3"><div><CardTitle className="font-serif text-lg tracking-tight text-stone-950">Trainer workload</CardTitle><p className="mt-1 text-xs font-medium text-stone-600">Active members and PT session pressure.</p></div><div className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg"><Dumbbell className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-4"><TrainerList trainers={trainers.data} /></CardContent></Card>
           </div>
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-2">
-          <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">05 · sales</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Sales funnel</CardTitle><p className="mt-1 text-xs text-slate-500">Lead conversion and follow-up execution.</p></div><CreditCard className="size-5 text-emerald-600" /></div></CardHeader><CardContent><SalesFunnel data={sales.data} /></CardContent></Card>
-          <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-violet-600">06 · acquisition</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Source performance</CardTitle><p className="mt-1 text-xs text-slate-500">Which lead sources are producing conversion.</p></div><Zap className="size-5 text-violet-600" /></div></CardHeader><CardContent><SourcePerformance data={sources.data} /></CardContent></Card>
+        <section aria-label="Sales and acquisition" className="grid gap-5 xl:grid-cols-2">
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-emerald-50/80 via-white to-teal-50/60"><div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">05 · sales</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Sales funnel</CardTitle><p className="mt-0.5 text-xs font-medium text-stone-600">Lead conversion and follow-up execution.</p></div><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg"><CreditCard className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><SalesFunnel data={sales.data} /></CardContent></Card>
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/80 via-white to-fuchsia-50/60"><div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-violet-700">06 · acquisition</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Source performance</CardTitle><p className="mt-0.5 text-xs font-medium text-stone-600">Which lead sources are producing conversion.</p></div><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg"><Zap className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><SourcePerformance data={sources.data} /></CardContent></Card>
         </section>
 
-        <section className="grid gap-5 lg:grid-cols-2">
-          <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-600">07 · inventory</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Inventory forecast</CardTitle><p className="mt-1 text-xs text-slate-500">Current stock and projected stockout pressure.</p></div><Package className="size-5 text-cyan-600" /></div></CardHeader><CardContent><InventoryList items={inventory.data} /></CardContent></Card>
-          <Card className={`rounded-[30px] ${glass}`}><CardHeader><div className="flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-rose-600">08 · cash intelligence</p><CardTitle className="mt-1 text-xl font-extrabold tracking-tight">Revenue quality</CardTitle><p className="mt-1 text-xs text-slate-500">Gross, refunds, membership mix, and data-computability notes.</p></div><WalletCards className="size-5 text-rose-600" /></div></CardHeader><CardContent><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Gross revenue</p><p className="mt-1 text-xl font-extrabold">{formatMoney(revenueRow?.grossRevenue)}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Refunded</p><p className="mt-1 text-xl font-extrabold text-rose-600">{formatMoney(revenueRow?.refunded)}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Membership revenue</p><p className="mt-1 text-xl font-extrabold">{formatMoney(revenueRow?.membershipRevenue)}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Other revenue</p><p className="mt-1 text-xl font-extrabold">{formatMoney(revenueRow?.otherRevenue)}</p></div></div>{revenue.data?.notComputable?.length ? <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4"><div className="flex items-center gap-2"><AlertTriangle className="size-4 text-amber-600" /><p className="text-xs font-bold text-amber-800">Data quality notes</p></div><div className="mt-2 space-y-1">{revenue.data.notComputable.map((item) => <p key={item.key} className="text-xs text-amber-700"><span className="font-semibold">{item.key}:</span> {item.reason}</p>)}</div></div> : null}</CardContent></Card>
+        <section aria-label="Inventory and revenue quality" className="grid gap-5 lg:grid-cols-2">
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/80 via-white to-blue-50/60"><div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-cyan-700">07 · inventory</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Inventory forecast</CardTitle><p className="mt-0.5 text-xs font-medium text-stone-600">Current stock and projected stockout pressure.</p></div><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg"><Package className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><InventoryList items={inventory.data} /></CardContent></Card>
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-rose-50/80 via-white to-orange-50/60"><div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-rose-700">08 · cash intelligence</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Revenue quality</CardTitle><p className="mt-0.5 text-xs font-medium text-stone-600">Gross, refunds, membership mix, and data-computability notes.</p></div><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-lg"><WalletCards className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl bg-stone-50 p-4 ring-1 ring-stone-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Gross revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.grossRevenue)}</p></div><div className="rounded-2xl bg-rose-50/70 p-4 ring-1 ring-rose-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Refunded</p><p className="mt-1 text-xl font-black text-rose-600">{formatMoney(revenueRow?.refunded)}</p></div><div className="rounded-2xl bg-violet-50/70 p-4 ring-1 ring-violet-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Membership revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.membershipRevenue)}</p></div><div className="rounded-2xl bg-cyan-50/70 p-4 ring-1 ring-cyan-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Other revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.otherRevenue)}</p></div></div>{revenue.data?.notComputable?.length ? <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4"><div className="flex items-center gap-2"><AlertTriangle className="size-4 text-amber-600" aria-hidden="true" /><p className="text-xs font-bold text-amber-800">Data quality notes</p></div><div className="mt-2 space-y-1">{revenue.data.notComputable.map((item) => <p key={item.key} className="text-xs font-medium text-amber-700"><span className="font-bold">{item.key}:</span> {item.reason}</p>)}</div></div> : null}</CardContent></Card>
         </section>
 
-        <section className="rounded-[30px] border border-slate-200/80 bg-white/55 p-5 shadow-sm backdrop-blur-xl sm:p-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-lg shadow-violet-500/20"><Sparkles className="size-5" /></div><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-violet-600">Next layer</p><h3 className="text-lg font-extrabold tracking-tight text-slate-900">Member Intelligence OS</h3><p className="text-xs text-slate-500">Risk, churn, recommendations, automation, and smart segmentation build on this analytics foundation.</p></div></div><Link href="/members"><Button className="rounded-full bg-slate-950 text-white hover:bg-slate-800">Open Member Command Center <ArrowRight className="ml-2 size-4" /></Button></Link></div></section>
+        <section aria-label="Next layer" className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-6">
+          <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-white/15 ring-1 ring-white/20"><Sparkles className="size-5" aria-hidden="true" /></div>
+              <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/60">Next layer</p><h2 className="font-serif text-lg font-semibold tracking-tight">Member Intelligence OS</h2><p className="text-xs font-medium text-white/70">Risk, churn, recommendations, automation, and smart segmentation build on this analytics foundation.</p></div>
+            </div>
+            <Link href="/members" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Open Member Command Center <ArrowRight className="size-4" aria-hidden="true" /></Link>
+          </div>
+        </section>
       </div>
-    </main>
+    </div>
   );
 }

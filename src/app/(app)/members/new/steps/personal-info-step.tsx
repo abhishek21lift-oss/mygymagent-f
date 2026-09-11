@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Camera, RefreshCw, Upload, X } from "lucide-react"
+import { Camera, RefreshCw, Upload, X, UserRound } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -174,17 +174,17 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 rounded-[22px] border border-violet-100/70 bg-gradient-to-br from-violet-50/70 via-white to-cyan-50/60 p-6">
         <div className="relative">
           {photoPreview ? (
             <img
               src={photoPreview}
               alt="Profile"
-              className="size-24 rounded-full object-cover border-2 border-primary"
+              className="size-24 rounded-[28px] border-2 border-white object-cover shadow-lg shadow-violet-500/25 ring-2 ring-violet-200"
             />
           ) : (
-            <div className="size-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-muted-foreground">
-              <Camera className="size-8 text-muted-foreground" />
+            <div className="flex size-24 items-center justify-center rounded-[28px] border-2 border-dashed border-violet-200 bg-white/80 shadow-sm">
+              <Camera className="size-8 text-stone-400" aria-hidden="true" />
             </div>
           )}
           <button
@@ -192,21 +192,21 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
             onClick={() => void startCamera()}
             disabled={cameraLoading}
             aria-label="Take profile photo with camera"
-            className="absolute bottom-0 right-0 size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm disabled:opacity-60"
+            className="absolute -bottom-1 -right-1 flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-60"
           >
-            <Camera className="size-4" />
+            <Camera className="size-4" aria-hidden="true" />
           </button>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button type="button" size="sm" onClick={() => void startCamera()} disabled={cameraLoading}>
-            <Camera className="mr-2 size-4" />
+          <Button type="button" size="sm" className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)]" onClick={() => void startCamera()} disabled={cameraLoading}>
+            <Camera className="mr-2 size-4" aria-hidden="true" />
             {cameraLoading ? "Opening camera..." : "Take Photo"}
           </Button>
           <label>
-            <Button type="button" variant="outline" size="sm" asChild>
+            <Button type="button" variant="outline" size="sm" className="min-h-11 rounded-2xl" asChild>
               <span className="cursor-pointer">
-                <Upload className="mr-2 size-4" />
+                <Upload className="mr-2 size-4" aria-hidden="true" />
                 Upload Photo
               </span>
             </Button>
@@ -216,10 +216,11 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
               capture="environment"
               className="hidden"
               onChange={handlePhotoChange}
+              aria-label="Upload profile photo"
             />
           </label>
         </div>
-        <p className="text-sm text-muted-foreground">Profile photo (optional)</p>
+        <p className="flex items-center gap-1.5 text-xs font-medium text-stone-600"><UserRound className="size-3.5" aria-hidden="true" /> Profile photo (optional)</p>
       </div>
 
       {cameraOpen && (
@@ -229,14 +230,14 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
           aria-modal="true"
           aria-label="Take member profile photo"
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-background shadow-2xl">
-            <div className="flex items-center justify-between border-b px-4 py-3">
+          <div className="w-full max-w-lg overflow-hidden rounded-[28px] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-stone-100 bg-gradient-to-r from-violet-50 to-cyan-50 px-4 py-3">
               <div>
-                <h2 className="font-semibold">Take Profile Photo</h2>
-                <p className="text-xs text-muted-foreground">Position the member inside the frame</p>
+                <h2 className="font-serif font-semibold text-stone-950">Take Profile Photo</h2>
+                <p className="text-xs font-medium text-stone-600">Position the member inside the frame</p>
               </div>
-              <Button type="button" variant="ghost" size="icon" onClick={closeCamera} aria-label="Close camera">
-                <X className="size-5" />
+              <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11 rounded-xl" onClick={closeCamera} aria-label="Close camera">
+                <X className="size-5" aria-hidden="true" />
               </Button>
             </div>
 
@@ -248,22 +249,22 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
                 muted
                 className={`h-full w-full object-cover ${cameraFacing === "user" ? "-scale-x-100" : ""}`}
               />
-              <div className="pointer-events-none absolute inset-8 rounded-[28%] border-2 border-white/70" />
+              <div className="pointer-events-none absolute inset-8 rounded-[28%] border-2 border-white/70" aria-hidden="true" />
             </div>
 
             {cameraError && (
-              <div className="mx-4 mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              <div className="mx-4 mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700" role="alert">
                 {cameraError}
               </div>
             )}
 
             <div className="flex items-center justify-center gap-3 p-4">
-              <Button type="button" variant="outline" onClick={() => void switchCamera()}>
-                <RefreshCw className="mr-2 size-4" />
+              <Button type="button" variant="outline" className="min-h-11 rounded-2xl" onClick={() => void switchCamera()}>
+                <RefreshCw className="mr-2 size-4" aria-hidden="true" />
                 Switch Camera
               </Button>
-              <Button type="button" size="lg" onClick={capturePhoto} disabled={!!cameraError}>
-                <Camera className="mr-2 size-5" />
+              <Button type="button" size="lg" className="min-h-11 rounded-2xl" onClick={capturePhoto} disabled={!!cameraError}>
+                <Camera className="mr-2 size-5" aria-hidden="true" />
                 Capture
               </Button>
             </div>
@@ -271,7 +272,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="firstName">First name *</Label>
           <Input
@@ -279,6 +280,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
             value={form.firstName}
             onChange={(e) => updateField("firstName", e.target.value)}
             placeholder="John"
+            className="h-11 rounded-2xl border-stone-200/80 bg-white/80 focus-visible:ring-violet-500/20"
           />
         </div>
         <div className="space-y-2">
@@ -288,11 +290,12 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
             value={form.lastName}
             onChange={(e) => updateField("lastName", e.target.value)}
             placeholder="Doe"
+            className="h-11 rounded-2xl border-stone-200/80 bg-white/80 focus-visible:ring-violet-500/20"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="phone">Phone *</Label>
           <Input
@@ -300,6 +303,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
             value={form.phone}
             onChange={(e) => updateField("phone", e.target.value)}
             placeholder="+91 98765 43210"
+            className="h-11 rounded-2xl border-stone-200/80 bg-white/80 focus-visible:ring-violet-500/20"
           />
         </div>
         <div className="space-y-2">
@@ -310,11 +314,12 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
             value={form.email}
             onChange={(e) => updateField("email", e.target.value)}
             placeholder="john@example.com"
+            className="h-11 rounded-2xl border-stone-200/80 bg-white/80 focus-visible:ring-violet-500/20"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="dateOfBirth">Date of birth</Label>
           <Input
@@ -322,12 +327,13 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
             type="date"
             value={form.dateOfBirth}
             onChange={(e) => updateField("dateOfBirth", e.target.value)}
+            className="h-11 rounded-2xl border-stone-200/80 bg-white/80 focus-visible:ring-violet-500/20"
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="gender">Gender</Label>
           <Select value={form.gender} onValueChange={(v) => updateField("gender", v as PersonalInfoData["gender"])}>
-            <SelectTrigger>
+            <SelectTrigger id="gender" className="h-11 rounded-2xl border-stone-200/80 bg-white/80">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
@@ -340,8 +346,8 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={onContinue} disabled={!isValid}>Continue</Button>
+      <div className="flex justify-end border-t border-stone-100 pt-5">
+        <Button onClick={onContinue} disabled={!isValid} className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 font-extrabold shadow-lg shadow-violet-500/25 disabled:opacity-50">Continue</Button>
       </div>
     </div>
   )

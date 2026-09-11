@@ -151,13 +151,13 @@ function fmtDate(iso: string) {
 
 function InfoRow({ icon: Icon, label, value }: { icon: typeof User; label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border bg-card/50 p-3 transition-colors hover:bg-card">
-      <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
-        <Icon className="size-4 text-primary" />
+    <div className="flex items-start gap-3 rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
+        <Icon className="size-4" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <div className="mt-0.5 text-sm font-semibold">{value || "—"}</div>
+        <p className="text-xs font-bold uppercase tracking-wide text-stone-500">{label}</p>
+        <div className="mt-0.5 text-sm font-bold text-stone-900">{value || "—"}</div>
       </div>
     </div>
   );
@@ -206,7 +206,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
     <div className="flex flex-col gap-6">
       {/* Personal Information */}
       <div>
-        <h3 className="mb-3 text-lg font-semibold tracking-tight">Personal Information</h3>
+        <h3 className="mb-3 font-serif text-lg font-semibold tracking-tight text-stone-950">Personal Information</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <InfoRow icon={User} label="Full Name" value={`${member.firstName} ${member.lastName}`} />
           <InfoRow icon={Mail} label="Email" value={member.email} />
@@ -225,7 +225,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 
       {/* Emergency & Contact */}
       <div>
-        <h3 className="mb-3 text-lg font-semibold tracking-tight">Emergency & Contact</h3>
+        <h3 className="mb-3 font-serif text-lg font-semibold tracking-tight text-stone-950">Emergency & Contact</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <InfoRow
             icon={Phone}
@@ -265,7 +265,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 
       {/* Health & Fitness */}
       <div>
-        <h3 className="mb-3 text-lg font-semibold tracking-tight">Health & Fitness</h3>
+        <h3 className="mb-3 font-serif text-lg font-semibold tracking-tight text-stone-950">Health & Fitness</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <InfoRow
             icon={TrendingUp}
@@ -313,7 +313,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 
       {/* Engagement */}
       <div>
-        <h3 className="mb-3 text-lg font-semibold tracking-tight">Engagement</h3>
+        <h3 className="mb-3 font-serif text-lg font-semibold tracking-tight text-stone-950">Engagement</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <InfoRow
             icon={Calendar}
@@ -378,7 +378,7 @@ function AddressesPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Add address
             </Button>
@@ -420,7 +420,7 @@ function AddressesPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((addr) => (
-            <div key={addr.id} className="flex items-start justify-between rounded-md border p-3">
+            <div key={addr.id} className="flex items-start justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
               <div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{addr.type}</Badge>
@@ -485,7 +485,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Add contact
             </Button>
@@ -517,13 +517,13 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((contact) => (
-            <div key={contact.id} className="flex items-start justify-between rounded-md border p-3">
+            <div key={contact.id} className="flex items-start justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{contact.name}</p>
                   {contact.isPrimary && <Badge>Primary</Badge>}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-stone-600">
                   {contact.phone}
                   {contact.relationship ? ` · ${contact.relationship}` : ""}
                 </p>
@@ -590,9 +590,9 @@ function NotesPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((note) => (
-            <div key={note.id} className="flex items-start justify-between rounded-md border p-3">
+            <div key={note.id} className="flex items-start justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
               <div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-stone-600">
                   {note.pinned && <Pin className="size-3" />}
                   <span>
                     {note.authorUser ? `${note.authorUser.firstName} ${note.authorUser.lastName}` : "Unknown"}
@@ -661,7 +661,7 @@ function ConsentsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Record consent
             </Button>
@@ -703,16 +703,16 @@ function ConsentsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((consent) => (
-            <div key={consent.id} className="flex items-center justify-between rounded-md border p-3">
+            <div key={consent.id} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
               <div>
                 <p className="font-medium">{CONSENT_LABELS[consent.type]}</p>
-                {consent.note && <p className="text-sm text-muted-foreground">{consent.note}</p>}
+                {consent.note && <p className="text-sm text-stone-600">{consent.note}</p>}
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant={consent.granted ? "default" : "destructive"}>
                   {consent.granted ? "Granted" : "Revoked"}
                 </Badge>
-                <span className="text-xs text-muted-foreground">{fmtDateTime(consent.createdAt)}</span>
+                <span className="text-xs text-stone-600">{fmtDateTime(consent.createdAt)}</span>
               </div>
             </div>
           ))}
@@ -766,9 +766,9 @@ function HistoryPanel({ memberId }: { memberId: string }) {
   return (
     <div className="flex flex-col gap-2">
       {rows.map((row) => (
-        <div key={row.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
+        <div key={row.id} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md text-sm">
           <span>{row.label}</span>
-          <span className="text-xs text-muted-foreground">{fmtDateTime(row.createdAt)}</span>
+          <span className="text-xs text-stone-600">{fmtDateTime(row.createdAt)}</span>
         </div>
       ))}
     </div>
@@ -849,7 +849,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end gap-2">
         <Dialog open={measurementOpen} onOpenChange={setMeasurementOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Log measurement
             </Button>
@@ -882,7 +882,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
 
         <Dialog open={fitnessOpen} onOpenChange={setFitnessOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Log fitness test
             </Button>
@@ -932,12 +932,12 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {rows.map((row) => (
-            <div key={row.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
+            <div key={row.id} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md text-sm">
               <div>
                 <span className="font-medium">{row.label}</span>
-                <span className="ml-2 text-muted-foreground">{row.detail}</span>
+                <span className="ml-2 text-stone-600">{row.detail}</span>
               </div>
-              <span className="text-xs text-muted-foreground">{fmtDateTime(row.date)}</span>
+              <span className="text-xs text-stone-600">{fmtDateTime(row.date)}</span>
             </div>
           ))}
         </div>
@@ -991,7 +991,7 @@ function GoalMilestones({
     <div className="mt-2 flex flex-col gap-2 border-t pt-2">
       {milestones.map((m) => (
         <div key={m.id} className="flex items-center justify-between text-sm">
-          <span className={m.achievedAt ? "text-muted-foreground line-through" : ""}>{m.title}</span>
+          <span className={m.achievedAt ? "text-stone-600 line-through" : ""}>{m.title}</span>
           {m.achievedAt ? (
             <CheckCircle2 className="size-4 text-primary" />
           ) : (
@@ -1053,7 +1053,7 @@ function GoalsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Add goal
             </Button>
@@ -1091,11 +1091,11 @@ function GoalsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((goal) => (
-            <div key={goal.id} className="rounded-md border p-3">
+            <div key={goal.id} className="rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{goal.title}</p>
-                  <p className="text-xs text-muted-foreground">{GOAL_CATEGORY_LABELS[goal.category]}</p>
+                  <p className="text-xs text-stone-600">{GOAL_CATEGORY_LABELS[goal.category]}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={GOAL_STATUS_VARIANT[goal.status]}>{goal.status}</Badge>
@@ -1230,7 +1230,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Upload document
             </Button>
@@ -1245,7 +1245,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
                 accept={ALLOWED_DOCUMENT_TYPES}
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
-              <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or PDF, up to 10MB.</p>
+              <p className="text-xs text-stone-600">JPEG, PNG, WebP, or PDF, up to 10MB.</p>
               <Select value={category} onValueChange={(v) => setCategory(v as MemberDocumentCategory)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -1337,7 +1337,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((doc) => (
-            <div key={doc.id} className="flex flex-col gap-2 rounded-md border p-3">
+            <div key={doc.id} className="flex flex-col gap-2 rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
                   {doc.mimeType?.startsWith("image/") && doc.url ? (
@@ -1348,24 +1348,24 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
                     />
                   ) : (
                     <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
-                      <FileText className="size-4 text-muted-foreground" />
+                      <FileText className="size-4 text-stone-600" />
                     </div>
                   )}
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{doc.originalName ?? "Unknown"}</p>
-                    <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 flex-wrap text-xs text-stone-600">
                       <Badge variant="outline">{DOCUMENT_CATEGORY_LABELS[doc.category]}</Badge>
                       <Badge variant={statusVariant[doc.status]}>{doc.status}</Badge>
                       {doc.sizeBytes && <span>{formatFileSize(doc.sizeBytes)}</span>}
                       <span>v{doc.currentVersion}</span>
                       <span>· {fmtDateTime(doc.createdAt)}</span>
                     </div>
-                    {doc.description && <p className="mt-1 text-xs text-muted-foreground">{doc.description}</p>}
+                    {doc.description && <p className="mt-1 text-xs text-stone-600">{doc.description}</p>}
                     {doc.status === "REJECTED" && doc.rejectionReason && (
                       <p className="mt-1 text-xs text-destructive">Rejected: {doc.rejectionReason}</p>
                     )}
                     {doc.reviewedBy && (
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="mt-1 text-xs text-stone-600">
                         {doc.status === "APPROVED" ? "Approved" : "Reviewed"} by {doc.reviewedBy.firstName} {doc.reviewedBy.lastName}
                       </p>
                     )}
@@ -1450,7 +1450,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
               </div>
               {doc.versions.length > 1 && (
                 <div className="flex flex-wrap gap-1 rounded bg-muted/50 p-2">
-                  <p className="text-xs font-medium text-muted-foreground">Version history:</p>
+                  <p className="text-xs font-medium text-stone-600">Version history:</p>
                   {doc.versions.map((v) => (
                     <Badge key={v.id} variant="secondary" className="text-xs">
                       v{v.version}: {v.changeNotes ?? "no notes"}
@@ -1485,16 +1485,16 @@ function AttendancePanel({ memberId }: { memberId: string }) {
   return (
     <div className="flex flex-col gap-3">
       {query.data.map((record) => (
-        <div key={record.id} className="flex items-center justify-between rounded-md border p-3">
+        <div key={record.id} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
               <Clock className="size-4 text-primary" />
             </div>
             <div>
               <p className="text-sm font-medium">
                 {new Date(record.checkInAt).toLocaleDateString()} {new Date(record.checkInAt).toLocaleTimeString()}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-stone-600">
                 {record.method} &bull; Branch: {record.branchId}
               </p>
             </div>
@@ -1596,7 +1596,7 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
         {canRenew && (
           <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
                 <RefreshCw className="size-3.5" />
                 Renew Membership
               </Button>
@@ -1633,7 +1633,7 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
                   value={renewDiscount}
                   onChange={(e) => setRenewDiscount(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-stone-600">
                   Renewing extends the current term at the plan&apos;s duration and price; the
                   selected membership&apos;s plan is used. Payment is recorded separately in
                   billing.
@@ -1653,33 +1653,33 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <div className="rounded-xl border bg-muted/20 p-3">
-          <p className="text-xs text-muted-foreground">Total</p>
-          <p className="text-lg font-semibold tabular-nums">
+        <div className="rounded-[20px] border border-violet-200/60 bg-gradient-to-br from-violet-50/80 to-white p-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Total</p>
+          <p className="font-mono text-lg font-black tabular-nums text-stone-950">
             {currency} {totalFromMemberships.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-xl border bg-muted/20 p-3">
-          <p className="text-xs text-muted-foreground">Discounts</p>
-          <p className="text-lg font-semibold tabular-nums text-muted-foreground">
+        <div className="rounded-[20px] border border-stone-200/70 bg-white/80 p-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Discounts</p>
+          <p className="font-mono text-lg font-black tabular-nums text-stone-500">
             -{currency} {totalDiscounts.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-xl border bg-primary/5 p-3">
-          <p className="text-xs text-muted-foreground">Final</p>
-          <p className="text-lg font-semibold tabular-nums">
+        <div className="rounded-[20px] border border-cyan-200/60 bg-gradient-to-br from-cyan-50/80 to-white p-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Final</p>
+          <p className="font-mono text-lg font-black tabular-nums text-stone-950">
             {currency} {finalAmount.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-xl border bg-muted/20 p-3">
-          <p className="text-xs text-muted-foreground">Paid</p>
-          <p className="text-lg font-semibold tabular-nums text-emerald-600">
+        <div className="rounded-[20px] border border-emerald-200/60 bg-gradient-to-br from-emerald-50/80 to-white p-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Paid</p>
+          <p className="font-mono text-lg font-black tabular-nums text-emerald-700">
             {currency} {totalPaid.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-xl border bg-muted/20 p-3">
-          <p className="text-xs text-muted-foreground">Outstanding</p>
-          <p className={`text-lg font-semibold tabular-nums ${outstandingBalance > 0 ? "text-red-600" : "text-emerald-600"}`}>
+        <div className="rounded-[20px] border border-amber-200/60 bg-gradient-to-br from-amber-50/80 to-white p-3">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Outstanding</p>
+          <p className={`text-lg font-semibold tabular-nums ${outstandingBalance > 0 ? "text-rose-600" : "text-emerald-600"}`}>
             {currency} {Math.abs(outstandingBalance).toLocaleString()}
             {outstandingBalance > 0 ? " due" : ""}
           </p>
@@ -1691,16 +1691,16 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
           <h4 className="mb-2 text-sm font-medium">Memberships</h4>
           <div className="flex flex-col gap-2">
             {memberships.map((membership) => (
-              <div key={membership.id} className="flex items-center justify-between rounded-md border p-3">
+              <div key={membership.id} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
                     <Dumbbell className="size-4 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">
                       {membership.membershipPlan?.name ?? "Membership"}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-stone-600">
                       {membership.membershipPlan?.durationDays ?? 0} days &bull;{" "}
                       {new Date(membership.startDate).toLocaleDateString()} -{" "}
                       {new Date(membership.endDate).toLocaleDateString()}
@@ -1744,21 +1744,21 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
                   ? "warning"
                   : "secondary";
               return (
-                <div key={payment.id} className="flex items-center justify-between rounded-md border p-3">
+                <div key={payment.id} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
                       <CreditCard className="size-4 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">
                         {payment.currency} {Number(payment.amount).toLocaleString()}
                         {refunded > 0 && (
-                          <span className="ml-2 text-xs text-muted-foreground">
+                          <span className="ml-2 text-xs text-stone-600">
                             (refunded: {payment.currency} {refunded.toLocaleString()})
                           </span>
                         )}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-stone-600">
                         {payment.method} &bull; {new Date(payment.createdAt).toLocaleDateString()}
                         {payment.note && <> &bull; {payment.note}</>}
                       </p>
@@ -1823,7 +1823,7 @@ function RefundPaymentForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-stone-600">
         Remaining refundable balance: {payment.currency} {remaining.toFixed(2)}
       </p>
       <div className="flex flex-col gap-2">
@@ -1892,7 +1892,7 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               New PAR-Q
             </Button>
@@ -1934,11 +1934,11 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
       </div>
 
       {latestScreening ? (
-        <div className="rounded-md border p-4">
+        <div className="rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Latest PAR-Q</p>
-              <p className="text-sm text-muted-foreground">{new Date(latestScreening.completedAt).toLocaleDateString()}</p>
+              <p className="text-sm text-stone-600">{new Date(latestScreening.completedAt).toLocaleDateString()}</p>
             </div>
             {latestScreening.flaggedForMedicalClearance && (
               <Badge variant="destructive">Medical clearance needed</Badge>
@@ -1982,11 +1982,11 @@ function WorkoutsPanel({ memberId }: { memberId: string }) {
   return (
     <div className="flex flex-col gap-2">
       {query.data.map((assignment) => (
-        <div key={assignment.id} className="rounded-md border p-4">
+        <div key={assignment.id} className="rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">{assignment.workoutPlan.name}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-stone-600">
                 Started {new Date(assignment.startDate).toLocaleDateString()}
               </p>
             </div>
@@ -1996,7 +1996,7 @@ function WorkoutsPanel({ memberId }: { memberId: string }) {
               {assignment.status}
             </Badge>
           </div>
-          {assignment.notes && <p className="mt-2 text-sm text-muted-foreground">{assignment.notes}</p>}
+          {assignment.notes && <p className="mt-2 text-sm text-stone-600">{assignment.notes}</p>}
         </div>
       ))}
     </div>
@@ -2022,17 +2022,17 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
   return (
     <div className="flex flex-col gap-2">
       {query.data.map((session) => (
-        <div key={session.id} className="rounded-md border p-4">
+        <div key={session.id} className="rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
                 <Dumbbell className="size-5 text-primary" />
               </div>
               <div>
                 <p className="font-medium">
                   {new Date(session.scheduledAt).toLocaleDateString()} at {new Date(session.scheduledAt).toLocaleTimeString()}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-stone-600">
                   {session.trainer?.firstName} {session.trainer?.lastName}
                   {session.workoutPlan && ` &bull; ${session.workoutPlan.name}`}
                 </p>
@@ -2044,7 +2044,7 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
               {session.status}
             </Badge>
           </div>
-          {session.notes && <p className="mt-2 text-sm text-muted-foreground">{session.notes}</p>}
+          {session.notes && <p className="mt-2 text-sm text-stone-600">{session.notes}</p>}
         </div>
       ))}
     </div>
@@ -2070,18 +2070,18 @@ function NutritionPanel({ memberId }: { memberId: string }) {
   return (
     <div className="flex flex-col gap-2">
       {query.data.map((assignment) => (
-        <div key={assignment.id} className="rounded-md border p-4">
+        <div key={assignment.id} className="rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">{assignment.dietPlan?.name}</p>
-              <p className="text-sm text-muted-foreground">Started {new Date(assignment.startDate).toLocaleDateString()}</p>
+              <p className="text-sm text-stone-600">Started {new Date(assignment.startDate).toLocaleDateString()}</p>
             </div>
             <Badge variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "secondary" : "outline"}>
               {assignment.status}
             </Badge>
           </div>
           {assignment.dietPlan && (
-            <p className="mt-2 text-sm text-muted-foreground">Diet plan assigned</p>
+            <p className="mt-2 text-sm text-stone-600">Diet plan assigned</p>
           )}
         </div>
       ))}
@@ -2155,7 +2155,7 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Add follow-up
             </Button>
@@ -2214,26 +2214,26 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
             <div className="flex flex-col gap-2">
               <h4 className="text-sm font-medium">Open ({openFollowUps.length})</h4>
               {openFollowUps.map((followUp) => (
-                <div key={followUp.id} className="flex items-start justify-between rounded-md border p-3">
+                <div key={followUp.id} className="flex items-start justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
                   <div className="flex items-start gap-3">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
                       <CheckSquare className="size-4 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">{followUp.title}</p>
                       {followUp.description && (
-                        <p className="mt-0.5 text-sm text-muted-foreground">{followUp.description}</p>
+                        <p className="mt-0.5 text-sm text-stone-600">{followUp.description}</p>
                       )}
                       <div className="mt-1 flex items-center gap-2">
                         <Badge variant={PRIORITY_VARIANT[followUp.priority]}>{PRIORITY_LABELS[followUp.priority]}</Badge>
                         {followUp.dueAt && (
-                          <span className={`text-xs ${followUp.isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                          <span className={`text-xs ${followUp.isOverdue ? "text-rose-600 font-medium" : "text-stone-600"}`}>
                             {followUp.isOverdue ? "Overdue: " : "Due: "}
                             {new Date(followUp.dueAt).toLocaleDateString()}
                           </span>
                         )}
                         {followUp.assignedToUser && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-stone-600">
                             Assigned to {followUp.assignedToUser.firstName} {followUp.assignedToUser.lastName}
                           </span>
                         )}
@@ -2267,7 +2267,7 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
                       }
                       disabled={remove.isPending}
                     >
-                      <Trash2 className="size-4 text-muted-foreground" />
+                      <Trash2 className="size-4 text-stone-600" />
                     </Button>
                   </div>
                 </div>
@@ -2277,16 +2277,16 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
 
           {completedFollowUps.length > 0 && (
             <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-medium text-muted-foreground">Completed ({completedFollowUps.length})</h4>
+              <h4 className="text-sm font-medium text-stone-600">Completed ({completedFollowUps.length})</h4>
               {completedFollowUps.map((followUp) => (
                 <div key={followUp.id} className="flex items-start justify-between rounded-md border bg-muted/30 p-3">
                   <div className="flex items-start gap-3 opacity-60">
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <CheckCircle2 className="size-4 text-muted-foreground" />
+                      <CheckCircle2 className="size-4 text-stone-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium line-through">{followUp.title}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-stone-600">
                         Completed {new Date(followUp.completedAt!).toLocaleDateString()}
                       </p>
                     </div>
@@ -2303,7 +2303,7 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
                     }
                     disabled={uncomplete.isPending}
                   >
-                    <Undo2 className="size-4 text-muted-foreground" />
+                    <Undo2 className="size-4 text-stone-600" />
                   </Button>
                 </div>
               ))}
@@ -2371,7 +2371,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Plus className="size-3.5" />
               Manage tags
             </Button>
@@ -2381,7 +2381,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
               <DialogTitle>Manage tags</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-3">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-stone-600">
                 Select tags to assign to this member:
               </p>
               <div className="flex flex-wrap gap-2">
@@ -2410,7 +2410,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
                   );
                 })}
                 {tagsQuery.data?.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No tags created yet.</p>
+                  <p className="text-sm text-stone-600">No tags created yet.</p>
                 )}
               </div>
             </div>
@@ -2496,7 +2496,7 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
       <div className="flex justify-end">
         <Dialog open={sendOpen} onOpenChange={setSendOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
               <Mail className="size-3.5" />
               Send message
             </Button>
@@ -2557,7 +2557,7 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
       ) : (
         <div className="flex flex-col gap-2">
           {query.data.map((msg) => (
-            <div key={msg.id} className="flex items-start gap-3 rounded-md border p-3">
+            <div key={msg.id} className="flex items-start gap-3 rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
                 {msg.channel === "EMAIL" ? <Mail className="size-4" /> : <MessageSquare className="size-4" />}
               </div>
@@ -2566,8 +2566,8 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
                   <p className="text-sm font-medium">{msg.channel}</p>
                   <Badge variant={statusVariant[msg.status] ?? "outline"}>{msg.status}</Badge>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{msg.recipient}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-xs text-stone-600">{msg.recipient}</p>
+                <p className="mt-1 text-xs text-stone-600">
                   {fmtDateTime(msg.createdAt)}
                 </p>
                 {msg.errorMessage && (
@@ -2647,22 +2647,22 @@ function TimelinePanel({ memberId }: { memberId: string }) {
         {data.events.map((event) => {
           const Icon = TIMELINE_ICON_MAP[event.type] ?? History;
           return (
-            <div key={event.id} className="flex items-start gap-3 rounded-md border p-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Icon className="size-4 text-primary" />
+            <div key={event.id} className="flex items-start gap-3 rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-md shadow-violet-500/20">
+                <Icon className="size-4 text-white" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-medium">{event.title}</p>
-                  <span className="shrink-0 text-xs text-muted-foreground">
+                  <span className="shrink-0 text-xs text-stone-600">
                     {fmtDateTime(event.timestamp)}
                   </span>
                 </div>
                 {event.description && (
-                  <p className="mt-0.5 text-sm text-muted-foreground">{event.description}</p>
+                  <p className="mt-0.5 text-sm text-stone-600">{event.description}</p>
                 )}
                 {event.actorName && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">by {event.actorName}</p>
+                  <p className="mt-0.5 text-xs text-stone-600">by {event.actorName}</p>
                 )}
               </div>
             </div>
@@ -2680,7 +2680,7 @@ function TimelinePanel({ memberId }: { memberId: string }) {
           >
             Previous
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-stone-600">
             Page {page} of {Math.ceil(data.totalCount / pageSize)}
           </span>
           <Button
@@ -2763,7 +2763,7 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-stone-600">
           Found {data.potentialDuplicates.length} potential duplicate
           {data.potentialDuplicates.length !== 1 ? "s" : ""}
         </p>
@@ -2775,16 +2775,16 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
 
       <div className="flex flex-col gap-2">
         {data.potentialDuplicates.map((dup) => (
-          <div key={dup.memberId} className="flex items-center justify-between rounded-md border p-4">
+          <div key={dup.memberId} className="flex items-center justify-between rounded-[20px] border border-stone-200/70 bg-white/80 p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-warning/10">
-                <AlertTriangle className="size-5 text-warning" />
+              <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10">
+                <AlertTriangle className="size-5 text-amber-600" />
               </div>
               <div>
                 <p className="font-medium">
                   {dup.firstName} {dup.lastName}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-stone-600">
                   {dup.email && <span>{dup.email}</span>}
                   {dup.phone && <span> · {dup.phone}</span>}
                 </p>
@@ -2795,7 +2795,7 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
                   </Badge>
                 </div>
                 {dup.matchReasons.length > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-stone-600">
                     Reasons: {dup.matchReasons.join(", ")}
                   </p>
                 )}
@@ -2830,14 +2830,14 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
                   <p className="mt-1">
                     {data.firstName} {data.lastName}
                   </p>
-                  <p className="text-sm text-muted-foreground">{data.email ?? "No email"}</p>
+                  <p className="text-sm text-stone-600">{data.email ?? "No email"}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Target (to keep)</p>
                   <p className="mt-1">
                     {selectedDuplicate.firstName} {selectedDuplicate.lastName}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-stone-600">
                     {selectedDuplicate.email ?? "No email"}
                   </p>
                 </div>
@@ -2911,7 +2911,7 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
           </SelectContent>
         </Select>
         {selected?.previousMembershipId && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-stone-600">
             Renewed/continued from a previous membership — full chain is preserved in the audit
             trail.
           </p>
@@ -2930,12 +2930,12 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
         <ol className="relative ml-3 border-l border-border">
           {entries.map((entry) => (
             <li key={entry.id} className="mb-6 ml-6">
-              <span className="absolute -left-[7px] mt-1.5 size-3.5 rounded-full border-2 border-background bg-primary/40" />
+              <span className="absolute -left-[7px] mt-1.5 size-3.5 rounded-full border-2 border-background bg-violet-500/60" />
               <p className="text-sm font-medium">
                 {entry.fromStatus ? `${entry.fromStatus} → ${entry.toStatus}` : `Created as ${entry.toStatus}`}
               </p>
-              {entry.detail && <p className="text-sm text-muted-foreground">{entry.detail}</p>}
-              <p className="text-xs text-muted-foreground">
+              {entry.detail && <p className="text-sm text-stone-600">{entry.detail}</p>}
+              <p className="text-xs text-stone-600">
                 {fmtDateTime(entry.createdAt)}
                 {entry.changedByUser
                   ? ` — by ${entry.changedByUser.firstName} ${entry.changedByUser.lastName}`.trim()
@@ -2952,131 +2952,131 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
 export function Member360Tabs({ memberId }: { memberId: string }) {
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <div className="relative">
-        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
+      <div className="relative -mx-1 px-1">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-[20px] border border-violet-100/70 bg-gradient-to-r from-violet-50/70 via-white to-cyan-50/70 p-1.5 shadow-sm">
           <TabsTrigger
             value="overview"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="tags"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Tags
           </TabsTrigger>
           <TabsTrigger
             value="addresses"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Addresses
           </TabsTrigger>
           <TabsTrigger
             value="emergency"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Emergency
           </TabsTrigger>
           <TabsTrigger
             value="notes"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Notes
           </TabsTrigger>
           <TabsTrigger
             value="consents"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Consents
           </TabsTrigger>
           <TabsTrigger
             value="assessments"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Assessments
           </TabsTrigger>
           <TabsTrigger
             value="goals"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Goals
           </TabsTrigger>
           <TabsTrigger
             value="documents"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Documents
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             History
           </TabsTrigger>
           <TabsTrigger
             value="attendance"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Attendance
           </TabsTrigger>
           <TabsTrigger
             value="payments"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Payments
           </TabsTrigger>
           <TabsTrigger
             value="screening"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             PAR-Q
           </TabsTrigger>
           <TabsTrigger
             value="pt-sessions"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             PT Sessions
           </TabsTrigger>
           <TabsTrigger
             value="workouts"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Workouts
           </TabsTrigger>
           <TabsTrigger
             value="nutrition"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Nutrition
           </TabsTrigger>
           <TabsTrigger
             value="follow-ups"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Follow-ups
           </TabsTrigger>
           <TabsTrigger
             value="communications"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Messages
           </TabsTrigger>
           <TabsTrigger
             value="timeline"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Timeline
           </TabsTrigger>
           <TabsTrigger
             value="duplicates"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Duplicates
           </TabsTrigger>
           <TabsTrigger
             value="membership-history"
-            className="relative rounded-none border-b-2 border-transparent px-4 py-3 text-sm transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:translate-y-full data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:bg-gradient-to-r after:from-violet-600 after:to-cyan-500 after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
           >
             Membership History
           </TabsTrigger>

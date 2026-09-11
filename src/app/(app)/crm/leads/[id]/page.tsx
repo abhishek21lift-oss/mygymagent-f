@@ -8,11 +8,10 @@ import { toast } from "sonner"
 import { ArrowLeft, ArrowRightCircle, CalendarClock, Check, Edit3, Flame, Mail, Phone, Save, Sparkles, Target, UserRound } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
-import { PageHeader } from "@/components/shared/page-header"
 import { UserSelect } from "@/components/shared/user-select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -44,8 +43,8 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
     if (lead) form.reset({ firstName: lead.firstName, lastName: lead.lastName, email: lead.email ?? "", phone: lead.phone ?? "", source: lead.source ?? "", notes: lead.notes ?? "" })
   }, [lead, form])
 
-  if (query.isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading lead workspace...</div>
-  if (!lead) return <div className="p-6 text-sm text-muted-foreground">Lead not found.</div>
+  if (query.isLoading) return <div className="p-6 text-sm font-medium text-stone-600">Loading lead workspace...</div>
+  if (!lead) return <div className="p-6 text-sm font-medium text-stone-600">Lead not found.</div>
 
   const currentLead = lead
   const openFollowUps = currentLead.followUps?.filter((item) => !item.completedAt).length ?? 0
@@ -69,35 +68,223 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
-      <Button asChild variant="ghost" size="sm" className="w-fit"><Link href="/crm"><ArrowLeft className="size-4" /> Back to Sales</Link></Button>
-      <PageHeader title={`${currentLead.firstName} ${currentLead.lastName}`} description="Lead 360 · pipeline, ownership, follow-ups and conversion handoff" actions={currentLead.status !== "WON" ? <Button asChild className="rounded-xl"><Link href={`/crm/leads/${currentLead.id}/convert`}><ArrowRightCircle className="size-4" /> Convert to member</Link></Button> : <Button asChild variant="outline" className="rounded-xl"><Link href={`/members/${currentLead.convertedMemberId}`}><UserRound className="size-4" /> Open member</Link></Button>} />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Metric icon={Sparkles} label="Sales priority score" value={score} tone="violet" /><Metric icon={Flame} label="Pipeline stage" value={currentLead.status} tone="rose" /><Metric icon={CalendarClock} label="Open follow-ups" value={openFollowUps} tone="amber" /><Metric icon={Target} label="Lead source" value={currentLead.source ?? "Unknown"} tone="cyan" /></div>
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]"
+        aria-hidden="true"
+      />
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        <section
+          aria-labelledby="lead-title"
+          className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10"
+        >
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-blue-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-300/25 blur-3xl" aria-hidden="true" />
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <Link
+                href="/crm"
+                className="mb-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-extrabold text-blue-700 transition hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                <ArrowLeft className="size-4" aria-hidden="true" /> Back to Sales
+              </Link>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-violet-700">
+                <Sparkles className="size-3.5" aria-hidden="true" /> Lead 360 · Score {score}
+              </div>
+              <h1 id="lead-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">
+                {currentLead.firstName} {currentLead.lastName}
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">
+                Lead 360 · pipeline, ownership, follow-ups and conversion handoff.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {currentLead.status !== "WON" ? (
+                <Button asChild className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                  <Link href={`/crm/leads/${currentLead.id}/convert`}><ArrowRightCircle className="size-4" aria-hidden="true" /> Convert to member</Link>
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="min-h-11 rounded-2xl border-emerald-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+                  <Link href={`/members/${currentLead.convertedMemberId}`}><UserRound className="size-4" aria-hidden="true" /> Open member</Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
 
-      <div className="grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
-        <Card className="border-0 shadow-sm ring-1 ring-border/70"><CardHeader className="border-b bg-muted/15"><CardTitle className="flex items-center gap-2 text-base"><Edit3 className="size-4 text-primary" /> Lead profile</CardTitle></CardHeader><CardContent className="p-6"><Form {...form}><form onSubmit={form.handleSubmit(save)} className="grid gap-5 sm:grid-cols-2">
-          {(["firstName", "lastName", "email", "phone", "source"] as const).map((name) => <FormField key={name} control={form.control} name={name} render={({ field }) => <FormItem className={name === "source" ? "sm:col-span-2" : ""}><FormLabel>{name === "firstName" ? "First name" : name === "lastName" ? "Last name" : name === "email" ? "Email" : name === "phone" ? "Phone" : "Source"}</FormLabel><FormControl><Input type={name === "email" ? "email" : "text"} {...field} /></FormControl><FormMessage /></FormItem>} />)}
-          <FormField control={form.control} name="notes" render={({ field }) => <FormItem className="sm:col-span-2"><FormLabel>Notes</FormLabel><FormControl><Textarea rows={5} placeholder="Context, objections, preferences..." {...field} /></FormControl><FormMessage /></FormItem>} />
-          <div className="sm:col-span-2 flex justify-end"><Button type="submit" disabled={update.isPending}><Save className="size-4" /> {update.isPending ? "Saving..." : "Save profile"}</Button></div>
-        </form></Form></CardContent></Card>
+        <section aria-label="Lead snapshot">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Metric icon={Sparkles} label="Sales priority score" value={score} tone="violet" hint="Stage + contact completeness" />
+            <Metric icon={Flame} label="Pipeline stage" value={currentLead.status} tone="rose" hint="Current conversion step" />
+            <Metric icon={CalendarClock} label="Open follow-ups" value={openFollowUps} tone="amber" hint="Actions awaiting a rep" />
+            <Metric icon={Target} label="Lead source" value={currentLead.source ?? "Unknown"} tone="cyan" hint="Acquisition channel" />
+          </div>
+        </section>
 
-        <Card className="border-0 bg-gradient-to-br from-violet-500/[0.08] via-card to-cyan-500/[0.06] shadow-sm ring-1 ring-primary/15"><CardHeader><CardTitle className="text-base">Pipeline control</CardTitle></CardHeader><CardContent className="space-y-5">
-          <div><p className="mb-2 text-xs font-medium text-muted-foreground">Stage</p><Select value={currentLead.status} onValueChange={changeStatus} disabled={statusMutation.isPending || currentLead.status === "WON"}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{statuses.filter((status) => status !== "WON").map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}{currentLead.status === "WON" && <SelectItem value="WON">WON</SelectItem>}</SelectContent></Select></div>
-          <div><p className="mb-2 text-xs font-medium text-muted-foreground">Assigned salesperson</p><UserSelect value={currentLead.assignedToUserId ?? undefined} onChange={(value) => update.mutate({ id: currentLead.id, input: { assignedToUserId: value } })} placeholder="Unassigned" /></div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1"><div className="rounded-2xl border bg-background/55 p-4"><p className="text-xs text-muted-foreground">Contact</p><div className="mt-2 space-y-1 text-sm">{currentLead.phone && <p className="flex items-center gap-2"><Phone className="size-3.5" />{currentLead.phone}</p>}{currentLead.email && <p className="flex items-center gap-2"><Mail className="size-3.5" />{currentLead.email}</p>}</div></div><div className="rounded-2xl border bg-background/55 p-4"><p className="text-xs text-muted-foreground">Created</p><p className="mt-2 text-sm font-medium">{new Date(currentLead.createdAt).toLocaleDateString()}</p></div></div>
-        </CardContent></Card>
+        <section className="grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
+          <div className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <div className="flex items-center gap-3 border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-cyan-50/60 px-5 py-5 sm:px-6">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/25">
+                <Edit3 className="size-5" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Lead profile</h2>
+                <p className="mt-0.5 text-xs font-medium text-stone-600">Contact truth the whole team can trust.</p>
+              </div>
+            </div>
+            <div className="p-5 sm:p-6">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(save)} className="grid gap-5 sm:grid-cols-2">
+                  {(["firstName", "lastName", "email", "phone", "source"] as const).map((name) => (
+                    <FormField
+                      key={name}
+                      control={form.control}
+                      name={name}
+                      render={({ field }) => (
+                        <FormItem className={name === "source" ? "sm:col-span-2" : ""}>
+                          <FormLabel>{name === "firstName" ? "First name" : name === "lastName" ? "Last name" : name === "email" ? "Email" : name === "phone" ? "Phone" : "Source"}</FormLabel>
+                          <FormControl><Input type={name === "email" ? "email" : "text"} {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl><Textarea rows={5} placeholder="Context, objections, preferences..." {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end sm:col-span-2">
+                    <Button type="submit" disabled={update.isPending} className="min-h-11 rounded-2xl bg-stone-950 text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+                      <Save className="size-4" aria-hidden="true" /> {update.isPending ? "Saving..." : "Save profile"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <div className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/60 px-5 py-5">
+              <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Pipeline control</h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">Stage, owner and instant contact.</p>
+            </div>
+            <div className="space-y-5 p-5 sm:p-6">
+              <div>
+                <p className="mb-2 text-xs font-bold text-stone-600">Stage</p>
+                <Select value={currentLead.status} onValueChange={changeStatus} disabled={statusMutation.isPending || currentLead.status === "WON"}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {statuses.filter((status) => status !== "WON").map((status) => (
+                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    ))}
+                    {currentLead.status === "WON" && <SelectItem value="WON">WON</SelectItem>}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <p className="mb-2 text-xs font-bold text-stone-600">Assigned salesperson</p>
+                <UserSelect value={currentLead.assignedToUserId ?? undefined} onChange={(value) => update.mutate({ id: currentLead.id, input: { assignedToUserId: value } })} placeholder="Unassigned" />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="rounded-[20px] border border-blue-100/70 bg-gradient-to-br from-blue-50/70 to-cyan-50/40 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Contact</p>
+                  <div className="mt-2 space-y-1 text-sm font-medium text-stone-800">
+                    {currentLead.phone && <p className="flex items-center gap-2"><Phone className="size-3.5 text-blue-600" aria-hidden="true" />{currentLead.phone}</p>}
+                    {currentLead.email && <p className="flex items-center gap-2"><Mail className="size-3.5 text-violet-600" aria-hidden="true" />{currentLead.email}</p>}
+                    {!currentLead.phone && !currentLead.email && <p className="text-stone-600">No contact details yet.</p>}
+                  </div>
+                </div>
+                <div className="rounded-[20px] border border-stone-200/70 bg-white/70 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Created</p>
+                  <p className="mt-2 text-sm font-bold text-stone-900">{new Date(currentLead.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="lead-followups" className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+          <div className="flex items-center gap-3 border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/90 via-white to-violet-50/60 px-5 py-5 sm:px-6">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 to-violet-600 text-white shadow-md shadow-cyan-500/25">
+              <CalendarClock className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="lead-followups" className="font-serif text-xl font-semibold tracking-tight text-stone-950">Follow-up command center</h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">Schedule the next action, close the loop.</p>
+            </div>
+          </div>
+          <div className="space-y-5 p-5 sm:p-6">
+            <Form {...followUpForm}>
+              <form onSubmit={followUpForm.handleSubmit(createFollowUp)} className="grid gap-3 rounded-[20px] border border-blue-100/70 bg-blue-50/40 p-4 sm:grid-cols-[180px_1fr_auto]">
+                <FormField control={followUpForm.control} name="dueAt" render={({ field }) => <FormItem><FormLabel>Due date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>} />
+                <FormField control={followUpForm.control} name="note" render={({ field }) => <FormItem><FormLabel>Next action</FormLabel><FormControl><Input placeholder="Call, WhatsApp, trial reminder..." {...field} /></FormControl><FormMessage /></FormItem>} />
+                <div className="flex items-end">
+                  <Button type="submit" disabled={addFollowUp.isPending} className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                    {addFollowUp.isPending ? "Scheduling..." : "Schedule"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+            <div className="space-y-3">
+              {currentLead.followUps?.map((followUp) => (
+                <div key={followUp.id} className="flex flex-col gap-3 rounded-[20px] border border-white/90 bg-white/80 p-4 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={followUp.completedAt ? "secondary" : "warning"}>{followUp.completedAt ? "Completed" : "Open"}</Badge>
+                      <span className="text-sm font-bold text-stone-800">{new Date(followUp.dueAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className={followUp.completedAt ? "mt-2 text-sm font-medium text-stone-600 line-through" : "mt-2 text-sm font-medium text-stone-900"}>{followUp.note}</p>
+                  </div>
+                  {!followUp.completedAt && (
+                    <Button size="sm" variant="outline" onClick={() => finishFollowUp(followUp.id)} disabled={completeFollowUp.isPending} className="min-h-11 shrink-0 rounded-xl border-blue-200 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                      <Check className="size-3.5" aria-hidden="true" /> Done
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {(!currentLead.followUps || currentLead.followUps.length === 0) && (
+                <div className="rounded-[20px] border border-dashed border-blue-200 bg-blue-50/40 p-6 text-center text-sm font-medium text-stone-600">
+                  No follow-ups yet. Schedule the next sales action above.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
-
-      <Card className="border-0 shadow-sm ring-1 ring-border/70"><CardHeader><CardTitle className="flex items-center gap-2 text-base"><CalendarClock className="size-4 text-primary" /> Follow-up command center</CardTitle></CardHeader><CardContent className="space-y-5"><Form {...followUpForm}><form onSubmit={followUpForm.handleSubmit(createFollowUp)} className="grid gap-3 sm:grid-cols-[180px_1fr_auto]">
-        <FormField control={followUpForm.control} name="dueAt" render={({ field }) => <FormItem><FormLabel>Due date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>} />
-        <FormField control={followUpForm.control} name="note" render={({ field }) => <FormItem><FormLabel>Next action</FormLabel><FormControl><Input placeholder="Call, WhatsApp, trial reminder..." {...field} /></FormControl><FormMessage /></FormItem>} />
-        <div className="flex items-end"><Button type="submit" disabled={addFollowUp.isPending}>{addFollowUp.isPending ? "Scheduling..." : "Schedule"}</Button></div>
-      </form></Form><div className="space-y-3">{currentLead.followUps?.map((followUp) => <div key={followUp.id} className="flex flex-col gap-3 rounded-2xl border bg-background/50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><div className="flex flex-wrap items-center gap-2"><Badge variant={followUp.completedAt ? "secondary" : "warning"}>{followUp.completedAt ? "Completed" : "Open"}</Badge><span className="text-sm font-medium">{new Date(followUp.dueAt).toLocaleDateString()}</span></div><p className={followUp.completedAt ? "mt-2 text-sm text-muted-foreground line-through" : "mt-2 text-sm"}>{followUp.note}</p></div>{!followUp.completedAt && <Button size="sm" variant="outline" onClick={() => finishFollowUp(followUp.id)} disabled={completeFollowUp.isPending}><Check className="size-3.5" /> Done</Button>}</div>)}{(!currentLead.followUps || currentLead.followUps.length === 0) && <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">No follow-ups yet. Schedule the next sales action above.</div>}</div></CardContent></Card>
     </div>
   )
 }
 
-function Metric({ icon: Icon, label, value, tone }: { icon: LucideIcon; label: string; value: string | number; tone: "violet" | "rose" | "amber" | "cyan" }) {
-  const tones = { violet: "bg-violet-500/10 text-violet-600", rose: "bg-rose-500/10 text-rose-600", amber: "bg-amber-500/10 text-amber-600", cyan: "bg-cyan-500/10 text-cyan-600" }
-  return <Card className="border-0 shadow-sm ring-1 ring-border/70"><CardContent className="p-5"><span className={`inline-flex size-9 items-center justify-center rounded-xl ${tones[tone]}`}><Icon className="size-4" /></span><p className="mt-3 text-2xl font-semibold tabular-nums">{value}</p><p className="text-xs text-muted-foreground">{label}</p></CardContent></Card>
+function Metric({ icon: Icon, label, value, tone, hint }: { icon: LucideIcon; label: string; value: string | number; tone: "violet" | "rose" | "amber" | "cyan"; hint: string }) {
+  const tones = {
+    violet: { bar: "from-violet-600 via-purple-600 to-fuchsia-600", tile: "from-violet-600 to-fuchsia-600 shadow-violet-500/30", orb: "bg-fuchsia-400/20", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
+    rose: { bar: "from-rose-500 via-red-500 to-orange-500", tile: "from-rose-500 to-orange-500 shadow-rose-500/30", orb: "bg-rose-400/20", ring: "hover:border-rose-200 hover:shadow-rose-500/10" },
+    amber: { bar: "from-amber-400 via-orange-500 to-rose-500", tile: "from-amber-500 to-orange-600 shadow-amber-500/30", orb: "bg-amber-400/20", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
+    cyan: { bar: "from-cyan-400 via-sky-500 to-blue-600", tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30", orb: "bg-cyan-400/20", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
+  }
+  const t = tones[tone]
+  return (
+    <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}>
+      <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} aria-hidden="true" />
+      <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
+      <CardContent className="relative flex items-center gap-4 p-5">
+        <span className={`flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br text-white shadow-lg ${t.tile} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
+          <Icon className="size-6" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
+          <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
+          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }

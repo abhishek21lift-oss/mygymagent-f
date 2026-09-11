@@ -32,56 +32,60 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
   }
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-violet-500/[0.08] via-card to-card shadow-sm ring-1 ring-primary/15">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Brain className="size-4 text-primary" />
-            AI workout progress
-          </CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Evidence-based analysis from verified workout execution data.
-          </p>
+    <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+      <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/70 px-5 py-5 sm:px-6">
+        <div className="flex items-start gap-3">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+            <Brain className="size-5" aria-hidden="true" />
+          </span>
+          <div>
+            <CardTitle className="font-serif text-xl tracking-tight text-stone-950">
+              AI workout progress
+            </CardTitle>
+            <p className="mt-0.5 text-xs font-medium text-stone-600">
+              Evidence-based analysis from verified workout execution data.
+            </p>
+          </div>
         </div>
-        <Badge variant="outline" className="gap-1">
-          <Sparkles className="size-3" /> Verified data
+        <Badge variant="outline" className="shrink-0 gap-1 rounded-full border-violet-200/70 bg-violet-500/10 px-2.5 py-1 text-[10px] font-black tracking-widest text-violet-700">
+          <Sparkles className="size-3" aria-hidden="true" /> Verified data
         </Badge>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-5 sm:p-6">
         {!insight && !error && (
-          <div className="flex flex-col items-start gap-3 rounded-2xl border bg-background/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start gap-3 rounded-[22px] border border-violet-100/70 bg-gradient-to-br from-violet-50/70 via-white to-cyan-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-medium">Ready to analyze this member</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-sm font-extrabold tracking-tight text-stone-900">Ready to analyze this member</p>
+              <p className="mt-1 text-xs font-medium text-stone-600">
                 The assistant will inspect available workout history before making recommendations.
               </p>
             </div>
-            <Button onClick={() => void analyze()} disabled={ai.isPending} className="gap-2 rounded-xl">
-              <TrendingUp className="size-4" />
+            <Button onClick={() => void analyze()} disabled={ai.isPending} className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-5 font-extrabold text-white shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+              <TrendingUp className="size-4" aria-hidden="true" />
               {ai.isPending ? "Analyzing..." : "Analyze progress"}
             </Button>
           </div>
         )}
 
         {error && (
-          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
-            <p className="font-medium">Analysis failed</p>
-            <p className="mt-1 text-xs text-muted-foreground">{error}</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={() => void analyze()} disabled={ai.isPending}>
+          <div className="rounded-[22px] border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50 p-5 text-sm" role="alert">
+            <p className="font-extrabold text-stone-900">Analysis failed</p>
+            <p className="mt-1 text-xs font-medium text-stone-600">{error}</p>
+            <Button variant="outline" size="sm" className="mt-3 min-h-11 rounded-2xl" onClick={() => void analyze()} disabled={ai.isPending}>
               Try again
             </Button>
           </div>
         )}
 
         {insight && (
-          <div className="rounded-2xl border bg-background/70 p-4">
+          <div className="rounded-[22px] border border-stone-200/70 bg-white/80 p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold">Workout intelligence</p>
-              <Button variant="ghost" size="sm" onClick={() => void analyze()} disabled={ai.isPending}>
+              <p className="text-sm font-extrabold tracking-tight text-stone-900">Workout intelligence</p>
+              <Button variant="ghost" size="sm" className="min-h-11 rounded-xl font-bold" onClick={() => void analyze()} disabled={ai.isPending}>
                 Refresh
               </Button>
             </div>
-            <p className="whitespace-pre-wrap text-sm leading-6">{insight}</p>
+            <p className="whitespace-pre-wrap text-sm leading-6 text-stone-700">{insight}</p>
           </div>
         )}
       </CardContent>
