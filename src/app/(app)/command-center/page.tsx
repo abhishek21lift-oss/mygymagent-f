@@ -10,7 +10,9 @@ import {
   Check,
   CreditCard,
   Dumbbell,
+  Flame,
   Package,
+  RefreshCw,
   Sparkles,
   TrendingUp,
   Users,
@@ -41,54 +43,45 @@ function timeAgo(iso: string | undefined) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Shared tone palette — literal class strings so Tailwind can see    */
-/* every combination statically, however they get composed at runtime.*/
+/* Vivid premium system — literal Tailwind strings (no dynamic color). */
+/* One radius family (22–34px), one space rhythm, 5 gradient families. */
 /* ------------------------------------------------------------------ */
 
-const TONE_STYLES = {
-  primary: {
-    chip: "bg-primary/10 text-primary",
-    bar: "from-primary to-primary/10",
-    glow: "hover:shadow-primary/15",
-    ring: "hover:bg-primary/5",
-  },
-  ai: {
-    chip: "bg-ai/10 text-ai",
-    bar: "from-ai to-ai/10",
-    glow: "hover:shadow-ai/15",
-    ring: "hover:bg-ai/5",
-  },
-  success: {
-    chip: "bg-success/10 text-success",
-    bar: "from-success to-success/10",
-    glow: "hover:shadow-success/15",
-    ring: "hover:bg-success/5",
-  },
-  warning: {
-    chip: "bg-warning/15 text-warning-foreground",
-    bar: "from-warning to-warning/10",
-    glow: "hover:shadow-warning/15",
-    ring: "hover:bg-warning/5",
-  },
-  info: {
-    chip: "bg-info/10 text-info",
-    bar: "from-info to-info/10",
-    glow: "hover:shadow-info/15",
-    ring: "hover:bg-info/5",
-  },
-  destructive: {
-    chip: "bg-destructive/10 text-destructive",
-    bar: "from-destructive to-destructive/10",
-    glow: "hover:shadow-destructive/15",
-    ring: "hover:bg-destructive/5",
-  },
-} as const;
+type StatTone = "cyan" | "emerald" | "rose" | "violet";
 
-type Tone = keyof typeof TONE_STYLES;
-
-/* ------------------------------------------------------------------ */
-/* Stat cards: one vivid tile per metric, colour-coded by meaning.     */
-/* ------------------------------------------------------------------ */
+const STAT_TONES: Record<
+  StatTone,
+  { bar: string; tile: string; softBg: string; cardRing: string; orb: string }
+> = {
+  cyan: {
+    bar: "from-cyan-400 via-sky-500 to-blue-600",
+    tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30",
+    softBg: "bg-cyan-50 text-cyan-700",
+    cardRing: "hover:border-cyan-200 hover:shadow-cyan-500/10",
+    orb: "bg-cyan-400/20",
+  },
+  emerald: {
+    bar: "from-emerald-400 via-teal-500 to-green-600",
+    tile: "from-emerald-500 to-teal-600 shadow-emerald-500/30",
+    softBg: "bg-emerald-50 text-emerald-700",
+    cardRing: "hover:border-emerald-200 hover:shadow-emerald-500/10",
+    orb: "bg-emerald-400/20",
+  },
+  rose: {
+    bar: "from-rose-500 via-red-500 to-orange-500",
+    tile: "from-rose-500 to-orange-500 shadow-rose-500/30",
+    softBg: "bg-rose-50 text-rose-700",
+    cardRing: "hover:border-rose-200 hover:shadow-rose-500/10",
+    orb: "bg-rose-400/20",
+  },
+  violet: {
+    bar: "from-violet-600 via-purple-600 to-fuchsia-600",
+    tile: "from-violet-600 to-fuchsia-600 shadow-violet-500/30",
+    softBg: "bg-violet-50 text-violet-700",
+    cardRing: "hover:border-violet-200 hover:shadow-violet-500/10",
+    orb: "bg-fuchsia-400/20",
+  },
+};
 
 function Stat({
   icon: Icon,
@@ -97,45 +90,95 @@ function Stat({
   hint,
   loading,
   tone,
+  delta,
 }: {
   icon: typeof Users;
   label: string;
   value: string;
   hint: string;
   loading: boolean;
-  tone: Tone;
+  tone: StatTone;
+  delta?: string;
 }) {
-  const t = TONE_STYLES[tone];
+  const t = STAT_TONES[tone];
   return (
-    <Card className={`relative overflow-hidden transition-shadow duration-300 ${t.glow}`}>
-      <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} aria-hidden />
-      <CardContent className="flex flex-col gap-3 p-5 lg:p-6">
-        <span className={`flex size-9 items-center justify-center rounded-xl ${t.chip}`}>
-          <Icon className="size-4.5" aria-hidden />
+    <Card
+      className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.cardRing}`}
+    >
+      <span
+        className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`}
+        aria-hidden="true"
+      />
+      <div
+        className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`}
+        aria-hidden="true"
+      />
+      <CardContent className="relative flex items-center gap-4 p-5 lg:p-6">
+        <span
+          className={`flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br text-white shadow-lg ${t.tile} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}
+        >
+          <Icon className="size-6" aria-hidden="true" />
         </span>
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-            {label}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">
+              {label}
+            </p>
+            {delta && !loading && (
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${t.softBg}`}
+              >
+                {delta}
+              </span>
+            )}
+          </div>
+          <p
+            className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums lg:text-[28px]"
+            aria-live="polite"
+          >
+            {loading ? <span className="text-stone-300">—</span> : value}
           </p>
-          <p className="metric-number mt-1 font-mono text-[28px] leading-none lg:text-3xl">
-            {loading ? <span className="text-muted-foreground/40">—</span> : value}
-          </p>
+          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
         </div>
-        <p className="text-xs text-muted-foreground">{hint}</p>
       </CardContent>
     </Card>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Decision queue rows: tinted icon chip, colour tick, quiet hover.    */
+/* Decision queue — each severity owns one vivid hue + icon + tick.    */
 /* ------------------------------------------------------------------ */
 
-const severityTone: Record<string, Tone> = {
-  risk: "destructive",
-  sales: "info",
-  stock: "warning",
-  ai: "ai",
+type Severity = "risk" | "sales" | "stock" | "ai";
+
+const SEVERITY_STYLES: Record<
+  Severity,
+  { chip: string; tick: string; hover: string; soft: string }
+> = {
+  risk: {
+    chip: "from-rose-500 to-orange-500 shadow-rose-500/25",
+    tick: "bg-gradient-to-b from-rose-500 to-orange-400",
+    hover: "hover:border-rose-200 hover:bg-rose-50/60",
+    soft: "bg-rose-50 text-rose-700",
+  },
+  sales: {
+    chip: "from-blue-600 to-cyan-500 shadow-blue-500/25",
+    tick: "bg-gradient-to-b from-blue-600 to-cyan-400",
+    hover: "hover:border-blue-200 hover:bg-blue-50/60",
+    soft: "bg-blue-50 text-blue-700",
+  },
+  stock: {
+    chip: "from-amber-500 to-orange-600 shadow-amber-500/25",
+    tick: "bg-gradient-to-b from-amber-500 to-orange-500",
+    hover: "hover:border-amber-200 hover:bg-amber-50/60",
+    soft: "bg-amber-50 text-amber-800",
+  },
+  ai: {
+    chip: "from-violet-600 to-fuchsia-600 shadow-violet-500/25",
+    tick: "bg-gradient-to-b from-violet-600 to-fuchsia-500",
+    hover: "hover:border-violet-200 hover:bg-violet-50/60",
+    soft: "bg-violet-50 text-violet-700",
+  },
 };
 
 function PriorityRow({
@@ -153,76 +196,100 @@ function PriorityRow({
   title: string;
   detail: string;
   action: string;
-  severity: keyof typeof severityTone;
+  severity: Severity;
 }) {
-  const t = TONE_STYLES[severityTone[severity]];
+  const s = SEVERITY_STYLES[severity];
   return (
     <Link
       href={href}
-      className={`group/pri flex items-center gap-4 rounded-xl px-3 py-3.5 transition-colors duration-200 ${t.ring} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
+      className={`group/pri relative flex items-center gap-4 overflow-hidden rounded-[20px] border border-transparent px-3 py-3.5 transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${s.hover}`}
     >
-      <span className="w-7 shrink-0 font-mono text-xs text-muted-foreground/70">
+      <span
+        className={`absolute inset-y-3 left-0 w-1 rounded-full ${s.tick}`}
+        aria-hidden="true"
+      />
+      <span className="w-8 shrink-0 pl-2 font-mono text-xs font-bold text-stone-400 tabular-nums">
         {String(index + 1).padStart(2, "0")}
       </span>
-      <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${t.chip}`}>
-        <Icon className="size-4" aria-hidden />
+      <span
+        className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md transition-transform duration-200 group-hover/pri:scale-110 ${s.chip}`}
+      >
+        <Icon className="size-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="truncate text-sm font-semibold">{title}</span>
-        <span className="mt-0.5 block text-xs text-muted-foreground">{detail}</span>
+        <span className="block truncate text-sm font-extrabold text-stone-900">
+          {title}
+        </span>
+        <span className="mt-0.5 block truncate text-xs font-medium text-stone-600">
+          {detail}
+        </span>
       </span>
-      <span className="hidden shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover/pri:text-foreground sm:flex">
+      <span className="hidden min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-white/80 px-3 text-xs font-extrabold text-stone-700 shadow-sm ring-1 ring-stone-200/70 transition group-hover/pri:bg-stone-950 group-hover/pri:text-white group-hover/pri:ring-stone-950 sm:flex">
         {action}
-        <ArrowRight className="size-3.5 transition-transform duration-200 group-hover/pri:translate-x-0.5" />
+        <ArrowRight
+          className="size-3.5 transition-transform duration-200 group-hover/pri:translate-x-0.5"
+          aria-hidden="true"
+        />
       </span>
     </Link>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Quiet empty state.                                                  */
+/* Watchlists — tinted headers, pill figures, hairline rows.           */
 /* ------------------------------------------------------------------ */
 
-function EmptyState({ text }: { text: string }) {
-  return (
-    <div className="flex min-h-24 items-center justify-center rounded-xl border border-dashed p-5 text-center text-xs text-muted-foreground">
-      {text}
-    </div>
-  );
-}
+type WatchTone = "rose" | "amber" | "cyan";
 
-/* ------------------------------------------------------------------ */
-/* Watchlist rows: label left, coloured figure right, hairline between.*/
-/* ------------------------------------------------------------------ */
+const WATCH_STYLES: Record<
+  WatchTone,
+  { header: string; tile: string; pill: string; footer: string }
+> = {
+  rose: {
+    header: "from-rose-50/90 via-white to-orange-50/60",
+    tile: "from-rose-500 to-orange-500 shadow-rose-500/25",
+    pill: "bg-rose-500/10 text-rose-700 ring-rose-200/60",
+    footer: "bg-rose-50/70 text-rose-700 ring-rose-100",
+  },
+  amber: {
+    header: "from-amber-50/90 via-white to-yellow-50/60",
+    tile: "from-amber-500 to-orange-600 shadow-amber-500/25",
+    pill: "bg-amber-500/15 text-amber-800 ring-amber-200/60",
+    footer: "bg-amber-50/70 text-amber-800 ring-amber-100",
+  },
+  cyan: {
+    header: "from-cyan-50/90 via-white to-blue-50/60",
+    tile: "from-cyan-500 to-blue-600 shadow-cyan-500/25",
+    pill: "bg-cyan-500/10 text-cyan-800 ring-cyan-200/60",
+    footer: "bg-cyan-50/70 text-cyan-800 ring-cyan-100",
+  },
+};
 
 function ListRow({
   primary,
   secondary,
   figure,
-  figureTone = "default",
+  tone,
 }: {
   primary: string;
   secondary?: string;
   figure: string;
-  figureTone?: "default" | "warning" | "destructive" | "info" | "muted";
+  tone: WatchTone;
 }) {
-  const tone =
-    figureTone === "warning"
-      ? "bg-warning/15 text-warning-foreground"
-      : figureTone === "destructive"
-        ? "bg-destructive/10 text-destructive"
-        : figureTone === "info"
-          ? "bg-info/10 text-info"
-          : figureTone === "muted"
-            ? "bg-muted text-muted-foreground"
-            : "bg-primary/[0.08] text-primary";
+  const w = WATCH_STYLES[tone];
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-border/60 py-3 last:border-0">
+    <div className="flex items-center justify-between gap-3 border-b border-stone-100 py-3 last:border-0">
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium">{primary}</p>
-        {secondary && <p className="mt-0.5 text-xs text-muted-foreground">{secondary}</p>}
+        <p className="truncate text-sm font-bold text-stone-900">{primary}</p>
+        {secondary && (
+          <p className="mt-0.5 truncate text-xs font-medium text-stone-600">
+            {secondary}
+          </p>
+        )}
       </div>
-      <span className={`shrink-0 rounded-lg px-2.5 py-1 font-mono text-sm tabular-nums ${tone}`}>
+      <span
+        className={`shrink-0 rounded-full px-2.5 py-1 font-mono text-xs font-bold tabular-nums ring-1 ${w.pill}`}
+      >
         {figure}
       </span>
     </div>
@@ -230,6 +297,7 @@ function ListRow({
 }
 
 function WatchlistCard({
+  id,
   title,
   caption,
   href,
@@ -239,47 +307,61 @@ function WatchlistCard({
   children,
   footer,
 }: {
+  id: string;
   title: string;
   caption: string;
   href: string;
   actionLabel: string;
   icon: typeof Users;
-  tone: Tone;
+  tone: WatchTone;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
-  const t = TONE_STYLES[tone];
+  const w = WATCH_STYLES[tone];
   return (
-    <Card className="relative gap-0 overflow-hidden">
-      <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} aria-hidden />
-      <CardContent className="flex h-full flex-col gap-0 p-0">
-        <div className="flex items-start gap-3 px-5 pb-3 pt-6">
-          <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${t.chip}`}>
-            <Icon className="size-4.5" aria-hidden />
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">{caption}</p>
-          </div>
+    <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+      <div
+        className={`flex items-start gap-3 border-b border-stone-100/80 bg-gradient-to-r px-5 py-5 ${w.header}`}
+      >
+        <span
+          className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md ${w.tile}`}
+        >
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 id={id} className="text-sm font-extrabold tracking-tight text-stone-950">
+            {title}
+          </h3>
+          <p className="mt-0.5 text-xs font-medium text-stone-600">{caption}</p>
         </div>
-        <div className="flex-1 px-5 pt-2">{children}</div>
-        {footer && <div className="px-5 pb-2 pt-3 text-[11px] text-muted-foreground">{footer}</div>}
-        <div className="px-5 pb-5 pt-3">
-          <Link
-            href={href}
-            className="group/wl inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+      </div>
+      <CardContent className="p-5">
+        {children}
+        {footer && (
+          <p
+            className={`mt-4 rounded-xl px-3 py-2 text-center text-[11px] font-bold ring-1 ${w.footer}`}
           >
-            {actionLabel}
-            <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover/wl:-translate-y-0.5 group-hover/wl:translate-x-0.5" />
-          </Link>
-        </div>
+            {footer}
+          </p>
+        )}
+        <Link
+          href={href}
+          aria-label={actionLabel}
+          className="group/wl mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-extrabold text-stone-700 transition hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950"
+        >
+          {actionLabel}
+          <ArrowUpRight
+            className="size-4 transition-transform duration-200 group-hover/wl:-translate-y-0.5 group-hover/wl:translate-x-0.5"
+            aria-hidden="true"
+          />
+        </Link>
       </CardContent>
     </Card>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Shortcut tiles: coloured icon chip + label — one glance, one hue.   */
+/* Shortcut tiles — one vivid gradient per destination.                */
 /* ------------------------------------------------------------------ */
 
 function Shortcut({
@@ -287,30 +369,47 @@ function Shortcut({
   icon: Icon,
   label,
   sublabel,
-  tone,
+  tile,
+  hoverRing,
 }: {
   href: string;
   icon: typeof Users;
   label: string;
   sublabel: string;
-  tone: Tone;
+  tile: string;
+  hoverRing: string;
 }) {
-  const t = TONE_STYLES[tone];
   return (
     <Link
       href={href}
-      className={`group/sc flex flex-col gap-3 rounded-xl border border-border/70 bg-card/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-transparent hover:shadow-lg ${t.glow}`}
+      className={`group/sc flex min-h-11 flex-col gap-3 rounded-[22px] border border-white/90 bg-white/85 p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${hoverRing}`}
     >
       <span
-        className={`flex size-9 items-center justify-center rounded-lg ${t.chip} transition-transform duration-300 group-hover/sc:scale-110`}
+        className={`flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover/sc:scale-110 group-hover/sc:-rotate-3 ${tile}`}
       >
-        <Icon className="size-4.5" aria-hidden />
+        <Icon className="size-5" aria-hidden="true" />
       </span>
       <span>
-        <span className="block text-sm font-semibold">{label}</span>
-        <span className="mt-0.5 block text-xs text-muted-foreground">{sublabel}</span>
+        <span className="block text-sm font-extrabold tracking-tight text-stone-950">
+          {label}
+        </span>
+        <span className="mt-0.5 block text-xs font-medium text-stone-600">
+          {sublabel}
+        </span>
       </span>
     </Link>
+  );
+}
+
+function EmptyState({ text, action }: { text: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-5 text-center">
+      <span className="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+        <Check className="size-5" aria-hidden="true" />
+      </span>
+      <p className="text-xs font-semibold text-stone-600">{text}</p>
+      {action}
+    </div>
   );
 }
 
@@ -371,417 +470,637 @@ export default function CommandCenterPage() {
       )
     : [];
 
+  const followUpPct = data ? Number(data.salesFunnel.followUps.completionRatePct) || 0 : 0;
+  const conversionPct = data ? Number(data.salesFunnel.conversionRatePct) || 0 : 0;
+
   return (
-    <div className="flex flex-col gap-8">
-      {/* ------------------------------------------------ Header */}
-      <header className="relative overflow-hidden rounded-[1.75rem] border border-border/60 bg-card/50 px-6 py-8 shadow-sm backdrop-blur-xl sm:px-8 lg:px-10">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -left-16 -top-24 size-72 rounded-full bg-primary/20 blur-3xl animate-blob" />
-          <div className="absolute -right-16 -top-20 size-72 rounded-full bg-ai/20 blur-3xl animate-blob [animation-delay:2.5s]" />
-          <div className="absolute -bottom-20 left-1/3 size-72 rounded-full bg-warning/10 blur-3xl animate-pulse-slow" />
-        </div>
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="bg-gradient-to-r from-primary via-ai to-primary bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-3xl">
-              Command Center
-            </h1>
-            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Your business pulse, decision queue, and growth engine — all in one place.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            {updatedAgo && (
-              <span className="mr-1 hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-                <span className="relative flex size-2" aria-hidden>
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/60" />
-                  <span className="relative inline-flex size-2 rounded-full bg-success" />
-                </span>
-                Updated {updatedAgo}
-              </span>
-            )}
-            <Link
-              href="/owner-os"
-              className="inline-flex h-10 items-center gap-2 rounded-[0.78rem] border border-border bg-card/70 px-4 text-sm font-medium shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-            >
-              <BarChart3 className="size-4 text-primary" aria-hidden />
-              Insights
-            </Link>
-            <Link
-              href="/ai"
-              className="inline-flex h-10 items-center gap-2 rounded-[0.78rem] bg-gradient-to-r from-primary to-ai px-5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-ai/30"
-            >
-              <Sparkles className="size-4" aria-hidden />
-              Ask MyGymAgent
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+      {/* Ambient canvas — matches PT OS / premium surfaces */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.14),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.16),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.11),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.09),transparent_24%)]"
+        aria-hidden="true"
+      />
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+        {/* ------------------------------------------ Hero: midnight aurora */}
+        <section
+          aria-labelledby="cc-title"
+          className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10"
+        >
+          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-amber-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
 
-      {/* ------------------------------------------------ Stat band */}
-      <section className="grid animate-in fade-in slide-in-from-bottom-2 grid-cols-1 gap-4 duration-500 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat
-          icon={CalendarCheck}
-          label="Check-ins today"
-          value={String(data?.today.checkIns ?? 0)}
-          hint="Real-time attendance"
-          loading={briefing.isLoading}
-          tone="info"
-        />
-        <Stat
-          icon={Wallet}
-          label="Net revenue"
-          value={money(revenue?.netRevenue, currency)}
-          hint="Current period"
-          loading={briefing.isLoading}
-          tone="success"
-        />
-        <Stat
-          icon={Users}
-          label="Members at risk"
-          value={String(data?.atRiskMembers.count ?? 0)}
-          hint="14+ days inactive"
-          loading={briefing.isLoading}
-          tone="destructive"
-        />
-        <Stat
-          icon={Sparkles}
-          label="Pending AI actions"
-          value={String(data?.pendingAiActions ?? 0)}
-          hint="Needs approval"
-          loading={briefing.isLoading}
-          tone="ai"
-        />
-      </section>
-
-      {/* ------------------------------------------------ Decision queue + Sales health */}
-      <section className="grid animate-in fade-in slide-in-from-bottom-2 gap-6 duration-500 xl:grid-cols-[1.35fr_0.9fr]">
-        <Card className="gap-0">
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between gap-3 px-6 pb-4 pt-6">
-              <div>
-                <h2 className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
-                  <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Zap className="size-4" aria-hidden />
+          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur">
+                  <span className="relative flex size-2" aria-hidden="true">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-emerald-300" />
                   </span>
-                  Decision queue
-                </h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  The highest-value things that deserve attention right now.
+                  Live pulse
+                </span>
+                {updatedAgo && (
+                  <span className="inline-flex items-center rounded-full bg-black/20 px-3 py-1.5 text-[11px] font-bold text-white/80">
+                    Updated {updatedAgo}
+                  </span>
+                )}
+              </div>
+              <h1
+                id="cc-title"
+                className="font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl"
+              >
+                Command Center
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75">
+                Your business pulse, decision queue, and growth engine — check-ins,
+                revenue, retention risk and AI approvals in one vivid cockpit.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/ai"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <Sparkles className="size-4" aria-hidden="true" />
+                  Ask MyGymAgent
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/owner-os"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <BarChart3 className="size-4" aria-hidden="true" />
+                  Owner Insights
+                </Link>
+              </div>
+            </div>
+
+            {/* Today momentum — glass panel, the memorable vivid moment */}
+            <div className="w-full shrink-0 rounded-[24px] border border-white/20 bg-white/10 p-5 backdrop-blur-xl lg:max-w-[360px]">
+              <div className="flex items-center justify-between gap-3">
+                <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-white/80">
+                  <Flame className="size-4 text-amber-300" aria-hidden="true" />
+                  Today&apos;s momentum
                 </p>
+                <span className="rounded-full bg-emerald-300/20 px-2 py-1 text-[10px] font-black text-emerald-200">
+                  LIVE
+                </span>
+              </div>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-xs font-bold text-white/70">Check-ins</span>
+                    <span className="font-mono text-2xl font-black tabular-nums">
+                      {briefing.isLoading ? "—" : (data?.today.checkIns ?? 0)}
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15" role="presentation">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-blue-400 transition-all duration-700"
+                      style={{ width: `${Math.min(100, ((data?.today.checkIns ?? 0) / 50) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-xs font-bold text-white/70">Follow-ups done</span>
+                    <span className="font-mono text-2xl font-black tabular-nums">
+                      {data ? `${followUpPct}%` : "—"}
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15" role="presentation">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-amber-300 to-orange-400 transition-all duration-700"
+                      style={{ width: `${Math.min(100, followUpPct)}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-xs font-bold text-white/70">Lead conversion</span>
+                    <span className="font-mono text-2xl font-black tabular-nums">
+                      {data ? `${conversionPct}%` : "—"}
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15" role="presentation">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-fuchsia-300 to-violet-300 transition-all duration-700"
+                      style={{ width: `${Math.min(100, conversionPct)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <Link
+                href="/intelligence"
+                className="mt-5 flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-3 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                View full intelligence
+                <ArrowUpRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Error path — recoverable, with retry (UX state matrix) */}
+        {briefing.isError && (
+          <div
+            role="alert"
+            className="flex flex-col gap-3 rounded-[22px] border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50 p-5 sm:flex-row sm:items-center"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md">
+              <AlertTriangle className="size-5" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-extrabold text-stone-900">
+                Couldn&apos;t load the briefing
+              </p>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">
+                Check your connection — your navigation still works. Retry to refresh
+                every number on this page.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => briefing.refetch()}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-stone-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950 disabled:opacity-60"
+              disabled={briefing.isFetching}
+            >
+              <RefreshCw
+                className={`size-4 ${briefing.isFetching ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
+              {briefing.isFetching ? "Retrying…" : "Retry"}
+            </button>
+          </div>
+        )}
+
+        {/* ------------------------------------------ Stat band */}
+        <section aria-labelledby="cc-pulse" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <h2 id="cc-pulse" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
+                Business pulse
+              </h2>
+              <p className="mt-1 text-xs font-medium text-stone-600">
+                The four numbers that matter today — each owns one color.
+              </p>
+            </div>
+            <Link
+              href="/intelligence"
+              className="hidden min-h-11 items-center gap-1 text-xs font-extrabold text-violet-700 hover:text-violet-900 sm:inline-flex"
+            >
+              View insights <ArrowUpRight className="size-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat
+              icon={CalendarCheck}
+              label="Check-ins today"
+              value={String(data?.today.checkIns ?? 0)}
+              hint="Real-time attendance"
+              loading={briefing.isLoading}
+              tone="cyan"
+              delta="LIVE"
+            />
+            <Stat
+              icon={Wallet}
+              label="Net revenue"
+              value={money(revenue?.netRevenue, currency)}
+              hint={revenue ? `${revenue.paymentCount} payments · current period` : "Current period"}
+              loading={briefing.isLoading}
+              tone="emerald"
+              delta={revenue ? `${revenue.paymentCount} txns` : undefined}
+            />
+            <Stat
+              icon={Users}
+              label="Members at risk"
+              value={String(data?.atRiskMembers.count ?? 0)}
+              hint="14+ days inactive"
+              loading={briefing.isLoading}
+              tone="rose"
+              delta={data && data.atRiskMembers.count > 0 ? "ACT NOW" : undefined}
+            />
+            <Stat
+              icon={Sparkles}
+              label="Pending AI actions"
+              value={String(data?.pendingAiActions ?? 0)}
+              hint="Needs approval"
+              loading={briefing.isLoading}
+              tone="violet"
+              delta={data && data.pendingAiActions > 0 ? "REVIEW" : undefined}
+            />
+          </div>
+        </section>
+
+        {/* ------------------------------------------ Decision queue + Sales health */}
+        <section
+          aria-labelledby="cc-decisions"
+          className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:100ms] xl:grid-cols-[1.35fr_0.9fr]"
+        >
+          <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
+            <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-white via-violet-50/50 to-cyan-50/50 px-6 py-5">
+              <div className="flex items-center gap-3">
+                <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+                  <Zap className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 id="cc-decisions" className="font-serif text-xl font-semibold tracking-tight text-stone-950">
+                    Decision queue
+                  </h2>
+                  <p className="mt-0.5 text-xs font-medium text-stone-600">
+                    Highest-value things deserving attention right now.
+                  </p>
+                </div>
               </div>
               {data && priorities.length > 0 && (
-                <span className="rounded-full bg-gradient-to-r from-primary/15 to-ai/15 px-2.5 py-1 font-mono text-xs tabular-nums text-primary">
+                <span className="rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-fuchsia-500/20">
                   {priorities.length}
                 </span>
               )}
             </div>
-            <div className="px-3 pb-4">
+            <CardContent className="p-3 sm:p-4">
               {briefing.isLoading ? (
-                <div className="space-y-2 px-3">
+                <div className="space-y-2" aria-label="Loading priorities">
                   {[1, 2, 3].map((item) => (
-                    <div key={item} className="h-14 animate-pulse rounded-xl bg-muted/50" />
+                    <div key={item} className="h-[68px] animate-pulse rounded-[20px] bg-gradient-to-r from-stone-100 to-stone-50" />
                   ))}
                 </div>
               ) : priorities.length ? (
-                <div className="divide-y divide-border/40">
+                <div className="flex flex-col gap-1">
                   {priorities.map(({ key, ...item }, index) => (
                     <PriorityRow key={key} {...item} index={index} />
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-success/30 bg-success/[0.04] px-5 py-10 text-center">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-success/10 text-success">
-                    <Check className="size-5" aria-hidden />
+                <div className="flex flex-col items-center justify-center gap-2 rounded-[22px] border border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 px-5 py-10 text-center">
+                  <span className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+                    <Check className="size-6" aria-hidden="true" />
                   </span>
-                  <p className="text-sm font-semibold">All caught up</p>
-                  <p className="text-xs text-muted-foreground">
-                    No priority items need attention right now.
+                  <p className="text-sm font-extrabold text-stone-900">All caught up</p>
+                  <p className="text-xs font-medium text-stone-600">
+                    No priority items need attention right now. Enjoy the calm.
                   </p>
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Gradient hero panel — the vivid, premium moment on the page. */}
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:100ms]">
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[1.15rem] bg-gradient-to-br from-primary via-primary to-ai text-primary-foreground shadow-xl shadow-primary/25">
-            <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
-            <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
-            <div className="relative flex items-center justify-between gap-3 border-b border-white/15 px-6 pb-4 pt-6">
+          {/* Vivid gradient hero — sales health */}
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] lg:p-7">
+            <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
+            <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
+            <div className="relative flex items-center gap-3">
+              <span className="flex size-11 items-center justify-center rounded-[15px] bg-white/15 ring-1 ring-white/20 backdrop-blur">
+                <TrendingUp className="size-5" aria-hidden="true" />
+              </span>
               <div>
-                <h2 className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
-                  <TrendingUp className="size-4" aria-hidden />
-                  Sales health
-                </h2>
-                <p className="mt-1 text-xs text-primary-foreground/70">
+                <h2 className="font-serif text-xl font-semibold tracking-tight">Sales health</h2>
+                <p className="mt-0.5 text-xs font-medium text-white/70">
                   Pipeline momentum and follow-up discipline.
                 </p>
               </div>
             </div>
-            <div className="relative flex flex-1 flex-col gap-5 px-6 py-6">
-              <div className="grid grid-cols-2 gap-x-5 gap-y-5">
-                {(
-                  [
-                    ["Total leads", data ? String(data.salesFunnel.totalLeads) : "—", "pipeline"],
-                    ["Won leads", data ? String(data.salesFunnel.wonLeads) : "—", "pipeline"],
-                    ["Conversion", data ? `${data.salesFunnel.conversionRatePct}%` : "—", "rate"],
-                    [
-                      "Follow-ups done",
-                      data ? `${data.salesFunnel.followUps.completionRatePct}%` : "—",
-                      "rate",
-                    ],
-                  ] as const
-                ).map(([label, value]) => (
-                  <div key={label} className="flex flex-col gap-1.5">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-primary-foreground/60">
-                      {label}
-                    </p>
-                    <p className="font-mono text-3xl leading-none tabular-nums">{value}</p>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/crm"
-                className="group/ink mt-auto inline-flex items-center justify-center gap-2 rounded-[0.78rem] bg-primary-foreground px-5 py-3.5 text-sm font-semibold text-primary transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-              >
-                Open Sales OS
-                <ArrowRight
-                  className="size-4 transition-transform duration-300 group-hover/ink:translate-x-1"
-                  aria-hidden
-                />
-              </Link>
+            <div className="relative mt-6 grid grid-cols-2 gap-3">
+              {(
+                [
+                  ["Total leads", data ? String(data.salesFunnel.totalLeads) : "—", "from-cyan-400/25 to-blue-500/10"],
+                  ["Won leads", data ? String(data.salesFunnel.wonLeads) : "—", "from-emerald-400/25 to-teal-500/10"],
+                  ["Conversion", data ? `${data.salesFunnel.conversionRatePct}%` : "—", "from-fuchsia-400/25 to-violet-500/10"],
+                  ["Follow-ups", data ? `${data.salesFunnel.followUps.completionRatePct}%` : "—", "from-amber-300/25 to-orange-500/10"],
+                ] as const
+              ).map(([label, value, tint]) => (
+                <div
+                  key={label}
+                  className={`rounded-[20px] border border-white/15 bg-gradient-to-br p-4 backdrop-blur ${tint}`}
+                >
+                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-white/60">
+                    {label}
+                  </p>
+                  <p className="mt-1 font-mono text-3xl font-black leading-none tabular-nums">
+                    {value}
+                  </p>
+                </div>
+              ))}
             </div>
+            <Link
+              href="/crm"
+              className="group/ink relative mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Open Sales OS
+              <ArrowRight
+                className="size-4 transition-transform duration-300 group-hover/ink:translate-x-1"
+                aria-hidden="true"
+              />
+            </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ------------------------------------------------ Money movement */}
-      <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:150ms]">
-        <div className="mb-4 flex items-baseline justify-between gap-4">
-          <div>
-            <h2 className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-success/10 text-success">
-                <CreditCard className="size-4" aria-hidden />
+        {/* ------------------------------------------ Money movement */}
+        <section aria-labelledby="cc-money" className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:150ms]">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+                <CreditCard className="size-5" aria-hidden="true" />
               </span>
-              Money movement
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {data
-                ? `${new Date(data.revenue.period.from).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${new Date(data.revenue.period.to).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
-                : "Current period"}
-            </p>
+              <div>
+                <h2 id="cc-money" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
+                  Money movement
+                </h2>
+                <p className="mt-0.5 text-xs font-medium text-stone-600">
+                  {data
+                    ? `${new Date(data.revenue.period.from).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${new Date(data.revenue.period.to).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+                    : "Current period"}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/billing"
+              className="group/mm hidden min-h-11 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-500/10 sm:inline-flex"
+            >
+              Open billing
+              <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/mm:-translate-y-0.5 group-hover/mm:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {(
+              [
+                {
+                  label: "Net revenue",
+                  value: money(revenue?.netRevenue, currency),
+                  hint: revenue ? `${revenue.paymentCount} payments` : "—",
+                  icon: Wallet,
+                  card: "from-emerald-50/90 via-white to-teal-50/50 hover:border-emerald-200",
+                  tile: "from-emerald-500 to-teal-600 shadow-emerald-500/25",
+                  bar: "from-emerald-400 to-teal-500",
+                },
+                {
+                  label: "Membership revenue",
+                  value: money(revenue?.membershipRevenue, currency),
+                  hint: "Recurring core",
+                  icon: Users,
+                  card: "from-violet-50/90 via-white to-blue-50/50 hover:border-violet-200",
+                  tile: "from-violet-600 to-blue-600 shadow-violet-500/25",
+                  bar: "from-violet-500 to-blue-500",
+                },
+                {
+                  label: "Outstanding",
+                  value: money(outstanding?.outstandingBalance, currency),
+                  hint: outstanding
+                    ? `${outstanding.membershipsWithBalance} memberships with balance`
+                    : "—",
+                  icon: CreditCard,
+                  card: "from-amber-50/90 via-white to-orange-50/50 hover:border-amber-200",
+                  tile: "from-amber-500 to-orange-600 shadow-amber-500/25",
+                  bar: "from-amber-400 to-orange-500",
+                },
+              ] as const
+            ).map((item) => (
+              <Card
+                key={item.label}
+                className={`relative overflow-hidden border-white/90 bg-gradient-to-br shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${item.card}`}
+              >
+                <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${item.bar}`} aria-hidden="true" />
+                <CardContent className="flex items-center gap-4 p-5 lg:p-6">
+                  <span className={`flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br text-white shadow-lg ${item.tile}`}>
+                    <item.icon className="size-6" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">
+                      {item.value}
+                    </p>
+                    <p className="mt-1 text-[11px] font-medium text-stone-600">{item.hint}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
           <Link
             href="/billing"
-            className="group/mm inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="group/collect mt-4 flex items-center gap-4 rounded-[22px] border border-amber-200/80 bg-gradient-to-r from-amber-50 via-orange-50/70 to-yellow-50/60 px-5 py-4 shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 lg:px-6"
           >
-            Open billing
-            <ArrowUpRight className="size-3.5 transition-transform duration-200 group-hover/mm:-translate-y-0.5 group-hover/mm:translate-x-0.5" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {(
-            [
-              {
-                label: "Net revenue",
-                value: money(revenue?.netRevenue, currency),
-                hint: revenue ? `${revenue.paymentCount} payments` : "—",
-                icon: Wallet,
-                tone: "success" as const,
-              },
-              {
-                label: "Membership revenue",
-                value: money(revenue?.membershipRevenue, currency),
-                hint: "Recurring core",
-                icon: Users,
-                tone: "primary" as const,
-              },
-              {
-                label: "Outstanding",
-                value: money(outstanding?.outstandingBalance, currency),
-                hint: outstanding
-                  ? `${outstanding.membershipsWithBalance} memberships with balance`
-                  : "—",
-                icon: CreditCard,
-                tone: "warning" as const,
-              },
-            ] satisfies { label: string; value: string; hint: string; icon: typeof Users; tone: Tone }[]
-          ).map((item) => {
-            const t = TONE_STYLES[item.tone];
-            return (
-              <Card key={item.label} className="relative overflow-hidden">
-                <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} aria-hidden />
-                <CardContent className="flex flex-col gap-3 p-5 lg:p-6">
-                  <span className={`flex size-9 items-center justify-center rounded-xl ${t.chip}`}>
-                    <item.icon className="size-4.5" aria-hidden />
-                  </span>
-                  <div>
-                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                      {item.label}
-                    </p>
-                    <p className="metric-number mt-1 font-mono text-[28px] leading-none lg:text-3xl">
-                      {item.value}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{item.hint}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-        <Link
-          href="/billing"
-          className="group/collect mt-4 flex items-center gap-4 rounded-2xl border border-warning/20 bg-warning/[0.05] px-5 py-4 transition-colors hover:bg-warning/[0.09] lg:px-6"
-        >
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning-foreground">
-            <CreditCard className="size-4.5" aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-medium">Keep collections moving</span>
-            <span className="mt-0.5 block text-xs text-muted-foreground">
-              Review outstanding memberships and keep cash flow healthy.
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-[18px] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25">
+              <CreditCard className="size-5" aria-hidden="true" />
             </span>
-          </span>
-          <ArrowRight
-            className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/collect:translate-x-0.5"
-            aria-hidden
-          />
-        </Link>
-      </section>
-
-      {/* ------------------------------------------------ Watchlists */}
-      <section className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:200ms] lg:grid-cols-3">
-        <WatchlistCard
-          title="At-risk members"
-          caption="Retention watchlist"
-          href="/members"
-          actionLabel="View all members"
-          icon={AlertTriangle}
-          tone="destructive"
-          footer={data ? `${data.atRiskMembers.count} total on watchlist` : undefined}
-        >
-          {data?.atRiskMembers.top.length ? (
-            data.atRiskMembers.top.map((member) => (
-              <ListRow
-                key={member.id}
-                primary={`${member.firstName} ${member.lastName}`}
-                secondary={
-                  member.neverCheckedIn
-                    ? "Never checked in"
-                    : `${member.daysSinceLastVisit} days since visit`
-                }
-                figure="Risk"
-                figureTone="destructive"
-              />
-            ))
-          ) : (
-            <EmptyState text="No at-risk members returned." />
-          )}
-        </WatchlistCard>
-
-        <WatchlistCard
-          title="Low stock"
-          caption="Inventory watchlist"
-          href="/inventory"
-          actionLabel="Open inventory"
-          icon={Package}
-          tone="warning"
-          footer={data ? `${data.lowStock.count} products below reorder level` : undefined}
-        >
-          {data?.lowStock.top.length ? (
-            data.lowStock.top.map((product) => (
-              <ListRow
-                key={product.productId}
-                primary={product.name}
-                secondary={`${product.sku} · reorder at ${product.reorderLevel}`}
-                figure={String(product.quantityOnHand)}
-                figureTone="warning"
-              />
-            ))
-          ) : (
-            <EmptyState text="Inventory levels look healthy." />
-          )}
-        </WatchlistCard>
-
-        <WatchlistCard
-          title="Trainer workload"
-          caption="People + programming activity"
-          href="/staff"
-          actionLabel="Open staff"
-          icon={Users}
-          tone="info"
-          footer={
-            data
-              ? `${data.trainerWorkload.trainerCount} trainers · plans assigned last 30 days`
-              : undefined
-          }
-        >
-          {data?.trainerWorkload.top.length ? (
-            data.trainerWorkload.top.map((trainer) => (
-              <ListRow
-                key={trainer.userId}
-                primary={`${trainer.firstName} ${trainer.lastName}`}
-                secondary={`${trainer.assignedMemberCount} assigned members`}
-                figure={`${trainer.workoutPlansAssignedLast30Days + trainer.dietPlansAssignedLast30Days} plans`}
-                figureTone="info"
-              />
-            ))
-          ) : (
-            <EmptyState text="No trainer workload data returned." />
-          )}
-        </WatchlistCard>
-      </section>
-
-      {/* ------------------------------------------------ Shortcuts (one section, not two) */}
-      <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:250ms]">
-        <div className="mb-4">
-          <h2 className="text-base font-semibold tracking-tight">Move faster</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Jump straight into an operating surface.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
-          {hasPermission("attendance.read") && (
-            <Shortcut
-              href="/attendance"
-              icon={CalendarCheck}
-              label="Attendance"
-              sublabel="Check-ins"
-              tone="info"
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-extrabold text-stone-900">
+                Keep collections moving
+              </span>
+              <span className="mt-0.5 block truncate text-xs font-medium text-stone-600">
+                Review outstanding memberships and keep cash flow healthy.
+              </span>
+            </span>
+            <ArrowRight
+              className="size-5 shrink-0 text-amber-700 transition-transform duration-200 group-hover/collect:translate-x-1"
+              aria-hidden="true"
             />
-          )}
-          {hasPermission("members.read") && (
-            <Shortcut href="/members" icon={Users} label="Members" sublabel="Member 360" tone="primary" />
-          )}
-          {hasPermission("payments.read") && (
-            <Shortcut href="/billing" icon={Wallet} label="Billing" sublabel="Collections" tone="success" />
-          )}
-          {hasPermission("workouts.edit") && (
-            <Shortcut
-              href="/workouts"
-              icon={Dumbbell}
-              label="Workout OS"
-              sublabel="Programs"
-              tone="destructive"
-            />
-          )}
-          <Shortcut
-            href="/owner-os"
-            icon={BarChart3}
-            label="Owner Insights"
-            sublabel="Deep dive"
-            tone="warning"
-          />
-          <Shortcut href="/crm" icon={TrendingUp} label="Sales OS" sublabel="Pipeline" tone="info" />
-          <Shortcut href="/inventory" icon={Package} label="Inventory OS" sublabel="Stock" tone="success" />
-          <Shortcut href="/ai" icon={Sparkles} label="MyGymAgent AI" sublabel="Ask anything" tone="ai" />
-        </div>
-      </section>
+          </Link>
+        </section>
 
-      {data && (
-        <p className="text-[11px] text-muted-foreground">
-          Briefing generated {new Date(data.generatedAt).toLocaleString("en-IN")}.
-        </p>
-      )}
+        {/* ------------------------------------------ Watchlists */}
+        <section aria-label="Watchlists" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:200ms] lg:grid-cols-3">
+          <WatchlistCard
+            id="cc-risk"
+            title="At-risk members"
+            caption="Retention watchlist"
+            href="/members"
+            actionLabel="View all members"
+            icon={AlertTriangle}
+            tone="rose"
+            footer={data ? `${data.atRiskMembers.count} total on watchlist` : undefined}
+          >
+            {briefing.isLoading ? (
+              <div className="space-y-2" aria-label="Loading at-risk members">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-xl bg-stone-100" />
+                ))}
+              </div>
+            ) : data?.atRiskMembers.top.length ? (
+              data.atRiskMembers.top.map((member) => (
+                <ListRow
+                  key={member.id}
+                  primary={`${member.firstName} ${member.lastName}`}
+                  secondary={
+                    member.neverCheckedIn
+                      ? "Never checked in"
+                      : `${member.daysSinceLastVisit} days since visit`
+                  }
+                  figure="Risk"
+                  tone="rose"
+                />
+              ))
+            ) : (
+              <EmptyState text="No at-risk members — retention looks strong." />
+            )}
+          </WatchlistCard>
+
+          <WatchlistCard
+            id="cc-stock"
+            title="Low stock"
+            caption="Inventory watchlist"
+            href="/inventory"
+            actionLabel="Open inventory"
+            icon={Package}
+            tone="amber"
+            footer={data ? `${data.lowStock.count} products below reorder level` : undefined}
+          >
+            {briefing.isLoading ? (
+              <div className="space-y-2" aria-label="Loading low stock">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-xl bg-stone-100" />
+                ))}
+              </div>
+            ) : data?.lowStock.top.length ? (
+              data.lowStock.top.map((product) => (
+                <ListRow
+                  key={product.productId}
+                  primary={product.name}
+                  secondary={`${product.sku} · reorder at ${product.reorderLevel}`}
+                  figure={String(product.quantityOnHand)}
+                  tone="amber"
+                />
+              ))
+            ) : (
+              <EmptyState text="Inventory levels look healthy." />
+            )}
+          </WatchlistCard>
+
+          <WatchlistCard
+            id="cc-trainers"
+            title="Trainer workload"
+            caption="People + programming activity"
+            href="/staff"
+            actionLabel="Open staff"
+            icon={Users}
+            tone="cyan"
+            footer={
+              data
+                ? `${data.trainerWorkload.trainerCount} trainers · plans assigned last 30 days`
+                : undefined
+            }
+          >
+            {briefing.isLoading ? (
+              <div className="space-y-2" aria-label="Loading trainer workload">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-xl bg-stone-100" />
+                ))}
+              </div>
+            ) : data?.trainerWorkload.top.length ? (
+              data.trainerWorkload.top.map((trainer) => (
+                <ListRow
+                  key={trainer.userId}
+                  primary={`${trainer.firstName} ${trainer.lastName}`}
+                  secondary={`${trainer.assignedMemberCount} assigned members`}
+                  figure={`${trainer.workoutPlansAssignedLast30Days + trainer.dietPlansAssignedLast30Days} plans`}
+                  tone="cyan"
+                />
+              ))
+            ) : (
+              <EmptyState text="No trainer workload data yet." />
+            )}
+          </WatchlistCard>
+        </section>
+
+        {/* ------------------------------------------ Shortcuts */}
+        <section aria-labelledby="cc-fast" className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:250ms]">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-cyan-500 via-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
+              <Zap className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="cc-fast" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
+                Move faster
+              </h2>
+              <p className="mt-0.5 text-xs font-medium text-stone-600">
+                Jump straight into an operating surface — every tile owns a color.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
+            {hasPermission("attendance.read") && (
+              <Shortcut
+                href="/attendance"
+                icon={CalendarCheck}
+                label="Attendance"
+                sublabel="Check-ins"
+                tile="from-cyan-500 to-blue-600 shadow-cyan-500/25"
+                hoverRing="hover:border-cyan-200 hover:shadow-cyan-500/10"
+              />
+            )}
+            {hasPermission("members.read") && (
+              <Shortcut
+                href="/members"
+                icon={Users}
+                label="Members"
+                sublabel="Member 360"
+                tile="from-violet-600 to-purple-600 shadow-violet-500/25"
+                hoverRing="hover:border-violet-200 hover:shadow-violet-500/10"
+              />
+            )}
+            {hasPermission("payments.read") && (
+              <Shortcut
+                href="/billing"
+                icon={Wallet}
+                label="Billing"
+                sublabel="Collections"
+                tile="from-emerald-500 to-teal-600 shadow-emerald-500/25"
+                hoverRing="hover:border-emerald-200 hover:shadow-emerald-500/10"
+              />
+            )}
+            {hasPermission("workouts.edit") && (
+              <Shortcut
+                href="/workouts"
+                icon={Dumbbell}
+                label="Workout OS"
+                sublabel="Programs"
+                tile="from-rose-500 to-orange-500 shadow-rose-500/25"
+                hoverRing="hover:border-rose-200 hover:shadow-rose-500/10"
+              />
+            )}
+            <Shortcut
+              href="/owner-os"
+              icon={BarChart3}
+              label="Owner Insights"
+              sublabel="Deep dive"
+              tile="from-amber-500 to-orange-600 shadow-amber-500/25"
+              hoverRing="hover:border-amber-200 hover:shadow-amber-500/10"
+            />
+            <Shortcut
+              href="/crm"
+              icon={TrendingUp}
+              label="Sales OS"
+              sublabel="Pipeline"
+              tile="from-blue-600 to-indigo-600 shadow-blue-500/25"
+              hoverRing="hover:border-blue-200 hover:shadow-blue-500/10"
+            />
+            <Shortcut
+              href="/inventory"
+              icon={Package}
+              label="Inventory OS"
+              sublabel="Stock"
+              tile="from-orange-500 to-amber-500 shadow-orange-500/25"
+              hoverRing="hover:border-orange-200 hover:shadow-orange-500/10"
+            />
+            <Shortcut
+              href="/ai"
+              icon={Sparkles}
+              label="MyGymAgent AI"
+              sublabel="Ask anything"
+              tile="from-fuchsia-600 to-violet-600 shadow-fuchsia-500/25"
+              hoverRing="hover:border-fuchsia-200 hover:shadow-fuchsia-500/10"
+            />
+          </div>
+        </section>
+
+        {data && (
+          <p className="text-[11px] font-medium text-stone-500">
+            Briefing generated {new Date(data.generatedAt).toLocaleString("en-IN")}.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
