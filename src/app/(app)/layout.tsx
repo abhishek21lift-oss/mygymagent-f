@@ -39,7 +39,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-svh overflow-hidden bg-background">
       <SidebarNav
         collapsed={sidebarCollapsed}
-        onNavigate={() => setSidebarCollapsed(true)}
         className={"hidden shrink-0 border-r border-sidebar-border/70 transition-[width] duration-300 md:flex " + (sidebarCollapsed ? "w-[78px]" : "w-[260px]")}
       />
       <MobileNav open={mobileNavOpen} onOpenChange={setMobileNavOpen} />
