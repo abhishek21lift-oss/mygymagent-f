@@ -87,6 +87,7 @@ export type CheckInInput = z.infer<typeof checkInSchema>
 export const createPaymentSchema = z.object({
   memberId: z.string().min(1, "Member is required"),
   membershipId: z.string().optional(),
+  invoiceId: z.string().optional(),
   amount: z.coerce.number().positive("Amount must be greater than 0"),
   method: z.enum(["CASH", "CARD", "UPI", "BANK_TRANSFER", "OTHER"]),
   note: z.string().optional().or(z.literal("")),
@@ -98,6 +99,36 @@ export const refundPaymentSchema = z.object({
   reason: z.string().optional().or(z.literal("")),
 })
 export type RefundPaymentInput = z.infer<typeof refundPaymentSchema>
+
+export const invoiceLineSchema = z.object({
+  label: z.string().min(1, "Label is required"),
+  amount: z.coerce.number().positive("Amount must be greater than 0"),
+  qty: z.coerce.number().int().positive("Qty must be at least 1").optional(),
+})
+export type InvoiceLineInput = z.infer<typeof invoiceLineSchema>
+
+export const taxBreakupLineSchema = z.object({
+  label: z.string().min(1, "Label is required"),
+  amount: z.coerce.number().min(0, "Amount must be 0 or more"),
+})
+export type TaxBreakupLineInput = z.infer<typeof taxBreakupLineSchema>
+
+export const createInvoiceSchema = z.object({
+  memberId: z.string().min(1, "Member is required"),
+  membershipId: z.string().optional(),
+  branchId: z.string().optional(),
+  lines: z.array(invoiceLineSchema).min(1, "Add at least one line"),
+  discount: z.coerce.number().min(0, "Discount must be 0 or more").optional(),
+  taxBreakup: z.array(taxBreakupLineSchema).optional(),
+  dueAt: z.string().optional().or(z.literal("")),
+  draft: z.boolean().optional(),
+})
+export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>
+
+export const voidInvoiceSchema = z.object({
+  reason: z.string().min(1, "Reason is required"),
+})
+export type VoidInvoiceInput = z.infer<typeof voidInvoiceSchema>
 
 export const createExerciseSchema = z.object({
   name: z.string().min(1, "Name is required"),

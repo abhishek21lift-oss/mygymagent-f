@@ -112,6 +112,7 @@ import {
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
 import { useRefundPayment } from "@/lib/hooks/use-payments";
+import { OPEN_INVOICE_STATUSES, useInvoices, useRetryCollection } from "@/lib/hooks/use-invoices";
 import { useMemberships, useRenewMembership, useMembershipHistory } from "@/lib/hooks/use-memberships";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
@@ -1510,6 +1511,115 @@ function AttendancePanel({ memberId }: { memberId: string }) {
 }
 
 // -- Payments Panel
+
+function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; currency: string }) {
+  const { hasPermission } = useAuth();
+  const invoicesQuery = useInvoices({ memberId, pageSize: 50, order: "desc" });
+  const retryCollection = useRetryCollection();
+  const [expanded, setExpanded] = React.useState(false);
+  const [unconfigured, setUnconfigured] = React.useState(false);
+
+  const openInvoices = (invoicesQuery.data?.items ?? []).filter((i) =>
+    OPEN_INVOICE_STATUSES.includes(i.status),
+  );
+
+  if (invoicesQuery.isLoading || invoicesQuery.isError || openInvoices.length === 0) return null;
+
+  const displayCurrency = openInvoices[0]?.currency ?? currency;
+  const total = openInvoices.reduce((sum, i) => sum + Number(i.grandTotal), 0);
+  const byDate = [...openInvoices].sort(
+    (a, b) =>
+      new Date(a.dueAt ?? a.issuedAt ?? 0).getTime() - new Date(b.dueAt ?? b.issuedAt ?? 0).getTime(),
+  );
+  const oldestOverdue =
+    byDate.find((i) => i.status === "OVERDUE") ?? byDate[0];
+
+  async function handleRemind() {
+    if (!oldestOverdue) return;
+    setUnconfigured(false);
+    try {
+      await retryCollection.mutateAsync(oldestOverdue.id);
+      toast.success(`Reminder sent for ${oldestOverdue.number}`);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 503) {
+        setUnconfigured(true);
+      } else {
+        toast.error(error instanceof ApiError ? error.message : "Reminder failed");
+      }
+    }
+  }
+
+  return (
+    <div className="rounded-[20px] border border-amber-200/70 bg-gradient-to-br from-amber-50/90 to-white p-4 dark:border-amber-900/40 dark:from-amber-950/40 dark:to-stone-950">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md">
+          <AlertTriangle className="size-4" aria-hidden="true" />
+        </span>
+        <p className="min-w-0 flex-1 text-sm font-bold text-stone-900 dark:text-stone-100">
+          {displayCurrency} {total.toLocaleString()} outstanding across {openInvoices.length} invoice
+          {openInvoices.length > 1 ? "s" : ""}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="min-h-11 rounded-2xl border-amber-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 dark:bg-white/5"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? "Hide" : "View"}
+        </Button>
+        {hasPermission("payments.create") && oldestOverdue && (
+          <Button
+            size="sm"
+            className="min-h-11 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+            disabled={retryCollection.isPending}
+            onClick={handleRemind}
+          >
+            <Send className="size-3.5" aria-hidden="true" />
+            {retryCollection.isPending ? "Sending..." : "Remind"}
+          </Button>
+        )}
+      </div>
+      {expanded && (
+        <div className="mt-3 flex flex-col gap-2">
+          {openInvoices.map((inv) => (
+            <div
+              key={inv.id}
+              className="flex items-center justify-between gap-2 rounded-2xl border border-amber-200/50 bg-white/80 p-3 text-sm dark:border-white/10 dark:bg-white/5"
+            >
+              <div>
+                <p className="font-mono font-bold tabular-nums">{inv.number}</p>
+                <p className="text-xs text-stone-600 tabular-nums dark:text-stone-400">
+                  Due {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : "—"}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={
+                    inv.status === "OVERDUE"
+                      ? "destructive"
+                      : inv.status === "PART_PAID"
+                        ? "warning"
+                        : "secondary"
+                  }
+                >
+                  {inv.status}
+                </Badge>
+                <span className="font-bold tabular-nums">
+                  {inv.currency} {Number(inv.grandTotal).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {unconfigured && (
+        <p className="mt-2 text-xs font-medium text-amber-800 dark:text-amber-300">
+          Online collection isn&apos;t configured — record a cash payment instead.
+        </p>
+      )}
+    </div>
+  );
+}
 function PaymentsPanel({ memberId }: { memberId: string }) {
   const paymentsQuery = useMemberPayments(memberId);
   const membershipsQuery = useMemberships({ memberId });
@@ -1593,6 +1703,7 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <OutstandingInvoicesBanner memberId={memberId} currency={currency} />
       <div className="flex justify-end">
         {canRenew && (
           <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
