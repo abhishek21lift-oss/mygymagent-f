@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CheckCircle2, Dumbbell, Flame, Play, Plus, Sparkles, Target, Users } from "lucide-react"
+import { CheckCircle2, Dumbbell, Flame, Play, Plus, Target, Users } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { PageHero } from "@/components/shared/page-hero"
@@ -34,7 +34,7 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string;
   },
 }
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: MetricTone }) {
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint?: string; tone: MetricTone }) {
   const t = METRIC_TONES[tone]
   return (
     <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.ring}`}>
@@ -47,7 +47,7 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; 
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>
@@ -110,10 +110,8 @@ export default function WorkoutSessionsPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="ws-title"
-          eyebrow="Live workout execution"
           icon={Dumbbell}
-          title="Today's Sessions"
-          description="Run the workout, capture every set and close with a clean execution record."
+          title="Sessions"
           variant="light"
           accent="rose"
           actions={
@@ -129,9 +127,9 @@ export default function WorkoutSessionsPage() {
         <section aria-labelledby="ws-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="ws-stats" className="sr-only">Execution numbers</h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <Metric icon={Target} label="Ready to start" value={activeAssignments.length} hint="Active client assignments" tone="rose" />
-            <Metric icon={Users} label="Started today" value={sessions.data?.length ?? 0} hint="Live execution records" tone="cyan" />
-            <Metric icon={CheckCircle2} label="Completed" value={sessions.data?.filter((x) => x.status === "COMPLETED").length ?? 0} hint="Closed sessions" tone="emerald" />
+            <Metric icon={Target} label="Ready to start" value={activeAssignments.length} tone="rose" />
+            <Metric icon={Users} label="Started today" value={sessions.data?.length ?? 0} tone="cyan" />
+            <Metric icon={CheckCircle2} label="Completed" value={sessions.data?.filter((x) => x.status === "COMPLETED").length ?? 0} tone="emerald" />
           </div>
         </section>
 
@@ -143,7 +141,6 @@ export default function WorkoutSessionsPage() {
               </span>
               <div className="min-w-0">
                 <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Execution queue</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Start an assigned workout or reopen today&apos;s session.</p>
               </div>
             </div>
             <CardContent className="space-y-5 p-4">
@@ -213,7 +210,6 @@ export default function WorkoutSessionsPage() {
                 </span>
                 <div>
                   <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Session execution</h2>
-                  <p className="mt-0.5 text-xs font-medium text-stone-600">Assigned targets and logged sets.</p>
                 </div>
               </div>
               {selected.data && <Badge variant={selected.data.status === "COMPLETED" ? "success" : "default"}>{selected.data.status.replace("_", " ")}</Badge>}
@@ -225,7 +221,7 @@ export default function WorkoutSessionsPage() {
                     <Dumbbell className="size-6" />
                   </span>
                   <p className="mt-3 text-sm font-extrabold text-stone-900">Select a session</p>
-                  <p className="mt-1 max-w-sm text-xs font-medium text-stone-600">Start a workout from the queue or choose one already started today.</p>
+                  <p className="mt-1 max-w-sm text-xs font-medium text-stone-600">Start a workout or pick one.</p>
                 </div>
               ) : selected.isLoading ? (
                 <div className="space-y-3" aria-label="Loading session">

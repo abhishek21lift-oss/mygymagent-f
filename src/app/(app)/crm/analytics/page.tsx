@@ -81,10 +81,8 @@ export default function SalesAnalyticsPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="analytics-title"
-          eyebrow="Real sales data"
           icon={BarChart3}
-          title="Sales Intelligence"
-          description="Pipeline health, conversion speed and sources — what turns into membership."
+          title="Analytics"
           variant="light"
           accent="violet"
           actions={
@@ -103,9 +101,8 @@ export default function SalesAnalyticsPage() {
           <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 id="analytics-window" className="font-serif text-xl font-semibold tracking-tight text-stone-950">
-                Measure what turns into membership.
+                Reporting window
               </h2>
-              <p className="mt-1 text-xs font-medium text-stone-600">Choose a reporting window. Empty dates intentionally mean all-time.</p>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:flex sm:items-end">
               <div>
@@ -123,11 +120,11 @@ export default function SalesAnalyticsPage() {
 
         <section aria-label="Funnel snapshot">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} hint="In selected window" tone="cyan" />
-            <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} hint="Converted to members" tone="emerald" />
-            <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} hint="Lead to member rate" tone="violet" />
-            <Metric icon={Clock3} label="Avg. conversion" value={data?.averageDaysToConversion == null ? "—" : `${data.averageDaysToConversion}d`} hint="Speed to close" tone="amber" />
-            <Metric icon={ListChecks} label="Follow-up completion" value={`${data?.followUps?.completionRatePct ?? 0}%`} hint="Sales discipline" tone="blue" />
+            <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} tone="cyan" />
+            <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} tone="emerald" />
+            <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} tone="violet" />
+            <Metric icon={Clock3} label="Avg. conversion" value={data?.averageDaysToConversion == null ? "—" : `${data.averageDaysToConversion}d`} tone="amber" />
+            <Metric icon={ListChecks} label="Follow-up completion" value={`${data?.followUps?.completionRatePct ?? 0}%`} tone="blue" />
           </div>
         </section>
 
@@ -136,7 +133,6 @@ export default function SalesAnalyticsPage() {
             <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-cyan-50/60 px-5 py-5">
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Pipeline distribution</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Every lead in the selected window by current stage.</p>
               </div>
               <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/25">
                 <Flame className="size-5" aria-hidden="true" />
@@ -169,7 +165,6 @@ export default function SalesAnalyticsPage() {
             <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/60 px-5 py-5">
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Follow-up discipline</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Scheduled actions and completion.</p>
               </div>
               <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25">
                 <CalendarDays className="size-5" aria-hidden="true" />
@@ -187,7 +182,6 @@ export default function SalesAnalyticsPage() {
           <div className="flex flex-col gap-3 border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/90 via-white to-blue-50/60 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
               <h2 id="analytics-sources" className="font-serif text-xl font-semibold tracking-tight text-stone-950">Lead source performance</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Real source strings grouped with won/lost conversion performance.</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
               <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
@@ -227,7 +221,6 @@ export default function SalesAnalyticsPage() {
             <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-rose-50/90 via-white to-orange-50/60 px-5 py-5">
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Why leads are lost</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Reasons recorded when deals are marked lost.</p>
               </div>
               <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25">
                 <Flame className="size-5" aria-hidden="true" />
@@ -257,7 +250,6 @@ export default function SalesAnalyticsPage() {
             <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-violet-50/60 px-5 py-5">
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Rep performance</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Leads per assignee with real conversion outcomes.</p>
               </div>
               <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-md shadow-blue-500/25">
                 <Users className="size-5" aria-hidden="true" />
@@ -299,7 +291,7 @@ export default function SalesAnalyticsPage() {
   )
 }
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: string | number; hint: string; tone: MetricTone }) {
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: string | number; hint?: string; tone: MetricTone }) {
   const t = METRIC_TONES[tone]
   return (
     <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}>
@@ -312,7 +304,7 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; 
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>

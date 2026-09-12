@@ -5,7 +5,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, Building2, Mail, MapPin, Phone, Plus, Sparkles } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Plus, Sparkles } from "lucide-react";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHero } from "@/components/shared/page-hero";
@@ -201,17 +201,15 @@ export default function BranchesPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="branches-title"
-          eyebrow="Footprint"
           icon={Building2}
           title="Branches"
-          description="Locations your organization operates — every floor, one network."
           variant="light"
           accent="violet"
           actions={
             <>
               {hasPermission("branches.create") && <CreateBranchDialog />}
               <Link href="/staff" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-cyan-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
-                <Sparkles className="size-4" aria-hidden="true" /> Staff <ArrowRight className="size-4" aria-hidden="true" />
+                <Sparkles className="size-4" aria-hidden="true" /> Staff
               </Link>
             </>
           }
@@ -221,7 +219,6 @@ export default function BranchesPage() {
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
               <h2 id="branches-grid-title" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">All locations</h2>
-              <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Status, city and contact for every branch.</p>
             </div>
             {!branchesQuery.isLoading && !branchesQuery.isError && branchesQuery.data && branchesQuery.data.items.length > 0 && (
               <span className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-cyan-500/20">{branchesQuery.data.items.length}</span>

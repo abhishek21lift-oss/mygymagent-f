@@ -5,7 +5,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, Plus, Sparkles, UserRound, UserX, Users } from "lucide-react";
+import { Plus, Sparkles, UserRound, UserX, Users } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
@@ -282,17 +282,15 @@ export default function StaffPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="staff-title"
-          eyebrow="Team roster"
           icon={Users}
           title="Staff"
-          description="Trainers and team members — roles, status and access in one roster."
           variant="light"
           accent="blue"
           actions={
             <>
               {hasPermission("users.create") && <InviteStaffDialog />}
               <Link href="/attendance" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-cyan-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
-                <Sparkles className="size-4" aria-hidden="true" /> Attendance <ArrowRight className="size-4" aria-hidden="true" />
+                <Sparkles className="size-4" aria-hidden="true" /> Attendance
               </Link>
             </>
           }
@@ -305,7 +303,6 @@ export default function StaffPage() {
             </span>
             <div>
               <h2 id="staff-roster" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Team roster</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Trainers, coaches and operators across every branch.</p>
             </div>
           </div>
           <div className="p-4 sm:p-5">

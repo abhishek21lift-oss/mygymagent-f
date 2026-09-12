@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Apple, ArrowRight, Leaf, Plus, Salad, Sparkles, Target, Trash2, UserPlus, Users, Utensils, Zap } from "lucide-react";
+import { Apple, Leaf, Plus, Salad, Trash2, UserPlus, Users, Utensils } from "lucide-react";
 import { MemberPicker } from "@/components/shared/member-picker";
 import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
@@ -259,7 +259,7 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string;
   },
 };
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: MetricTone }) {
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint?: string; tone: MetricTone }) {
   const t = METRIC_TONES[tone];
   return (
     <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(5,150,105,.28)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}>
@@ -272,20 +272,10 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; 
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function Pulse({ icon: Icon, title, text }: { icon: typeof Zap; title: string; text: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-      <Icon className="size-4 text-white/80" aria-hidden="true" />
-      <p className="mt-2 text-sm font-extrabold">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-white/60">{text}</p>
-    </div>
   );
 }
 
@@ -302,10 +292,8 @@ export default function NutritionPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="nutrition-title"
-          eyebrow="Nutrition studio"
           icon={Apple}
-          title="Nutrition Plans"
-          description="Build food intelligence, create meal plans and keep client delivery in one place."
+          title="Nutrition"
           variant="light"
           accent="emerald"
           actions={
@@ -319,13 +307,13 @@ export default function NutritionPage() {
         <section aria-labelledby="nutrition-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="nutrition-stats" className="sr-only">Nutrition numbers</h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <Metric icon={Apple} label="Food library" value={foods.isLoading ? "—" : foods.data?.length ?? 0} hint="Nutrition building blocks" tone="emerald" />
-            <Metric icon={Leaf} label="Diet plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} hint="Ready-to-deliver plans" tone="lime" />
-            <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} hint="Clients on nutrition plans" tone="cyan" />
+            <Metric icon={Apple} label="Food library" value={foods.isLoading ? "—" : foods.data?.length ?? 0} tone="emerald" />
+            <Metric icon={Leaf} label="Diet plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} tone="lime" />
+            <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} tone="cyan" />
           </div>
         </section>
 
-        <section aria-label="Plans and pulse" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:100ms] xl:grid-cols-[1.25fr_.75fr]">
+        <section aria-label="Plans" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:100ms]">
           <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-emerald-900/5 backdrop-blur-xl">
             <div className="flex items-start gap-3 border-b border-stone-100/80 bg-gradient-to-r from-emerald-50/90 via-white to-lime-50/60 px-5 py-5">
               <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-emerald-500 to-lime-500 text-white shadow-md shadow-emerald-500/25" aria-hidden="true">
@@ -333,7 +321,6 @@ export default function NutritionPage() {
               </span>
               <div className="min-w-0">
                 <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Diet plan library</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Plans designed for real client delivery.</p>
               </div>
             </div>
             <CardContent className="p-4">
@@ -366,28 +353,6 @@ export default function NutritionPage() {
               )}
             </CardContent>
           </Card>
-
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#064e3b,#0f766e_48%,#0891b2)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(5,150,105,.72)] sm:p-5">
-            <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-lime-300/25 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-300/20 blur-3xl" aria-hidden="true" />
-            <div className="relative flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-[15px] bg-white/15 ring-1 ring-white/20 backdrop-blur" aria-hidden="true">
-                <Target className="size-5" />
-              </span>
-              <div>
-                <h2 className="font-serif text-lg font-semibold tracking-tight">Nutrition pulse</h2>
-                <p className="mt-0.5 text-xs font-medium text-white/70">Fresh delivery, from plan to plate.</p>
-              </div>
-            </div>
-            <div className="relative mt-6 space-y-3">
-              <Pulse icon={Zap} title="Plan delivery" text="Keep client plans structured, visible and easy to assign." />
-              <Pulse icon={Users} title="Client context" text="Open Member 360 before changing nutrition direction." />
-              <Pulse icon={Sparkles} title="AI nutrition" text="Use AI Coach for ideas, review and faster planning." />
-            </div>
-            <Button asChild variant="secondary" className="relative mt-6 min-h-11 w-full rounded-2xl bg-white text-emerald-800 hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-              <a href="/ai">Open AI Coach <ArrowRight className="size-4" aria-hidden="true" /></a>
-            </Button>
-          </div>
         </section>
 
         <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/85 shadow-lg backdrop-blur-xl">
@@ -397,7 +362,6 @@ export default function NutritionPage() {
             </span>
             <div>
               <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Recent nutrition assignments</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Latest diet deliveries and completions.</p>
             </div>
           </div>
           <CardContent className="space-y-3 p-4">

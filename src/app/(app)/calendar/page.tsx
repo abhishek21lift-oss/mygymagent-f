@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarDays, CalendarX2, ChevronLeft, ChevronRight, Clock3, Dumbbell, Sparkles, Trash2, UserRound } from "lucide-react"
+import { CalendarDays, CalendarX2, ChevronLeft, ChevronRight, Clock3, Dumbbell, Trash2, UserRound } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { PageHero } from "@/components/shared/page-hero"
@@ -156,10 +156,8 @@ export default function CalendarPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="calendar-title"
-          eyebrow="Unified scheduling"
           icon={CalendarDays}
-          title="Calendar & Appointments"
-          description="One calendar for PT sessions, trials and consultations — with conflict detection."
+          title="Calendar"
           variant="light"
           accent="orange"
           actions={
@@ -170,14 +168,7 @@ export default function CalendarPage() {
               </SelectContent>
             </Select>
           }
-        >
-          <div className="flex flex-wrap gap-1.5" aria-label="Event legend">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200/70"><span className="size-1.5 rounded-full bg-rose-500" aria-hidden="true" />Trial</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-2.5 py-1 text-[10px] font-extrabold text-cyan-800 ring-1 ring-cyan-200/70"><span className="size-1.5 rounded-full bg-cyan-500" aria-hidden="true" />Consult</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-extrabold text-violet-700 ring-1 ring-violet-200/70"><span className="size-1.5 rounded-full bg-violet-500" aria-hidden="true" />Assessment</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-extrabold text-orange-800 ring-1 ring-orange-200/70"><span className="size-1.5 rounded-full bg-orange-500" aria-hidden="true" />PT</span>
-          </div>
-        </PageHero>
+        />
 
         <section aria-labelledby="calendar-board-title" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 xl:grid-cols-[1.6fr_1fr]">
           <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-rose-900/5 backdrop-blur-xl">
@@ -188,7 +179,6 @@ export default function CalendarPage() {
                 </span>
                 <div>
                   <h2 id="calendar-board-title" className="font-serif text-xl font-semibold tracking-tight text-stone-950">{title}</h2>
-                  <p className="mt-1 text-xs font-medium text-stone-600">{visible.length} entr{visible.length === 1 ? "y" : "ies"} · PT sessions and appointments merged</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -225,7 +215,7 @@ export default function CalendarPage() {
                     <CalendarDays className="size-6" />
                   </span>
                   <p className="mt-3 text-sm font-extrabold text-stone-900">Nothing scheduled</p>
-                  <p className="mt-1 text-xs font-medium text-stone-600">Book an appointment from the panel — PT sessions booked in Training also appear here.</p>
+                  <p className="mt-1 text-xs font-medium text-stone-600">Book an appointment to begin.</p>
                 </div>
               ) : view === "month" ? (
                 <MonthGrid slots={visible} anchor={anchor} />
@@ -438,7 +428,6 @@ function BookingPanel({ branchId }: { branchId: string }) {
         </span>
         <div className="min-w-0">
           <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Book an appointment</h2>
-          <p className="mt-0.5 text-xs font-medium text-stone-600">Trials, consultations, assessments and more. Availability, time-off and double-booking are blocked by the backend.</p>
         </div>
       </div>
       <CardContent className="pt-5">
@@ -580,7 +569,6 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
         </span>
         <div className="min-w-0">
           <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Trainer availability &amp; time off</h2>
-          <p className="mt-0.5 text-xs font-medium text-stone-600">Rules and time off are enforced on every booking, reschedule and PT session.</p>
         </div>
       </div>
       <CardContent className="flex flex-col gap-5 pt-5">
@@ -612,7 +600,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          {(rules.data ?? []).length === 0 ? <p className="text-xs font-medium text-stone-600">No rules yet — trainers without rules accept any time.</p> : (rules.data ?? []).map((r) => (
+          {(rules.data ?? []).length === 0 ? <p className="text-xs font-medium text-stone-600">No rules yet.</p> : (rules.data ?? []).map((r) => (
             <div key={r.id} className="flex items-center justify-between gap-2 rounded-xl border border-cyan-100 bg-gradient-to-r from-cyan-50/70 to-blue-50/50 px-3 py-2 text-xs">
               <span className="font-bold text-stone-700 tabular-nums">
                 {r.staff ? `${r.staff.firstName} ${r.staff.lastName}` : "Trainer"} · {DAYS[(r.dayOfWeek + 5) % 7]} {minuteToLabel(r.startMinute)}–{minuteToLabel(r.endMinute)}

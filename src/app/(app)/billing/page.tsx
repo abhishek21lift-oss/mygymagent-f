@@ -5,7 +5,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, CreditCard, Plus, Sparkles, Undo2, Wallet, TrendingUp, Clock3 } from "lucide-react";
+import { CreditCard, Plus, Sparkles, Undo2, Wallet, TrendingUp } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
 import { PageHero } from "@/components/shared/page-hero";
@@ -49,17 +49,15 @@ export default function BillingPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="billing-title"
-          eyebrow="Finance intelligence"
           icon={Wallet}
           title="Finance OS"
-          description="Collections, refunds and payment activity — live from the finance API."
           variant="light"
           accent="emerald"
           actions={
             <>
               {hasPermission("payments.create") && <RecordPaymentDialog />}
               <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-emerald-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-emerald-900 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-                <Sparkles className="size-4" aria-hidden="true" /> Ask AI about revenue
+                <Sparkles className="size-4" aria-hidden="true" /> Ask AI
               </Link>
             </>
           }
@@ -69,21 +67,14 @@ export default function BillingPage() {
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
               <h2 id="billing-stats" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Collections snapshot</h2>
-              <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Live figures from the current page of transactions.</p>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <FinanceMetric icon={Wallet} label="Collected · current page" value={`${currency} ${totalCollected.toFixed(2)}`} hint="Excludes fully refunded" loading={paymentsQuery.isLoading} tone="green" />
-            <FinanceMetric icon={Undo2} label="Refunded · current page" value={`${currency} ${totalRefunded.toFixed(2)}`} hint="Warm dues watch" loading={paymentsQuery.isLoading} tone="amber" />
-            <FinanceMetric icon={CreditCard} label="Transactions" value={items.length} hint="On this page" loading={paymentsQuery.isLoading} tone="violet" />
-            <FinanceMetric icon={TrendingUp} label="Payment activity" value="Live" hint="Real-time ledger" loading={paymentsQuery.isLoading} tone="cyan" />
+            <FinanceMetric icon={Wallet} label="Collected · current page" value={`${currency} ${totalCollected.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="green" />
+            <FinanceMetric icon={Undo2} label="Refunded · current page" value={`${currency} ${totalRefunded.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="amber" />
+            <FinanceMetric icon={CreditCard} label="Transactions" value={items.length} loading={paymentsQuery.isLoading} tone="violet" />
+            <FinanceMetric icon={TrendingUp} label="Payment activity" value="Live" loading={paymentsQuery.isLoading} tone="cyan" />
           </div>
-        </section>
-
-        <section aria-labelledby="billing-next" className="grid animate-in fade-in slide-in-from-bottom-2 gap-4 duration-500 [animation-delay:100ms] sm:grid-cols-3">
-          <FinanceInsight icon={TrendingUp} title="Revenue trend" text="Period-level revenue analytics can be connected when the backend aggregate is available." />
-          <FinanceInsight icon={Clock3} title="Outstanding" text="Next layer: aging, renewal balances and recovery opportunities from real billing data." />
-          <FinanceInsight icon={Sparkles} title="AI finance" text="Next layer: explain revenue changes and surface high-impact financial actions." />
         </section>
 
         <section aria-labelledby="billing-activity" className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:150ms] dark:border-white/10 dark:bg-stone-950/80">
@@ -94,13 +85,12 @@ export default function BillingPage() {
               </span>
               <div>
                 <h2 id="billing-activity" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Payment activity</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Current transactions and refund actions.</p>
               </div>
             </div>
             <Badge variant="outline" className="rounded-full border-emerald-200 bg-emerald-50/70 font-mono text-xs font-bold text-emerald-800 tabular-nums">Page {page}</Badge>
           </div>
           <div className="p-4 sm:p-5">
-            <DataTable columns={columns} data={items} isLoading={paymentsQuery.isLoading} isError={paymentsQuery.isError} onRetry={() => paymentsQuery.refetch()} page={page} onPageChange={setPage} emptyTitle="No payments recorded yet" emptyDescription="Record your first payment to start tracking gym revenue." />
+            <DataTable columns={columns} data={items} isLoading={paymentsQuery.isLoading} isError={paymentsQuery.isError} onRetry={() => paymentsQuery.refetch()} page={page} onPageChange={setPage} emptyTitle="No payments recorded yet" emptyDescription="Record a payment to begin." />
           </div>
         </section>
 
@@ -110,7 +100,7 @@ export default function BillingPage() {
   );
 }
 
-function FinanceMetric({ icon: Icon, label, value, hint, loading, tone }: { icon: typeof Wallet; label: string; value: string | number; hint: string; loading: boolean; tone: "green" | "amber" | "violet" | "cyan" }) {
+function FinanceMetric({ icon: Icon, label, value, loading, tone }: { icon: typeof Wallet; label: string; value: string | number; loading: boolean; tone: "green" | "amber" | "violet" | "cyan" }) {
   const tones = {
     green: { bar: "from-emerald-400 via-teal-500 to-green-600", tile: "from-emerald-500 to-teal-600 shadow-emerald-500/30", orb: "bg-emerald-400/20", ring: "hover:border-emerald-200 hover:shadow-emerald-500/10" },
     amber: { bar: "from-amber-400 via-orange-500 to-amber-600", tile: "from-amber-500 to-orange-600 shadow-amber-500/30", orb: "bg-amber-400/20", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
@@ -129,23 +119,8 @@ function FinanceMetric({ icon: Icon, label, value, hint, loading, tone }: { icon
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           {loading ? <div className="mt-2 h-7 w-24 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading metric" /> : <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{value}</p>}
-          <p className="mt-1 text-[11px] font-medium text-stone-600 dark:text-stone-400">{hint}</p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function FinanceInsight({ icon: Icon, title, text }: { icon: typeof TrendingUp; title: string; text: string }) {
-  return (
-    <div className="group relative overflow-hidden rounded-[22px] border border-white/90 bg-white/85 p-5 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-stone-950/80">
-      <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500" aria-hidden="true" />
-      <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transition-transform duration-300 group-hover:scale-110">
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <p className="mt-3 text-sm font-extrabold tracking-tight text-stone-950 dark:text-white">{title}</p>
-      <p className="mt-1 text-xs font-medium leading-5 text-stone-600 dark:text-stone-400">{text}</p>
-      <span className="mt-3 inline-flex min-h-11 items-center gap-1 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300">Planned next <ArrowRight className="size-3" aria-hidden="true" /></span>
     </div>
   );
 }

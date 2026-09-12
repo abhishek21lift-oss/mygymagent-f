@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, CalendarClock, CreditCard, PauseCircle, PlayCircle, Users, Wallet } from "lucide-react"
+import { CalendarClock, CreditCard, PauseCircle, PlayCircle, Users, Wallet } from "lucide-react"
 import { PageHero } from "@/components/shared/page-hero"
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans"
 import { useMembershipAnalytics, useMembershipRenewalReminders, useMemberships, usePauseMembership, useResumeMembership, useExtendMembership, useUpgradeMembership, useDowngradeMembership, useRenewMembership, useCancelMembership, useTransferMembership } from "@/lib/hooks/use-memberships"
@@ -20,7 +20,7 @@ function statusPill(status: string) {
   return STATUS_PILL[status] ?? "bg-stone-500/10 text-stone-600 ring-stone-200/60"
 }
 
-function LifecycleStat({ icon: Icon, label, value, hint, loading, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; loading: boolean; tone: "emerald" | "cyan" | "amber" | "violet" | "rose" }) {
+function LifecycleStat({ icon: Icon, label, value, loading, tone }: { icon: typeof Users; label: string; value: React.ReactNode; loading: boolean; tone: "emerald" | "cyan" | "amber" | "violet" | "rose" }) {
   const tones = {
     emerald: { bar: "from-emerald-400 via-teal-500 to-green-600", tile: "from-emerald-500 to-teal-600 shadow-emerald-500/30", orb: "bg-emerald-400/20", ring: "hover:border-emerald-200 hover:shadow-emerald-500/10" },
     cyan: { bar: "from-cyan-400 via-sky-500 to-blue-600", tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30", orb: "bg-cyan-400/20", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
@@ -40,7 +40,6 @@ function LifecycleStat({ icon: Icon, label, value, hint, loading, tone }: { icon
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           {loading ? <div className="mt-2 h-7 w-16 animate-pulse rounded-lg bg-stone-200/70" aria-label={`Loading ${label}`} /> : <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{value ?? 0}</p>}
-          <p className="mt-1 text-[11px] font-medium text-stone-600 dark:text-stone-400">{hint}</p>
         </div>
       </div>
     </div>
@@ -81,16 +80,14 @@ export default function MembershipLifecyclePage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="memberships-title"
-          eyebrow="Recurring revenue engine"
           icon={CreditCard}
           title="Membership Lifecycle"
-          description="Pauses, renewals, upgrades and dues recovery — without leaving the gym OS."
           variant="light"
           accent="emerald"
           actions={
             <>
               <Link href="/membership-plans" className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(105deg,#059669,#0d9488_55%,#0ea5e9)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-emerald-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-                <CreditCard className="size-4" aria-hidden="true" /> Manage plans <ArrowRight className="size-4" aria-hidden="true" />
+                <CreditCard className="size-4" aria-hidden="true" /> Plans
               </Link>
               <Link href="/billing" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-amber-200/80 bg-amber-50/80 px-5 py-3 text-sm font-bold text-amber-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
                 <Wallet className="size-4" aria-hidden="true" /> Recover dues
@@ -102,14 +99,13 @@ export default function MembershipLifecyclePage() {
         <section aria-labelledby="memberships-pulse" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <div className="mb-4">
             <h2 id="memberships-pulse" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Lifecycle pulse</h2>
-            <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Every stage of the member journey owns one vivid color.</p>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            <LifecycleStat icon={Users} label="Total" value={stats.total as string | number | undefined} hint="All memberships" loading={loading} tone="emerald" />
-            <LifecycleStat icon={PlayCircle} label="Active" value={stats.active as string | number | undefined} hint="In good standing" loading={loading} tone="cyan" />
-            <LifecycleStat icon={PauseCircle} label="Frozen" value={stats.frozen as string | number | undefined} hint="Paused by staff" loading={loading} tone="violet" />
-            <LifecycleStat icon={CalendarClock} label="Expiring 30d" value={stats.expiringNext30Days as string | number | undefined} hint="Dues watchlist" loading={loading} tone="amber" />
-            <LifecycleStat icon={CreditCard} label="Expired" value={stats.expired as string | number | undefined} hint="Needs renewal" loading={loading} tone="rose" />
+            <LifecycleStat icon={Users} label="Total" value={stats.total as string | number | undefined} loading={loading} tone="emerald" />
+            <LifecycleStat icon={PlayCircle} label="Active" value={stats.active as string | number | undefined} loading={loading} tone="cyan" />
+            <LifecycleStat icon={PauseCircle} label="Frozen" value={stats.frozen as string | number | undefined} loading={loading} tone="violet" />
+            <LifecycleStat icon={CalendarClock} label="Expiring 30d" value={stats.expiringNext30Days as string | number | undefined} loading={loading} tone="amber" />
+            <LifecycleStat icon={CreditCard} label="Expired" value={stats.expired as string | number | undefined} loading={loading} tone="rose" />
           </div>
         </section>
 
@@ -122,7 +118,6 @@ export default function MembershipLifecyclePage() {
                 </span>
                 <div>
                   <h2 id="memberships-plan-change" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Plan change</h2>
-                  <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Select the target plan before using Upgrade / Downgrade.</p>
                 </div>
               </div>
               <select aria-label="Select target plan" className="min-h-11 rounded-2xl border border-emerald-200/70 bg-white/90 px-4 py-2.5 text-sm font-bold text-stone-800 shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 dark:border-white/10 dark:bg-stone-900 dark:text-stone-100" value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
@@ -140,7 +135,6 @@ export default function MembershipLifecyclePage() {
             </span>
             <div>
               <h2 id="memberships-renewals" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Renewal watchlist</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Active memberships expiring within 30 days — warm dues recovery.</p>
             </div>
           </div>
           <div className="divide-y divide-stone-100 p-2 dark:divide-white/10">
@@ -169,7 +163,6 @@ export default function MembershipLifecyclePage() {
             </span>
             <div>
               <h2 id="memberships-all" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">All memberships</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Pause, extend, upgrade, transfer, renew or cancel in place.</p>
             </div>
           </div>
           <div className="overflow-x-auto p-2">

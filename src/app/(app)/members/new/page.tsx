@@ -15,10 +15,8 @@ export default function NewMemberPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="new-member-title"
-          eyebrow="Onboarding · Member OS"
           icon={UserRound}
-          title="New member onboarding"
-          description="Complete the wizard to create a new member profile."
+          title="New member"
           variant="light"
           accent="violet"
           actions={
@@ -27,7 +25,7 @@ export default function NewMemberPage() {
               className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-stone-200 bg-white/80 px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />
-              Back to members
+              Back
             </Link>
           }
         />

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarDays, CheckCircle2, Clock3, Dumbbell, Sparkles, UserRound, Users, XCircle, Zap } from "lucide-react"
+import { CalendarDays, CheckCircle2, Clock3, Dumbbell, UserRound, Users, XCircle, Zap } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { PageHero } from "@/components/shared/page-hero"
@@ -101,7 +101,7 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string;
   },
 }
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: MetricTone }) {
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint?: string; tone: MetricTone }) {
   const t = METRIC_TONES[tone]
   return (
     <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.ring}`}>
@@ -114,7 +114,7 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; 
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>
@@ -179,10 +179,8 @@ export default function PtSessionsPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="pt-sessions-title"
-          eyebrow="Live coaching calendar"
           icon={CalendarDays}
           title="PT Sessions"
-          description="Book, execute and close today's personal-training sessions."
           variant="light"
           accent="rose"
           actions={
@@ -195,10 +193,10 @@ export default function PtSessionsPage() {
         <section aria-labelledby="pt-sessions-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="pt-sessions-stats" className="sr-only">Today&apos;s session numbers</h2>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric icon={CalendarDays} label="Scheduled" value={scheduled.length} hint="Sessions still to deliver" tone="rose" />
-            <Metric icon={CheckCircle2} label="Completed" value={completed.length} hint="Closed today" tone="emerald" />
-            <Metric icon={XCircle} label="No-shows" value={noShows.length} hint="Needs follow-up" tone="amber" />
-            <Metric icon={Clock3} label="Total" value={items.length} hint="Today's session volume" tone="cyan" />
+            <Metric icon={CalendarDays} label="Scheduled" value={scheduled.length} tone="rose" />
+            <Metric icon={CheckCircle2} label="Completed" value={completed.length} tone="emerald" />
+            <Metric icon={XCircle} label="No-shows" value={noShows.length} tone="amber" />
+            <Metric icon={Clock3} label="Total" value={items.length} tone="cyan" />
           </div>
         </section>
 
@@ -210,7 +208,6 @@ export default function PtSessionsPage() {
               </span>
               <div className="min-w-0">
                 <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Book a PT session</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Create a real calendar session.</p>
               </div>
             </div>
             <CardContent className="pt-5">
@@ -273,7 +270,6 @@ export default function PtSessionsPage() {
               </span>
               <div className="min-w-0">
                 <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Today&apos;s coaching timeline</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Actual PT sessions, ordered by start time.</p>
               </div>
             </div>
             <CardContent className="p-3 sm:p-4">
@@ -285,7 +281,7 @@ export default function PtSessionsPage() {
                     <CalendarDays className="size-6" />
                   </span>
                   <p className="mt-3 text-sm font-extrabold text-stone-900">No PT sessions today</p>
-                  <p className="mt-1 text-xs font-medium text-stone-600">Book the first coaching session from the panel.</p>
+                  <p className="mt-1 text-xs font-medium text-stone-600">Book the first session now.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">{items.map((x) => <SessionRow key={x.id} session={x} />)}</div>

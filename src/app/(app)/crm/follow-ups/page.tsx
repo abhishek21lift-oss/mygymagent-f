@@ -56,19 +56,17 @@ export default function SalesFollowUpsPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="followups-title"
-          eyebrow="Follow-up discipline"
           icon={CalendarClock}
           title="Follow-ups"
-          description="Never lose the next sales action — open work first, overdue on top."
           variant="light"
           accent="blue"
           actions={
             <>
               <Button asChild variant="outline" className="min-h-11 rounded-2xl border-blue-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Back to Sales OS</Link>
+                <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Sales OS</Link>
               </Button>
               <Button asChild className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                <Link href="/crm/analytics">Sales analytics <ArrowRight className="size-4" aria-hidden="true" /></Link>
+                <Link href="/crm/analytics">Analytics <ArrowRight className="size-4" aria-hidden="true" /></Link>
               </Button>
             </>
           }
@@ -76,9 +74,9 @@ export default function SalesFollowUpsPage() {
 
         <section aria-label="Follow-up snapshot">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Metric icon={ListChecks} label="Visible actions" value={rows.length} hint="In this view" tone="cyan" />
-            <Metric icon={Flame} label="Overdue" value={overdue} hint="Needs action right now" tone="rose" />
-            <Metric icon={CalendarClock} label="Open" value={status === "OPEN" ? rows.length : rows.filter((row) => !row.completedAt).length} hint="Still awaiting a rep" tone="violet" />
+            <Metric icon={ListChecks} label="Visible actions" value={rows.length} tone="cyan" />
+            <Metric icon={Flame} label="Overdue" value={overdue} tone="rose" />
+            <Metric icon={CalendarClock} label="Open" value={status === "OPEN" ? rows.length : rows.filter((row) => !row.completedAt).length} tone="violet" />
           </div>
         </section>
 
@@ -92,9 +90,6 @@ export default function SalesFollowUpsPage() {
                 <h2 id="followups-list" className="font-serif text-xl font-semibold tracking-tight text-stone-950">
                   Sales actions
                 </h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">
-                  Sorted by open work first, then due date.
-                </p>
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -172,7 +167,7 @@ export default function SalesFollowUpsPage() {
                   <CalendarClock className="size-6" aria-hidden="true" />
                 </span>
                 <p className="mt-3 text-sm font-extrabold text-stone-900">No follow-ups in this view</p>
-                <p className="mt-1 text-xs font-medium text-stone-600">Schedule the next action from any Lead 360 workspace.</p>
+                <p className="mt-1 text-xs font-medium text-stone-600">Schedule the next action soon.</p>
               </div>
             )}
           </div>
@@ -182,7 +177,7 @@ export default function SalesFollowUpsPage() {
   )
 }
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof ListChecks; label: string; value: number; hint: string; tone: StatTone }) {
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof ListChecks; label: string; value: number; hint?: string; tone: StatTone }) {
   const t = STAT_TONES[tone]
   return (
     <div className={`group relative overflow-hidden rounded-[22px] border border-white/90 bg-white/85 p-5 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}>
@@ -193,7 +188,7 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof ListChe
       </span>
       <p className="relative mt-3 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
       <p className="relative text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
-      <p className="relative mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+      {hint ? <p className="relative mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
     </div>
   )
 }

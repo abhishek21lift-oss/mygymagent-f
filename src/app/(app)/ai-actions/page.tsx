@@ -26,9 +26,7 @@ export default function AiActionsPage() {
           variant="dark"
           accent="violet"
           icon={ShieldCheck}
-          eyebrow="Human-in-the-loop"
           title="AI Action Center"
-          description="Review AI-proposed changes before they affect your gym. Nothing executes without your approval."
           actions={
             <>
               <span className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-extrabold ring-1 ring-white/20 backdrop-blur">
@@ -51,7 +49,6 @@ export default function AiActionsPage() {
             <CardContent className="flex flex-col items-center gap-2 py-12 text-center" role="alert">
               <span className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-lg"><ShieldCheck className="size-6" aria-hidden="true" /></span>
               <p className="text-sm font-extrabold text-stone-900">Approvals unavailable</p>
-              <p className="text-sm font-medium text-stone-600">You don&apos;t have access to AI approvals, or the service is unavailable.</p>
               <Button onClick={() => actions.refetch()} variant="outline" className="mt-2 min-h-11 rounded-2xl">Retry</Button>
             </CardContent>
           </Card>
@@ -68,9 +65,8 @@ export default function AiActionsPage() {
                 <Check className="size-7" aria-hidden="true" />
               </span>
               <p className="mt-2 font-serif text-xl font-semibold text-stone-950">No pending AI actions</p>
-              <p className="text-sm font-medium text-stone-600">You&apos;re all caught up.</p>
               <Link href="/ai" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-stone-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
-                Ask the AI assistant <ArrowRight className="size-4" aria-hidden="true" />
+                Ask AI <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </CardContent>
           </Card>
@@ -82,7 +78,6 @@ export default function AiActionsPage() {
               </span>
               <div>
                 <h2 id="aia-queue" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">Approval queue</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">{count} proposal{count === 1 ? "" : "s"} waiting for a human decision.</p>
               </div>
             </div>
             <div className="grid gap-4">

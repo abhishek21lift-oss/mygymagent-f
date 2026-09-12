@@ -5,7 +5,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, BadgeCheck, Clock3, Plus, Sparkles, Tag, Wallet } from "lucide-react";
+import { BadgeCheck, Clock3, Plus, Sparkles, Tag, Wallet } from "lucide-react";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHero } from "@/components/shared/page-hero";
@@ -173,17 +173,15 @@ export default function MembershipPlansPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="plans-title"
-          eyebrow="Plan catalog"
           icon={Sparkles}
           title="Membership Plans"
-          description="Price, duration and freeze policy in one catalog."
           variant="light"
           accent="emerald"
           actions={
             <>
               {hasPermission("membership_plans.create") && <CreatePlanDialog />}
               <Link href="/memberships" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-emerald-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-emerald-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-                <Sparkles className="size-4" aria-hidden="true" /> Lifecycle <ArrowRight className="size-4" aria-hidden="true" />
+                <Sparkles className="size-4" aria-hidden="true" /> Lifecycle
               </Link>
             </>
           }
@@ -193,7 +191,6 @@ export default function MembershipPlansPage() {
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
               <h2 id="plans-grid-title" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">All plans</h2>
-              <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Each tier owns a distinct gradient — emerald core, amber value, cyan flex.</p>
             </div>
             {!plansQuery.isLoading && !plansQuery.isError && plansQuery.data && plansQuery.data.items.length > 0 && (
               <span className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-emerald-500/20">{plansQuery.data.items.length}</span>

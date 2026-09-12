@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ArrowLeft, ArrowRight, CheckCircle2, Sparkles, UserRound } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Sparkles, UserRound } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -75,10 +75,8 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="convert-title"
-          eyebrow="Conversion handoff"
           icon={CheckCircle2}
-          title="Convert Lead to Member"
-          description={`${lead.firstName} ${lead.lastName} is ready to enter the member lifecycle.`}
+          title="Convert lead"
           variant="light"
           accent="emerald"
           actions={
@@ -101,7 +99,6 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
               </span>
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Conversion handoff</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Choose where this member lives and who coaches them.</p>
               </div>
             </div>
             <CardContent className="space-y-6 p-5 sm:p-6">
@@ -171,26 +168,19 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
               </span>
               <div>
                 <h2 className="font-serif text-lg font-semibold tracking-tight">What happens next</h2>
-                <p className="mt-0.5 text-xs font-medium text-white/70">A clean handoff into the member lifecycle.</p>
               </div>
             </div>
             <ul className="relative mt-6 space-y-3 text-sm">
               <li className="rounded-[18px] border border-white/15 bg-white/10 p-4 backdrop-blur">
                 <p className="font-extrabold">Member profile is created</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">Contact, source and notes carry over automatically.</p>
               </li>
               <li className="rounded-[18px] border border-white/15 bg-white/10 p-4 backdrop-blur">
                 <p className="font-extrabold">Branch + trainer attached</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">Billing, attendance and coaching route correctly.</p>
               </li>
               <li className="rounded-[18px] border border-white/15 bg-white/10 p-4 backdrop-blur">
                 <p className="font-extrabold">Pipeline marked won</p>
-                <p className="mt-1 text-xs leading-5 text-white/70">Sales analytics reflect the win instantly.</p>
               </li>
             </ul>
-            <span className="relative mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-extrabold text-indigo-950">
-              Ready when you are <ArrowRight className="size-4" aria-hidden="true" />
-            </span>
           </aside>
         </div>
       </div>

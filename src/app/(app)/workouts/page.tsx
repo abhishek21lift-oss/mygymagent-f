@@ -4,8 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ArrowRight, Dumbbell, Flame, Layers3, Plus, Sparkles, Target, Trash2, UserPlus, Users, Zap } from "lucide-react";
-import Link from "next/link";
+import { Dumbbell, Layers3, Plus, Trash2, UserPlus, Users } from "lucide-react";
 import { MemberPicker } from "@/components/shared/member-picker";
 import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
@@ -243,7 +242,7 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string;
   },
 };
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: MetricTone }) {
+function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint?: string; tone: MetricTone }) {
   const t = METRIC_TONES[tone];
   return (
     <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.ring}`}>
@@ -256,20 +255,10 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; 
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function Pulse({ icon: Icon, title, text }: { icon: typeof Zap; title: string; text: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-      <Icon className="size-4 text-white/80" aria-hidden="true" />
-      <p className="mt-2 text-sm font-extrabold">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-white/60">{text}</p>
-    </div>
   );
 }
 
@@ -286,10 +275,8 @@ export default function WorkoutsPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="workouts-title"
-          eyebrow="Workout studio"
           icon={Dumbbell}
-          title="Training Studio"
-          description="Build programs, curate the exercise library and deliver training plans."
+          title="Workouts"
           variant="light"
           accent="rose"
           actions={
@@ -303,13 +290,13 @@ export default function WorkoutsPage() {
         <section aria-labelledby="workouts-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="workouts-stats" className="sr-only">Studio numbers</h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <Metric icon={Dumbbell} label="Exercises" value={ex.isLoading ? "—" : ex.data?.length ?? 0} hint="Library ready to program" tone="rose" />
-            <Metric icon={Layers3} label="Workout plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} hint="Programs in your studio" tone="orange" />
-            <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} hint="Clients currently training" tone="cyan" />
+            <Metric icon={Dumbbell} label="Exercises" value={ex.isLoading ? "—" : ex.data?.length ?? 0} tone="rose" />
+            <Metric icon={Layers3} label="Workout plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} tone="orange" />
+            <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} tone="cyan" />
           </div>
         </section>
 
-        <section aria-label="Programs and pulse" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:100ms] xl:grid-cols-[1.2fr_.8fr]">
+        <section aria-label="Programs" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:100ms]">
           <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-rose-900/5 backdrop-blur-xl">
             <div className="flex items-start gap-3 border-b border-stone-100/80 bg-gradient-to-r from-rose-50/90 via-white to-orange-50/60 px-5 py-5">
               <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">
@@ -317,7 +304,6 @@ export default function WorkoutsPage() {
               </span>
               <div className="min-w-0">
                 <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Workout plans</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Your program library, ready to assign.</p>
               </div>
             </div>
             <CardContent className="p-4">
@@ -335,8 +321,7 @@ export default function WorkoutsPage() {
                       </div>
                       <h3 className="mt-4 text-sm font-extrabold tracking-tight text-stone-950">{plan.name}</h3>
                       <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-stone-600">{plan.description || "Structured training program"}</p>
-                      <div className="mt-4 flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">Program</span>
+                      <div className="mt-4 flex items-center justify-end gap-2">
                         {hasPermission("workouts.assign") && <AssignDialog planId={plan.id} planName={plan.name} />}
                       </div>
                     </div>
@@ -346,28 +331,6 @@ export default function WorkoutsPage() {
               {plans.data?.items.length === 0 && !plans.isLoading && <p className="py-8 text-center text-sm font-medium text-stone-600">No workout plans yet.</p>}
             </CardContent>
           </Card>
-
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#4c0519,#9a3412_45%,#0e7490)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(244,63,94,.55)] sm:p-5">
-            <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-orange-400/25 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
-            <div className="relative flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-[15px] bg-white/15 ring-1 ring-white/20 backdrop-blur" aria-hidden="true">
-                <Target className="size-5" />
-              </span>
-              <div>
-                <h2 className="font-serif text-lg font-semibold tracking-tight">Training pulse</h2>
-                <p className="mt-0.5 text-xs font-medium text-white/70">Program delivery, from plan to completion.</p>
-              </div>
-            </div>
-            <div className="relative mt-6 space-y-3">
-              <Pulse icon={Zap} title="Program delivery" text="Assign the right plan to the right client, then track completion." />
-              <Pulse icon={Users} title="Client context" text="Open Member 360 before making major programming changes." />
-              <Pulse icon={Flame} title="AI coaching" text="Use AI Coach as the next layer for program ideas and review." />
-            </div>
-            <Button asChild variant="secondary" className="relative mt-6 min-h-11 w-full rounded-2xl bg-white text-rose-900 hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-              <Link href="/ai">Open AI Coach <ArrowRight className="size-4" aria-hidden="true" /></Link>
-            </Button>
-          </div>
         </section>
 
         <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/85 shadow-lg backdrop-blur-xl">
@@ -377,7 +340,6 @@ export default function WorkoutsPage() {
             </span>
             <div>
               <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Recent assignments</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Latest program deliveries and completions.</p>
             </div>
           </div>
           <CardContent className="space-y-3 p-4">

@@ -423,10 +423,8 @@ export default function InventoryPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="inventory-title"
-          eyebrow="Stock command"
           icon={Package}
           title="Inventory OS"
-          description="Product catalog and stock movements — protect availability before stockout."
           variant="light"
           accent="amber"
           actions={
@@ -440,7 +438,6 @@ export default function InventoryPage() {
         <section aria-labelledby="inventory-pulse" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <div className="mb-4">
             <h2 id="inventory-pulse" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Stock pulse</h2>
-            <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Catalog depth and reorder urgency at a glance.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="group relative overflow-hidden rounded-[22px] border border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-amber-200 hover:shadow-amber-500/10 dark:border-white/10 dark:bg-stone-950/80">
@@ -453,7 +450,6 @@ export default function InventoryPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">Products · this page</p>
                   {productsQuery.isLoading ? <div className="mt-2 h-7 w-16 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading products" /> : <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{productsQuery.data?.total ?? 0}</p>}
-                  <p className="mt-1 text-[11px] font-medium text-stone-600 dark:text-stone-400">Cataloged products</p>
                 </div>
               </div>
             </div>
@@ -467,7 +463,6 @@ export default function InventoryPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">Low stock · this page</p>
                   {productsQuery.isLoading ? <div className="mt-2 h-7 w-16 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading low stock" /> : <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{lowStockCount}</p>}
-                  <p className="mt-1 text-[11px] font-medium text-stone-600 dark:text-stone-400">{lowStockCount > 0 ? "Reorder before stockout" : "Inventory looks healthy"}</p>
                 </div>
                 {!productsQuery.isLoading && lowStockCount > 0 && (
                   <span className="shrink-0 rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-800 ring-1 ring-amber-200/60">Reorder</span>
@@ -484,7 +479,6 @@ export default function InventoryPage() {
             </span>
             <div>
               <h2 id="inventory-products" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Products</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Catalog, pricing and reorder levels — low stock glows amber.</p>
             </div>
           </div>
           <div className="p-4 sm:p-5">
@@ -497,7 +491,7 @@ export default function InventoryPage() {
               page={productsPage}
               onPageChange={setProductsPage}
               emptyTitle="No products yet"
-              emptyDescription="Add your first product to start tracking stock."
+              emptyDescription="Add a product to begin."
             />
           </div>
         </section>
@@ -510,11 +504,10 @@ export default function InventoryPage() {
               </span>
               <div>
                 <h2 id="inventory-movements" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Stock movements</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Restocks, sales, adjustments and damage log.</p>
               </div>
             </div>
             <Link href="/command-center" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-              Low-stock watchlist <ArrowRight className="size-3.5" aria-hidden="true" />
+              Watchlist <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
           </div>
           <div className="p-4 sm:p-5">

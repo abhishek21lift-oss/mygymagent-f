@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowRight, CalendarCheck, LogIn, LogOut, ScanLine, Sparkles } from "lucide-react";
+import { CalendarCheck, LogIn, LogOut, ScanLine, Sparkles } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
@@ -45,7 +45,6 @@ function CheckInForm() {
         </span>
         <div>
           <h2 id="attendance-checkin" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Manual check-in</h2>
-          <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Pick a branch and member, then tap check-in — live floor pulse.</p>
         </div>
       </div>
       <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:p-6">
@@ -130,16 +129,14 @@ export default function AttendancePage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="attendance-title"
-          eyebrow="Live floor pulse"
           icon={CalendarCheck}
           title="Attendance"
-          description="Check-ins and check-outs across your branches — every visit, counted live."
           variant="light"
           accent="cyan"
           actions={
             <>
               <Link href="/members" className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(105deg,#0891b2,#0d9488_55%,#059669)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-cyan-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
-                <CalendarCheck className="size-4" aria-hidden="true" /> Members <ArrowRight className="size-4" aria-hidden="true" />
+                <CalendarCheck className="size-4" aria-hidden="true" /> Members
               </Link>
               <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-cyan-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
                 <Sparkles className="size-4" aria-hidden="true" /> Ask AI
@@ -157,7 +154,6 @@ export default function AttendancePage() {
             </span>
             <div>
               <h2 id="attendance-log" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Visit log</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Who walked in, how they checked in, and when they left.</p>
             </div>
           </div>
           <div className="p-4 sm:p-5">

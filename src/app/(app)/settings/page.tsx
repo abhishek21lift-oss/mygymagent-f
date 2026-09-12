@@ -3,13 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { ArrowRight, Building2, MessageCircle, Settings2, Sparkles } from "lucide-react";
+import { ArrowRight, Building2, MessageCircle, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -67,10 +67,8 @@ export default function SettingsPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="settings-title"
-          eyebrow="Control room"
           icon={Settings2}
           title="Settings"
-          description="Organization profile and preferences — operational truth in one place."
           variant="light"
           accent="indigo"
           actions={
@@ -91,7 +89,6 @@ export default function SettingsPage() {
                 </span>
                 <div>
                   <h2 id="settings-org" className="font-serif text-xl font-semibold tracking-tight text-stone-950">Organization profile</h2>
-                  <p className="mt-0.5 text-xs font-medium text-stone-600">Name, timezone and billing currency.</p>
                 </div>
               </div>
               <CardContent className="p-5 sm:p-6">
@@ -161,22 +158,12 @@ export default function SettingsPage() {
                     <span className="flex size-12 shrink-0 items-center justify-center rounded-[18px] bg-white/15 ring-1 ring-white/25 backdrop-blur"><MessageCircle className="size-6" aria-hidden="true" /></span>
                     <div className="min-w-0">
                       <div className="font-serif text-lg font-semibold tracking-tight">WhatsApp Business</div>
-                      <div className="mt-0.5 text-xs font-medium text-white/70">Connect this gym&apos;s own WhatsApp number through Meta.</div>
                     </div>
                   </div>
                   <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-2xl border-white/30 bg-white font-extrabold text-emerald-900 hover:bg-white/90"><Link href="/settings/whatsapp">Manage</Link></Button>
                 </CardContent>
               </Card>
             )}
-            <Card className="border-white/90 bg-white/85 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="font-serif text-lg tracking-tight text-stone-950">Good defaults, quiet power</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 pt-0 text-xs font-medium leading-5 text-stone-600">
-                <p>Timezone drives scheduling and reporting. Currency drives every price, invoice and payout.</p>
-                <p>Changes apply instantly across billing, attendance and automations.</p>
-              </CardContent>
-            </Card>
           </section>
         </div>
       </div>

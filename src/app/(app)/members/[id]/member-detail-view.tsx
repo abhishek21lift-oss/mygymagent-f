@@ -110,12 +110,6 @@ const MEMBERSHIP_STATUS_VARIANT: Record<MembershipStatus, "default" | "secondary
   CANCELLED: "secondary",
 };
 
-const MEMBER_TYPE_LABELS: Record<string, string> = {
-  GYM: "Gym",
-  PT: "Personal Training",
-  GYM_PT: "Gym + PT",
-};
-
 function SellMembershipDialog({ memberId }: { memberId: string }) {
   const [open, setOpen] = React.useState(false);
   const [planId, setPlanId] = React.useState("");
@@ -570,7 +564,6 @@ function WorkoutProgress({ memberId }: { memberId: string }) {
     return (
       <EmptyState
         title="No workout history yet"
-        description="Completed training sessions will appear here automatically."
       />
     );
 
@@ -1334,52 +1327,13 @@ function MemberHeader({
     }
   }
 
-  const memberTypeLabel = member?.memberType
-    ? MEMBER_TYPE_LABELS[member.memberType] || member.memberType
-    : null;
-  const joinedLabel = member?.joinedAt
-    ? new Date(member.joinedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "—";
-
   return (
     <PageHero
       id="member-title"
-      eyebrow={memberTypeLabel ? `Member 360 · ${memberTypeLabel}` : "Member 360"}
       icon={Users}
       title={
         <>
           {member?.firstName} {member?.lastName}
-        </>
-      }
-      description={
-        <>
-          <span className="font-mono tabular-nums">{member?.memberCode}</span>
-          {" · "}
-          <span>Joined {joinedLabel}</span>
-          {member?.assignedTrainer && (
-            <>
-              {" · "}
-              <span>
-                {member.assignedTrainer.firstName} {member.assignedTrainer.lastName}
-              </span>
-            </>
-          )}
-          {member?.phone && (
-            <>
-              {" · "}
-              <span>{member.phone}</span>
-            </>
-          )}
-          {member?.email && (
-            <>
-              {" · "}
-              <span>{member.email}</span>
-            </>
-          )}
         </>
       }
       variant="light"

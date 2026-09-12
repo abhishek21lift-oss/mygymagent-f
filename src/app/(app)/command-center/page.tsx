@@ -31,17 +31,6 @@ function money(value: string | undefined, currency: string) {
     : `${currency} 0`;
 }
 
-function timeAgo(iso: string | undefined) {
-  if (!iso) return null;
-  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (seconds < 90) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
 /* ------------------------------------------------------------------ */
 /* Vivid premium system — literal Tailwind strings (no dynamic color). */
 /* One radius family (22–34px), one space rhythm, 5 gradient families. */
@@ -95,7 +84,7 @@ function Stat({
   icon: typeof Users;
   label: string;
   value: string;
-  hint: string;
+  hint?: string;
   loading: boolean;
   tone: StatTone;
   delta?: string;
@@ -138,8 +127,7 @@ function Stat({
           >
             {loading ? <span className="text-stone-300">—</span> : value}
           </p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
-        </div>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}        </div>
       </CardContent>
     </Card>
   );
@@ -309,7 +297,7 @@ function WatchlistCard({
 }: {
   id: string;
   title: string;
-  caption: string;
+  caption?: string;
   href: string;
   actionLabel: string;
   icon: typeof Users;
@@ -332,7 +320,7 @@ function WatchlistCard({
           <h3 id={id} className="text-sm font-extrabold tracking-tight text-stone-950">
             {title}
           </h3>
-          <p className="mt-0.5 text-xs font-medium text-stone-600">{caption}</p>
+          {caption ? <p className="mt-0.5 text-xs font-medium text-stone-600">{caption}</p> : null}
         </div>
       </div>
       <CardContent className="p-5">
@@ -375,7 +363,7 @@ function Shortcut({
   href: string;
   icon: typeof Users;
   label: string;
-  sublabel: string;
+  sublabel?: string;
   tile: string;
   hoverRing: string;
 }) {
@@ -393,9 +381,11 @@ function Shortcut({
         <span className="block text-sm font-extrabold tracking-tight text-stone-950">
           {label}
         </span>
+        {sublabel ? (
         <span className="mt-0.5 block text-xs font-medium text-stone-600">
           {sublabel}
         </span>
+        ) : null}
       </span>
     </Link>
   );
@@ -424,7 +414,6 @@ export default function CommandCenterPage() {
   const currency = data?.revenue.revenue[0]?.currency ?? "INR";
   const revenue = data?.revenue.revenue.find((item) => item.currency === currency);
   const outstanding = data?.revenue.outstanding.find((item) => item.currency === currency);
-  const updatedAgo = timeAgo(data?.generatedAt);
 
   type Priority = Omit<Parameters<typeof PriorityRow>[0], "index"> & { key: string };
   const priorities: Priority[] = data
@@ -487,9 +476,7 @@ export default function CommandCenterPage() {
           variant="dark"
           accent="violet"
           icon={Zap}
-          eyebrow={updatedAgo ? `Live pulse · Updated ${updatedAgo}` : "Live pulse"}
           title="Command Center"
-          description="Check-ins, revenue, retention risk and AI approvals in one vivid cockpit."
           actions={
             <>
               <Link
@@ -558,7 +545,7 @@ export default function CommandCenterPage() {
             href="/intelligence"
             className="mt-2 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            View full intelligence
+            Intelligence
             <ArrowUpRight className="size-4" aria-hidden="true" />
           </Link>
         </PageHero>
@@ -603,9 +590,6 @@ export default function CommandCenterPage() {
               <h2 id="cc-pulse" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
                 Business pulse
               </h2>
-              <p className="mt-1 text-xs font-medium text-stone-600">
-                The four numbers that matter today — each owns one color.
-              </p>
             </div>
             <Link
               href="/intelligence"
@@ -619,7 +603,6 @@ export default function CommandCenterPage() {
               icon={CalendarCheck}
               label="Check-ins today"
               value={String(data?.today.checkIns ?? 0)}
-              hint="Real-time attendance"
               loading={briefing.isLoading}
               tone="cyan"
               delta="LIVE"
@@ -628,7 +611,7 @@ export default function CommandCenterPage() {
               icon={Wallet}
               label="Net revenue"
               value={money(revenue?.netRevenue, currency)}
-              hint={revenue ? `${revenue.paymentCount} payments · current period` : "Current period"}
+              hint={revenue ? `${revenue.paymentCount} payments` : undefined}
               loading={briefing.isLoading}
               tone="emerald"
               delta={revenue ? `${revenue.paymentCount} txns` : undefined}
@@ -637,7 +620,6 @@ export default function CommandCenterPage() {
               icon={Users}
               label="Members at risk"
               value={String(data?.atRiskMembers.count ?? 0)}
-              hint="14+ days inactive"
               loading={briefing.isLoading}
               tone="rose"
               delta={data && data.atRiskMembers.count > 0 ? "ACT NOW" : undefined}
@@ -646,7 +628,6 @@ export default function CommandCenterPage() {
               icon={Sparkles}
               label="Pending AI actions"
               value={String(data?.pendingAiActions ?? 0)}
-              hint="Needs approval"
               loading={briefing.isLoading}
               tone="violet"
               delta={data && data.pendingAiActions > 0 ? "REVIEW" : undefined}
@@ -669,9 +650,6 @@ export default function CommandCenterPage() {
                   <h2 id="cc-decisions" className="font-serif text-xl font-semibold tracking-tight text-stone-950">
                     Decision queue
                   </h2>
-                  <p className="mt-0.5 text-xs font-medium text-stone-600">
-                    Highest-value things deserving attention right now.
-                  </p>
                 </div>
               </div>
               {data && priorities.length > 0 && (
@@ -717,9 +695,6 @@ export default function CommandCenterPage() {
               </span>
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight">Sales health</h2>
-                <p className="mt-0.5 text-xs font-medium text-white/70">
-                  Pipeline momentum and follow-up discipline.
-                </p>
               </div>
             </div>
             <div className="relative mt-4 grid grid-cols-2 gap-2">
@@ -768,11 +743,11 @@ export default function CommandCenterPage() {
                 <h2 id="cc-money" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
                   Money movement
                 </h2>
+                {data ? (
                 <p className="mt-0.5 text-xs font-medium text-stone-600">
-                  {data
-                    ? `${new Date(data.revenue.period.from).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${new Date(data.revenue.period.to).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
-                    : "Current period"}
+                  {`${new Date(data.revenue.period.from).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${new Date(data.revenue.period.to).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`}
                 </p>
+                ) : null}
               </div>
             </div>
             <Link
@@ -798,7 +773,6 @@ export default function CommandCenterPage() {
                 {
                   label: "Membership revenue",
                   value: money(revenue?.membershipRevenue, currency),
-                  hint: "Recurring core",
                   icon: Users,
                   card: "from-violet-50/90 via-white to-blue-50/50 hover:border-violet-200",
                   tile: "from-violet-600 to-blue-600 shadow-violet-500/25",
@@ -833,7 +807,7 @@ export default function CommandCenterPage() {
                     <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">
                       {item.value}
                     </p>
-                    <p className="mt-1 text-[11px] font-medium text-stone-600">{item.hint}</p>
+                    {"hint" in item && item.hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{item.hint}</p> : null}
                   </div>
                 </CardContent>
               </Card>
@@ -850,9 +824,6 @@ export default function CommandCenterPage() {
               <span className="block text-sm font-extrabold text-stone-900">
                 Keep collections moving
               </span>
-              <span className="mt-0.5 block truncate text-xs font-medium text-stone-600">
-                Review outstanding memberships and keep cash flow healthy.
-              </span>
             </span>
             <ArrowRight
               className="size-5 shrink-0 text-amber-700 transition-transform duration-200 group-hover/collect:translate-x-1"
@@ -866,9 +837,8 @@ export default function CommandCenterPage() {
           <WatchlistCard
             id="cc-risk"
             title="At-risk members"
-            caption="Retention watchlist"
             href="/members"
-            actionLabel="View all members"
+            actionLabel="Members"
             icon={AlertTriangle}
             tone="rose"
             footer={data ? `${data.atRiskMembers.count} total on watchlist` : undefined}
@@ -894,16 +864,15 @@ export default function CommandCenterPage() {
                 />
               ))
             ) : (
-              <EmptyState text="No at-risk members — retention looks strong." />
+              <EmptyState text="No at-risk members." />
             )}
           </WatchlistCard>
 
           <WatchlistCard
             id="cc-stock"
             title="Low stock"
-            caption="Inventory watchlist"
             href="/inventory"
-            actionLabel="Open inventory"
+            actionLabel="Inventory"
             icon={Package}
             tone="amber"
             footer={data ? `${data.lowStock.count} products below reorder level` : undefined}
@@ -932,9 +901,8 @@ export default function CommandCenterPage() {
           <WatchlistCard
             id="cc-trainers"
             title="Trainer workload"
-            caption="People + programming activity"
             href="/staff"
-            actionLabel="Open staff"
+            actionLabel="Staff"
             icon={Users}
             tone="cyan"
             footer={
@@ -975,9 +943,6 @@ export default function CommandCenterPage() {
               <h2 id="cc-fast" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
                 Move faster
               </h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">
-                Jump straight into an operating surface — every tile owns a color.
-              </p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
@@ -986,7 +951,6 @@ export default function CommandCenterPage() {
                 href="/attendance"
                 icon={CalendarCheck}
                 label="Attendance"
-                sublabel="Check-ins"
                 tile="from-cyan-500 to-blue-600 shadow-cyan-500/25"
                 hoverRing="hover:border-cyan-200 hover:shadow-cyan-500/10"
               />
@@ -996,7 +960,6 @@ export default function CommandCenterPage() {
                 href="/members"
                 icon={Users}
                 label="Members"
-                sublabel="Member 360"
                 tile="from-violet-600 to-purple-600 shadow-violet-500/25"
                 hoverRing="hover:border-violet-200 hover:shadow-violet-500/10"
               />
@@ -1006,7 +969,6 @@ export default function CommandCenterPage() {
                 href="/billing"
                 icon={Wallet}
                 label="Billing"
-                sublabel="Collections"
                 tile="from-emerald-500 to-teal-600 shadow-emerald-500/25"
                 hoverRing="hover:border-emerald-200 hover:shadow-emerald-500/10"
               />
@@ -1016,7 +978,6 @@ export default function CommandCenterPage() {
                 href="/workouts"
                 icon={Dumbbell}
                 label="Workout OS"
-                sublabel="Programs"
                 tile="from-rose-500 to-orange-500 shadow-rose-500/25"
                 hoverRing="hover:border-rose-200 hover:shadow-rose-500/10"
               />
@@ -1025,7 +986,6 @@ export default function CommandCenterPage() {
               href="/owner-os"
               icon={BarChart3}
               label="Owner Insights"
-              sublabel="Deep dive"
               tile="from-amber-500 to-orange-600 shadow-amber-500/25"
               hoverRing="hover:border-amber-200 hover:shadow-amber-500/10"
             />
@@ -1033,7 +993,6 @@ export default function CommandCenterPage() {
               href="/crm"
               icon={TrendingUp}
               label="Sales OS"
-              sublabel="Pipeline"
               tile="from-blue-600 to-indigo-600 shadow-blue-500/25"
               hoverRing="hover:border-blue-200 hover:shadow-blue-500/10"
             />
@@ -1041,7 +1000,6 @@ export default function CommandCenterPage() {
               href="/inventory"
               icon={Package}
               label="Inventory OS"
-              sublabel="Stock"
               tile="from-orange-500 to-amber-500 shadow-orange-500/25"
               hoverRing="hover:border-orange-200 hover:shadow-orange-500/10"
             />
@@ -1049,7 +1007,6 @@ export default function CommandCenterPage() {
               href="/ai"
               icon={Sparkles}
               label="MyGymAgent AI"
-              sublabel="Ask anything"
               tile="from-fuchsia-600 to-violet-600 shadow-fuchsia-500/25"
               hoverRing="hover:border-fuchsia-200 hover:shadow-fuchsia-500/10"
             />

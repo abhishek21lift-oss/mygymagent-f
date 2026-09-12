@@ -77,10 +77,8 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="lead-title"
-          eyebrow={`Lead 360 · Score ${score}`}
           icon={UserRound}
           title={`${currentLead.firstName} ${currentLead.lastName}`}
-          description="Pipeline, ownership, follow-ups and conversion handoff."
           variant="light"
           accent="violet"
           actions={
@@ -103,10 +101,10 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
 
         <section aria-label="Lead snapshot">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric icon={Sparkles} label="Sales priority score" value={score} tone="violet" hint="Stage + contact completeness" />
-            <Metric icon={Flame} label="Pipeline stage" value={currentLead.status} tone="rose" hint="Current conversion step" />
-            <Metric icon={CalendarClock} label="Open follow-ups" value={openFollowUps} tone="amber" hint="Actions awaiting a rep" />
-            <Metric icon={Target} label="Lead source" value={currentLead.source ?? "Unknown"} tone="cyan" hint="Acquisition channel" />
+            <Metric icon={Sparkles} label="Sales priority score" value={score} tone="violet" />
+            <Metric icon={Flame} label="Pipeline stage" value={currentLead.status} tone="rose" />
+            <Metric icon={CalendarClock} label="Open follow-ups" value={openFollowUps} tone="amber" />
+            <Metric icon={Target} label="Lead source" value={currentLead.source ?? "Unknown"} tone="cyan" />
           </div>
         </section>
 
@@ -118,7 +116,6 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
               </span>
               <div>
                 <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Lead profile</h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">Contact truth the whole team can trust.</p>
               </div>
             </div>
             <div className="p-5 sm:p-6">
@@ -162,7 +159,6 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
           <div className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
             <div className="border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/60 px-5 py-5">
               <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Pipeline control</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Stage, owner and instant contact.</p>
             </div>
             <div className="space-y-5 p-5 sm:p-6">
               <div>
@@ -205,8 +201,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
               <CalendarClock className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 id="lead-followups" className="font-serif text-xl font-semibold tracking-tight text-stone-950">Follow-up command center</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Schedule the next action, close the loop.</p>
+              <h2 id="lead-followups" className="font-serif text-xl font-semibold tracking-tight text-stone-950">Follow-ups</h2>
             </div>
           </div>
           <div className="space-y-5 p-5 sm:p-6">
@@ -240,7 +235,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
               ))}
               {(!currentLead.followUps || currentLead.followUps.length === 0) && (
                 <div className="rounded-[20px] border border-dashed border-blue-200 bg-blue-50/40 p-6 text-center text-sm font-medium text-stone-600">
-                  No follow-ups yet. Schedule the next sales action above.
+                  No follow-ups yet.
                 </div>
               )}
             </div>
@@ -251,7 +246,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
   )
 }
 
-function Metric({ icon: Icon, label, value, tone, hint }: { icon: LucideIcon; label: string; value: string | number; tone: "violet" | "rose" | "amber" | "cyan"; hint: string }) {
+function Metric({ icon: Icon, label, value, tone, hint }: { icon: LucideIcon; label: string; value: string | number; tone: "violet" | "rose" | "amber" | "cyan"; hint?: string }) {
   const tones = {
     violet: { bar: "from-violet-600 via-purple-600 to-fuchsia-600", tile: "from-violet-600 to-fuchsia-600 shadow-violet-500/30", orb: "bg-fuchsia-400/20", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
     rose: { bar: "from-rose-500 via-red-500 to-orange-500", tile: "from-rose-500 to-orange-500 shadow-rose-500/30", orb: "bg-rose-400/20", ring: "hover:border-rose-200 hover:shadow-rose-500/10" },
@@ -270,7 +265,7 @@ function Metric({ icon: Icon, label, value, tone, hint }: { icon: LucideIcon; la
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>

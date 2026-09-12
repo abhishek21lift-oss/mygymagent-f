@@ -94,9 +94,7 @@ export default function AiPage() {
           variant="dark"
           accent="violet"
           icon={Sparkles}
-          eyebrow="MyGymAgent AI"
           title="AI Assistant"
-          description="Ask about members, workout history, and attendance — or have it draft a workout or a lead follow-up."
           actions={
             <Link
               href="/ai-actions"
@@ -131,7 +129,6 @@ export default function AiPage() {
                 </span>
                 <div>
                   <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Conversation</h2>
-                  <p className="text-xs font-medium text-stone-600">Grounded in your gym&apos;s live data.</p>
                 </div>
                 {chat.isPending && <span className="ml-auto rounded-full bg-violet-500/10 px-3 py-1 text-[11px] font-black text-violet-700">THINKING…</span>}
               </div>
@@ -142,9 +139,6 @@ export default function AiPage() {
                       <Sparkles className="size-6" aria-hidden="true" />
                     </span>
                     <p className="max-w-sm font-serif text-lg font-semibold text-stone-900">What should we solve today?</p>
-                    <p className="max-w-sm text-xs font-medium text-stone-600">
-                      Try: &quot;What&apos;s the attendance history for [member name]?&quot;
-                    </p>
                     <div className="mt-2 grid w-full max-w-md gap-2">
                       {PROMPTS.map((p) => (
                         <button
@@ -217,7 +211,7 @@ export default function AiPage() {
                     <Send className="size-4" aria-hidden="true" />
                   </Button>
                 </div>
-                <p className="mt-2 text-[11px] font-medium text-stone-600">Enter to send · Shift + Enter for a new line. AI drafts never execute without approval.</p>
+                <p className="mt-2 text-[11px] font-medium text-stone-600">Enter to send · Shift + Enter for a new line.</p>
               </div>
             </section>
 
@@ -226,9 +220,6 @@ export default function AiPage() {
                 <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
                 <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
                 <h2 className="relative font-serif text-xl font-semibold tracking-tight">Grounded answers</h2>
-                <p className="relative mt-2 text-xs font-medium leading-5 text-white/70">
-                  The assistant reads live members, attendance, plans and pipeline — then proposes actions you approve.
-                </p>
                 <Link
                   href="/ai-actions"
                   className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"

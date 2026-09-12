@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
-  ArrowRight,
   CalendarClock,
   CheckCircle2,
   ChevronRight,
@@ -90,7 +89,7 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; ring: string
   },
 };
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint: string; tone: MetricTone }) {
+function Metric({ icon: Icon, label, value, tone }: { icon: typeof Users; label: string; value: React.ReactNode; tone: MetricTone }) {
   const t = METRIC_TONES[tone];
   return (
     <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.ring}`}>
@@ -103,7 +102,6 @@ function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; 
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
           <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums" aria-live="polite">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
         </div>
       </CardContent>
     </Card>
@@ -236,16 +234,14 @@ export default function MembersPage() {
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         <PageHero
           id="members-title"
-          eyebrow="Member OS · Command Center"
           icon={Users}
-          title="Members, in context."
-          description="One operational surface for every member, signal, segment and action."
+          title="Members"
           variant="light"
           accent="violet"
           actions={
             <>
               <Button variant="outline" className="min-h-11 rounded-2xl border-stone-200/80 bg-white/80 px-5 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600" onClick={() => document.getElementById("member-table")?.scrollIntoView({ behavior: "smooth" })}>
-                <Search className="mr-2 size-4" aria-hidden="true" /> Explore members
+                <Search className="mr-2 size-4" aria-hidden="true" /> Explore
               </Button>
               <Button className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-5 font-extrabold text-white shadow-lg shadow-violet-500/25 transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600" onClick={() => router.push("/members/new")}>
                 <Plus className="mr-2 size-4" aria-hidden="true" /> Add member
@@ -256,23 +252,19 @@ export default function MembersPage() {
 
         <section aria-labelledby="members-pulse" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <div className="mb-4 px-1">
-            <p className="text-[10px] font-black uppercase tracking-[.22em] text-violet-700">Member pulse</p>
             <h2 id="members-pulse" className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950 sm:text-[28px]">Today at a glance</h2>
-            <p className="mt-1 text-xs font-medium text-stone-600">Live directory health — each number owns one color.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric icon={Users} label="Total members" value={members.isLoading ? "—" : total} hint="Complete member directory" tone="violet" />
-            <Metric icon={CheckCircle2} label="Active" value={members.isLoading ? "—" : active} hint="On current page" tone="emerald" />
-            <Metric icon={AlertTriangle} label="Attention signals" value={members.isLoading ? "—" : inactive + frozen + expired} hint="Inactive, frozen or expired" tone="amber" />
-            <Metric icon={Sparkles} label="PT members" value={members.isLoading ? "—" : items.filter((m) => m.memberType !== "GYM").length} hint="PT + hybrid members" tone="cyan" />
+            <Metric icon={Users} label="Total members" value={members.isLoading ? "—" : total} tone="violet" />
+            <Metric icon={CheckCircle2} label="Active" value={members.isLoading ? "—" : active} tone="emerald" />
+            <Metric icon={AlertTriangle} label="Attention signals" value={members.isLoading ? "—" : inactive + frozen + expired} tone="amber" />
+            <Metric icon={Sparkles} label="PT members" value={members.isLoading ? "—" : items.filter((m) => m.memberType !== "GYM").length} tone="cyan" />
           </div>
         </section>
 
         <section aria-labelledby="members-segments" className="animate-in fade-in slide-in-from-bottom-2 duration-500 [animation-delay:100ms]">
           <div className="mb-4 px-1">
-            <p className="text-[10px] font-black uppercase tracking-[.22em] text-violet-700">Smart segments</p>
             <h2 id="members-segments" className="mt-1 font-serif text-2xl font-semibold tracking-tight text-stone-950">Go from signal to cohort</h2>
-            <p className="mt-1 text-xs font-medium text-stone-600">One tap filters the directory below.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <Segment title="All members" description="Full operational directory." icon={Users} tone="all" onClick={() => setSegment("all")} />
@@ -294,7 +286,6 @@ export default function MembersPage() {
                   </span>
                   <div>
                     <CardTitle id="members-directory" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">Member directory</CardTitle>
-                    <p className="mt-0.5 text-xs font-medium text-stone-600">Search, filter, select, export and open Member 360 without leaving the command surface.</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -332,42 +323,13 @@ export default function MembersPage() {
                 rowSelection={selection}
                 onRowSelectionChange={setSelection}
                 emptyTitle="No members found"
-                emptyDescription="Try another search or filter, or add a new member."
+                emptyDescription="Try another search."
                 emptyAction={<Button className="min-h-11 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600" onClick={() => router.push("/members/new")}><Plus className="mr-2 size-4" aria-hidden="true" /> Add member</Button>}
               />
             </CardContent>
           </Card>
         </section>
 
-        <section aria-labelledby="members-workflow" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 [animation-delay:200ms] lg:grid-cols-[1.25fr_.75fr]">
-          <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 backdrop-blur-xl">
-            <CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-white via-violet-50/50 to-cyan-50/50">
-              <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Member OS workflow</CardTitle>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Nothing is hidden behind the redesign — the command surface simply makes the existing workflows easier to reach.</p>
-            </CardHeader>
-            <CardContent className="grid gap-3 p-5 sm:grid-cols-2">
-              <div className="rounded-[20px] border border-cyan-100/70 bg-gradient-to-br from-cyan-50/80 to-white p-4"><p className="text-[10px] font-black uppercase tracking-[.16em] text-cyan-700">Directory</p><p className="mt-1 text-sm font-bold text-stone-900">Search · filters · tags · status · types</p></div>
-              <div className="rounded-[20px] border border-violet-100/70 bg-gradient-to-br from-violet-50/80 to-white p-4"><p className="text-[10px] font-black uppercase tracking-[.16em] text-violet-700">Member 360</p><p className="mt-1 text-sm font-bold text-stone-900">Open any member for the full profile workspace</p></div>
-              <div className="rounded-[20px] border border-amber-100/70 bg-gradient-to-br from-amber-50/80 to-white p-4"><p className="text-[10px] font-black uppercase tracking-[.16em] text-amber-800">Operations</p><p className="mt-1 text-sm font-bold text-stone-900">Bulk status · bulk tags · export</p></div>
-              <div className="rounded-[20px] border border-emerald-100/70 bg-gradient-to-br from-emerald-50/80 to-white p-4"><p className="text-[10px] font-black uppercase tracking-[.16em] text-emerald-700">Lifecycle</p><p className="mt-1 text-sm font-bold text-stone-900">Active · inactive · frozen · expired</p></div>
-            </CardContent>
-          </Card>
-          <Card className="overflow-hidden rounded-[28px] border-0 bg-[linear-gradient(145deg,#2e1065,#6d28d9_45%,#0e7490)] text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)]">
-            <CardHeader className="border-b border-white/10">
-              <CardTitle className="flex items-center gap-3 font-serif text-xl"><span className="flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20"><Sparkles className="size-5" aria-hidden="true" /></span> Member intelligence</CardTitle>
-              <p className="mt-1 text-xs font-medium text-white/65">The redesigned shell is ready for the Risk → Analytics → Churn → AI Insights → Actions pipeline.</p>
-            </CardHeader>
-            <CardContent className="space-y-4 p-5">
-              <div className="rounded-[20px] border border-white/15 bg-white/10 p-4 backdrop-blur">
-                <p className="text-[10px] font-black uppercase tracking-[.16em] text-white/60">Next-best action</p>
-                <p className="mt-1 text-sm font-bold">Open a member to inspect their complete operational context and available actions.</p>
-              </div>
-              <Button variant="secondary" className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white font-extrabold text-indigo-950 hover:bg-white/90" onClick={() => router.push("/intelligence")}>
-                <span>Open Intelligence</span><ArrowRight className="ml-2 size-4" aria-hidden="true" />
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
       </div>
     </div>
   );

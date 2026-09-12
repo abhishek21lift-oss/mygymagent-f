@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock3,
-  CreditCard,
   Dumbbell,
   Megaphone,
   Package,
@@ -159,9 +158,7 @@ export default function DashboardPage() {
           variant="dark"
           accent="violet"
           icon={Sparkles}
-          eyebrow={briefing.isLoading ? "Live gym pulse · Syncing…" : `Live gym pulse · ${data?.today.checkIns ?? 0} check-ins today`}
           title={gymName}
-          description="Live attendance, revenue flow, retention risk and AI approvals in one command deck."
           actions={
             <>
               <Link
@@ -193,7 +190,7 @@ export default function DashboardPage() {
               href="/intelligence"
               className="inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold text-violet-700 transition hover:bg-violet-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
             >
-              View full intelligence
+              Intelligence
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
@@ -225,9 +222,6 @@ export default function DashboardPage() {
               <h2 id="dash-pulse" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">
                 Business pulse
               </h2>
-              <p className="mt-1 text-xs font-medium text-stone-600">
-                Immersive 3D metric cards — live numbers that matter today.
-              </p>
             </div>
             <Link
               href="/intelligence"
@@ -237,10 +231,10 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard3D icon={CalendarCheck} label="Today's check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" hint="Real-time" trend="neutral" delay={0} />
-            <MetricCard3D icon={Wallet} label="Net revenue" value={data ? `${currency} ${revenue}` : undefined} loading={briefing.isLoading} accent="green" hint="Current period" trend="neutral" delay={100} />
-            <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" hint="14+ days inactive" trend="neutral" delay={200} />
-            <MetricCard3D icon={Sparkles} label="AI actions" value={data?.pendingAiActions} loading={briefing.isLoading} accent="violet" hint="Awaiting approval" trend="neutral" delay={300} />
+            <MetricCard3D icon={CalendarCheck} label="Today's check-ins" value={data?.today.checkIns} loading={briefing.isLoading} accent="cyan" trend="neutral" delay={0} />
+            <MetricCard3D icon={Wallet} label="Net revenue" value={data ? `${currency} ${revenue}` : undefined} loading={briefing.isLoading} accent="green" trend="neutral" delay={100} />
+            <MetricCard3D icon={Users} label="Members at risk" value={data?.atRiskMembers.count} loading={briefing.isLoading} accent="amber" trend="neutral" delay={200} />
+            <MetricCard3D icon={Sparkles} label="AI actions" value={data?.pendingAiActions} loading={briefing.isLoading} accent="violet" trend="neutral" delay={300} />
           </div>
         </section>
 
@@ -254,7 +248,6 @@ export default function DashboardPage() {
                   </span>
                   <div>
                     <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Revenue trend</CardTitle>
-                    <p className="mt-0.5 text-xs font-medium text-stone-600">Net revenue by month, in {revenueTrend.data?.[0]?.revenue[0]?.currency ?? currency}.</p>
                   </div>
                 </div>
                 <Link href="/billing" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-xs font-extrabold text-cyan-700 transition hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">Details</Link>
@@ -265,7 +258,7 @@ export default function DashboardPage() {
                 {revenueTrend.isLoading ? (
                   <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>
                 ) : weeklyData.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No revenue yet</p><p className="text-xs font-medium text-stone-600">Data unavailable — no revenue recorded yet.</p></div>
+                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No revenue yet</p></div>
                 ) : (
                   <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>}>
                     <Chart3D data={weeklyData} />
@@ -284,7 +277,6 @@ export default function DashboardPage() {
                   </span>
                   <div>
                     <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Member status</CardTitle>
-                    <p className="mt-0.5 text-xs font-medium text-stone-600">Live member statuses across your gym.</p>
                   </div>
                 </div>
                 <Link href="/members" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-xs font-extrabold text-violet-700 transition hover:bg-violet-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">Members</Link>
@@ -295,7 +287,7 @@ export default function DashboardPage() {
                 {statusBreakdown.isLoading ? (
                   <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>
                 ) : membershipData.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No members yet</p><p className="text-xs font-medium text-stone-600">Data unavailable — no members yet.</p></div>
+                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No members yet</p></div>
                 ) : (
                   <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>}>
                     <DataOrb data={membershipData} />
@@ -323,7 +315,6 @@ export default function DashboardPage() {
                 </span>
                 <div>
                   <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Today&apos;s activity flow</CardTitle>
-                  <p className="mt-0.5 text-xs font-medium text-stone-600">Animated timeline of gym events.</p>
                 </div>
               </div>
             </CardHeader>
@@ -332,7 +323,7 @@ export default function DashboardPage() {
                 {briefing.isLoading ? (
                   <div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>
                 ) : activityTimeline.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No activity yet</p><p className="text-xs font-medium text-stone-600">Data unavailable.</p></div>
+                  <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-stone-200 bg-stone-50/60 p-6 text-center"><p className="text-sm font-bold text-stone-900">No activity yet</p></div>
                 ) : (
                   <Suspense fallback={<div className="flex h-full items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" aria-hidden="true" /></div>}>
                     <ActivityTimeline3D activities={activityTimeline} />
@@ -351,7 +342,6 @@ export default function DashboardPage() {
                   </span>
                   <div>
                     <CardTitle className="font-serif text-xl tracking-tight text-stone-950">Today&apos;s priorities</CardTitle>
-                    <p className="mt-0.5 text-xs font-medium text-stone-600">Signals that may need a decision.</p>
                   </div>
                 </div>
                 <Link href="/owner-os" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">Owner OS</Link>
@@ -376,7 +366,7 @@ export default function DashboardPage() {
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-2 rounded-[22px] border border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 px-5 py-10 text-center"><span className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25"><CheckCircle2 className="size-6" aria-hidden="true" /></span><p className="text-sm font-extrabold text-stone-900">You&apos;re all caught up</p><p className="text-xs font-medium text-stone-600">No urgent operational signals right now.</p></div>
+                <div className="flex flex-col items-center justify-center gap-2 rounded-[22px] border border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 px-5 py-10 text-center"><span className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25"><CheckCircle2 className="size-6" aria-hidden="true" /></span><p className="text-sm font-extrabold text-stone-900">You&apos;re all caught up</p></div>
               )}
             </CardContent>
           </Card>
@@ -391,15 +381,13 @@ export default function DashboardPage() {
             </span>
             <div>
               <h2 id="dash-ai" className="font-serif text-xl font-semibold tracking-tight">AI briefing</h2>
-              <p className="mt-0.5 text-xs font-medium text-white/70">A one-line read of today, then go deeper.</p>
             </div>
           </div>
-          <p className="relative mt-4 text-sm leading-6 text-white/80">{data ? `${data.today.checkIns} check-ins today, ${data.atRiskMembers.count} members need attention, ${data.salesFunnel.followUps.total} follow-ups are tracked, and ${data.pendingAiActions} AI proposals await decisions.` : "Loading today's operational briefing…"}</p>
           <div className="relative mt-4 grid grid-cols-2 gap-3">
             <MiniInsight icon={TrendingUp} label="Conversion" value={data ? `${data.salesFunnel.conversionRatePct}%` : "—"} />
             <MiniInsight icon={Clock3} label="Follow-ups" value={data?.salesFunnel.followUps.total ?? 0} />
           </div>
-          <Link href="/ai" className="relative mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Open AI command center <ArrowRight className="size-4" aria-hidden="true" /></Link>
+          <Link href="/ai" className="relative mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Open AI <ArrowRight className="size-4" aria-hidden="true" /></Link>
         </section>
 
         <section aria-labelledby="dash-quick">
@@ -409,19 +397,18 @@ export default function DashboardPage() {
             </span>
             <div>
               <h2 id="dash-quick" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">Quick actions</h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">Common workflows — every tile owns a color.</p>
             </div>
           </div>
           {visibleActions.length > 0 && (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {visibleActions.map(([title, description, href, Icon], i) => (
+              {visibleActions.map(([title, , href, Icon], i) => (
                 <Link
                   key={href}
                   href={href}
                   className="group flex min-h-11 items-center gap-3 rounded-[22px] border border-white/90 bg-white/85 p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
                 >
                   <span className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${QUICK_TILES[i % QUICK_TILES.length]}`}><Icon className="size-5" aria-hidden="true" /></span>
-                  <span className="min-w-0 flex-1"><span className="block text-sm font-extrabold tracking-tight text-stone-950">{title}</span><span className="mt-0.5 block truncate text-xs font-medium text-stone-600">{description}</span></span>
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-extrabold tracking-tight text-stone-950">{title}</span></span>
                   <ArrowRight className="size-4 shrink-0 text-stone-400 transition group-hover:translate-x-1 group-hover:text-violet-700" aria-hidden="true" />
                 </Link>
               ))}
@@ -429,11 +416,6 @@ export default function DashboardPage() {
           )}
         </section>
 
-        <section aria-label="Explore surfaces" className="grid gap-3 sm:grid-cols-3">
-          <Link href="/members" className="rounded-[22px] border border-white/90 bg-white/85 p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"><div className="flex items-center gap-2 text-sm font-extrabold text-stone-900"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md"><Users className="size-4" aria-hidden="true" /></span> Member health</div><p className="mt-2 text-xs font-medium text-stone-600">Explore retention, attendance and member lifecycle.</p></Link>
-          <Link href="/crm" className="rounded-[22px] border border-white/90 bg-white/85 p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"><div className="flex items-center gap-2 text-sm font-extrabold text-stone-900"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-md"><Megaphone className="size-4" aria-hidden="true" /></span> Sales pipeline</div><p className="mt-2 text-xs font-medium text-stone-600">Prioritize leads and follow-ups with context.</p></Link>
-          <Link href="/billing" className="rounded-[22px] border border-white/90 bg-white/85 p-5 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"><div className="flex items-center gap-2 text-sm font-extrabold text-stone-900"><span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md"><CreditCard className="size-4" aria-hidden="true" /></span> Cash flow</div><p className="mt-2 text-xs font-medium text-stone-600">Outstanding balances and payment activity.</p></Link>
-        </section>
       </div>
     </div>
   );

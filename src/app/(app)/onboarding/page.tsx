@@ -15,9 +15,7 @@ export default function OnboardingPage() {
           variant="dark"
           accent="violet"
           icon={Sparkles}
-          eyebrow="Business setup"
           title="MyGymAgent"
-          description="Launch your gym in minutes — organization, branch, preferences and team, all in one vivid flow."
           align="center"
         />
         <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">

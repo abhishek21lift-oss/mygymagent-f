@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
-  ArrowRight,
   ArrowRightCircle,
   CalendarClock,
   Check,
@@ -14,7 +13,6 @@ import {
   Megaphone,
   Plus,
   Sparkles,
-  Target,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -567,9 +565,6 @@ function LeadDetail({ leadId, onClose }: { leadId: string; onClose: () => void }
                   Send
                 </Button>
               </div>
-              <p className="text-xs font-medium text-stone-600">
-                Sends are recorded in the message log for audit.
-              </p>
             </div>
           )}
         </div>
@@ -637,10 +632,8 @@ export default function CrmPage() {
         {/* Hero */}
         <PageHero
           id="crm-title"
-          eyebrow="Sales intelligence"
           icon={Megaphone}
           title="Sales OS"
-          description="Know who to contact next — pipeline, follow-ups and conversion in one place."
           variant="light"
           accent="blue"
           actions={
@@ -651,7 +644,7 @@ export default function CrmPage() {
                 className="min-h-11 rounded-2xl border-violet-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
               >
                 <a href="/ai">
-                  <Sparkles className="size-4" aria-hidden="true" /> Ask AI who to call
+                  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
                 </a>
               </Button>
               {hasPermission("leads.manage") && <NewLeadDialog />}
@@ -676,18 +669,14 @@ export default function CrmPage() {
 
         {/* Stats */}
         <section aria-label="Pipeline snapshot">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <Metric icon={Users} label="Visible leads" value={visible} tone="cyan" hint="On this page of results" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Metric icon={Users} label="Visible leads" value={visible} tone="cyan" />
             <Metric
               icon={Flame}
               label="Current stage"
               value={filter === "ALL" ? "All" : filter}
               tone="rose"
-              hint="Active pipeline filter"
             />
-            <Metric icon={Target} label="Qualified" value="—" tone="violet" hint="Move warm to trial" />
-            <Metric icon={CalendarClock} label="Follow-ups" value="—" tone="amber" hint="Work today's actions" />
-            <Metric icon={Sparkles} label="AI priority" value="Ready" tone="blue" hint="Ask who to call next" />
           </div>
         </section>
 
@@ -708,9 +697,6 @@ export default function CrmPage() {
                 >
                   Conversion pipeline
                 </h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">
-                  Filter the pipeline without losing lead context.
-                </p>
               </div>
             </div>
           </div>
@@ -735,16 +721,13 @@ export default function CrmPage() {
           </div>
         </section>
 
-        {/* Leads + next actions */}
-        <section className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+        {/* Leads */}
+        <section className="grid gap-5">
           <div className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
             <div className="border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-violet-50/60 px-5 py-5 sm:px-6">
               <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">
                 Leads
               </h2>
-              <p className="mt-0.5 text-xs font-medium text-stone-600">
-                Select any row to open the full lead workspace.
-              </p>
             </div>
             <div className="p-3 sm:p-4">
               <DataTable
@@ -757,60 +740,8 @@ export default function CrmPage() {
                 page={page}
                 onPageChange={setPage}
                 emptyTitle="No leads yet"
-                emptyDescription="Add a lead to start tracking your pipeline."
+                emptyDescription="Add a lead to begin."
               />
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-            <div className="flex items-center gap-3 border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/60 px-5 py-5">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25">
-                <Sparkles className="size-5" aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">
-                  Next best actions
-                </h2>
-                <p className="mt-0.5 text-xs font-medium text-stone-600">
-                  AI-guided moves that protect revenue.
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3 p-5">
-              <Action
-                icon={CalendarClock}
-                title="Follow up today"
-                text="Work the leads with the next scheduled action."
-                tile="from-blue-600 to-cyan-500 shadow-blue-500/25"
-              />
-              <Action
-                icon={Target}
-                title="Prioritize qualified leads"
-                text="Move warm prospects toward a trial or offer."
-                tile="from-violet-600 to-fuchsia-600 shadow-violet-500/25"
-              />
-              <Action
-                icon={Flame}
-                title="Protect hot leads"
-                text="Respond while purchase intent is high."
-                tile="from-rose-500 to-orange-500 shadow-rose-500/25"
-              />
-              <Button
-                asChild
-                variant="outline"
-                className="min-h-11 w-full rounded-2xl border-violet-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
-              >
-                <a href="/ai">
-                  <Sparkles className="size-4" aria-hidden="true" /> Open AI sales assistant
-                </a>
-              </Button>
-              <Link
-                href="/crm/follow-ups"
-                className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-stone-950 px-4 py-3 text-sm font-extrabold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950"
-              >
-                Open follow-up queue
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </Link>
             </div>
           </div>
         </section>
@@ -832,7 +763,7 @@ function Metric({
   label: string;
   value: string | number;
   tone: MetricTone;
-  hint: string;
+  hint?: string;
 }) {
   const t = METRIC_TONES[tone];
   return (
@@ -860,37 +791,10 @@ function Metric({
           <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">
             {value}
           </p>
-          <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p>
+          {hint ? <p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function Action({
-  icon: Icon,
-  title,
-  text,
-  tile,
-}: {
-  icon: typeof Target;
-  title: string;
-  text: string;
-  tile: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-[20px] border border-stone-200/70 bg-white/70 p-4 transition hover:-translate-y-px hover:shadow-md">
-      <span
-        className={`flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-gradient-to-br text-white shadow-md ${tile}`}
-      >
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-extrabold tracking-tight text-stone-950">
-          {title}
-        </span>
-        <span className="mt-0.5 block text-xs font-medium leading-5 text-stone-600">{text}</span>
-      </span>
-    </div>
-  );
-}
