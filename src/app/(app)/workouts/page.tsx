@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ArrowRight, Dumbbell, Flame, Layers3, Plus, Sparkles, Target, Trash2, UserPlus, Users, Zap } from "lucide-react";
 import Link from "next/link";
 import { MemberPicker } from "@/components/shared/member-picker";
+import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -283,24 +284,21 @@ export default function WorkoutsPage() {
     <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="workouts-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-rose-300/25 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-orange-300/25 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-rose-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Workout studio
-              </div>
-              <h1 id="workouts-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Training Studio</h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">Build programs, curate the exercise library and deliver training plans from one premium workspace.</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        <PageHero
+          id="workouts-title"
+          eyebrow="Workout studio"
+          icon={Dumbbell}
+          title="Training Studio"
+          description="Build programs, curate the exercise library and deliver training plans."
+          variant="light"
+          accent="rose"
+          actions={
+            <>
               {hasPermission("workouts.create") && <AddExerciseDialog />}
               {hasPermission("workouts.create") && <CreatePlanDialog />}
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <section aria-labelledby="workouts-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="workouts-stats" className="sr-only">Studio numbers</h2>
@@ -349,7 +347,7 @@ export default function WorkoutsPage() {
             </CardContent>
           </Card>
 
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#4c0519,#9a3412_45%,#0e7490)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(244,63,94,.55)] lg:p-7">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#4c0519,#9a3412_45%,#0e7490)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(244,63,94,.55)] sm:p-5">
             <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-orange-400/25 blur-3xl" aria-hidden="true" />
             <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
             <div className="relative flex items-center gap-3">
@@ -357,7 +355,7 @@ export default function WorkoutsPage() {
                 <Target className="size-5" />
               </span>
               <div>
-                <h2 className="font-serif text-xl font-semibold tracking-tight">Training pulse</h2>
+                <h2 className="font-serif text-lg font-semibold tracking-tight">Training pulse</h2>
                 <p className="mt-0.5 text-xs font-medium text-white/70">Program delivery, from plan to completion.</p>
               </div>
             </div>

@@ -6,6 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Apple, ArrowRight, Leaf, Plus, Salad, Sparkles, Target, Trash2, UserPlus, Users, Utensils, Zap } from "lucide-react";
 import { MemberPicker } from "@/components/shared/member-picker";
+import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -299,24 +300,21 @@ export default function NutritionPage() {
     <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="nutrition-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(5,150,105,.35)] backdrop-blur-2xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-emerald-300/25 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-lime-300/25 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Nutrition studio
-              </div>
-              <h1 id="nutrition-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Nutrition Command Center</h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">Build food intelligence, create meal plans and keep client nutrition delivery in one calm workspace.</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        <PageHero
+          id="nutrition-title"
+          eyebrow="Nutrition studio"
+          icon={Apple}
+          title="Nutrition Plans"
+          description="Build food intelligence, create meal plans and keep client delivery in one place."
+          variant="light"
+          accent="emerald"
+          actions={
+            <>
               {hasPermission("nutrition.create") && <AddFood />}
               {hasPermission("nutrition.create") && <CreatePlan />}
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <section aria-labelledby="nutrition-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="nutrition-stats" className="sr-only">Nutrition numbers</h2>
@@ -369,7 +367,7 @@ export default function NutritionPage() {
             </CardContent>
           </Card>
 
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#064e3b,#0f766e_48%,#0891b2)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(5,150,105,.72)] lg:p-7">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#064e3b,#0f766e_48%,#0891b2)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(5,150,105,.72)] sm:p-5">
             <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-lime-300/25 blur-3xl" aria-hidden="true" />
             <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-300/20 blur-3xl" aria-hidden="true" />
             <div className="relative flex items-center gap-3">
@@ -377,7 +375,7 @@ export default function NutritionPage() {
                 <Target className="size-5" />
               </span>
               <div>
-                <h2 className="font-serif text-xl font-semibold tracking-tight">Nutrition pulse</h2>
+                <h2 className="font-serif text-lg font-semibold tracking-tight">Nutrition pulse</h2>
                 <p className="mt-0.5 text-xs font-medium text-white/70">Fresh delivery, from plan to plate.</p>
               </div>
             </div>

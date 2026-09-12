@@ -4,6 +4,7 @@ import * as React from "react"
 import { CalendarDays, CalendarX2, ChevronLeft, ChevronRight, Clock3, Dumbbell, Sparkles, Trash2, UserRound } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { PageHero } from "@/components/shared/page-hero"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -153,36 +154,30 @@ export default function CalendarPage() {
     <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="calendar-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-rose-300/25 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-orange-300/25 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-rose-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Unified scheduling
-              </div>
-              <h1 id="calendar-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Calendar &amp; Appointments</h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">
-                One calendar for PT sessions, trials, consultations and assessments — with conflict detection, trainer availability rules and daily reminders.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Event legend">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200/70"><span className="size-1.5 rounded-full bg-rose-500" aria-hidden="true" />Trial</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-2.5 py-1 text-[10px] font-extrabold text-cyan-800 ring-1 ring-cyan-200/70"><span className="size-1.5 rounded-full bg-cyan-500" aria-hidden="true" />Consult</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-extrabold text-violet-700 ring-1 ring-violet-200/70"><span className="size-1.5 rounded-full bg-violet-500" aria-hidden="true" />Assessment</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-extrabold text-orange-800 ring-1 ring-orange-200/70"><span className="size-1.5 rounded-full bg-orange-500" aria-hidden="true" />PT</span>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Select value={effectiveBranchId} onValueChange={setBranchId}>
-                <SelectTrigger className="min-h-11 w-44"><SelectValue placeholder="Branch" /></SelectTrigger>
-                <SelectContent>
-                  {(branches.data?.items ?? []).map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+        <PageHero
+          id="calendar-title"
+          eyebrow="Unified scheduling"
+          icon={CalendarDays}
+          title="Calendar & Appointments"
+          description="One calendar for PT sessions, trials and consultations — with conflict detection."
+          variant="light"
+          accent="orange"
+          actions={
+            <Select value={effectiveBranchId} onValueChange={setBranchId}>
+              <SelectTrigger className="min-h-11 w-44"><SelectValue placeholder="Branch" /></SelectTrigger>
+              <SelectContent>
+                {(branches.data?.items ?? []).map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          }
+        >
+          <div className="flex flex-wrap gap-1.5" aria-label="Event legend">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-[10px] font-extrabold text-rose-700 ring-1 ring-rose-200/70"><span className="size-1.5 rounded-full bg-rose-500" aria-hidden="true" />Trial</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-2.5 py-1 text-[10px] font-extrabold text-cyan-800 ring-1 ring-cyan-200/70"><span className="size-1.5 rounded-full bg-cyan-500" aria-hidden="true" />Consult</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-extrabold text-violet-700 ring-1 ring-violet-200/70"><span className="size-1.5 rounded-full bg-violet-500" aria-hidden="true" />Assessment</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-extrabold text-orange-800 ring-1 ring-orange-200/70"><span className="size-1.5 rounded-full bg-orange-500" aria-hidden="true" />PT</span>
           </div>
-        </section>
+        </PageHero>
 
         <section aria-labelledby="calendar-board-title" className="grid animate-in fade-in slide-in-from-bottom-2 gap-5 duration-500 xl:grid-cols-[1.6fr_1fr]">
           <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 shadow-xl shadow-rose-900/5 backdrop-blur-xl">

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAiChat } from "@/lib/hooks/use-ai-chat";
+import { PageHero } from "@/components/shared/page-hero";
 import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, ChatToolCall } from "@/lib/types/ai";
@@ -88,36 +89,25 @@ export default function AiPage() {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section
-          aria-labelledby="ai-title"
-          className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10"
-        >
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-400/25 blur-3xl" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur">
-                <Sparkles className="size-3.5" aria-hidden="true" /> MyGymAgent AI
-              </div>
-              <h1 id="ai-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl">
-                AI Assistant
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75">
-                Ask about members, workout history, and attendance — or have it draft a workout or a lead follow-up.
-              </p>
-            </div>
+        <PageHero
+          id="ai-title"
+          variant="dark"
+          accent="violet"
+          icon={Sparkles}
+          eyebrow="MyGymAgent AI"
+          title="AI Assistant"
+          description="Ask about members, workout history, and attendance — or have it draft a workout or a lead follow-up."
+          actions={
             <Link
               href="/ai-actions"
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <Zap className="size-4" aria-hidden="true" />
               Review AI actions
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
-          </div>
-        </section>
+          }
+        />
 
         {notConfigured ? (
           <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl backdrop-blur-xl">
@@ -232,7 +222,7 @@ export default function AiPage() {
             </section>
 
             <aside aria-label="AI tips" className="flex flex-col gap-4">
-              <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)]">
+              <div className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
                 <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
                 <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
                 <h2 className="relative font-serif text-xl font-semibold tracking-tight">Grounded answers</h2>
@@ -241,7 +231,7 @@ export default function AiPage() {
                 </p>
                 <Link
                   href="/ai-actions"
-                  className="relative mt-5 flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Open approval queue <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>

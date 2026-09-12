@@ -27,6 +27,7 @@ import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
 import { useMemberStatusBreakdown, useRevenueTrend } from "@/lib/hooks/use-analytics";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { SceneBackground } from "@/components/three/scene-bg";
+import { PageHero } from "@/components/shared/page-hero";
 import { MetricCard3D } from "@/components/three/metric-card-3d";
 import { Chart3D } from "@/components/three/chart-3d";
 import { DataOrb } from "@/components/three/data-orb";
@@ -152,89 +153,68 @@ export default function DashboardPage() {
       />
       <SceneBackground />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        {/* Premium midnight hero — 3D scene stays mounted behind */}
-        <section
-          aria-labelledby="dashboard-title"
-          className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10"
-        >
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-amber-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
-          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0 flex-1 text-center lg:text-left">
-              <div className="mb-4 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur">
-                  <span className="relative flex size-2" aria-hidden="true">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-emerald-300" />
-                  </span>
-                  Live gym pulse
-                </span>
-                <span className="inline-flex items-center rounded-full bg-black/20 px-3 py-1.5 text-[11px] font-bold text-white/80">
-                  {briefing.isLoading ? "Syncing…" : `${data?.today.checkIns ?? 0} check-ins today`}
-                </span>
-              </div>
-              <h1
-                id="dashboard-title"
-                className="font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl"
-              >
-                {gymName}
-              </h1>
-              <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75 lg:mx-0">
-                Your athletic-luxe command deck — live attendance, revenue flow, retention
-                risk and AI approvals wrapped around an immersive 3D pulse.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
-                <Link
-                  href="/ai"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <Sparkles className="size-4" aria-hidden="true" />
-                  Ask MyGymAgent
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-                <Link
-                  href="/command-center"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <Zap className="size-4" aria-hidden="true" />
-                  Command Center
-                </Link>
-              </div>
-            </div>
-            <div className="w-full shrink-0 rounded-[24px] border border-white/20 bg-white/10 p-5 backdrop-blur-xl lg:max-w-[340px]">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-white/80">
-                <Activity className="size-4 text-cyan-300" aria-hidden="true" />
-                Today at a glance
-              </p>
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10">
-                  <span className="text-xs font-bold text-white/70">Net revenue</span>
-                  <span className="font-mono text-lg font-black tabular-nums">
-                    {briefing.isLoading ? "—" : `${currency} ${revenue}`}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10">
-                  <span className="text-xs font-bold text-white/70">Members at risk</span>
-                  <span className="font-mono text-lg font-black tabular-nums">
-                    {briefing.isLoading ? "—" : (data?.atRiskMembers.count ?? 0)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10">
-                  <span className="text-xs font-bold text-white/70">AI awaiting approval</span>
-                  <span className="font-mono text-lg font-black tabular-nums">
-                    {briefing.isLoading ? "—" : (data?.pendingAiActions ?? 0)}
-                  </span>
-                </div>
-              </div>
+        {/* Compact midnight hero */}
+        <PageHero
+          id="dashboard-title"
+          variant="dark"
+          accent="violet"
+          icon={Sparkles}
+          eyebrow={briefing.isLoading ? "Live gym pulse · Syncing…" : `Live gym pulse · ${data?.today.checkIns ?? 0} check-ins today`}
+          title={gymName}
+          description="Live attendance, revenue flow, retention risk and AI approvals in one command deck."
+          actions={
+            <>
               <Link
-                href="/intelligence"
-                className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-3 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                href="/ai"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                View full intelligence
+                <Sparkles className="size-4" aria-hidden="true" />
+                Ask MyGymAgent
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
+              <Link
+                href="/command-center"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <Zap className="size-4" aria-hidden="true" />
+                Command Center
+              </Link>
+            </>
+          }
+        />
+
+        <section aria-label="Today at a glance" className="rounded-[20px] border border-white/90 bg-white/85 p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-stone-500">
+              <Activity className="size-4 text-cyan-600" aria-hidden="true" />
+              Today at a glance
+            </p>
+            <Link
+              href="/intelligence"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold text-violet-700 transition hover:bg-violet-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+            >
+              View full intelligence
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-stone-50/80 px-4 py-3 ring-1 ring-stone-200/60">
+              <span className="text-xs font-bold text-stone-600">Net revenue</span>
+              <span className="font-mono text-base font-black tabular-nums text-stone-950">
+                {briefing.isLoading ? "—" : `${currency} ${revenue}`}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-stone-50/80 px-4 py-3 ring-1 ring-stone-200/60">
+              <span className="text-xs font-bold text-stone-600">Members at risk</span>
+              <span className="font-mono text-base font-black tabular-nums text-stone-950">
+                {briefing.isLoading ? "—" : (data?.atRiskMembers.count ?? 0)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-stone-50/80 px-4 py-3 ring-1 ring-stone-200/60">
+              <span className="text-xs font-bold text-stone-600">AI awaiting approval</span>
+              <span className="font-mono text-base font-black tabular-nums text-stone-950">
+                {briefing.isLoading ? "—" : (data?.pendingAiActions ?? 0)}
+              </span>
             </div>
           </div>
         </section>
@@ -402,7 +382,7 @@ export default function DashboardPage() {
           </Card>
         </section>
 
-        <section aria-labelledby="dash-ai" className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] lg:p-7">
+        <section aria-labelledby="dash-ai" className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
           <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
           <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
           <div className="relative flex items-center gap-3">

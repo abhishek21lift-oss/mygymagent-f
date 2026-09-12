@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api/client";
+import { PageHero } from "@/components/shared/page-hero";
 
 type OwnerBriefing = { generatedAt: string; metrics: { members: number; activeMemberships: number; todayAttendance: number; todayRevenue: number; expiringSoon: number; outstandingPayments: number }; alerts: { id: string; severity: "high" | "medium" | "low"; title: string; detail: string; href?: string }[]; recommendations: { id: string; title: string; reason: string; href?: string }[] };
 function money(value: number) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value); }
@@ -39,23 +40,21 @@ export default function OwnerOsPage() {
   return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
     <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
     <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-    <section aria-labelledby="owner-title" className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10">
-      <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-      <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-      <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-amber-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur"><Sparkles className="size-3.5" aria-hidden="true" /> Executive intelligence</div>
-          <h1 id="owner-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl">Owner OS</h1>
-          <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75">A decision cockpit for your gym. Monitor business health, understand what changed, and move from insight to action.</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button asChild className="min-h-11 rounded-2xl bg-white font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] hover:bg-white/90"><Link href="/ai"><Brain className="size-4" aria-hidden="true" /> Ask MyGymAgent</Link></Button>
-          <Button asChild variant="outline" className="min-h-11 rounded-2xl border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white"><Link href="/intelligence">Full intelligence <ArrowRight className="size-4" aria-hidden="true" /></Link></Button>
-        </div>
-      </div>
-    </section>
+    <PageHero
+      id="owner-title"
+      variant="dark"
+      accent="violet"
+      icon={Sparkles}
+      eyebrow="Executive intelligence"
+      title="Owner OS"
+      description="A decision cockpit for your gym. Monitor business health, understand what changed, and move from insight to action."
+      actions={
+        <>
+          <Button asChild className="min-h-10 rounded-xl bg-white font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] hover:bg-white/90"><Link href="/ai"><Brain className="size-4" aria-hidden="true" /> Ask MyGymAgent</Link></Button>
+          <Button asChild variant="outline" className="min-h-10 rounded-xl border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white"><Link href="/intelligence">Full intelligence <ArrowRight className="size-4" aria-hidden="true" /></Link></Button>
+        </>
+      }
+    />
 
     <section aria-labelledby="owner-health"><div className="mb-4"><h2 id="owner-health" className="font-serif text-2xl font-semibold tracking-tight text-stone-950">Business health</h2><p className="mt-1 text-xs font-medium text-stone-600">Live operating signals from your gym.</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{cards.map(([Icon,label,value,hint], i)=>{ const t = CARD_TONES[i % CARD_TONES.length]; return <Card key={label} className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}><span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} aria-hidden="true" /><CardContent className="relative p-5 lg:p-6"><div className="flex items-start justify-between gap-3"><span className={`flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}><Icon className="size-6" aria-hidden="true" /></span><span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700">Live</span></div><p className="mt-4 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p><p className="mt-1 text-[10px] font-black uppercase tracking-[.18em] text-stone-500">{label}</p><p className="mt-1 text-[11px] font-medium text-stone-600">{hint}</p></CardContent></Card>;})}</div></section>
 

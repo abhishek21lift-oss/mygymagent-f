@@ -10,7 +10,6 @@ import {
   Check,
   CreditCard,
   Dumbbell,
-  Flame,
   Package,
   RefreshCw,
   Sparkles,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHero } from "@/components/shared/page-hero";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
 
@@ -481,126 +481,87 @@ export default function CommandCenterPage() {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        {/* ------------------------------------------ Hero: midnight aurora */}
-        <section
-          aria-labelledby="cc-title"
-          className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10"
-        >
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-amber-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
-
-          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0 flex-1">
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur">
-                  <span className="relative flex size-2" aria-hidden="true">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-emerald-300" />
-                  </span>
-                  Live pulse
-                </span>
-                {updatedAgo && (
-                  <span className="inline-flex items-center rounded-full bg-black/20 px-3 py-1.5 text-[11px] font-bold text-white/80">
-                    Updated {updatedAgo}
-                  </span>
-                )}
-              </div>
-              <h1
-                id="cc-title"
-                className="font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl"
+        {/* ------------------------------------------ Hero: compact midnight */}
+        <PageHero
+          id="cc-title"
+          variant="dark"
+          accent="violet"
+          icon={Zap}
+          eyebrow={updatedAgo ? `Live pulse · Updated ${updatedAgo}` : "Live pulse"}
+          title="Command Center"
+          description="Check-ins, revenue, retention risk and AI approvals in one vivid cockpit."
+          actions={
+            <>
+              <Link
+                href="/ai"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Command Center
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-white/75">
-                Your business pulse, decision queue, and growth engine — check-ins,
-                revenue, retention risk and AI approvals in one vivid cockpit.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/ai"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <Sparkles className="size-4" aria-hidden="true" />
-                  Ask MyGymAgent
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-                <Link
-                  href="/owner-os"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <BarChart3 className="size-4" aria-hidden="true" />
-                  Owner Insights
-                </Link>
+                <Sparkles className="size-4" aria-hidden="true" />
+                Ask MyGymAgent
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/owner-os"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <BarChart3 className="size-4" aria-hidden="true" />
+                Owner Insights
+              </Link>
+            </>
+          }
+        >
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xl">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-bold text-white/70">Check-ins</span>
+                <span className="font-mono text-xl font-black tabular-nums">
+                  {briefing.isLoading ? "—" : (data?.today.checkIns ?? 0)}
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15" role="presentation">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-blue-400 transition-all duration-700"
+                  style={{ width: `${Math.min(100, ((data?.today.checkIns ?? 0) / 50) * 100)}%` }}
+                />
               </div>
             </div>
-
-            {/* Today momentum — glass panel, the memorable vivid moment */}
-            <div className="w-full shrink-0 rounded-[24px] border border-white/20 bg-white/10 p-5 backdrop-blur-xl lg:max-w-[360px]">
-              <div className="flex items-center justify-between gap-3">
-                <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[.16em] text-white/80">
-                  <Flame className="size-4 text-amber-300" aria-hidden="true" />
-                  Today&apos;s momentum
-                </p>
-                <span className="rounded-full bg-emerald-300/20 px-2 py-1 text-[10px] font-black text-emerald-200">
-                  LIVE
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xl">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-bold text-white/70">Follow-ups done</span>
+                <span className="font-mono text-xl font-black tabular-nums">
+                  {data ? `${followUpPct}%` : "—"}
                 </span>
               </div>
-              <div className="mt-4 space-y-4">
-                <div>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-xs font-bold text-white/70">Check-ins</span>
-                    <span className="font-mono text-2xl font-black tabular-nums">
-                      {briefing.isLoading ? "—" : (data?.today.checkIns ?? 0)}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15" role="presentation">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-blue-400 transition-all duration-700"
-                      style={{ width: `${Math.min(100, ((data?.today.checkIns ?? 0) / 50) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-xs font-bold text-white/70">Follow-ups done</span>
-                    <span className="font-mono text-2xl font-black tabular-nums">
-                      {data ? `${followUpPct}%` : "—"}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15" role="presentation">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-300 to-orange-400 transition-all duration-700"
-                      style={{ width: `${Math.min(100, followUpPct)}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-xs font-bold text-white/70">Lead conversion</span>
-                    <span className="font-mono text-2xl font-black tabular-nums">
-                      {data ? `${conversionPct}%` : "—"}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15" role="presentation">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-fuchsia-300 to-violet-300 transition-all duration-700"
-                      style={{ width: `${Math.min(100, conversionPct)}%` }}
-                    />
-                  </div>
-                </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15" role="presentation">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-300 to-orange-400 transition-all duration-700"
+                  style={{ width: `${Math.min(100, followUpPct)}%` }}
+                />
               </div>
-              <Link
-                href="/intelligence"
-                className="mt-5 flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 py-3 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                View full intelligence
-                <ArrowUpRight className="size-4" aria-hidden="true" />
-              </Link>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xl">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-bold text-white/70">Lead conversion</span>
+                <span className="font-mono text-xl font-black tabular-nums">
+                  {data ? `${conversionPct}%` : "—"}
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15" role="presentation">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-fuchsia-300 to-violet-300 transition-all duration-700"
+                  style={{ width: `${Math.min(100, conversionPct)}%` }}
+                />
+              </div>
             </div>
           </div>
-        </section>
+          <Link
+            href="/intelligence"
+            className="mt-2 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            View full intelligence
+            <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
+        </PageHero>
 
         {/* Error path — recoverable, with retry (UX state matrix) */}
         {briefing.isError && (
@@ -747,7 +708,7 @@ export default function CommandCenterPage() {
           </Card>
 
           {/* Vivid gradient hero — sales health */}
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] lg:p-7">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
             <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
             <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
             <div className="relative flex items-center gap-3">
@@ -761,7 +722,7 @@ export default function CommandCenterPage() {
                 </p>
               </div>
             </div>
-            <div className="relative mt-6 grid grid-cols-2 gap-3">
+            <div className="relative mt-4 grid grid-cols-2 gap-2">
               {(
                 [
                   ["Total leads", data ? String(data.salesFunnel.totalLeads) : "—", "from-cyan-400/25 to-blue-500/10"],
@@ -772,12 +733,12 @@ export default function CommandCenterPage() {
               ).map(([label, value, tint]) => (
                 <div
                   key={label}
-                  className={`rounded-[20px] border border-white/15 bg-gradient-to-br p-4 backdrop-blur ${tint}`}
+                  className={`rounded-2xl border border-white/15 bg-gradient-to-br p-3 backdrop-blur ${tint}`}
                 >
                   <p className="text-[10px] font-black uppercase tracking-[.16em] text-white/60">
                     {label}
                   </p>
-                  <p className="mt-1 font-mono text-3xl font-black leading-none tabular-nums">
+                  <p className="mt-1 font-mono text-2xl font-black leading-none tabular-nums">
                     {value}
                   </p>
                 </div>
@@ -785,7 +746,7 @@ export default function CommandCenterPage() {
             </div>
             <Link
               href="/crm"
-              className="group/ink relative mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="group/ink relative mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Open Sales OS
               <ArrowRight

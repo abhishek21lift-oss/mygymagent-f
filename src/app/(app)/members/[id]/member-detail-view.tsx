@@ -37,6 +37,7 @@ import {
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
+import { PageHero } from "@/components/shared/page-hero";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
@@ -1333,236 +1334,169 @@ function MemberHeader({
     }
   }
 
+  const memberTypeLabel = member?.memberType
+    ? MEMBER_TYPE_LABELS[member.memberType] || member.memberType
+    : null;
+  const joinedLabel = member?.joinedAt
+    ? new Date(member.joinedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "—";
+
   return (
-    <div className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-      {/* Decorative blobs — members accent violet + cyan + fuchsia */}
-      <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-violet-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-      <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-      <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-fuchsia-300/20 blur-3xl" aria-hidden="true" />
-
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        {/* Left: Avatar + Info */}
-        <div className="flex items-center gap-5">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,#7c3aed,#c026d3_55%,#06b6d4)] shadow-lg shadow-violet-500/30 ring-1 ring-white/60">
-              <span className="text-2xl font-black tracking-tight text-white">
-                {member?.firstName?.[0]}
-                {member?.lastName?.[0]}
-              </span>
-            </div>
-            <div
-              className={`absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-white ${
-                member?.status === "ACTIVE"
-                  ? "bg-emerald-500"
-                  : member?.status === "FROZEN"
-                    ? "bg-cyan-500"
-                    : member?.status === "INACTIVE"
-                      ? "bg-amber-500"
-                      : "bg-rose-500"
-              }`}
-              aria-hidden="true"
-            />
-          </div>
-
-          {/* Info */}
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-serif text-3xl font-semibold tracking-[-.03em] text-stone-950 sm:text-4xl">
-                {member?.firstName} {member?.lastName}
-              </h1>
-              <Badge
-                variant={
-                  member?.status === "ACTIVE"
-                    ? "default"
-                    : member?.status === "FROZEN"
-                      ? "warning"
-                      : "secondary"
-                }
-                className={`rounded-full px-2.5 py-1 text-[10px] font-black tracking-widest ring-1 ${
-                  member?.status === "ACTIVE"
-                    ? "bg-emerald-500/10 text-emerald-700 ring-emerald-200/70"
-                    : member?.status === "FROZEN"
-                      ? "bg-cyan-500/10 text-cyan-800 ring-cyan-200/70"
-                      : member?.status === "INACTIVE"
-                        ? "bg-amber-500/15 text-amber-800 ring-amber-200/70"
-                        : "bg-rose-500/10 text-rose-700 ring-rose-200/70"
-                }`}
-              >
-                {member?.status}
-              </Badge>
-              {member?.memberType && (
-                <Badge variant="outline" className="rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-black tracking-widest text-violet-700 ring-1 ring-violet-200/60">
-                  {MEMBER_TYPE_LABELS[member.memberType] || member.memberType}
-                </Badge>
-              )}
-            </div>
-
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-stone-600">
-              <span className="font-mono tabular-nums">{member?.memberCode}</span>
-              <span aria-hidden="true">·</span>
+    <PageHero
+      id="member-title"
+      eyebrow={memberTypeLabel ? `Member 360 · ${memberTypeLabel}` : "Member 360"}
+      icon={Users}
+      title={
+        <>
+          {member?.firstName} {member?.lastName}
+        </>
+      }
+      description={
+        <>
+          <span className="font-mono tabular-nums">{member?.memberCode}</span>
+          {" · "}
+          <span>Joined {joinedLabel}</span>
+          {member?.assignedTrainer && (
+            <>
+              {" · "}
               <span>
-                Joined{" "}
-                {member?.joinedAt
-                  ? new Date(member.joinedAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "—"}
+                {member.assignedTrainer.firstName} {member.assignedTrainer.lastName}
               </span>
-              {member?.assignedTrainer && (
+            </>
+          )}
+          {member?.phone && (
+            <>
+              {" · "}
+              <span>{member.phone}</span>
+            </>
+          )}
+          {member?.email && (
+            <>
+              {" · "}
+              <span>{member.email}</span>
+            </>
+          )}
+        </>
+      }
+      variant="light"
+      accent="violet"
+      actions={
+        <>
+          {activeMembership && (
+            <MembershipActions
+              membershipId={activeMembership.id}
+              status={activeMembership.status as MembershipStatus}
+            />
+          )}
+          <SellMembershipDialog memberId={member?.id ?? ""} />
+          <CollectPaymentDialog
+            memberId={member?.id ?? ""}
+            memberships={allMemberships}
+          />
+          <EditMemberDialog member={member}>
+            <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+              <Pencil className="size-3.5" aria-hidden="true" />
+              Edit
+            </Button>
+          </EditMemberDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+                <MoreHorizontal className="size-3.5" aria-hidden="true" />
+                More
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
+                  await navigator.clipboard.writeText(member?.memberCode ?? "");
+                  toast.success("Member code copied!");
+                }}
+              >
+                <Copy className="size-3.5 mr-2" />
+                Copy Member Code
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  window.open(`tel:${member?.phone ?? ""}`, "_self");
+                }}
+              >
+                <Phone className="size-3.5 mr-2" />
+                Call Member
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  window.open(`mailto:${member?.email ?? ""}`, "_self");
+                }}
+              >
+                <Mail className="size-3.5 mr-2" />
+                Email Member
+              </DropdownMenuItem>
+              {hasPermission("members.delete") && (
                 <>
-                  <span aria-hidden="true">·</span>
-                  <span className="flex items-center gap-1">
-                    <Users className="size-3.5" aria-hidden="true" />
-                    {member.assignedTrainer.firstName}{" "}
-                    {member.assignedTrainer.lastName}
-                  </span>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setDeleteOpen(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="size-3.5 mr-2" />
+                    Delete Member
+                  </DropdownMenuItem>
                 </>
               )}
-            </div>
-
-            {/* Contact info */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-stone-600">
-              {member?.phone && (
-                <span className="flex items-center gap-1.5">
-                  <Phone className="size-3.5" aria-hidden="true" />
-                  {member.phone}
-                </span>
-              )}
-              {member?.email && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="size-3.5" aria-hidden="true" />
-                  {member.email}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Membership + Actions */}
-        <div className="flex flex-col items-start gap-4 lg:items-end">
-          {activeMembership ? (
-            <div className="rounded-[22px] border border-white/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">
-                    Active Membership
-                  </p>
-                  <p className="font-extrabold tracking-tight text-stone-950">
-                    {activeMembership.membershipPlan?.name || "Plan"}
-                  </p>
-                </div>
-                <Separator orientation="vertical" className="h-8" />
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">
-                    Status
-                  </p>
-                  <Badge
-                    variant={
-                      MEMBERSHIP_STATUS_VARIANT[activeMembership.status as MembershipStatus] ||
-                      "secondary"
-                    }
-                    className="rounded-full"
-                  >
-                    {activeMembership.status}
-                  </Badge>
-                </div>
-                {daysLeft !== null && (
-                  <>
-                    <Separator orientation="vertical" className="h-8" />
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[.16em] text-stone-500">
-                        Days Left
-                      </p>
-                      <p
-                        className={`font-mono font-black tabular-nums ${daysLeft <= 7 ? "text-amber-700" : "text-emerald-600"}`}
-                      >
-                        {daysLeft}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-[22px] border border-dashed border-violet-200 bg-violet-50/50 px-4 py-3">
-              <p className="text-sm font-semibold text-stone-600">
-                No active membership
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            {activeMembership && (
-              <MembershipActions
-                membershipId={activeMembership.id}
-                status={activeMembership.status as MembershipStatus}
-              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      }
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge
+          variant={
+            member?.status === "ACTIVE"
+              ? "default"
+              : member?.status === "FROZEN"
+                ? "warning"
+                : "secondary"
+          }
+          className={`rounded-full px-2.5 py-1 text-[10px] font-black tracking-widest ring-1 ${
+            member?.status === "ACTIVE"
+              ? "bg-emerald-500/10 text-emerald-700 ring-emerald-200/70"
+              : member?.status === "FROZEN"
+                ? "bg-cyan-500/10 text-cyan-800 ring-cyan-200/70"
+                : member?.status === "INACTIVE"
+                  ? "bg-amber-500/15 text-amber-800 ring-amber-200/70"
+                  : "bg-rose-500/10 text-rose-700 ring-rose-200/70"
+          }`}
+        >
+          {member?.status}
+        </Badge>
+        {activeMembership ? (
+          <span className="inline-flex items-center gap-2 rounded-full border border-stone-200/70 bg-white/70 px-3 py-1.5 text-xs font-bold text-stone-700">
+            {activeMembership.membershipPlan?.name || "Plan"}
+            <Badge
+              variant={
+                MEMBERSHIP_STATUS_VARIANT[activeMembership.status as MembershipStatus] ||
+                "secondary"
+              }
+              className="rounded-full"
+            >
+              {activeMembership.status}
+            </Badge>
+            {daysLeft !== null && (
+              <span className={`font-mono tabular-nums ${daysLeft <= 7 ? "text-amber-700" : "text-emerald-600"}`}>
+                {daysLeft}d left
+              </span>
             )}
-            <SellMembershipDialog memberId={member?.id ?? ""} />
-            <CollectPaymentDialog
-              memberId={member?.id ?? ""}
-              memberships={allMemberships}
-            />
-            <EditMemberDialog member={member}>
-              <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
-                <Pencil className="size-3.5" aria-hidden="true" />
-                Edit
-              </Button>
-            </EditMemberDialog>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline" className="min-h-11 rounded-2xl border-violet-200/70 bg-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
-                  <MoreHorizontal className="size-3.5" aria-hidden="true" />
-                  More
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(member?.memberCode ?? "");
-                    toast.success("Member code copied!");
-                  }}
-                >
-                  <Copy className="size-3.5 mr-2" />
-                  Copy Member Code
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    window.open(`tel:${member?.phone ?? ""}`, "_self");
-                  }}
-                >
-                  <Phone className="size-3.5 mr-2" />
-                  Call Member
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    window.open(`mailto:${member?.email ?? ""}`, "_self");
-                  }}
-                >
-                  <Mail className="size-3.5 mr-2" />
-                  Email Member
-                </DropdownMenuItem>
-                {hasPermission("members.delete") && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setDeleteOpen(true)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="size-3.5 mr-2" />
-                      Delete Member
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+          </span>
+        ) : (
+          <span className="text-xs font-semibold text-stone-500">No active membership</span>
+        )}
       </div>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -1585,7 +1519,7 @@ function MemberHeader({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageHero>
   );
 }
 

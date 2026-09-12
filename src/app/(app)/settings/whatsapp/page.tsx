@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, Loader2, MessageCircle, ShieldCheck, Sparkles,
 import { toast } from "sonner"
 
 import { ErrorState } from "@/components/shared/error-state"
+import { PageHero } from "@/components/shared/page-hero"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -131,27 +132,20 @@ export default function WhatsAppSettingsPage() {
           aria-hidden="true"
         />
         <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-          <section aria-labelledby="wa-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-            <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-emerald-300/25 blur-3xl" aria-hidden="true" />
-            <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-teal-300/25 blur-3xl" aria-hidden="true" />
-            <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-4">
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30">
-                  <MessageCircle className="size-6" aria-hidden="true" />
-                </span>
-                <div>
-                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/75 px-3 py-1 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">
-                    <Sparkles className="size-3.5" aria-hidden="true" /> Meta Cloud API
-                  </div>
-                  <h1 id="wa-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">WhatsApp</h1>
-                  <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-stone-600">Connect your gym&apos;s official WhatsApp Business number with Meta Cloud API.</p>
-                </div>
-              </div>
+          <PageHero
+            id="wa-title"
+            eyebrow="Meta Cloud API"
+            icon={MessageCircle}
+            title="WhatsApp"
+            description="Connect your gym's official WhatsApp Business number with Meta Cloud API."
+            variant="light"
+            accent="emerald"
+            actions={
               <Link href="/settings" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white/80 px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
                 <ArrowLeft className="size-4" aria-hidden="true" /> Back to settings
               </Link>
-            </div>
-          </section>
+            }
+          />
 
           {integrationQuery.isLoading ? (
             <Card className="max-w-3xl border-white/90 bg-white/88 backdrop-blur-xl"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full rounded-2xl" /><Skeleton className="h-11 w-40 rounded-2xl" /></CardContent></Card>

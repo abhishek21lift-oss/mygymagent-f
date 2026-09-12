@@ -4,6 +4,7 @@ import * as React from "react"
 import { CheckCircle2, Dumbbell, Flame, Play, Plus, Sparkles, Target, Users } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { PageHero } from "@/components/shared/page-hero"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useWorkoutAssignments } from "@/lib/hooks/use-workouts"
@@ -107,26 +108,23 @@ export default function WorkoutSessionsPage() {
     <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="ws-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-rose-300/25 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-orange-300/25 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-rose-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-rose-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Live workout execution
-              </div>
-              <h1 id="ws-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Today&apos;s Sessions</h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">Run the actual workout, capture every set and close the session with a clean execution record.</p>
-            </div>
+        <PageHero
+          id="ws-title"
+          eyebrow="Live workout execution"
+          icon={Dumbbell}
+          title="Today's Sessions"
+          description="Run the workout, capture every set and close with a clean execution record."
+          variant="light"
+          accent="rose"
+          actions={
             <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-gradient-to-r from-rose-50 to-orange-50 px-4 py-3 text-xs font-bold text-stone-700">
               <span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">
                 <Dumbbell className="size-5" />
               </span>
               <span>{activeAssignments.length} ready · {sessions.data?.filter((x) => x.status === "COMPLETED").length ?? 0} closed</span>
             </div>
-          </div>
-        </section>
+          }
+        />
 
         <section aria-labelledby="ws-stats" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <h2 id="ws-stats" className="sr-only">Execution numbers</h2>

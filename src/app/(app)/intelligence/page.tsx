@@ -56,6 +56,7 @@ import {
   type TrainerWorkload,
 } from "@/lib/hooks/use-analytics";
 import { useBranches } from "@/lib/hooks/use-branches";
+import { PageHero } from "@/components/shared/page-hero";
 
 function formatMoney(value: string | number | undefined, currency = "INR") {
   const amount = Number(value ?? 0);
@@ -313,31 +314,25 @@ export default function IntelligencePage() {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="intel-title" className="relative overflow-hidden rounded-[34px] bg-[linear-gradient(135deg,#0f0c29_0%,#302b63_38%,#6d28d9_68%,#be185d_100%)] p-6 text-white shadow-[0_35px_110px_-48px_rgba(79,70,229,.65)] sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-cyan-400/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-400/25 blur-3xl" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
-          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-white backdrop-blur"><Sparkles className="size-3.5" aria-hidden="true" /> Intelligence OS</span>
-                <span className="text-[10px] font-bold uppercase tracking-[.18em] text-white/50">Decision layer · live data</span>
-              </div>
-              <h1 id="intel-title" className="mt-5 font-serif text-4xl font-semibold tracking-[-.045em] text-balance sm:text-5xl lg:text-6xl">See the gym.<br /><span className="bg-gradient-to-r from-white via-cyan-100 to-fuchsia-200 bg-clip-text text-transparent">Decide what happens next.</span></h1>
-              <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-white/75">A premium intelligence cockpit for revenue, member health, sales performance, trainer capacity, and inventory signals.</p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:min-w-[280px] lg:flex-col">
-              <div className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl"><Filter className="ml-2 size-4 shrink-0 text-cyan-200" aria-hidden="true" /><Select value={branchId} onValueChange={setBranchId}><SelectTrigger aria-label="Filter by branch" className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue placeholder="All branches" /></SelectTrigger><SelectContent>{<SelectItem value="all">All branches</SelectItem>}{branches?.items?.map((item: { id: string; name: string }) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-xl"><BarChart3 className="ml-2 size-4 shrink-0 text-violet-200" aria-hidden="true" /><Select value={months} onValueChange={setMonths}><SelectTrigger aria-label="Select month range" className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select><Button size="icon" variant="ghost" onClick={refresh} className="min-h-11 min-w-11 text-white hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" title="Refresh intelligence" aria-label="Refresh intelligence"><RefreshCw className="size-4" aria-hidden="true" /></Button></div>
-            </div>
+        <PageHero
+          id="intel-title"
+          variant="dark"
+          accent="violet"
+          icon={Sparkles}
+          eyebrow="Intelligence OS"
+          title="Gym intelligence"
+          description="Revenue, member health, sales performance, trainer capacity and inventory signals in one cockpit."
+        >
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur-xl"><Filter className="ml-2 size-4 shrink-0 text-cyan-200" aria-hidden="true" /><Select value={branchId} onValueChange={setBranchId}><SelectTrigger aria-label="Filter by branch" className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue placeholder="All branches" /></SelectTrigger><SelectContent>{<SelectItem value="all">All branches</SelectItem>}{branches?.items?.map((item: { id: string; name: string }) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur-xl"><BarChart3 className="ml-2 size-4 shrink-0 text-violet-200" aria-hidden="true" /><Select value={months} onValueChange={setMonths}><SelectTrigger aria-label="Select month range" className="h-9 border-0 bg-transparent text-white shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select><Button size="icon" variant="ghost" onClick={refresh} className="min-h-10 min-w-10 text-white hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" title="Refresh intelligence" aria-label="Refresh intelligence"><RefreshCw className="size-4" aria-hidden="true" /></Button></div>
           </div>
-          <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Decision signals</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{riskCount + lowStockCount}</p><p className="text-xs font-medium text-white/60">member + inventory attention</p></div>
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Member health</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{totalMembers ? Math.round((activeMembers / totalMembers) * 100) : 0}%</p><p className="text-xs font-medium text-white/60">active member ratio</p></div>
-            <div className="rounded-[20px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Cash visibility</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{formatMoney(revenueRow?.netRevenue)}</p><p className="text-xs font-medium text-white/60">current net revenue snapshot</p></div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <div className="rounded-[16px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Decision signals</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{riskCount + lowStockCount}</p><p className="text-xs font-medium text-white/60">member + inventory attention</p></div>
+            <div className="rounded-[16px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Member health</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{totalMembers ? Math.round((activeMembers / totalMembers) * 100) : 0}%</p><p className="text-xs font-medium text-white/60">active member ratio</p></div>
+            <div className="rounded-[16px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/50">Cash visibility</p><p className="mt-1 font-mono text-2xl font-black tabular-nums">{formatMoney(revenueRow?.netRevenue)}</p><p className="text-xs font-medium text-white/60">current net revenue snapshot</p></div>
           </div>
-        </section>
+        </PageHero>
 
         <section aria-labelledby="intel-pulse">
           <SectionHeader eyebrow="01 · pulse" title="Executive signal layer" description="The fastest read on financial health, member health, sales velocity, and operational pressure." />
@@ -382,7 +377,7 @@ export default function IntelligencePage() {
           <Card className="overflow-hidden border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl"><CardHeader className="border-b border-stone-100/80 bg-gradient-to-r from-rose-50/80 via-white to-orange-50/60"><div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-rose-700">08 · cash intelligence</p><CardTitle className="mt-1 font-serif text-xl tracking-tight text-stone-950">Revenue quality</CardTitle><p className="mt-0.5 text-xs font-medium text-stone-600">Gross, refunds, membership mix, and data-computability notes.</p></div><span className="flex size-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-lg"><WalletCards className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-2xl bg-stone-50 p-4 ring-1 ring-stone-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Gross revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.grossRevenue)}</p></div><div className="rounded-2xl bg-rose-50/70 p-4 ring-1 ring-rose-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Refunded</p><p className="mt-1 text-xl font-black text-rose-600">{formatMoney(revenueRow?.refunded)}</p></div><div className="rounded-2xl bg-violet-50/70 p-4 ring-1 ring-violet-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Membership revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.membershipRevenue)}</p></div><div className="rounded-2xl bg-cyan-50/70 p-4 ring-1 ring-cyan-100"><p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Other revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.otherRevenue)}</p></div></div>{revenue.data?.notComputable?.length ? <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4"><div className="flex items-center gap-2"><AlertTriangle className="size-4 text-amber-600" aria-hidden="true" /><p className="text-xs font-bold text-amber-800">Data quality notes</p></div><div className="mt-2 space-y-1">{revenue.data.notComputable.map((item) => <p key={item.key} className="text-xs font-medium text-amber-700"><span className="font-bold">{item.key}:</span> {item.reason}</p>)}</div></div> : null}</CardContent></Card>
         </section>
 
-        <section aria-label="Next layer" className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-6">
+        <section aria-label="Next layer" className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
           <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">

@@ -7,6 +7,7 @@ import { ArrowRight, Building2, MessageCircle, Settings2, Sparkles } from "lucid
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
+import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -64,30 +65,22 @@ export default function SettingsPage() {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="settings-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-indigo-300/25 blur-3xl" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-stone-300/30 blur-3xl" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-200/25 blur-3xl" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-start gap-4">
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-[19px] bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30">
-                <Settings2 className="size-6" aria-hidden="true" />
-              </span>
-              <div>
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/75 px-3 py-1 text-[10px] font-black uppercase tracking-[.18em] text-indigo-700">
-                  <Sparkles className="size-3.5" aria-hidden="true" /> Control room
-                </div>
-                <h1 id="settings-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">Settings</h1>
-                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-stone-600">Organization profile and preferences — the calm indigo surface for operational truth.</p>
-              </div>
-            </div>
-            {canManageSettings && (
+        <PageHero
+          id="settings-title"
+          eyebrow="Control room"
+          icon={Settings2}
+          title="Settings"
+          description="Organization profile and preferences — operational truth in one place."
+          variant="light"
+          accent="indigo"
+          actions={
+            canManageSettings ? (
               <Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
                 <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp setup <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-            )}
-          </div>
-        </section>
+            ) : undefined
+          }
+        />
 
         <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
           <section aria-labelledby="settings-org">

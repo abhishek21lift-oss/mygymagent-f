@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { BranchSelect } from "@/components/shared/branch-select"
+import { PageHero } from "@/components/shared/page-hero"
 import { UserSelect } from "@/components/shared/user-select"
 import { useLead, useConvertLead } from "@/lib/hooks/use-lead"
 import { ApiError } from "@/lib/api/client"
@@ -72,35 +73,25 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section
-          aria-labelledby="convert-title"
-          className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10"
-        >
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-blue-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-300/25 blur-3xl" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <Button variant="ghost" size="sm" className="mb-3 w-fit min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={() => router.back()}>
+        <PageHero
+          id="convert-title"
+          eyebrow="Conversion handoff"
+          icon={CheckCircle2}
+          title="Convert Lead to Member"
+          description={`${lead.firstName} ${lead.lastName} is ready to enter the member lifecycle.`}
+          variant="light"
+          accent="emerald"
+          actions={
+            <>
+              <Button variant="ghost" size="sm" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={() => router.back()}>
                 <ArrowLeft className="size-4" aria-hidden="true" /> Back to Sales
               </Button>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-blue-700">
-                <CheckCircle2 className="size-3.5" aria-hidden="true" /> Conversion handoff
-              </div>
-              <h1 id="convert-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">
-                Convert Lead to Member
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">
-                {lead.firstName} {lead.lastName} is ready to enter the member lifecycle.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline" className="min-h-11 rounded-2xl border-violet-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
                 <Link href={`/crm/leads/${lead.id}`}><Sparkles className="size-4" aria-hidden="true" /> Lead 360</Link>
               </Button>
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <div className="grid gap-5 lg:grid-cols-[1fr_0.85fr]">
           <Card className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
@@ -171,7 +162,7 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
             </CardContent>
           </Card>
 
-          <aside aria-label="What happens next" className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-6 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] lg:p-7">
+          <aside aria-label="What happens next" className="relative flex h-full flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
             <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-cyan-400/25 blur-3xl" aria-hidden="true" />
             <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
             <div className="relative flex items-center gap-3">
@@ -179,7 +170,7 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
                 <Sparkles className="size-5" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="font-serif text-xl font-semibold tracking-tight">What happens next</h2>
+                <h2 className="font-serif text-lg font-semibold tracking-tight">What happens next</h2>
                 <p className="mt-0.5 text-xs font-medium text-white/70">A clean handoff into the member lifecycle.</p>
               </div>
             </div>

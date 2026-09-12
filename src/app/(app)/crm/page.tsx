@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
+import { PageHero } from "@/components/shared/page-hero";
 import { BranchSelect } from "@/components/shared/branch-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -634,53 +635,16 @@ export default function CrmPage() {
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
         {/* Hero */}
-        <section
-          aria-labelledby="crm-title"
-          className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10"
-        >
-          <div
-            className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-blue-300/30 blur-3xl motion-safe:animate-blob"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-300/25 blur-3xl"
-            aria-hidden="true"
-          />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-blue-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Sales intelligence
-              </div>
-              <h1
-                id="crm-title"
-                className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl"
-              >
-                Sales OS
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">
-                Know who to contact next — pipeline, follow-ups and conversion actions in
-                one focused workspace.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Link
-                  href="/crm/follow-ups"
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-blue-500/10 px-3 py-2 text-xs font-extrabold text-blue-700 ring-1 ring-blue-200/60 transition hover:bg-stone-950 hover:text-white hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                >
-                  <CalendarClock className="size-3.5" aria-hidden="true" /> Follow-ups
-                </Link>
-                <Link
-                  href="/crm/analytics"
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-violet-500/10 px-3 py-2 text-xs font-extrabold text-violet-700 ring-1 ring-violet-200/60 transition hover:bg-stone-950 hover:text-white hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
-                >
-                  <TrendingUp className="size-3.5" aria-hidden="true" /> Analytics
-                </Link>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        <PageHero
+          id="crm-title"
+          eyebrow="Sales intelligence"
+          icon={Megaphone}
+          title="Sales OS"
+          description="Know who to contact next — pipeline, follow-ups and conversion in one place."
+          variant="light"
+          accent="blue"
+          actions={
+            <>
               <Button
                 asChild
                 variant="outline"
@@ -691,9 +655,24 @@ export default function CrmPage() {
                 </a>
               </Button>
               {hasPermission("leads.manage") && <NewLeadDialog />}
-            </div>
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/crm/follow-ups"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-blue-500/10 px-3 py-2 text-xs font-extrabold text-blue-700 ring-1 ring-blue-200/60 transition hover:bg-stone-950 hover:text-white hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              <CalendarClock className="size-3.5" aria-hidden="true" /> Follow-ups
+            </Link>
+            <Link
+              href="/crm/analytics"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-violet-500/10 px-3 py-2 text-xs font-extrabold text-violet-700 ring-1 ring-violet-200/60 transition hover:bg-stone-950 hover:text-white hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+            >
+              <TrendingUp className="size-3.5" aria-hidden="true" /> Analytics
+            </Link>
           </div>
-        </section>
+        </PageHero>
 
         {/* Stats */}
         <section aria-label="Pipeline snapshot">

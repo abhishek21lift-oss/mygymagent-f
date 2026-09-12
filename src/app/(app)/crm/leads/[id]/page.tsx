@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRightCircle, CalendarClock, Check, Edit3, Flame, Mail, 
 import type { LucideIcon } from "lucide-react"
 
 import { UserSelect } from "@/components/shared/user-select"
+import { PageHero } from "@/components/shared/page-hero"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -74,32 +75,19 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section
-          aria-labelledby="lead-title"
-          className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10"
-        >
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-blue-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-violet-300/25 blur-3xl" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <Link
-                href="/crm"
-                className="mb-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-extrabold text-blue-700 transition hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                <ArrowLeft className="size-4" aria-hidden="true" /> Back to Sales
-              </Link>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-violet-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Lead 360 · Score {score}
-              </div>
-              <h1 id="lead-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">
-                {currentLead.firstName} {currentLead.lastName}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">
-                Lead 360 · pipeline, ownership, follow-ups and conversion handoff.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        <PageHero
+          id="lead-title"
+          eyebrow={`Lead 360 · Score ${score}`}
+          icon={UserRound}
+          title={`${currentLead.firstName} ${currentLead.lastName}`}
+          description="Pipeline, ownership, follow-ups and conversion handoff."
+          variant="light"
+          accent="violet"
+          actions={
+            <>
+              <Button asChild variant="outline" className="min-h-11 rounded-2xl border-blue-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                <Link href="/crm"><ArrowLeft className="size-4" aria-hidden="true" /> Back to Sales</Link>
+              </Button>
               {currentLead.status !== "WON" ? (
                 <Button asChild className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                   <Link href={`/crm/leads/${currentLead.id}/convert`}><ArrowRightCircle className="size-4" aria-hidden="true" /> Convert to member</Link>
@@ -109,9 +97,9 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
                   <Link href={`/members/${currentLead.convertedMemberId}`}><UserRound className="size-4" aria-hidden="true" /> Open member</Link>
                 </Button>
               )}
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <section aria-label="Lead snapshot">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

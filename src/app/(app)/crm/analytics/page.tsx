@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight, BarChart3, CalendarDays, Clock3, Flame, ListChecks, RefreshCw, Sparkles, Target, TrendingUp, Users } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
+import { PageHero } from "@/components/shared/page-hero"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -78,36 +79,25 @@ export default function SalesAnalyticsPage() {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section
-          aria-labelledby="analytics-title"
-          className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10"
-        >
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-blue-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-violet-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-cyan-300/25 blur-3xl" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-violet-700">
-                <BarChart3 className="size-3.5" aria-hidden="true" /> Real sales data
-              </div>
-              <h1 id="analytics-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl">
-                Sales Intelligence
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">
-                Pipeline health, conversion speed, follow-up discipline and acquisition
-                sources — measure what turns into membership.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        <PageHero
+          id="analytics-title"
+          eyebrow="Real sales data"
+          icon={BarChart3}
+          title="Sales Intelligence"
+          description="Pipeline health, conversion speed and sources — what turns into membership."
+          variant="light"
+          accent="violet"
+          actions={
+            <>
               <Button asChild variant="outline" className="min-h-11 rounded-2xl border-blue-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                 <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Sales OS</Link>
               </Button>
               <Button asChild className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
                 <Link href="/crm/follow-ups">Follow-ups <ArrowRight className="size-4" aria-hidden="true" /></Link>
               </Button>
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <section aria-labelledby="analytics-window" className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
           <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
+import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -233,28 +234,25 @@ export default function MembersPage() {
         aria-hidden="true"
       />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-        <section aria-labelledby="members-title" className="relative overflow-hidden rounded-[34px] border border-white/90 bg-white/88 p-6 shadow-[0_35px_110px_-48px_rgba(79,70,229,.48)] backdrop-blur-2xl sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -left-24 -top-32 size-80 rounded-full bg-violet-300/30 blur-3xl motion-safe:animate-blob" aria-hidden="true" />
-          <div className="pointer-events-none absolute -right-28 -top-24 size-96 rounded-full bg-cyan-300/30 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]" aria-hidden="true" />
-          <div className="pointer-events-none absolute -bottom-40 left-[35%] size-96 rounded-full bg-fuchsia-300/20 blur-3xl motion-safe:animate-pulse-slow" aria-hidden="true" />
-          <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
-            <div className="min-w-0">
-              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-200/70 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-violet-700">
-                <Sparkles className="size-3.5" aria-hidden="true" /> Member OS · Command Center
-              </p>
-              <h1 id="members-title" className="font-serif text-4xl font-semibold tracking-[-.045em] text-stone-950 sm:text-5xl lg:text-6xl">Members, in context.</h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-stone-600">One operational surface for every member, signal, segment and action — while keeping the complete existing Member OS workflow intact.</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+        <PageHero
+          id="members-title"
+          eyebrow="Member OS · Command Center"
+          icon={Users}
+          title="Members, in context."
+          description="One operational surface for every member, signal, segment and action."
+          variant="light"
+          accent="violet"
+          actions={
+            <>
               <Button variant="outline" className="min-h-11 rounded-2xl border-stone-200/80 bg-white/80 px-5 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600" onClick={() => document.getElementById("member-table")?.scrollIntoView({ behavior: "smooth" })}>
                 <Search className="mr-2 size-4" aria-hidden="true" /> Explore members
               </Button>
               <Button className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-5 font-extrabold text-white shadow-lg shadow-violet-500/25 transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600" onClick={() => router.push("/members/new")}>
                 <Plus className="mr-2 size-4" aria-hidden="true" /> Add member
               </Button>
-            </div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <section aria-labelledby="members-pulse" className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           <div className="mb-4 px-1">
