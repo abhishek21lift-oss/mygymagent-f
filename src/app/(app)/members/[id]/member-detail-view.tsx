@@ -79,6 +79,7 @@ import { useMemberGoals } from "@/lib/hooks/use-member-goals";
 import { useMemberScreenings } from "@/lib/hooks/use-member-screenings";
 import { Member360Tabs } from "./member-360-tabs";
 import { MemberAiProgress } from "./member-ai-progress";
+import { EntryQrCard } from "./entry-qr-card";
 import {
   useCreateMembership,
   useFreezeMembership,
@@ -1598,6 +1599,9 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
 
       {/* Quick Stats */}
       <QuickStatsRow memberId={memberId} />
+
+      {/* Gate entry token */}
+      <EntryQrCard memberId={memberId} />
 
       {/* AI Progress Card */}
       <Card className="overflow-hidden rounded-[28px] border-white/90 bg-white/88 p-0 shadow-xl shadow-violet-900/5 backdrop-blur-xl">

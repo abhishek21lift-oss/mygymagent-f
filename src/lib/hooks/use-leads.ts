@@ -74,3 +74,49 @@ export function useCompleteFollowUp() {
   const queryClient = useQueryClient()
   return useMutation({ mutationFn: ({ leadId, followUpId }: { leadId: string; followUpId: string }) => api.patch<LeadFollowUp>(`/leads/${leadId}/follow-ups/${followUpId}/complete`), onSuccess: (_, { leadId }) => { queryClient.invalidateQueries({ queryKey: [KEY, leadId] }); queryClient.invalidateQueries({ queryKey: ["lead-follow-ups"] }) } })
 }
+
+export interface CrmSlaItem {
+  leadId: string
+  name: string
+  createdAt: string
+  firstContactAt?: string | null
+  slaMin?: number | null
+}
+
+export interface CrmSla {
+  items: CrmSlaItem[]
+  overdueCount: number
+  medianMin: number | null
+}
+
+/** Minutes until first contact, compactly: 12 -> "12m", 180 -> "3h", null -> "—". */
+export function formatSlaMin(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "—"
+  if (value < 60) return `${Math.max(0, Math.round(value))}m`
+  return `${Math.max(1, Math.round(value / 60))}h`
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null
+}
+
+function normalizeSla(raw: unknown): CrmSla {
+  const envelope = isRecord(raw) && "data" in raw ? (raw as { data: unknown }).data : raw
+  if (!isRecord(envelope)) return { items: [], overdueCount: 0, medianMin: null }
+  const items = Array.isArray(envelope.items) ? (envelope.items as CrmSlaItem[]) : []
+  return {
+    items,
+    overdueCount: typeof envelope.overdueCount === "number" ? envelope.overdueCount : 0,
+    medianMin: typeof envelope.medianMin === "number" ? envelope.medianMin : null,
+  }
+}
+
+/** First-contact SLA snapshot. 404-safe: on error callers hide the section. */
+export function useCrmSla() {
+  return useQuery({
+    queryKey: ["crm-sla"],
+    queryFn: async () => normalizeSla(await api.get<unknown>("/crm/sla")),
+    retry: false,
+    staleTime: 60_000,
+  })
+}

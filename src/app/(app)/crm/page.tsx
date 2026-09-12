@@ -59,6 +59,8 @@ import {
   useCompleteFollowUp,
   useLeadScore,
   useSendLeadMessage,
+  useCrmSla,
+  formatSlaMin,
 } from "@/lib/hooks/use-leads";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -620,7 +622,42 @@ export default function CrmPage() {
     order: "desc",
     status: filter === "ALL" ? undefined : filter,
   });
+  const sla = useCrmSla();
   const visible = q.data?.items.length ?? 0;
+
+  const slaByLead = React.useMemo(() => {
+    const map = new Map<string, number | null | undefined>();
+    for (const item of sla.data?.items ?? []) map.set(item.leadId, item.slaMin);
+    return map;
+  }, [sla.data]);
+
+  // SLA column is only added once the snapshot loads; on 404/error the
+  // table renders exactly as before instead of crashing.
+  const tableColumns = React.useMemo<ColumnDef<Lead>[]>(() => {
+    if (!sla.data) return columns;
+    return [
+      ...columns,
+      {
+        header: "SLA",
+        accessorKey: "sla",
+        cell: ({ row }) => {
+          const min = slaByLead.get(row.original.id);
+          const overdue = typeof min === "number" && min > 120;
+          return (
+            <span
+              className={
+                overdue
+                  ? "font-mono font-bold tabular-nums text-rose-600 dark:text-rose-400"
+                  : "font-mono tabular-nums text-stone-700 dark:text-stone-300"
+              }
+            >
+              {formatSlaMin(min)}
+            </span>
+          );
+        },
+      },
+    ];
+  }, [sla.data, slaByLead]);
 
   return (
     <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
@@ -724,14 +761,19 @@ export default function CrmPage() {
         {/* Leads */}
         <section className="grid gap-5">
           <div className="overflow-hidden rounded-[28px] border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-            <div className="border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-violet-50/60 px-5 py-5 sm:px-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-violet-50/60 px-5 py-5 sm:px-6">
               <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">
                 Leads
               </h2>
+              {sla.data && (
+                <span className="inline-flex min-h-11 items-center rounded-full border border-blue-200/70 bg-blue-50/70 px-3 py-1 text-xs font-bold text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/50 dark:text-blue-200">
+                  Median first contact: {formatSlaMin(sla.data.medianMin)} · {sla.data.overdueCount} overdue
+                </span>
+              )}
             </div>
             <div className="p-3 sm:p-4">
               <DataTable
-                columns={columns}
+                columns={tableColumns}
                 data={q.data?.items ?? []}
                 isLoading={q.isLoading}
                 isError={q.isError}

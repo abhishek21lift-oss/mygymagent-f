@@ -36,3 +36,17 @@ export function useUpdateBranch(id: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   });
 }
+
+export interface RotatedDeviceKey {
+  deviceKey: string;
+}
+
+/** Rotates a branch scanner device key. Plaintext is returned once —
+ * callers must show copy-once UI and never persist it. */
+export function useRotateDeviceKey() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<RotatedDeviceKey>(`/branches/${id}/rotate-device-key`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  });
+}

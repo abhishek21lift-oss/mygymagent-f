@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useBranches, useCreateBranch } from "@/lib/hooks/use-branches";
+import { DeviceKeyRow } from "./device-key-row";
 import { ApiError } from "@/lib/api/client";
 import { createBranchSchema, type CreateBranchInput } from "@/lib/validation/gym";
 
@@ -260,6 +261,7 @@ export default function BranchesPage() {
                       {branch.email && <p className="inline-flex min-w-0 items-center gap-2"><Mail className="size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span className="truncate">{branch.email}</span></p>}
                       {!branch.city && !branch.phone && !branch.email && <p className="text-xs">No contact details yet.</p>}
                     </div>
+                    <DeviceKeyRow branchId={branch.id} branch={branch} />
                   </article>
                 );
               })}
