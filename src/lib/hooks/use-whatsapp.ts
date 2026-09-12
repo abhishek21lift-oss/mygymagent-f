@@ -36,3 +36,59 @@ export function useSendWhatsAppMessage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "messages"] }),
   })
 }
+
+// --- WS-2: test-send / templates / logs / disconnect (new backend surface) ---
+
+export interface WhatsAppTemplate {
+  key: string
+  channel: string
+  subject?: string | null
+  body: string
+}
+
+export interface WhatsAppLogEntry {
+  id: string
+  channel: string
+  category: string
+  templateKey: string
+  recipient: string
+  status: string
+  errorMessage?: string | null
+  sentAt: string | null
+  createdAt: string
+}
+
+export interface WhatsAppTestSendResult {
+  messageLogId: string
+  status: string
+}
+
+export function useWhatsappTemplates() {
+  return useQuery({ queryKey: [KEY, "templates"], queryFn: () => api.get<WhatsAppTemplate[]>("/whatsapp/templates") })
+}
+
+export function useWhatsappLogs(limit = 20) {
+  return useQuery({
+    queryKey: [KEY, "logs", limit],
+    queryFn: () => api.get<WhatsAppLogEntry[]>("/whatsapp/logs", { query: { limit } }),
+  })
+}
+
+export function useTestSend() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { to: string }) => api.post<WhatsAppTestSendResult>("/whatsapp/test-send", input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [KEY, "logs"] })
+      queryClient.invalidateQueries({ queryKey: [KEY, "messages"] })
+    },
+  })
+}
+
+export function useDisconnectWhatsapp() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ status: "DISCONNECTED" }>("/whatsapp/disconnect", {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  })
+}
