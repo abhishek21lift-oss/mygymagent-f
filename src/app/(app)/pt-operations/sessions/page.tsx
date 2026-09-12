@@ -236,7 +236,7 @@ export default function PtSessionsPage() {
                     ))}
                   </select>
                 </Field>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field label="Start">
                     <input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} className="input min-h-11 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600" />
                   </Field>
@@ -244,7 +244,7 @@ export default function PtSessionsPage() {
                     <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} className="input min-h-11 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600" />
                   </Field>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field label="Session type">
                     <select value={type} onChange={(e) => setType(e.target.value as PtSessionType)} className="input min-h-11 w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
                       <option value="PERSONAL_TRAINING">Personal</option>

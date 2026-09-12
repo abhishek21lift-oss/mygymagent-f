@@ -897,7 +897,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
                 value={testName}
                 onChange={(e) => setTestName(e.target.value)}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Input
                   type="number"
                   placeholder="Value"
@@ -913,6 +913,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
             </div>
             <DialogFooter>
               <Button
+                className="w-full sm:w-auto"
                 onClick={handleLogFitnessTest}
                 disabled={!testName.trim() || !testValue || !testUnit.trim() || createFitness.isPending}
               >

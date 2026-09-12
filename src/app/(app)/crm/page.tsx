@@ -175,7 +175,7 @@ function NewLeadDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {(["firstName", "lastName"] as const).map((n) => (
                 <FormField
                   key={n}
@@ -193,7 +193,7 @@ function NewLeadDialog() {
                 />
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {(["email", "phone"] as const).map((n) => (
                 <FormField
                   key={n}

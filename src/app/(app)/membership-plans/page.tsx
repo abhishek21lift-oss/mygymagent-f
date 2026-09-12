@@ -110,7 +110,7 @@ function CreatePlanDialog() {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="durationDays"
@@ -152,7 +152,7 @@ function CreatePlanDialog() {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={createPlan.isPending}>
+              <Button type="submit" className="w-full sm:w-auto" disabled={createPlan.isPending}>
                 {createPlan.isPending ? "Creating..." : "Create plan"}
               </Button>
             </DialogFooter>

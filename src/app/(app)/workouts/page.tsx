@@ -49,7 +49,7 @@ function AddExerciseDialog() {
             <FormField control={form.control} name="name" render={({ field }) => (
               <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Back Squat" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <FormField control={form.control} name="muscleGroup" render={({ field }) => (
                 <FormItem><FormLabel>Muscle group</FormLabel><FormControl><Input placeholder="Legs" {...field} /></FormControl></FormItem>
               )} />
@@ -123,7 +123,7 @@ function CreatePlanDialog() {
                       )} />
                       <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} aria-label="Remove exercise" className="min-h-11 min-w-11"><Trash2 className="size-4" aria-hidden="true" /></Button>
                     </div>
-                    <div className="mt-2 grid grid-cols-3 gap-2">
+                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <FormField control={form.control} name={`exercises.${index}.sets`} render={({ field: f }) => (
                         <FormItem><FormLabel className="text-xs">Sets</FormLabel><FormControl><Input type="number" {...f} /></FormControl></FormItem>
                       )} />

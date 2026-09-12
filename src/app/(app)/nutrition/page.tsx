@@ -61,7 +61,7 @@ function AddFood() {
             <FormField control={form.control} name="servingSize" render={({ field }) => (
               <FormItem><FormLabel>Serving size</FormLabel><FormControl><Input placeholder="100g" {...field} /></FormControl></FormItem>
             )} />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {(["calories", "proteinG", "carbsG", "fatG"] as const).map((name) => (
                 <FormField key={name} control={form.control} name={name} render={({ field }) => (
                   <FormItem>
@@ -136,7 +136,7 @@ function CreatePlan() {
                     )} />
                     <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} aria-label="Remove food item" className="min-h-11 min-w-11"><Trash2 className="size-4" aria-hidden="true" /></Button>
                   </div>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <FormField control={form.control} name={`items.${index}.mealSlot`} render={({ field: f }) => (
                       <FormItem>
                         <FormLabel className="text-xs">Meal</FormLabel>

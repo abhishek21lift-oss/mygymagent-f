@@ -68,14 +68,14 @@ function RecordExpenseDialog() {
       <DialogContent>
         <DialogHeader><DialogTitle>Record an expense</DialogTitle></DialogHeader>
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div><Label>Category</Label><Select value={category} onValueChange={setCategory}><SelectTrigger className="mt-1.5 w-full"><SelectValue /></SelectTrigger><SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
             <div><Label>Amount</Label><Input className="mt-1.5" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" /></div>
           </div>
           <div><Label>Vendor (optional)</Label><Input className="mt-1.5" value={vendor} onChange={(e) => setVendor(e.target.value)} placeholder="Landlord, utility company..." /></div>
           <div><Label>Notes (optional)</Label><Input className="mt-1.5" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="What was this for?" /></div>
         </div>
-        <DialogFooter><Button onClick={submit} disabled={create.isPending}>{create.isPending ? "Recording..." : "Record expense"}</Button></DialogFooter>
+        <DialogFooter><Button className="w-full sm:w-auto" onClick={submit} disabled={create.isPending}>{create.isPending ? "Recording..." : "Record expense"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   )

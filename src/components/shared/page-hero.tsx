@@ -53,7 +53,7 @@ export function PageHero({
           : "border-stone-200/70 bg-white text-stone-950 shadow-sm dark:border-white/10 dark:bg-stone-950 dark:text-white",
       )}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {Icon && (
             <span
@@ -67,12 +67,16 @@ export function PageHero({
           )}
           <h1
             id={id}
-            className="truncate text-lg font-semibold tracking-tight sm:text-xl"
+            className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight sm:text-xl"
           >
             {title}
           </h1>
         </div>
-        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+        {actions && (
+          <div className="flex flex-wrap items-center gap-2 [&>*]:min-h-11">
+            {actions}
+          </div>
+        )}
       </div>
       {children && <div className="mt-3 border-t border-stone-200/60 pt-3 dark:border-white/10">{children}</div>}
     </section>

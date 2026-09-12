@@ -105,7 +105,8 @@ export function DataTable<T>({
         <>
           <div className="overflow-hidden rounded-[22px] border border-white/90 bg-white/88 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl dark:border-white/10 dark:bg-card/90">
             <div aria-hidden="true" className="h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
-            <Table>
+            <div className="overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
+            <Table className="min-w-[640px]">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="bg-gradient-to-r from-stone-50 via-violet-50/50 to-cyan-50/50 hover:bg-stone-50 dark:from-white/5 dark:via-white/5 dark:to-transparent dark:hover:bg-white/5">
@@ -138,6 +139,7 @@ export function DataTable<T>({
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
 
           {page !== undefined && onPageChange ? (

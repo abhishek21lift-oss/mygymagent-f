@@ -303,7 +303,7 @@ function SlotRow({ slot, showDate }: { slot: CalendarSlot; showDate: boolean }) 
           </div>
           {isAppt && slot.status === "BOOKED" ? (
             <div className="mt-3 flex flex-col gap-3 border-t border-stone-100 pt-4">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
                   <Label className="text-xs">New start</Label>
                   <Input type="datetime-local" value={rsStart} onChange={(e) => setRsStart(e.target.value)} className="min-h-11" />
@@ -436,7 +436,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
             <Label className="text-sm font-bold text-stone-700">Title</Label>
             <Input className="mt-1.5 min-h-11" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Trial session — Priya" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label className="text-sm font-bold text-stone-700">Type</Label>
               <Select value={type} onValueChange={(v) => setType(v as AppointmentType)}>
@@ -457,7 +457,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
               </Select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label className="text-sm font-bold text-stone-700">Member</Label>
               <Select value={memberId} onValueChange={(v) => { setMemberId(v === "none" ? "" : v); setLeadId(""); setClientName("") }}>
@@ -480,7 +480,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
             </div>
           </div>
           {!memberId && !leadId ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label className="text-xs font-bold text-stone-700">Client name</Label>
                 <Input className="mt-1.5 min-h-11" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Walk-in" />
@@ -491,7 +491,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
               </div>
             </div>
           ) : null}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label className="text-sm font-bold text-stone-700">Start</Label>
               <Input className="mt-1.5 min-h-11" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} />
@@ -579,7 +579,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
               {trainers.map((s) => s.staffProfile && <SelectItem key={s.staffProfile.id} value={s.staffProfile.id}>{s.firstName} {s.lastName}</SelectItem>)}
             </SelectContent>
           </Select>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Select value={dayOfWeek} onValueChange={setDayOfWeek}>
               <SelectTrigger className="min-h-11 w-full"><SelectValue /></SelectTrigger>
               <SelectContent>{DAY_OPTIONS.map((d) => <SelectItem key={d.value} value={String(d.value)}>{d.label}</SelectItem>)}</SelectContent>
@@ -613,7 +613,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
         <div className="border-t border-stone-100 pt-4">
           <p className="mb-2 text-xs font-black uppercase tracking-wider text-stone-500">Time off</p>
           <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Input type="datetime-local" value={offStart} onChange={(e) => setOffStart(e.target.value)} className="min-h-11" aria-label="Time off start" />
               <Input type="datetime-local" value={offEnd} onChange={(e) => setOffEnd(e.target.value)} className="min-h-11" aria-label="Time off end" />
             </div>

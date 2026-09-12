@@ -97,7 +97,7 @@ function AddProductDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="sku"
@@ -151,7 +151,7 @@ function AddProductDialog() {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="unitPrice"
@@ -179,7 +179,7 @@ function AddProductDialog() {
                 )}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="quantityOnHand"
@@ -208,7 +208,7 @@ function AddProductDialog() {
               />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={createProduct.isPending}>
+              <Button type="submit" className="w-full sm:w-auto" disabled={createProduct.isPending}>
                 {createProduct.isPending ? "Adding..." : "Add product"}
               </Button>
             </DialogFooter>
@@ -256,7 +256,7 @@ function StockMovementDialog({ product }: { product: Product }) {
         </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="type"
@@ -312,7 +312,7 @@ function StockMovementDialog({ product }: { product: Product }) {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={recordMovement.isPending}>
+              <Button type="submit" className="w-full sm:w-auto" disabled={recordMovement.isPending}>
                 {recordMovement.isPending ? "Saving..." : "Record movement"}
               </Button>
             </DialogFooter>

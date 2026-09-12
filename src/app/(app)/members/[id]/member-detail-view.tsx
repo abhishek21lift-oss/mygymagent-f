@@ -887,7 +887,7 @@ function EditMemberDialog({
               </TabsList>
 
               <TabsContent value="personal" className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="firstName"
@@ -915,7 +915,7 @@ function EditMemberDialog({
                     )}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="email"
@@ -943,7 +943,7 @@ function EditMemberDialog({
                     )}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="dateOfBirth"
@@ -1038,7 +1038,7 @@ function EditMemberDialog({
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="city"
@@ -1066,7 +1066,7 @@ function EditMemberDialog({
                     )}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="postalCode"
@@ -1238,6 +1238,7 @@ function EditMemberDialog({
             <DialogFooter>
               <Button
                 type="submit"
+                className="w-full sm:w-auto"
                 disabled={updateMember.isPending}
               >
                 {updateMember.isPending ? "Saving..." : "Save Changes"}

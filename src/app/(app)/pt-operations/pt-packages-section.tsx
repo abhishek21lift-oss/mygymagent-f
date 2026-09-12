@@ -65,7 +65,7 @@ function SellPackageDialog() {
         <DialogHeader><DialogTitle>Sell a PT package</DialogTitle></DialogHeader>
         <div className="flex flex-col gap-4">
           <div><p className="mb-1.5 text-sm font-medium">Member</p><MemberPicker value={member} onChange={setMember} /></div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div><Label>Package name</Label><Input className="mt-1.5" value={name} onChange={(e) => setName(e.target.value)} /></div>
             <div><Label>Sessions</Label><Input className="mt-1.5" type="number" value={sessions} onChange={(e) => setSessions(e.target.value)} /></div>
             <div><Label>Price</Label><Input className="mt-1.5" type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" /></div>
