@@ -207,7 +207,7 @@ const columns: ColumnDef<Member>[] = [
   { header: "Contact", accessorKey: "email", cell: ({ row }) => <div className="text-sm"><span className="block font-medium text-stone-900">{row.original.email ?? "—"}</span><span className="text-xs font-medium text-stone-600 tabular-nums">{row.original.phone ?? ""}</span></div> },
   { header: "Branch", accessorKey: "primaryBranch", cell: ({ row }) => <span className="text-sm font-semibold text-stone-700">{row.original.primaryBranch?.name ?? "—"}</span> },
   { header: "Status", accessorKey: "status", cell: ({ row }) => <Badge variant={statusVariant[row.original.status]} className={`rounded-full px-2.5 py-1 text-[10px] font-black tracking-wide ring-1 ${STATUS_PILL[row.original.status]}`}>{row.original.status}</Badge> },
-  { header: "Type", accessorKey: "memberType", cell: ({ row }) => <span className="rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-black tracking-wide text-violet-700 ring-1 ring-violet-200/60">{row.original.memberType}</span> },
+  { header: "Type", accessorKey: "memberType", cell: ({ row }) => row.original.memberType ? <span className="rounded-full bg-violet-500/10 px-2.5 py-1 text-[10px] font-black tracking-wide text-violet-700 ring-1 ring-violet-200/60">{row.original.memberType}</span> : <span className="text-sm text-stone-600">—</span> },
 ];
 
 export default function MembersPage() {
