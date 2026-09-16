@@ -43,13 +43,13 @@ export function AICommandBar() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group hidden min-h-11 w-full max-w-xl items-center gap-3 rounded-[19px] border border-white/90 bg-white/85 px-3 py-2 text-left text-sm font-medium text-stone-600 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-px hover:border-violet-200 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 md:flex dark:border-white/10 dark:bg-white/5 dark:text-stone-300 dark:hover:border-violet-400/30"
+        className="group flex min-h-11 w-11 shrink-0 items-center justify-center gap-3 rounded-[19px] border border-white/90 bg-white/85 text-left text-sm font-medium text-stone-600 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-px hover:border-violet-200 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 sm:w-full sm:max-w-xl sm:justify-start sm:px-3 sm:py-2 dark:border-white/10 dark:bg-white/5 dark:text-stone-300 dark:hover:border-violet-400/30"
         aria-label="Open MyGymAgent AI command center"
       >
         <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-[13px] bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-3">
           <Sparkles className="size-4" />
         </span>
-        <span className="flex-1 truncate">Ask MyGymAgent anything...</span>
+        <span className="hidden flex-1 truncate sm:inline">Ask MyGymAgent anything...</span>
         <kbd className="hidden shrink-0 rounded-full border border-violet-100 bg-gradient-to-r from-violet-50 to-fuchsia-50 px-2 py-1 text-[10px] font-black text-violet-700 lg:inline dark:border-white/10 dark:from-white/10 dark:to-white/5 dark:text-violet-200">
           ⌘ K
         </kbd>

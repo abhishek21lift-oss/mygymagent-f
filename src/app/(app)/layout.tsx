@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { Topbar } from "@/components/app-shell/topbar";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
+import { BottomTabBar } from "@/components/app-shell/bottom-tab-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -53,8 +54,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             aria-hidden="true"
             className="pointer-events-none absolute -left-20 bottom-10 size-72 rounded-full bg-cyan-400/15 blur-3xl motion-safe:animate-blob motion-safe:[animation-delay:2.5s]"
           />
-          <div className="relative mx-auto w-full max-w-[1720px] px-3 pb-6 pt-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="relative mx-auto w-full max-w-[1720px] px-3 pt-4 pb-24 sm:px-6 sm:pt-6 md:pb-6 lg:px-8 lg:pt-8 lg:pb-8">{children}</div>
         </main>
+        <BottomTabBar onOpenMore={() => setMobileNavOpen(true)} />
       </div>
     </div>
   );

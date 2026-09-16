@@ -103,7 +103,63 @@ export function DataTable<T>({
         <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />
       ) : (
         <>
-          <div className="overflow-hidden rounded-[22px] border border-white/90 bg-white/88 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl dark:border-white/10 dark:bg-card/90">
+          <div className="flex flex-col gap-3 sm:hidden">
+            {table.getRowModel().rows.map((row) => {
+              const cells = row.getVisibleCells();
+              const selectCell = cells.find((cell) => cell.column.id === "select");
+              const [primaryCell, ...restCells] = cells.filter((cell) => cell.column.id !== "select");
+              return (
+                <div
+                  key={row.id}
+                  role={onRowClick ? "button" : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onClick={() => onRowClick?.(row.original)}
+                  onKeyDown={(event) => {
+                    if (!onRowClick) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onRowClick(row.original);
+                    }
+                  }}
+                  className={cn(
+                    "rounded-[19px] border border-white/90 bg-white/88 p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:border-white/10 dark:bg-card/90",
+                    onRowClick && "cursor-pointer touch-manipulation active:bg-violet-50/60 dark:active:bg-white/5",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      {primaryCell && flexRender(primaryCell.column.columnDef.cell, primaryCell.getContext())}
+                    </div>
+                    {selectCell && (
+                      <div onClick={(event) => event.stopPropagation()} className="shrink-0">
+                        {flexRender(selectCell.column.columnDef.cell, selectCell.getContext())}
+                      </div>
+                    )}
+                  </div>
+                  {restCells.length > 0 && (
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5 border-t border-stone-100 pt-3 dark:border-white/10">
+                      {restCells.map((cell) => {
+                        const header = cell.column.columnDef.header;
+                        const label = typeof header === "string" ? header : null;
+                        return (
+                          <div key={cell.id} className="min-w-0">
+                            {label && (
+                              <div className="mb-0.5 text-[9px] font-black uppercase tracking-[.14em] text-stone-600 dark:text-stone-300">
+                                {label}
+                              </div>
+                            )}
+                            <div className="truncate text-sm">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="hidden overflow-hidden rounded-[22px] border border-white/90 bg-white/88 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl sm:block dark:border-white/10 dark:bg-card/90">
             <div aria-hidden="true" className="h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
             <div className="overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
             <Table className="min-w-[640px]">
