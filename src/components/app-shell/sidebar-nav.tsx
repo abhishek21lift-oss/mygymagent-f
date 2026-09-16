@@ -7,7 +7,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
-import { primaryNav, comingSoonNav, settingsNav, type NavItem } from "@/lib/nav-config";
+import { primaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 
 /* Athletic Luxe — one vivid gradient per section. Literal strings only. */
@@ -109,23 +109,23 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
       {!collapsed && <div className="mb-2 shrink-0 px-3 text-[9px] font-black uppercase tracking-[0.2em] text-stone-600 dark:text-stone-300">Workspace</div>}
       <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5 pb-2 [scrollbar-width:thin]">
         {visiblePrimary.map((item) => {
-          const active = pathname.startsWith(item.href);
           const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
+          const active = isNavItemActive(pathname, item.href) || children.some((child) => isNavItemActive(pathname, child.href));
           return (
             <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined} className="shrink-0">
               <NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} itemRef={mobile && !collapsed && active ? activeRef : undefined} />
               {!collapsed && active && children.length > 0 && (
                 <div className="mt-1 mb-2 space-y-0.5 border-l-2 border-violet-200/70 pl-1 dark:border-white/15">
-                  {children.map((child) => <NavLink key={child.href} item={child} active={pathname.startsWith(child.href)} nested onNavigate={onNavigate} />)}
+                  {children.map((child) => <NavLink key={child.href} item={child} active={isNavItemActive(pathname, child.href)} nested onNavigate={onNavigate} />)}
                 </div>
               )}
             </div>
           );
         })}
-        {!collapsed && visibleComingSoon.length > 0 && <div className="mt-5 shrink-0"><div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[0.2em] text-stone-600 dark:text-stone-300">Coming soon</div><div className="space-y-1">{visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} onNavigate={onNavigate} />)}</div></div>}
-        {collapsed && visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} collapsed onNavigate={onNavigate} />)}
+        {!collapsed && visibleComingSoon.length > 0 && <div className="mt-5 shrink-0"><div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[0.2em] text-stone-600 dark:text-stone-300">Coming soon</div><div className="space-y-1">{visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} onNavigate={onNavigate} />)}</div></div>}
+        {collapsed && visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} collapsed onNavigate={onNavigate} />)}
       </div>
-      <div className="mt-3 shrink-0 border-t border-stone-200/70 pt-3 dark:border-white/10">{showSettings && <NavLink item={settingsNav} active={pathname.startsWith(settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}</div>
+      <div className="mt-3 shrink-0 border-t border-stone-200/70 pt-3 dark:border-white/10">{showSettings && <NavLink item={settingsNav} active={isNavItemActive(pathname, settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}</div>
     </nav>
   );
 }

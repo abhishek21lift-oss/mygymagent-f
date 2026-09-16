@@ -3,6 +3,13 @@ import { BarChart3, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare, 
 
 export interface NavItem { title: string; href: string; icon: LucideIcon; permission?: string | string[]; children?: NavItem[]; accent?: "ai" | "default"; comingSoon?: boolean }
 
+/** Exact-segment route match: `pathname.startsWith(href)` alone is wrong
+ * whenever one route is a literal string prefix of an unrelated sibling
+ * (e.g. "/membership-plans" and "/memberships" both start with "/members"). */
+export function isNavItemActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export const primaryNav: NavItem[] = [
   { title: "Command Center", href: "/command-center", icon: LayoutDashboard },
   { title: "Members", href: "/members", icon: Users, permission: ["members.read", "members.read_assigned"] },

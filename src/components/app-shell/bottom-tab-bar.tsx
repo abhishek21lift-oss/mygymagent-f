@@ -7,6 +7,7 @@ import { CalendarCheck, LayoutDashboard, Menu, Sparkles, Users } from "lucide-re
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
+import { isNavItemActive } from "@/lib/nav-config";
 
 interface TabItem {
   title: string;
@@ -50,6 +51,7 @@ export function BottomTabBar({ onOpenMore }: { onOpenMore: () => void }) {
 
   const visibleLeft = leftTabs.filter((tab) => !tab.permission || hasPermission(tab.permission));
   const visibleRight = rightTabs.filter((tab) => !tab.permission || hasPermission(tab.permission));
+  const aiActive = isNavItemActive(pathname, "/ai") || isNavItemActive(pathname, "/ai-actions");
 
   return (
     <nav
@@ -58,19 +60,19 @@ export function BottomTabBar({ onOpenMore }: { onOpenMore: () => void }) {
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-between px-1">
         {visibleLeft.map((tab) => (
-          <TabLink key={tab.href} tab={tab} active={pathname.startsWith(tab.href)} />
+          <TabLink key={tab.href} tab={tab} active={isNavItemActive(pathname, tab.href)} />
         ))}
 
         <Link
           href="/ai"
           aria-label="AI Agent"
-          aria-current={pathname.startsWith("/ai") ? "page" : undefined}
+          aria-current={aiActive ? "page" : undefined}
           className="relative -mt-5 flex flex-1 touch-manipulation flex-col items-center justify-end gap-1 pb-1.5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-violet-600"
         >
           <span
             className={cn(
               "flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/40 ring-4 ring-white transition-transform dark:ring-card",
-              pathname.startsWith("/ai") && "scale-105",
+              aiActive && "scale-105",
             )}
           >
             <Sparkles className="size-5" aria-hidden="true" />
@@ -78,7 +80,7 @@ export function BottomTabBar({ onOpenMore }: { onOpenMore: () => void }) {
           <span
             className={cn(
               "text-[10px] font-bold tracking-tight",
-              pathname.startsWith("/ai") ? "text-violet-700 dark:text-violet-300" : "text-sidebar-foreground/55",
+              aiActive ? "text-violet-700 dark:text-violet-300" : "text-sidebar-foreground/55",
             )}
           >
             AI
@@ -86,7 +88,7 @@ export function BottomTabBar({ onOpenMore }: { onOpenMore: () => void }) {
         </Link>
 
         {visibleRight.map((tab) => (
-          <TabLink key={tab.href} tab={tab} active={pathname.startsWith(tab.href)} />
+          <TabLink key={tab.href} tab={tab} active={isNavItemActive(pathname, tab.href)} />
         ))}
 
         <button
