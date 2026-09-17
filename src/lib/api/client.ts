@@ -1,10 +1,16 @@
 import { getAccessToken, setAccessToken } from "./token-store"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? (
-  process.env.NODE_ENV === "production"
+const CONFIGURED_API_URL = process.env.NEXT_PUBLIC_API_URL
+if (!CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "NEXT_PUBLIC_API_URL is not configured — refusing to fall back to a hardcoded backend in production.",
+  )
+}
+const API_URL =
+  CONFIGURED_API_URL ??
+  (process.env.NODE_ENV === "production"
     ? "https://mygymagent-b.onrender.com"
-    : "http://localhost:4000"
-)
+    : "http://localhost:4000")
 const REQUEST_TIMEOUT_MS = 20_000
 
 export interface ApiErrorBody {
@@ -45,11 +51,13 @@ let refreshInFlight: Promise<boolean> | null = null
 
 async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timer = globalThis.setTimeout
+    ? globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+    : undefined
   try {
     return await fetch(input, { ...init, signal: controller.signal })
   } finally {
-    window.clearTimeout(timeout)
+    if (timer !== undefined) globalThis.clearTimeout(timer)
   }
 }
 
@@ -147,9 +155,32 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   } catch {}
 
   if (!res.ok) {
-    const code = typeof raw === "object" && raw !== null && "code" in raw ? raw.code : "UNKNOWN"
-    const message = typeof raw === "object" && raw !== null && "message" in raw ? raw.message : res.statusText
-    throw new ApiError(res.status, { error: { code: code as string, message: message as string } } as ApiErrorBody)
+    // Backend envelope is `{ error: { code, message, details?, requestId? } }`
+    // but tolerate a bare `{ code, message }` shape too (defensive: proxies
+    // or future endpoints may flatten it). Never drop code/message/details.
+    const envelope =
+      typeof raw === "object" && raw !== null && "error" in raw
+        ? (raw as { error?: unknown }).error
+        : raw
+    const source =
+      typeof envelope === "object" && envelope !== null
+        ? (envelope as Record<string, unknown>)
+        : {}
+    const code = typeof source.code === "string" ? source.code : "UNKNOWN"
+    const message =
+      typeof source.message === "string" ? source.message : res.statusText
+    throw new ApiError(
+      res.status,
+      {
+        error: {
+          code,
+          message,
+          details: source.details,
+          requestId:
+            typeof source.requestId === "string" ? source.requestId : undefined,
+        },
+      } as ApiErrorBody,
+    )
   }
 
   if (typeof raw === "object" && raw !== null && "data" in raw && raw.data !== null && raw.data !== undefined) {

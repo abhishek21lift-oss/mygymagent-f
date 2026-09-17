@@ -1,25 +1,16 @@
 /**
- * Stores access token in localStorage for persistence across page refreshes.
- * The refresh token lives in httpOnly cookie (never accessible to JS).
+ * Holds the access token in memory only — never in localStorage/sessionStorage.
+ *
+ * Rationale: any XSS payload (or compromised third-party script) can read
+ * localStorage and exfiltrate a long-lived token. An in-memory variable is
+ * cleared on reload and unreachable across tabs, so theft requires live JS
+ * execution at the moment a token exists. The refresh token lives in an
+ * httpOnly cookie (never accessible to JS); AuthProvider bootstraps the
+ * session on load via POST /auth/refresh with credentials: 'include'.
  */
-const STORAGE_KEY = "accessToken"
 
 let accessToken: string | null = null
 const listeners = new Set<(token: string | null) => void>()
-
-function loadFromStorage(): string | null {
-  if (typeof window === "undefined") return null
-  return localStorage.getItem(STORAGE_KEY)
-}
-
-function saveToStorage(token: string | null): void {
-  if (typeof window === "undefined") return
-  if (token === null) {
-    localStorage.removeItem(STORAGE_KEY)
-  } else {
-    localStorage.setItem(STORAGE_KEY, token)
-  }
-}
 
 export function getAccessToken(): string | null {
   return accessToken
@@ -27,7 +18,6 @@ export function getAccessToken(): string | null {
 
 export function setAccessToken(token: string | null): void {
   accessToken = token
-  saveToStorage(token)
   for (const listener of listeners) listener(token)
 }
 
@@ -35,5 +25,3 @@ export function subscribeToAccessToken(listener: (token: string | null) => void)
   listeners.add(listener)
   return () => listeners.delete(listener)
 }
-
-accessToken = loadFromStorage()

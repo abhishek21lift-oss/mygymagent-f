@@ -34,7 +34,6 @@ const nextConfig: NextConfig = {
           { key: "X-DNS-Prefetch-Control", value: "off" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
         ],
       },
     ];
