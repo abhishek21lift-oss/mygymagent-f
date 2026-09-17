@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { api, ApiError } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import type { AuthUser, LoginResponse, MeResponse, RegisterResponse } from "@/lib/types/auth"
@@ -24,38 +25,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<AuthUser | null>(null)
   const [permissions, setPermissions] = React.useState<string[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
+  const queryClient = useQueryClient()
+
+  // Bumped on every explicit session change (login/register/logout) but NOT
+  // on silent access-token refresh. Lets an in-flight /auth/me tell apart
+  // "same session, token rotated underneath me" (safe to apply) from "the
+  // user switched accounts while I was in flight" (must discard).
+  const sessionGen = React.useRef(0)
+
+  function clearSession(nextGen: number) {
+    sessionGen.current = nextGen
+    setAccessToken(null)
+    setUser(null)
+    setPermissions([])
+  }
 
   const loadMe = React.useCallback(async (): Promise<void> => {
-    const tokenAtStart = getAccessToken()
+    const genAtStart = sessionGen.current
 
     try {
       const me = await api.get<MeResponse>("/auth/me")
 
-      // A token change during this request is normally the silent refresh that
-      // apiFetch performs after an expired access token. The response is still
-      // the authoritative /auth/me result for the current session, so it must
-      // hydrate the user instead of being discarded. This fixes the reload path
-      // where refresh succeeded but the UI stayed unauthenticated.
-      //
-      // Keep the stale-request protection for a genuine login/register race:
-      // when the request started with a token and that token was replaced by a
-      // different session before /auth/me completed, don't overwrite the newer
-      // session with the older response.
-      if (tokenAtStart !== null && getAccessToken() !== tokenAtStart) {
-        const currentToken = getAccessToken()
-        if (currentToken === null) return
-      }
+      // Account switched mid-request: a newer session owns the UI now.
+      if (genAtStart !== sessionGen.current) return
 
       setUser(me.user)
       setPermissions(me.permissions)
-    } catch {
-      if (getAccessToken() !== tokenAtStart) return
-      if (tokenAtStart !== null) {
+    } catch (error) {
+      // A newer session started while this request was in flight -- never
+      // let the stale response clobber it.
+      if (genAtStart !== sessionGen.current) return
+      if (error instanceof ApiError && error.status === 401) {
+        // Same session, server says it is dead: log out for real instead
+        // of leaving the UI authenticated with no usable token.
+        clearSession(genAtStart)
         return
       }
-      setAccessToken(null)
-      setUser(null)
-      setPermissions([])
+      // Transient failure (network/5xx) on a session we already hold:
+      // keep existing state. Only a bootstrap with no session at all
+      // settles to logged-out.
+      if (getAccessToken() === null) {
+        clearSession(genAtStart)
+      }
     }
   }, [])
 
@@ -84,6 +95,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(
     async (input: LoginInput) => {
+      // New session: drop any cached data from a previous account first so
+      // tenant data can never bleed across logins on a shared device.
+      sessionGen.current += 1
+      await queryClient.cancelQueries().catch(() => undefined)
+      queryClient.clear()
       const res = await api.post<LoginResponse>("/auth/login", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
@@ -91,18 +107,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       void loadMe()
     },
-    [loadMe],
+    [loadMe, queryClient],
   )
 
   const register = React.useCallback(
     async (input: RegisterInput) => {
+      sessionGen.current += 1
+      await queryClient.cancelQueries().catch(() => undefined)
+      queryClient.clear()
       const res = await api.post<RegisterResponse>("/auth/register", input)
       setAccessToken(res.accessToken)
       setUser(res.user)
       setPermissions([])
       void loadMe()
     },
-    [loadMe],
+    [loadMe, queryClient],
   )
 
   const logout = React.useCallback(async () => {
@@ -111,10 +130,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Best effort; local auth state must still be cleared.
     }
+    sessionGen.current += 1
+    await queryClient.cancelQueries().catch(() => undefined)
+    queryClient.clear()
     setAccessToken(null)
     setUser(null)
     setPermissions([])
-  }, [])
+  }, [queryClient])
 
   const hasPermission = React.useCallback(
     (key: string | string[]) =>

@@ -26,6 +26,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/lib/auth/auth-context"
 import { ApiError } from "@/lib/api/client"
+import { isAllowedMetaMessageOrigin } from "@/lib/meta-message-origins"
 import { useCompleteWhatsAppSignup, useWhatsAppIntegration } from "@/lib/hooks/use-whatsapp"
 import {
   useDisconnectWhatsapp,
@@ -88,7 +89,7 @@ export default function WhatsAppSettingsPage() {
 
   React.useEffect(() => {
     const listener = (event: MessageEvent) => {
-      if (!event.origin.includes("facebook.com")) return
+      if (!isAllowedMetaMessageOrigin(event.origin)) return
       let data: unknown
       try { data = typeof event.data === "string" ? JSON.parse(event.data) : event.data } catch { return }
       if (!data || typeof data !== "object") return

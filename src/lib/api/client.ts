@@ -6,11 +6,10 @@ if (!CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
     "NEXT_PUBLIC_API_URL is not configured — refusing to fall back to a hardcoded backend in production.",
   )
 }
-const API_URL =
-  CONFIGURED_API_URL ??
-  (process.env.NODE_ENV === "production"
-    ? "https://mygymagent-b.onrender.com"
-    : "http://localhost:4000")
+// No production fallback: the throw above guarantees a configured URL in
+// prod, so any hardcoded host here would be dead code implying protection
+// it does not provide. Development falls back to the local API.
+const API_URL = CONFIGURED_API_URL ?? "http://localhost:4000"
 const REQUEST_TIMEOUT_MS = 20_000
 
 export interface ApiErrorBody {

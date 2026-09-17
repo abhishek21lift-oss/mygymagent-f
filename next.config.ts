@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === "1" ? "standalone" : undefined,
   allowedDevOrigins: [
     "3000-56d39e1e-dfbb-4e33-a41e-4b5e25e67684.daytonaproxy01.net",
+    // Additional dev tunnel/proxy hostnames, comma-separated. Per the
+    // allowedDevOrigins guide only hostnames are matched (no scheme/port).
+    ...(process.env.NEXT_ALLOWED_DEV_ORIGINS ?? "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean),
   ],
   async headers() {
     // Local development talks to the local API over plain http; the
