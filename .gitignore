@@ -37,6 +37,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# swc
+.swc/
+
+# lockfiles / sync placeholders (npm is canonical: see vercel.json, Dockerfile, CI)
+bun.lock
+*.tmp
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
