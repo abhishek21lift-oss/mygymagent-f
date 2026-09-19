@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { ArrowLeft, Barcode, Boxes, Check, PackagePlus, Tag } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 import { InventoryResourceShell } from "@/components/inventory/inventory-resource-shell"
 import { ApiError } from "@/lib/api/client"
@@ -302,15 +303,6 @@ export default function NewInventoryProductPage() {
                         value={field.value ?? ""}
                         hint="Opening stock will be recorded through the inventory ledger."
                       />
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <div className="hidden">
-                        <input type="hidden" {...field} />
-                      </div>
                     )}
                   />
                 </div>
