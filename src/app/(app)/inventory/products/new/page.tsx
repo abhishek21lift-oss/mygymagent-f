@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { ArrowLeft, Barcode, Boxes, Check, PackagePlus, Tag } from "lucide-react"
+import { ArrowLeft, Barcode, Boxes, Check, PackagePlus, ScanBarcode, Tag } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { InventoryResourceShell } from "@/components/inventory/inventory-resource-shell"
+import { BarcodeCameraScanner } from "@/components/inventory/barcode-camera-scanner"
 import { ApiError } from "@/lib/api/client"
 import { useAuth } from "@/lib/auth/auth-context"
 import { useCreateProduct } from "@/lib/hooks/use-inventory"
@@ -18,6 +19,14 @@ import {
   type CreateProductInput,
 } from "@/lib/validation/gym"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -91,6 +100,7 @@ export default function NewInventoryProductPage() {
   const { hasPermission } = useAuth()
   const router = useRouter()
   const createProduct = useCreateProduct()
+  const [barcodeScannerOpen, setBarcodeScannerOpen] = React.useState(false)
 
   const form = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema),
@@ -218,13 +228,49 @@ export default function NewInventoryProductPage() {
                     name="barcode"
                     render={({ field }) => (
                       <div className="sm:col-span-2">
-                        <Field
-                          {...field}
-                          label="Barcode"
-                          placeholder="8901234567890"
-                          inputMode="numeric"
-                          hint="Optional. Use the barcode printed on the product."
-                        />
+                        <FormItem>
+                          <div className="flex items-center justify-between gap-3">
+                            <FormLabel className="text-sm font-bold text-stone-800 dark:text-stone-100">
+                              Barcode
+                            </FormLabel>
+                            <Dialog open={barcodeScannerOpen} onOpenChange={setBarcodeScannerOpen}>
+                              <DialogTrigger asChild>
+                                <Button type="button" variant="outline" size="sm" className="rounded-xl font-bold">
+                                  <ScanBarcode className="size-4" aria-hidden="true" />
+                                  Scan barcode
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Scan product barcode</DialogTitle>
+                                  <DialogDescription>
+                                    Point your camera at the printed barcode. The scanned value will be filled into this product form automatically.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <BarcodeCameraScanner
+                                  onCodeDetected={(code) => {
+                                    field.onChange(code)
+                                    setBarcodeScannerOpen(false)
+                                    toast.success("Barcode scanned")
+                                  }}
+                                />
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Scan barcode or enter manually"
+                              inputMode="numeric"
+                              autoComplete="off"
+                              className="h-12 rounded-xl border-stone-200 bg-white/90 px-4 text-sm font-medium shadow-sm transition focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:border-white/10 dark:bg-stone-900/80"
+                            />
+                          </FormControl>
+                          <p className="text-xs font-medium leading-5 text-stone-500">
+                            Scan the product barcode with your phone camera, or enter the code manually if needed.
+                          </p>
+                          <FormMessage />
+                        </FormItem>
                       </div>
                     )}
                   />
