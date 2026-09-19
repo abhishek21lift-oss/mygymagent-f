@@ -560,7 +560,7 @@ export interface Product {
   updatedAt: string
 }
 
-export type StockMovementType = "RESTOCK" | "SALE" | "ADJUSTMENT" | "DAMAGED"
+export type StockMovementType = "RESTOCK" | "SALE" | "ADJUSTMENT" | "DAMAGED" | "OPENING" | "TRANSFER_IN" | "TRANSFER_OUT" | "RETURN"
 
 export interface StockMovement {
   id: string
@@ -570,6 +570,11 @@ export interface StockMovement {
   quantity: number
   note: string | null
   recordedByUserId: string | null
+  branchId?: string | null
+  unitCost?: string | null
+  totalCost?: string | null
+  referenceType?: string | null
+  referenceId?: string | null
   createdAt: string
   product?: { id: string; name: string; sku: string }
 }
