@@ -5,9 +5,10 @@ import { lookupProductByScanCode } from "@/lib/hooks/use-inventory"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import type { Product } from "@/lib/types/gym"
 
 export default function ScannerPage(){
- const [code,setCode]=React.useState(""); const [product,setProduct]=React.useState<any>(null); const [loading,setLoading]=React.useState(false)
+ const [code,setCode]=React.useState(""); const [product,setProduct]=React.useState<Product | null>(null); const [loading,setLoading]=React.useState(false)
  async function scan(e:React.FormEvent){e.preventDefault();if(!code.trim())return;setLoading(true);try{setProduct(await lookupProductByScanCode(code.trim()));toast.success("Product found")}catch(e){setProduct(null);toast.error(e instanceof Error?e.message:"Product not found")}finally{setLoading(false)}}
  return <InventoryResourceShell title="QR / Barcode Scanner" description="Resolve a printed QR/barcode value to the tenant-scoped product record.">
   <form onSubmit={scan} className="mx-auto flex w-full max-w-xl gap-2"><Input autoFocus value={code} onChange={e=>setCode(e.target.value)} placeholder="Scan or type SKU / barcode" className="rounded-xl"/><Button disabled={loading}>{loading?"Scanning…":"Lookup"}</Button></form>
