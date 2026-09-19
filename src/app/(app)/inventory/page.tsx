@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
 import { toast } from "sonner";
-import { Plus, PackagePlus, Boxes, AlertTriangle, ArrowRight, History, Package } from "lucide-react";
+import { PackagePlus, Boxes, AlertTriangle, ArrowRight, History, Package } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
@@ -15,15 +15,6 @@ import { ScanStockDialog } from "@/components/shared/scan-stock-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
- Dialog,
- DialogContent,
- DialogFooter,
- DialogHeader,
- DialogTitle,
- DialogTrigger,
-} from "@/components/ui/dialog";
 import {
  Form,
  FormControl,
@@ -32,6 +23,14 @@ import {
  FormLabel,
  FormMessage,
 } from "@/components/ui/form";
+import {
+ Dialog,
+ DialogContent,
+ DialogFooter,
+ DialogHeader,
+ DialogTitle,
+ DialogTrigger,
+} from "@/components/ui/dialog";
 import {
  Select,
  SelectContent,
@@ -42,207 +41,15 @@ import {
 import { useAuth } from "@/lib/auth/auth-context";
 import {
  useProducts,
- useCreateProduct,
  useRecordStockMovement,
  useStockMovements,
 } from "@/lib/hooks/use-inventory";
 import { ApiError } from "@/lib/api/client";
 import {
- createProductSchema,
  createStockMovementSchema,
- type CreateProductInput,
  type CreateStockMovementInput,
 } from "@/lib/validation/gym";
 import type { Product, StockMovement } from "@/lib/types/gym";
-
-function AddProductDialog() {
- const [open, setOpen] = React.useState(false);
- const createProduct = useCreateProduct();
-
- const form = useForm<CreateProductInput>({
-  resolver: zodResolver(createProductSchema),
-  defaultValues: {
-   sku: "",
-   name: "",
-   description: "",
-   category: "",
-   unitPrice: 0,
-   costPrice: undefined,
-   quantityOnHand: 0,
-   reorderLevel: 0,
-   reorderQuantity: 0,
-   barcode: "",
-   unit: "unit",
-  },
- });
-
- async function onSubmit(values: CreateProductInput) {
-  try {
-   await createProduct.mutateAsync(values);
-   toast.success("Product added");
-   setOpen(false);
-   form.reset();
-  } catch (error) {
-   toast.error(error instanceof ApiError ? error.message : "Failed to add product");
-  }
- }
-
- return (
-  <Dialog open={open} onOpenChange={setOpen}>
-   <DialogTrigger asChild>
-    <Button className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(105deg,#f59e0b,#f97316_55%,#ea580c)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-amber-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-     <Plus className="size-4" aria-hidden="true" />
-     New product
-    </Button>
-   </DialogTrigger>
-   <DialogContent>
-    <DialogHeader>
-     <DialogTitle>New product</DialogTitle>
-    </DialogHeader>
-    <Form {...form}>
-     <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-       <FormField
-        control={form.control}
-        name="sku"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>SKU</FormLabel>
-          <FormControl>
-           <Input placeholder="SHAKE-1" {...field} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-       <FormField
-        control={form.control}
-        name="category"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>Category</FormLabel>
-          <FormControl>
-           <Input placeholder="Supplements" {...field} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-       <FormField control={form.control} name="barcode" render={({ field }) => (
-        <FormItem><FormLabel>Barcode</FormLabel><FormControl><Input placeholder="8901234567890" {...field} /></FormControl><FormMessage /></FormItem>
-       )} />
-       <FormField control={form.control} name="unit" render={({ field }) => (
-        <FormItem><FormLabel>Unit</FormLabel><FormControl><Input placeholder="unit / pack / bottle" {...field} /></FormControl><FormMessage /></FormItem>
-       )} />
-      </div>
-      <FormField
-       control={form.control}
-       name="name"
-       render={({ field }) => (
-        <FormItem>
-         <FormLabel>Name</FormLabel>
-         <FormControl>
-          <Input placeholder="Vanilla Whey Protein" {...field} />
-         </FormControl>
-         <FormMessage />
-        </FormItem>
-       )}
-      />
-      <FormField
-       control={form.control}
-       name="description"
-       render={({ field }) => (
-        <FormItem>
-         <FormLabel>Description (optional)</FormLabel>
-         <FormControl>
-          <Textarea rows={2} {...field} />
-         </FormControl>
-         <FormMessage />
-        </FormItem>
-       )}
-      />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-       <FormField
-        control={form.control}
-        name="unitPrice"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>Unit price</FormLabel>
-          <FormControl>
-           <Input type="number" step="0.01" {...field} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-       <FormField
-        control={form.control}
-        name="costPrice"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>Cost price (optional)</FormLabel>
-          <FormControl>
-           <Input type="number" step="0.01" {...field} value={field.value ?? ""} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-       <FormField
-        control={form.control}
-        name="quantityOnHand"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>Starting quantity</FormLabel>
-          <FormControl>
-           <Input type="number" {...field} value={field.value ?? ""} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-       <FormField
-        control={form.control}
-        name="reorderQuantity"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>Reorder quantity</FormLabel>
-          <FormControl>
-           <Input type="number" {...field} value={field.value ?? ""} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-       <FormField
-        control={form.control}
-        name="reorderLevel"
-        render={({ field }) => (
-         <FormItem>
-          <FormLabel>Reorder level</FormLabel>
-          <FormControl>
-           <Input type="number" {...field} value={field.value ?? ""} />
-          </FormControl>
-          <FormMessage />
-         </FormItem>
-        )}
-       />
-      </div>
-      <DialogFooter>
-       <Button type="submit" className="w-full sm:w-auto" disabled={createProduct.isPending}>
-        {createProduct.isPending ? "Adding..." : "Add product"}
-       </Button>
-      </DialogFooter>
-     </form>
-    </Form>
-   </DialogContent>
-  </Dialog>
- );
-}
 
 function StockMovementDialog({ product }: { product: Product }) {
  const [open, setOpen] = React.useState(false);
@@ -459,7 +266,15 @@ export default function InventoryPage() {
      actions={
       <>
        {hasPermission("inventory.read") && <ScanStockDialog />}
-       {hasPermission("inventory.manage") && <AddProductDialog />}
+       {hasPermission("inventory.manage") && (
+       <Link
+        href="/inventory/products/new"
+        className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(105deg,#f59e0b,#f97316_55%,#ea580c)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-amber-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+       >
+        <PackagePlus className="size-4" aria-hidden="true" />
+        New product
+       </Link>
+      )}
       </>
      }
     />
