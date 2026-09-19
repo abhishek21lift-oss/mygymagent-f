@@ -18,7 +18,7 @@ import {
   createProductSchema,
   type CreateProductInput,
 } from "@/lib/validation/gym"
-import { Button } from "@/components/ui/button
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
