@@ -10,6 +10,7 @@ if (!CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
 // prod, so any hardcoded host here would be dead code implying protection
 // it does not provide. Development falls back to the local API.
 const API_URL = CONFIGURED_API_URL ?? "http://localhost:4000"
+const AUTH_PROXY_PATHS = new Set(["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"])
 const REQUEST_TIMEOUT_MS = 20_000
 
 export interface ApiErrorBody {
@@ -60,9 +61,10 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
   }
 }
 
-/** Calls POST /auth/refresh using the httpOnly cookie. Coalesces concurrent
- * callers into a single in-flight request so bootstrap and 401 recovery cannot
- * rotate the refresh token against each other. */
+/** Calls POST /auth/refresh through the same-origin BFF using the httpOnly
+ * first-party cookie. Coalesces concurrent callers into a single in-flight
+ * request so bootstrap and 401 recovery cannot rotate the refresh token
+ * against each other. */
 export async function refreshSession(): Promise<boolean> {
   refreshInFlight ??= (async () => {
     const tokenAtStart = getAccessToken()
@@ -97,7 +99,16 @@ export async function refreshSession(): Promise<boolean> {
 }
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
-  const url = new URL(path.replace(/^\//, ""), `${API_URL}/`)
+  // Browser auth mutations go through the Next.js same-origin BFF. Vercel
+  // and Render are different sites, so a Render-hosted SameSite=None refresh
+  // cookie is treated as a third-party cookie by some browsers (notably
+  // Safari/iOS). The BFF keeps the refresh cookie first-party on the frontend
+  // origin while forwarding it server-to-server.
+  const baseUrl =
+    typeof window !== "undefined" && AUTH_PROXY_PATHS.has(path)
+      ? `${window.location.origin}/api/`
+      : `${API_URL}/`
+  const url = new URL(path.replace(/^\//, ""), baseUrl)
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined) {
