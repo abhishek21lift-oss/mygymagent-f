@@ -100,6 +100,7 @@ export default function NewInventoryProductPage() {
   const { hasPermission } = useAuth()
   const router = useRouter()
   const createProduct = useCreateProduct()
+  const [barcodeScannerOpen, setBarcodeScannerOpen] = React.useState(false)
 
   const form = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema),
@@ -232,7 +233,7 @@ export default function NewInventoryProductPage() {
                             <FormLabel className="text-sm font-bold text-stone-800 dark:text-stone-100">
                               Barcode
                             </FormLabel>
-                            <Dialog>
+                            <Dialog open={barcodeScannerOpen} onOpenChange={setBarcodeScannerOpen}>
                               <DialogTrigger asChild>
                                 <Button type="button" variant="outline" size="sm" className="rounded-xl font-bold">
                                   <ScanBarcode className="size-4" aria-hidden="true" />
@@ -246,7 +247,13 @@ export default function NewInventoryProductPage() {
                                     Point your camera at the printed barcode. The scanned value will be filled into this product form automatically.
                                   </DialogDescription>
                                 </DialogHeader>
-                                <BarcodeCameraScanner onCodeDetected={field.onChange} />
+                                <BarcodeCameraScanner
+                                  onCodeDetected={(code) => {
+                                    field.onChange(code)
+                                    setBarcodeScannerOpen(false)
+                                    toast.success("Barcode scanned")
+                                  }}
+                                />
                               </DialogContent>
                             </Dialog>
                           </div>
