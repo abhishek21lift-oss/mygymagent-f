@@ -552,6 +552,9 @@ export interface Product {
   costPrice: string | null
   quantityOnHand: number
   reorderLevel: number
+  reorderQuantity: number
+  barcode: string | null
+  unit: string
   isActive: boolean
   createdAt: string
   updatedAt: string
