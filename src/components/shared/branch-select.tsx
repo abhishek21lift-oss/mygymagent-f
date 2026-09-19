@@ -2,6 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBranches } from "@/lib/hooks/use-branches";
+import { setCurrentBranchId } from "@/lib/branch-context";
 
 export function BranchSelect({
   value,
@@ -17,7 +18,14 @@ export function BranchSelect({
   const branchesQuery = useBranches({ pageSize: 100 });
 
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled || branchesQuery.isLoading}>
+    <Select
+      value={value}
+      onValueChange={(next) => {
+        setCurrentBranchId(next);
+        onChange(next);
+      }}
+      disabled={disabled || branchesQuery.isLoading}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={branchesQuery.isLoading ? "Loading branches..." : placeholder} />
       </SelectTrigger>
