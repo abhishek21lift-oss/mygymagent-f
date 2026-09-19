@@ -13,7 +13,7 @@ function Switch({
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-input focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        "peer inline-flex h-[1.5rem] w-11 shrink-0 cursor-pointer items-center rounded-full border border-[#2b2415] bg-gradient-to-b from-[#6b5d42] to-[#4a3f2a] px-0.5 shadow-[inset_0_2px_5px_rgba(0,0,0,0.6),0_1px_0_rgba(255,245,220,0.5)] transition-all outline-none focus-visible:ring-2 focus-visible:ring-[#8a6420] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-gradient-to-b data-[state=checked]:from-[#e8c25e] data-[state=checked]:to-[#8a6420]",
         className,
       )}
       {...props}
@@ -21,7 +21,7 @@ function Switch({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "bg-background pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0",
+          "pointer-events-none block size-5 rounded-full border border-[#4a3f2a] bg-[radial-gradient(circle_at_35%_30%,#fffdf2,#c9b98f_60%,#8f8163)] shadow-[0_2px_4px_rgba(0,0,0,0.5),inset_0_1px_0_#fff] ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-1px)] data-[state=unchecked]:translate-x-0",
         )}
       />
     </SwitchPrimitive.Root>

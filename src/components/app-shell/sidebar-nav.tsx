@@ -10,66 +10,46 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { primaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 
-/* Athletic Luxe — one vivid gradient per section. Literal strings only. */
-function activeToneFor(href: string): string {
-  if (href.startsWith("/ai")) return "from-violet-600 via-purple-600 to-fuchsia-600 shadow-violet-500/30";
-  if (href.startsWith("/intelligence")) return "from-violet-600 via-purple-600 to-fuchsia-600 shadow-violet-500/30";
-  if (href.startsWith("/crm")) return "from-blue-600 to-cyan-500 shadow-blue-500/30";
-  if (href.startsWith("/pt-operations")) return "from-rose-500 to-orange-500 shadow-rose-500/30";
-  if (href.startsWith("/workouts")) return "from-rose-500 to-orange-500 shadow-rose-500/30";
-  if (href.startsWith("/workout-sessions")) return "from-rose-500 to-orange-500 shadow-rose-500/30";
-  if (href.startsWith("/nutrition")) return "from-emerald-500 to-teal-600 shadow-emerald-500/30";
-  if (href.startsWith("/billing")) return "from-emerald-500 to-teal-600 shadow-emerald-500/30";
-  if (href.startsWith("/membership")) return "from-emerald-500 to-teal-600 shadow-emerald-500/30";
-  if (href.startsWith("/attendance")) return "from-cyan-500 to-blue-600 shadow-cyan-500/30";
-  if (href.startsWith("/calendar")) return "from-cyan-500 to-blue-600 shadow-cyan-500/30";
-  if (href.startsWith("/inventory")) return "from-amber-500 to-orange-600 shadow-amber-500/30";
-  if (href.startsWith("/staff")) return "from-indigo-500 to-violet-600 shadow-indigo-500/30";
-  if (href.startsWith("/branches")) return "from-indigo-500 to-violet-600 shadow-indigo-500/30";
-  if (href.startsWith("/owner-os")) return "from-amber-500 to-orange-600 shadow-amber-500/30";
-  if (href.startsWith("/members")) return "from-violet-600 to-purple-600 shadow-violet-500/30";
-  if (href.startsWith("/settings")) return "from-stone-700 to-stone-900 shadow-stone-500/25";
-  if (href.startsWith("/command-center")) return "from-violet-600 via-purple-600 to-fuchsia-600 shadow-violet-500/30";
-  return "from-violet-600 via-purple-600 to-fuchsia-600 shadow-violet-500/30";
-}
+/* Skeuomorphism — stitched leather sidebar, brass active plates. */
 
 function NavLink({ item, active, nested = false, collapsed = false, onNavigate, itemRef }: { item: NavItem; active: boolean; nested?: boolean; collapsed?: boolean; onNavigate?: () => void; itemRef?: React.RefObject<HTMLAnchorElement | null> }) {
   const Icon = item.icon;
-  const tone = activeToneFor(item.href);
   return (
     <Link
       ref={itemRef}
       href={item.href}
       onClick={onNavigate}
       title={collapsed ? item.title : undefined}
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "group relative flex min-h-11 items-center overflow-hidden touch-manipulation transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600",
-        collapsed ? "justify-center rounded-[19px] px-2 py-3" : nested ? "ml-3 gap-3 rounded-xl px-3 py-2.5 text-xs" : "gap-3 rounded-[19px] px-3 py-3 text-sm",
+        "group relative flex min-h-11 items-center overflow-hidden touch-manipulation transition-all duration-150",
+        collapsed ? "justify-center rounded-[12px] px-2 py-3" : nested ? "ml-4 gap-2.5 rounded-[10px] px-3 py-2 text-xs" : "gap-3 rounded-[12px] px-3 py-2.5 text-sm",
         active
-          ? `bg-gradient-to-r text-white shadow-lg ${tone}`
-          : "text-sidebar-foreground/70 hover:bg-white/70 hover:text-sidebar-foreground hover:shadow-sm dark:hover:bg-white/10",
-        item.accent === "ai" && !active && "bg-gradient-to-r from-violet-500/10 via-fuchsia-500/5 to-transparent text-violet-700 hover:from-violet-500/15 dark:text-violet-300",
+          ? "border border-[#4a360f] bg-gradient-to-b from-[#ffedb0] via-[#c99b3f] to-[#8a6420] text-[#241a08] shadow-[inset_0_1px_0_rgba(255,250,220,0.95),inset_0_-2px_4px_rgba(70,45,10,0.5),0_3px_0_#241a08,0_6px_14px_rgba(0,0,0,0.5)]"
+          : "border border-transparent text-[#e9dcb8]/80 shadow-[inset_0_0_0_transparent] hover:border-[#4a3f2a] hover:bg-gradient-to-b hover:from-[#4a3a26] hover:to-[#2b2114] hover:text-[#ffe9a8] hover:shadow-[inset_0_1px_0_rgba(255,240,200,0.2),inset_0_-1px_3px_rgba(0,0,0,0.5)]",
+        item.accent === "ai" && !active && "border-[#6b5226]/60 bg-gradient-to-b from-[#4a3a1a]/60 to-[#2b2114]/60 text-[#ffe9a8]",
       )}
+      style={active ? { textShadow: "0 1px 0 rgba(255,245,200,0.9)" } : { textShadow: "0 -1px 0 rgba(0,0,0,0.8)" }}
     >
-      {active && <span aria-hidden="true" className="absolute inset-y-2 left-0 w-1 rounded-full bg-white/80" />}
+      {/* pressed LED strip on active */}
+      {active && <span aria-hidden="true" className="absolute inset-y-1.5 left-1 w-1 rounded-full bg-[#241a08] shadow-[0_0_6px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,240,200,0.6)]" />}
       <span
         aria-hidden="true"
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-[13px] transition-transform duration-200 group-hover:scale-110",
+          "flex shrink-0 items-center justify-center rounded-[9px] border transition-transform duration-150 group-hover:scale-105",
           nested ? "size-7" : "size-9",
           active
-            ? "bg-white/20 text-white ring-1 ring-white/25"
-            : item.accent === "ai"
-              ? "bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 text-violet-700 dark:text-violet-300"
-              : "bg-stone-500/10 text-sidebar-foreground/50 group-hover:text-sidebar-foreground",
+            ? "border-[#4a360f] bg-gradient-to-b from-[#fff8e2] to-[#c9a44f] text-[#3a2a0c] shadow-[inset_0_1px_0_#fff,0_2px_4px_rgba(0,0,0,0.4)]"
+            : "border-[#170e07] bg-gradient-to-b from-[#5a4c38] to-[#2b2415] text-[#e9dcb8] shadow-[inset_0_1px_0_rgba(255,240,200,0.25),0_2px_4px_rgba(0,0,0,0.5)]",
         )}
       >
         <Icon className={cn(nested ? "size-3.5" : "size-4", "shrink-0")} aria-hidden="true" />
       </span>
       {!collapsed && (
         <>
-          <span className="flex-1 truncate font-semibold tracking-[-0.01em]">{item.title}</span>
-          {item.comingSoon && <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider">Soon</Badge>}
+          <span className="flex-1 truncate font-bold tracking-[-0.01em]">{item.title}</span>
+          {item.comingSoon && <Badge variant="secondary" className="rounded-[6px] px-1.5 py-0 text-[9px]">Soon</Badge>}
+          {active && <span aria-hidden="true" className="size-2 rounded-full bg-[#3a2a0c] shadow-[inset_0_1px_2px_rgba(0,0,0,0.9),0_1px_0_rgba(255,245,200,0.6)]" />}
         </>
       )}
     </Link>
@@ -78,6 +58,16 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
 
 function permissionVisible(item: NavItem, hasPermission: (permission: string | string[]) => boolean) {
   return !item.permission || hasPermission(item.permission);
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-2 flex items-center gap-2 px-3">
+      <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8a6f3a]/70 to-transparent shadow-[0_1px_0_rgba(255,240,200,0.15)]" />
+      <span className="text-[9px] font-black uppercase tracking-[0.24em] text-[#c9a44f]" style={{ textShadow: "0 -1px 0 rgba(0,0,0,0.9), 0 1px 0 rgba(255,240,200,0.12)" }}>{children}</span>
+      <span aria-hidden="true" className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8a6f3a]/70 to-transparent shadow-[0_1px_0_rgba(255,240,200,0.15)]" />
+    </div>
+  );
 }
 
 export function SidebarNav({ className, collapsed = false, onNavigate, mobile = false, scrollToActive = false }: { className?: string; collapsed?: boolean; onNavigate?: () => void; mobile?: boolean; scrollToActive?: boolean }) {
@@ -97,17 +87,39 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
   }, [mobile, scrollToActive, collapsed, pathname]);
 
   return (
-    <nav className={cn("flex h-full min-h-0 flex-col border-white/90 bg-gradient-to-b from-white/88 via-stone-50/90 to-violet-50/60 p-3 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl dark:from-card/95 dark:via-card/90 dark:to-primary/10", className)}>
-      <Link href="/command-center" onClick={onNavigate} title={collapsed ? "MyGymAgent" : undefined} className={cn("mb-4 flex shrink-0 items-center rounded-[22px] border border-white/90 bg-white/85 py-2.5 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition hover:-translate-y-px hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5", collapsed ? "justify-center px-1.5" : "gap-2.5 px-2.5")}>
-        <span aria-hidden="true" className="rounded-[15px] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-[2px] shadow-lg shadow-violet-500/25">
-          <span className="flex size-9 items-center justify-center rounded-[13px] bg-white">
-            <Image src="/logo-mark.webp" alt="" width={38} height={38} className="size-7 shrink-0 object-contain" priority />
-          </span>
+    <nav
+      className={cn(
+        "skeuo-leather relative flex h-full min-h-0 flex-col p-3",
+        className,
+      )}
+    >
+      {/* stitched inset border */}
+      <span aria-hidden="true" className="skeuo-stitch pointer-events-none absolute inset-2" />
+      {/* top brass screws */}
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_14px_14px,#fff6d8_0_1.5px,#c9a44f_2.5px,#241a08_3.5px,transparent_4.5px),radial-gradient(circle_at_calc(100%-14px)_14px,#fff6d8_0_1.5px,#c9a44f_2.5px,#241a08_3.5px,transparent_4.5px)] bg-no-repeat" />
+
+      <Link
+        href="/command-center"
+        onClick={onNavigate}
+        title={collapsed ? "MyGymAgent" : undefined}
+        className={cn(
+          "relative z-10 mb-4 flex shrink-0 items-center rounded-[12px] border border-[#4a360f] bg-gradient-to-b from-[#ffedb0] via-[#c99b3f] to-[#7a5a1e] px-2.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,250,220,0.95),inset_0_-2px_4px_rgba(70,45,10,0.5),0_3px_0_#170e07,0_8px_18px_rgba(0,0,0,0.5)] transition hover:brightness-105 active:translate-y-[1px] active:shadow-[inset_0_2px_6px_rgba(40,25,10,0.5)]",
+          collapsed ? "justify-center px-1.5" : "gap-2.5",
+        )}
+      >
+        <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-[9px] border border-[#241a08] bg-gradient-to-b from-[#2b2114] to-[#170e07] shadow-[inset_0_1px_3px_rgba(0,0,0,0.9),0_1px_0_rgba(255,245,200,0.5)]">
+          <Image src="/logo-mark.webp" alt="" width={38} height={38} className="size-7 shrink-0 object-contain" priority />
         </span>
-        {!collapsed && <div className="min-w-0"><div className="truncate font-serif text-[17px] font-semibold tracking-tight text-stone-950 dark:text-white">MyGymAgent</div><div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-[9px] font-black uppercase tracking-[0.2em] text-transparent">Gym OS</div></div>}
+        {!collapsed && (
+          <div className="min-w-0">
+            <div className="truncate text-[17px] font-black tracking-tight text-[#241a08]" style={{ textShadow: "0 1px 0 rgba(255,245,200,0.9)" }}>MyGymAgent</div>
+            <div className="text-[9px] font-black uppercase tracking-[0.24em] text-[#3a2a0c]" style={{ textShadow: "0 1px 0 rgba(255,245,200,0.7)" }}>Gym OS &bull; Mk II</div>
+          </div>
+        )}
       </Link>
-      {!collapsed && <div className="mb-2 shrink-0 px-3 text-[9px] font-black uppercase tracking-[0.2em] text-stone-600 dark:text-stone-300">Workspace</div>}
-      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5 pb-2 [scrollbar-width:thin]">
+
+      {!collapsed && <SectionLabel>Workspace</SectionLabel>}
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5 pb-2 [scrollbar-width:thin]">
         {visiblePrimary.map((item) => {
           const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
           const active = isNavItemActive(pathname, item.href) || children.some((child) => isNavItemActive(pathname, child.href));
@@ -115,17 +127,27 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
             <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined} className="shrink-0">
               <NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} itemRef={mobile && !collapsed && active ? activeRef : undefined} />
               {!collapsed && active && children.length > 0 && (
-                <div className="mt-1 mb-2 space-y-0.5 border-l-2 border-violet-200/70 pl-1 dark:border-white/15">
+                <div className="mt-1 mb-2 ml-5 space-y-0.5 rounded-[10px] border border-[#170e07] bg-[#1c140b]/70 p-1 shadow-[inset_0_2px_6px_rgba(0,0,0,0.7),0_1px_0_rgba(255,240,200,0.12)]">
                   {children.map((child) => <NavLink key={child.href} item={child} active={isNavItemActive(pathname, child.href)} nested onNavigate={onNavigate} />)}
                 </div>
               )}
             </div>
           );
         })}
-        {!collapsed && visibleComingSoon.length > 0 && <div className="mt-5 shrink-0"><div className="mb-2 px-3 text-[9px] font-black uppercase tracking-[0.2em] text-stone-600 dark:text-stone-300">Coming soon</div><div className="space-y-1">{visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} onNavigate={onNavigate} />)}</div></div>}
+        {!collapsed && visibleComingSoon.length > 0 && (
+          <div className="mt-4 shrink-0">
+            <SectionLabel>Coming soon</SectionLabel>
+            <div className="space-y-1 opacity-80">{visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} onNavigate={onNavigate} />)}</div>
+          </div>
+        )}
         {collapsed && visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} collapsed onNavigate={onNavigate} />)}
       </div>
-      <div className="mt-3 shrink-0 border-t border-stone-200/70 pt-3 dark:border-white/10">{showSettings && <NavLink item={settingsNav} active={isNavItemActive(pathname, settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}</div>
+
+      {/* bottom riveted steel strip */}
+      <div className="relative z-10 mt-3 shrink-0 rounded-[10px] border border-[#170e07] bg-gradient-to-b from-[#5a4c38] to-[#2b2415] p-1 shadow-[inset_0_1px_0_rgba(255,240,200,0.2),0_2px_6px_rgba(0,0,0,0.5)]">
+        {showSettings && <NavLink item={settingsNav} active={isNavItemActive(pathname, settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}
+        {!collapsed && <div className="px-3 py-1.5 text-center text-[8px] font-bold uppercase tracking-[0.2em] text-[#8f7748]" style={{ textShadow: "0 -1px 0 #000" }}>Calibrated &bull; Iron &amp; Leather</div>}
+      </div>
     </nav>
   );
 }

@@ -13,24 +13,16 @@ export function ComingSoonPage({
 }) {
   return (
     <div className="relative flex flex-col gap-6">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-16 -top-10 size-64 rounded-full bg-fuchsia-400/15 blur-3xl motion-safe:animate-blob"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-16 top-40 size-64 rounded-full bg-cyan-400/15 blur-3xl"
-      />
       <div className="relative">
         <PageHeader title={title} />
       </div>
-      <div className="relative overflow-hidden rounded-[28px] border border-white/90 bg-white/88 p-2 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl dark:border-white/10 dark:bg-card/90">
-        <div aria-hidden="true" className="h-1.5 rounded-t-[22px] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
+      <div className="skeuo-plate skeuo-screws relative overflow-hidden rounded-[14px] border p-2">
+        <div aria-hidden="true" className="h-2 rounded-t-[10px] border-b border-[#4a3f2a] bg-[repeating-linear-gradient(90deg,#6b5d42_0_6px,#3a3222_6px_12px)]" />
         <EmptyState
           icon={icon}
-          title={`${title} is on the roadmap`}
+          title={`${title} is on the workbench`}
           description={description}
-          className="border-0 bg-transparent shadow-none backdrop-blur-none"
+          className="border border-dashed shadow-[inset_0_2px_8px_rgba(40,25,10,0.4)]"
         />
       </div>
     </div>

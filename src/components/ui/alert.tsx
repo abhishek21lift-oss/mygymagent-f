@@ -6,15 +6,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border p-4 [&>svg]:absolute [&>svg]:size-4 [&>svg]:left-4 [&>svg]:top-4 [&>svg+div]:translate-y-[-3px] [&:has(svg)]:pl-11",
+  "skeuo-plate relative w-full rounded-[12px] border border-[#6b5d42] p-4 shadow-[inset_0_1px_0_#fff,0_6px_16px_rgba(0,0,0,0.35)] [&>svg]:absolute [&>svg]:size-4 [&>svg]:left-4 [&>svg]:top-4 [&>svg+div]:translate-y-[-3px] [&:has(svg)]:pl-11",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
+        default: "text-[#2b2114]",
         warning:
-          "border-yellow-200 bg-yellow-50 text-yellow-900 [&>svg]:text-yellow-600 dark:border-yellow-900 dark:bg-yellow-950 dark:text-yellow-200 dark:[&>svg]:text-yellow-400",
+          "border-[#6b5226] bg-gradient-to-b from-[#ffe9a8] to-[#d9a53a] text-[#3a2a0c] [&>svg]:text-[#6b4c10]",
         destructive:
-          "border-red-200 bg-red-50 text-red-900 [&>svg]:text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-200 dark:[&>svg]:text-red-400",
+          "border-[#4a0f0a] bg-gradient-to-b from-[#ffb3a6] to-[#c04534] text-[#2b0a06] [&>svg]:text-[#5a130c]",
       },
     },
     defaultVariants: {

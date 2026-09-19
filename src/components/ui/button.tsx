@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[0.78rem] text-sm font-semibold tracking-[-0.01em] transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
+  "skeuo-sheen inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm tracking-[-0.01em] transition-all duration-150 disabled:pointer-events-none disabled:opacity-50 disabled:grayscale [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#8a6420] focus-visible:ring-offset-2 focus-visible:ring-offset-[#e8ddbd] active:translate-y-[2px] cursor-pointer select-none",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:ring-destructive/20",
-        outline: "border bg-background/70 shadow-xs backdrop-blur-md hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "font-bold",
+        destructive: "font-bold",
+        outline: "font-bold",
+        secondary: "font-bold",
+        ghost: "border border-[#6b5d42]/60 bg-gradient-to-b from-[#efe6cc]/60 to-[#c9b98f]/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]",
+        link: "border-none shadow-none bg-none underline-offset-4 hover:underline text-[#5a4416] dark:text-[#e8c25e]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

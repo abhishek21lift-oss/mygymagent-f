@@ -91,7 +91,7 @@ export function DataTable<T>({
           value={search ?? ""}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="max-w-sm rounded-[19px] border-white/90 bg-white/85 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5"
+          className="max-w-sm"
         />
       )}
 
@@ -122,8 +122,8 @@ export function DataTable<T>({
                     }
                   }}
                   className={cn(
-                    "rounded-[19px] border border-white/90 bg-white/88 p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:border-white/10 dark:bg-card/90",
-                    onRowClick && "cursor-pointer touch-manipulation active:bg-violet-50/60 dark:active:bg-white/5",
+                    "skeuo-plate rounded-[12px] border p-4 transition-all focus-visible:outline-2 focus-visible:outline-[#8a6420]",
+                    onRowClick && "cursor-pointer touch-manipulation active:translate-y-[1px]",
                   )}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -159,15 +159,15 @@ export function DataTable<T>({
             })}
           </div>
 
-          <div className="hidden overflow-hidden rounded-[22px] border border-white/90 bg-white/88 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl sm:block dark:border-white/10 dark:bg-card/90">
-            <div aria-hidden="true" className="h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
-            <div className="overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
+          <div className="skeuo-plate hidden overflow-hidden rounded-[14px] border sm:block">
+            <div aria-hidden="true" className="h-2 border-b border-[#4a3f2a] bg-[repeating-linear-gradient(90deg,#6b5d42_0_6px,#3a3222_6px_12px)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]" />
+            <div className="skeuo-ledger overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
             <Table className="min-w-[640px]">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="bg-gradient-to-r from-stone-50 via-violet-50/50 to-cyan-50/50 hover:bg-stone-50 dark:from-white/5 dark:via-white/5 dark:to-transparent dark:hover:bg-white/5">
+                  <TableRow key={headerGroup.id} className="border-b border-black hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="text-[11px] font-black uppercase tracking-[.14em] text-stone-600 dark:text-stone-300">
+                      <TableHead key={header.id} className="text-[11px] font-black uppercase tracking-[0.14em]">
                         {header.isPlaceholder
                           ? null
                           : flexRender(header.column.columnDef.header, header.getContext())}
@@ -181,13 +181,13 @@ export function DataTable<T>({
                   <TableRow
                     key={row.id}
                     className={cn(
-                      "transition-colors hover:bg-violet-50/50 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-violet-600 dark:hover:bg-white/5",
+                      "transition-colors focus-visible:outline-2 focus-visible:outline-[#8a6420]",
                       onRowClick && "cursor-pointer",
                     )}
                     onClick={() => onRowClick?.(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="font-medium text-stone-900 dark:text-stone-100">
+                      <TableCell key={cell.id} className="font-bold">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -199,8 +199,8 @@ export function DataTable<T>({
           </div>
 
           {page !== undefined && onPageChange ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 text-sm font-medium text-stone-600 dark:text-stone-300">
-            <span className="rounded-full border border-white/80 bg-white/70 px-3 py-1.5 font-mono text-xs font-bold tabular-nums shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm font-bold">
+            <span className="skeuo-embossed-label rounded-[8px] px-3 py-1.5 font-mono text-xs tabular-nums">
               Page {normalizedData.page} of {normalizedData.totalPages} &middot; {normalizedData.total} total
             </span>
             <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export function DataTable<T>({
                 disabled={page <= 1}
                 onClick={() => onPageChange(page - 1)}
                 aria-label="Previous page"
-                className="min-h-11 min-w-11 rounded-[15px] border-white/80 bg-white/85 shadow-sm backdrop-blur-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5"
+                className="min-h-10 min-w-10 rounded-[10px]"
               >
                 <ChevronLeft className="size-4" aria-hidden="true" />
               </Button>
@@ -220,7 +220,7 @@ export function DataTable<T>({
                 disabled={page >= normalizedData.totalPages}
                 onClick={() => onPageChange(page + 1)}
                 aria-label="Next page"
-                className="min-h-11 min-w-11 rounded-[15px] border-white/80 bg-white/85 shadow-sm backdrop-blur-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:bg-white/5"
+                className="min-h-10 min-w-10 rounded-[10px]"
               >
                 <ChevronRight className="size-4" aria-hidden="true" />
               </Button>

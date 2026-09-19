@@ -26,9 +26,9 @@ export function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="top-0 left-0 h-[100svh] w-[min(20rem,88vw)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-r-[28px] border-white/90 bg-white/95 p-0 shadow-[0_35px_110px_-48px_rgba(79,70,229,.55)] backdrop-blur-xl data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-none dark:border-white/10 dark:bg-card/95"
+        className="skeuo-leather top-0 left-0 h-[100svh] w-[min(20rem,88vw)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-r-[14px] border-[3px] border-[#6b5226] p-0 shadow-[0_0_0_6px_rgba(43,30,16,0.9),0_30px_80px_rgba(0,0,0,0.65)] data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-none"
       >
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-10 h-2 bg-gradient-to-b from-[#ffedb0] via-[#c99b3f] to-[#7a5a1e] shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
         <VisuallyHidden>
           <DialogTitle>Navigation</DialogTitle>
         </VisuallyHidden>

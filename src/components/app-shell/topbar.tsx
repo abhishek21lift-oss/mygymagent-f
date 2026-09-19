@@ -25,14 +25,20 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
   }
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 border-b border-white/90 bg-gradient-to-r from-white/88 via-violet-50/85 to-cyan-50/85 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl dark:border-white/10 dark:from-background/95 dark:via-primary/10 dark:to-ai/10">
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-violet-500/50 to-fuchsia-500/40" aria-hidden="true" />
-      <div className="mx-auto flex min-h-[3.35rem] w-full items-center gap-2 px-3 py-1.5 pt-[calc(env(safe-area-inset-top)+0.375rem)] sm:min-h-[3.75rem] sm:px-5 sm:py-1.5 sm:pt-1.5">
-        <div className="flex shrink-0 items-center gap-1 rounded-[19px] border border-white/90 bg-white/85 p-1 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <Button variant="ghost" size="icon" className="hidden min-h-11 min-w-11 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 md:inline-flex" onClick={onToggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+    <header className="relative z-40 shrink-0 border-b border-[#241a08] bg-gradient-to-b from-[#f4ecd4] via-[#d9cba4] to-[#a89a76] shadow-[inset_0_1px_0_#fffdf2,0_4px_14px_rgba(0,0,0,0.45)] dark:from-[#453b28] dark:via-[#332a1c] dark:to-[#241d12]">
+      {/* brushing + rivets */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_2px)]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-3 top-1/2 hidden h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-[#5c4f38]/40 to-transparent sm:block" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10px_50%,#fff6d8_0_1.5px,#8a6a2f_2.5px,#241a08_3.5px,transparent_4.5px),radial-gradient(circle_at_calc(100%-10px)_50%,#fff6d8_0_1.5px,#8a6a2f_2.5px,#241a08_3.5px,transparent_4.5px)] bg-no-repeat" />
+      {/* engraved bottom groove */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-b from-[#4a3f2a] to-[#241a08]" aria-hidden="true" />
+
+      <div className="relative mx-auto flex min-h-[3.6rem] w-full items-center gap-2 px-3 py-1.5 pt-[calc(env(safe-area-inset-top)+0.375rem)] sm:min-h-[4rem] sm:px-5 sm:py-1.5 sm:pt-1.5">
+        <div className="flex shrink-0 items-center gap-1 rounded-[12px] border border-[#5c4f38] bg-gradient-to-b from-[#efe6cc] to-[#b7a87f] p-1 shadow-[inset_0_1px_0_#fff,0_3px_0_#4a3f2a,0_6px_12px_rgba(0,0,0,0.35)]">
+          <Button variant="ghost" size="icon" className="hidden min-h-10 min-w-10 rounded-[9px] md:inline-flex" onClick={onToggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
             {sidebarCollapsed ? <ChevronsRight className="size-4.5" aria-hidden="true" /> : <ChevronsLeft className="size-4.5" aria-hidden="true" />}
           </Button>
-          <Button variant="ghost" size="icon" className="min-h-11 min-w-11 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 md:hidden" onClick={onOpenMobileNav} aria-label="Open navigation">
+          <Button variant="ghost" size="icon" className="min-h-10 min-w-10 rounded-[9px] md:hidden" onClick={onOpenMobileNav} aria-label="Open navigation">
             <Menu className="size-4.5" aria-hidden="true" />
           </Button>
         </div>
@@ -41,23 +47,23 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
           <AICommandBar />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 rounded-[19px] border border-white/90 bg-white/85 p-1 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <Button variant="ghost" size="icon" className="min-h-11 min-w-11 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
+        <div className="flex shrink-0 items-center gap-1 rounded-[12px] border border-[#5c4f38] bg-gradient-to-b from-[#efe6cc] to-[#b7a87f] p-1 shadow-[inset_0_1px_0_#fff,0_3px_0_#4a3f2a,0_6px_12px_rgba(0,0,0,0.35)]">
+          <Button variant="ghost" size="icon" className="min-h-10 min-w-10 rounded-[9px]" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
             <Sun className="size-4 dark:hidden" aria-hidden="true" /><Moon className="hidden size-4 dark:block" aria-hidden="true" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="min-h-11 gap-2 rounded-2xl border border-transparent bg-white/60 p-1 pr-1.5 pl-1 shadow-sm hover:border-violet-200 hover:bg-white/95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 sm:pl-1 dark:bg-white/5 dark:hover:bg-white/10">
-                <Avatar className="size-9 border border-white/80 shadow-md shadow-violet-500/20"><AvatarFallback className="bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 text-xs font-black text-white">{user ? initials(user.firstName, user.lastName) : <UserIcon className="size-4" aria-hidden="true" />}</AvatarFallback></Avatar>
-                <span className="hidden text-sm font-bold tracking-tight text-stone-900 sm:inline dark:text-stone-100">{user ? `${user.firstName} ${user.lastName}` : ""}</span>
+              <Button variant="ghost" className="min-h-10 gap-2 rounded-[9px] border border-[#4a360f] bg-gradient-to-b from-[#ffedb0] via-[#c99b3f] to-[#8a6420] p-1 pr-2 pl-1 text-[#241a08] shadow-[inset_0_1px_0_rgba(255,250,220,0.9),0_2px_0_#3a2a0c]">
+                <Avatar className="size-8 border border-[#241a08] shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]"><AvatarFallback className="bg-gradient-to-b from-[#2b2114] to-[#170e07] text-[11px] font-black text-[#ffe9a8]">{user ? initials(user.firstName, user.lastName) : <UserIcon className="size-4" aria-hidden="true" />}</AvatarFallback></Avatar>
+                <span className="hidden text-sm font-black tracking-tight sm:inline" style={{ textShadow: "0 1px 0 rgba(255,245,200,0.8)" }}>{user ? `${user.firstName} ${user.lastName}` : ""}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-[22px] border-white/90 bg-white/95 p-1.5 shadow-[0_28px_70px_-38px_rgba(79,70,229,.5)] backdrop-blur-xl dark:border-white/10 dark:bg-card/95">
-              <DropdownMenuLabel className="rounded-2xl bg-gradient-to-r from-violet-50/80 via-white to-cyan-50/60 px-3 py-2.5 font-normal dark:from-white/5 dark:via-transparent dark:to-transparent">
-                <div className="flex flex-col gap-0.5"><span className="text-sm font-extrabold tracking-tight text-stone-950 dark:text-white">{user?.firstName} {user?.lastName}</span><span className="text-xs font-medium text-stone-600 dark:text-stone-300">{user?.email}</span></div>
+            <DropdownMenuContent align="end" className="w-64 rounded-[12px] p-1.5">
+              <DropdownMenuLabel className="rounded-[9px] border border-[#4a360f] bg-gradient-to-b from-[#3a2c1a] to-[#241a0e] px-3 py-2.5 font-normal shadow-[inset_0_1px_3px_rgba(0,0,0,0.8)]">
+                <div className="flex flex-col gap-0.5"><span className="text-sm font-black tracking-tight text-[#ffe9a8]" style={{ textShadow: "0 -1px 0 #000" }}>{user?.firstName} {user?.lastName}</span><span className="font-mono text-xs text-[#c9b586]">{user?.email}</span></div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" className="min-h-11 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500" onClick={handleLogout}><LogOut aria-hidden="true" />Log out</DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" className="min-h-11 rounded-[9px]" onClick={handleLogout}><LogOut aria-hidden="true" />Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
