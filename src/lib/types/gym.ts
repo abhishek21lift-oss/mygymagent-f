@@ -719,3 +719,113 @@ export interface DuplicateDetectionResult {
   status: string
   potentialDuplicates: DuplicateCandidate[]
 }
+
+export interface ProductStock {
+  id: string
+  organizationId: string
+  branchId: string
+  productId: string
+  quantityOnHand: number
+  createdAt: string
+  updatedAt: string
+  product?: Product
+  branch?: { id: string; name: string }
+}
+export interface InventorySupplier {
+  id: string
+  organizationId: string
+  name: string
+  phone: string | null
+  email: string | null
+  address: string | null
+  taxId: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+export type InventoryPurchaseOrderStatus = "DRAFT" | "ORDERED" | "PARTIALLY_RECEIVED" | "RECEIVED" | "CANCELLED"
+export interface InventoryPurchaseOrderItem {
+  id: string
+  purchaseOrderId: string
+  productId: string
+  orderedQuantity: number
+  receivedQuantity: number
+  unitCost: string
+  createdAt: string
+  updatedAt: string
+}
+export interface InventoryPurchaseOrder {
+  id: string
+  organizationId: string
+  supplierId: string
+  branchId: string | null
+  number: string
+  status: InventoryPurchaseOrderStatus
+  notes: string | null
+  orderedAt: string | null
+  expectedAt: string | null
+  receivedAt: string | null
+  totalCost: string
+  createdAt: string
+  updatedAt: string
+  supplier?: InventorySupplier
+  items: InventoryPurchaseOrderItem[]
+}
+export type InventoryTransferStatus = "DRAFT" | "IN_TRANSIT" | "RECEIVED" | "CANCELLED"
+export interface InventoryTransferItem {
+  id: string
+  transferId: string
+  productId: string
+  quantity: number
+}
+export interface InventoryTransfer {
+  id: string
+  organizationId: string
+  fromBranchId: string
+  toBranchId: string
+  number: string
+  status: InventoryTransferStatus
+  notes: string | null
+  shippedAt: string | null
+  receivedAt: string | null
+  createdAt: string
+  updatedAt: string
+  items: InventoryTransferItem[]
+  fromBranch?: { id: string; name: string }
+  toBranch?: { id: string; name: string }
+}
+export type InventorySaleStatus = "COMPLETED" | "CANCELLED" | "RETURNED"
+export interface InventorySaleItem {
+  id: string
+  saleId: string
+  productId: string
+  quantity: number
+  unitPrice: string
+  unitCost: string
+  total: string
+}
+export interface InventorySale {
+  id: string
+  organizationId: string
+  branchId: string | null
+  memberId: string | null
+  invoiceId: string | null
+  number: string
+  status: InventorySaleStatus
+  subtotal: string
+  discount: string
+  total: string
+  currency: string
+  createdAt: string
+  items: InventorySaleItem[]
+}
+export interface InventoryDashboard {
+  activeProducts: number
+  lowStockProducts: number
+  totalUnits: number
+  inventoryCostValue: number
+  activeSuppliers: number
+  openPurchaseOrders: number
+  transfersInTransit: number
+  salesTotal: number
+}
