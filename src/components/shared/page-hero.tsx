@@ -4,28 +4,28 @@ import { cn } from "@/lib/utils";
 
 type HeroAccent = "violet" | "emerald" | "cyan" | "amber" | "rose" | "indigo" | "orange" | "blue";
 
+/**
+ * Premium page header — clean card + tinted icon tile.
+ * `accent` is retained for API compatibility and maps to subtle tints.
+ */
 const ACCENTS: Record<HeroAccent, string> = {
-  violet: "from-[#ffedb0] via-[#c99b3f] to-[#7a5a1e] border-[#4a360f] text-[#241a08]",
-  emerald: "from-[#d8f0dc] via-[#6aa876] to-[#2a5a35] border-[#1d3a24] text-[#0f2413]",
-  cyan: "from-[#d5eef5] via-[#5aa8c0] to-[#2a5a6b] border-[#1d3a44] text-[#0f2229]",
-  amber: "from-[#ffe9a8] via-[#d9a53a] to-[#7a5a1e] border-[#4a360f] text-[#241a08]",
-  rose: "from-[#ffc4b8] via-[#b03528] to-[#5a130c] border-[#4a0f0a] text-[#fff3e8]",
-  indigo: "from-[#e2ddf5] via-[#7a6fc0] to-[#3a346b] border-[#26224a] text-[#14122b]",
-  orange: "from-[#ffdfb8] via-[#c07a2a] to-[#5a3410] border-[#4a2a0c] text-[#241505]",
-  blue: "from-[#d5e4f5] via-[#5a8ac0] to-[#2a4a6b] border-[#1d3244] text-[#0f1e2b]",
+  violet: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+  emerald: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  cyan: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
+  amber: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  rose: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
+  indigo: "bg-primary/10 text-primary",
+  orange: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
+  blue: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
 };
 
-/**
- * Skeuo control panel header — riveted steel plate + enamel icon medallion.
- */
 export function PageHero({
   id,
   icon: Icon,
   title,
   actions,
   children,
-  variant = "light",
-  accent = "violet",
+  accent = "indigo",
 }: {
   id?: string;
   eyebrow?: string;
@@ -38,32 +38,28 @@ export function PageHero({
   accent?: HeroAccent;
   align?: "left" | "center";
 }) {
-  const dark = variant === "dark";
-
+  const headingId = id ?? `page-title-${typeof title === "string" ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "header"}`;
   return (
     <section
-      aria-labelledby={id}
-      className={cn(
-        "skeuo-plate skeuo-screws relative rounded-[14px] border px-4 py-3.5 sm:px-5",
-        dark && "dark",
-      )}
+      aria-labelledby={headingId}
+      className="relative rounded-xl border bg-card px-4 py-4 shadow-sm sm:px-5"
     >
-      <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {Icon && (
             <span
               className={cn(
-                "flex size-11 shrink-0 items-center justify-center rounded-full border-[3px] bg-gradient-to-b shadow-[inset_0_2px_0_rgba(255,255,255,0.6),0_3px_0_#241a08,0_6px_12px_rgba(0,0,0,0.4)]",
+                "flex size-10 shrink-0 items-center justify-center rounded-lg",
                 ACCENTS[accent],
               )}
             >
-              <Icon className="size-5" aria-hidden="true" strokeWidth={2.5} />
+              <Icon className="size-5" aria-hidden="true" strokeWidth={2.25} />
             </span>
           )}
           <h1
-            id={id}
-            className="min-w-0 flex-1 truncate text-lg font-black tracking-tight text-[#2e2313] sm:text-xl dark:text-[#f3e7c6]"
-            style={{ textShadow: "0 1px 0 rgba(255,250,235,0.9)" }}
+            id={headingId}
+            className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight sm:text-xl"
+            title={typeof title === "string" ? title : undefined}
           >
             {title}
           </h1>
@@ -74,7 +70,7 @@ export function PageHero({
           </div>
         )}
       </div>
-      {children && <div className="skeuo-inset relative z-10 mt-3 rounded-[10px] border p-3">{children}</div>}
+      {children && <div className="mt-3 rounded-lg border bg-muted/50 p-3">{children}</div>}
     </section>
   );
 }

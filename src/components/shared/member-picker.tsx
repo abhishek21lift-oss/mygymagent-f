@@ -46,21 +46,24 @@ export function MemberPicker({
             <p className="p-2 text-sm text-muted-foreground">No members found.</p>
           )}
           {membersQuery.data?.items.map((member) => (
-            <button
+            <Button
               key={member.id}
               type="button"
-              className="flex flex-col items-start rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent"
+              variant="ghost"
+              className="h-auto min-h-10 w-full items-start justify-start rounded-md px-2 py-1.5 text-left text-sm font-normal"
               onClick={() => {
                 onChange({ id: member.id, label: `${member.firstName} ${member.lastName}` });
                 setOpen(false);
                 setQuery("");
               }}
             >
-              <span className="font-medium">
-                {member.firstName} {member.lastName}
+              <span className="flex flex-col items-start">
+                <span className="font-medium">
+                  {member.firstName} {member.lastName}
+                </span>
+                <span className="text-xs text-muted-foreground">{member.memberCode}</span>
               </span>
-              <span className="text-xs text-muted-foreground">{member.memberCode}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </PopoverContent>

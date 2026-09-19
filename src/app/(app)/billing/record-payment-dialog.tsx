@@ -108,17 +108,18 @@ function InvoiceLinkPicker({
             <p className="p-2 text-sm text-muted-foreground">No invoices match.</p>
           )}
           {results.map((item) => (
-            <button
+            <Button
               key={item.id}
               type="button"
-              className="flex w-full items-center justify-between gap-2 rounded-xl px-2 py-2 text-left text-sm hover:bg-accent"
+              variant="ghost"
+              className="h-auto min-h-10 w-full justify-between rounded-lg px-2 py-2 text-left text-sm font-normal"
               onClick={() => pick(item)}
             >
               <span className="font-mono font-bold tabular-nums">{item.number}</span>
-              <span className="text-xs font-medium tabular-nums text-stone-600 dark:text-stone-400">
+              <span className="text-xs font-medium tabular-nums text-muted-foreground">
                 {item.currency} {Number(item.grandTotal).toFixed(2)} · {item.status}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
       )}
