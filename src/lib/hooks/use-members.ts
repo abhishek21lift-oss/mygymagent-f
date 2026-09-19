@@ -88,7 +88,10 @@ export function useCreateMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateMemberInput) => api.post<Member>("/members", input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [KEY] });
+      void queryClient.invalidateQueries({ queryKey: [KEY, "metrics"] });
+    },
   });
 }
 
@@ -99,6 +102,7 @@ export function useUpdateMember(id: string) {
       api.patch<Member>(`/members/${id}`, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [KEY] });
+      void queryClient.invalidateQueries({ queryKey: [KEY, "metrics"] });
       void queryClient.invalidateQueries({ queryKey: [KEY, id] });
     },
   });
@@ -108,6 +112,9 @@ export function useDeleteMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete<Member>(`/members/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [KEY] });
+      void queryClient.invalidateQueries({ queryKey: [KEY, "metrics"] });
+    },
   });
 }
