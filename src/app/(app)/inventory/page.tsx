@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { toast } from "sonner";
 import { PackagePlus, Boxes, AlertTriangle, ArrowRight, History, Package } from "lucide-react";
@@ -13,6 +15,14 @@ import { ScanStockDialog } from "@/components/shared/scan-stock-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+ Form,
+ FormControl,
+ FormField,
+ FormItem,
+ FormLabel,
+ FormMessage,
+} from "@/components/ui/form";
 import {
  Dialog,
  DialogContent,
