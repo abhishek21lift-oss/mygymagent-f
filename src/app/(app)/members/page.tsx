@@ -167,11 +167,6 @@ export default function MembersPage() {
  const members = useMembers(filters);
  const metrics = useMemberMetrics();
  const items = members.data?.items ?? [];
- const total = members.data?.total ?? 0;
- const active = items.filter((m) => m.status === "ACTIVE").length;
- const inactive = items.filter((m) => m.status === "INACTIVE").length;
- const frozen = items.filter((m) => m.status === "FROZEN").length;
- const expired = items.filter((m) => m.status === "EXPIRED").length;
  const selectedIds = Object.entries(selection).filter(([, value]) => value).map(([id]) => items[Number(id)]?.id).filter((id): id is string => Boolean(id));
  const setSearch = (search: string) => setFilters((f) => ({ ...f, search: search || undefined, page: 1 }));
  const setSegment = (segment: "all" | "active" | "inactive" | "frozen" | "expired" | "pt") => setFilters((f) => ({ ...f, page: 1, status: segment === "all" || segment === "pt" ? undefined : [segment.toUpperCase() as MemberStatus], memberType: segment === "pt" ? ["PT", "GYM_PT"] : undefined }));
