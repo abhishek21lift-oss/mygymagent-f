@@ -48,3 +48,166 @@ export function useStockMovements(params: PaginationParams & { productId?: strin
 export async function lookupProductByScanCode(code: string): Promise<Product> {
   return api.get<Product>(`/products/scan/${encodeURIComponent(code)}`);
 }
+
+export function useInventoryDashboard() {
+  return useQuery({
+    queryKey: ["inventory-dashboard"],
+    queryFn: () => api.get<import("@/lib/types/gym").InventoryDashboard>("/inventory/dashboard"),
+    staleTime: 30_000,
+  })
+}
+
+export function useInventoryBranchStock(params: { branchId?: string; productId?: string } = {}) {
+  return useQuery({
+    queryKey: ["inventory-branch-stock", params],
+    queryFn: () => api.get<import("@/lib/types/gym").ProductStock[]>("/inventory/branch-stock", { query: params }),
+  })
+}
+
+export function useInventoryReorderSuggestions(branchId?: string) {
+  return useQuery({
+    queryKey: ["inventory-reorder", branchId],
+    queryFn: () => api.get<Array<{
+      productId: string; sku: string; name: string; quantityOnHand: number;
+      reorderLevel: number; suggestedQuantity: number;
+    }>>("/inventory/reorder-suggestions", { query: branchId ? { branchId } : undefined }),
+  })
+}
+
+export function useInventorySuppliers(search?: string) {
+  return useQuery({
+    queryKey: ["inventory-suppliers", search],
+    queryFn: () => api.get<import("@/lib/types/gym").InventorySupplier[]>("/inventory/suppliers", {
+      query: search ? { search } : undefined,
+    }),
+  })
+}
+
+export function useCreateInventorySupplier() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { name: string; phone?: string; email?: string; address?: string; taxId?: string }) =>
+      api.post("/inventory/suppliers", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] }),
+  })
+}
+
+export function useInventoryPurchaseOrders(status?: string) {
+  return useQuery({
+    queryKey: ["inventory-purchase-orders", status],
+    queryFn: () => api.get<import("@/lib/types/gym").InventoryPurchaseOrder[]>("/inventory/purchase-orders", {
+      query: status ? { status } : undefined,
+    }),
+  })
+}
+
+export function useCreateInventoryPurchaseOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: {
+      supplierId: string; branchId?: string; notes?: string; expectedAt?: string;
+      items: Array<{ productId: string; orderedQuantity: number; unitCost: number }>
+    }) => api.post("/inventory/purchase-orders", input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-purchase-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
+    },
+  })
+}
+
+export function useReceiveInventoryPurchaseOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, input }: {
+      id: string; input: { branchId?: string; items: Array<{ productId: string; quantity: number }> }
+    }) => api.post(`/inventory/purchase-orders/${id}/receive`, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-purchase-orders"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
+    },
+  })
+}
+
+export function useInventoryTransfers(status?: string) {
+  return useQuery({
+    queryKey: ["inventory-transfers", status],
+    queryFn: () => api.get<import("@/lib/types/gym").InventoryTransfer[]>("/inventory/transfers", {
+      query: status ? { status } : undefined,
+    }),
+  })
+}
+
+export function useCreateInventoryTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: {
+      fromBranchId: string; toBranchId: string; notes?: string;
+      items: Array<{ productId: string; quantity: number }>
+    }) => api.post("/inventory/transfers", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] }),
+  })
+}
+
+export function useShipInventoryTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/inventory/transfers/${id}/ship`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    },
+  })
+}
+
+export function useReceiveInventoryTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/inventory/transfers/${id}/receive`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    },
+  })
+}
+
+export function useInventorySales(status?: string) {
+  return useQuery({
+    queryKey: ["inventory-sales", status],
+    queryFn: () => api.get<import("@/lib/types/gym").InventorySale[]>("/inventory/sales", {
+      query: status ? { status } : undefined,
+    }),
+  })
+}
+
+export function useCreateInventorySale() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: {
+      branchId?: string; memberId?: string; invoiceId?: string; discount?: number; currency?: string;
+      items: Array<{ productId: string; quantity: number; unitPrice: number }>
+    }) => api.post("/inventory/sales", input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+    },
+  })
+}
+
+export function useReturnInventorySale() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/inventory/sales/${id}/return`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+    },
+  })
+}
