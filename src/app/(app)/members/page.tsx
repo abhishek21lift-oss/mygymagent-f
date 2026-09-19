@@ -14,7 +14,6 @@ import {
  Sparkles,
  SquareCheckBig,
  Tag,
- Upload,
  UserRound,
  Users,
  Wallet,
@@ -226,7 +225,6 @@ export default function MembersPage() {
         <div className="flex flex-wrap items-center gap-2">
          <Filters filters={filters} onChange={setFilters} />
          <Button variant="outline" size="sm" className="min-h-10" onClick={() => router.push("/members/new")}><Plus className="mr-1.5 size-3.5" aria-hidden="true" /> Add</Button>
-         <Button variant="outline" size="sm" className="min-h-10" onClick={() => toast.info("Use the existing member import workflow to upload members.")}><Upload className="mr-1.5 size-3.5" aria-hidden="true" /> Import</Button>
         </div>
        </div>
       </CardHeader>
