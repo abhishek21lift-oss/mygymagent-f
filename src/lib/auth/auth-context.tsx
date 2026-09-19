@@ -40,7 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     setPermissions([])
     setCurrentBranchId(null)
-    setCurrentBranchId(null)
   }
 
   const loadMe = React.useCallback(async (): Promise<void> => {
@@ -85,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setAccessToken(null)
           setUser(null)
           setPermissions([])
+          setCurrentBranchId(null)
         }
       } finally {
         if (!cancelled) setIsLoading(false)
@@ -142,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null)
     setUser(null)
     setPermissions([])
+    setCurrentBranchId(null)
   }, [queryClient])
 
   const hasPermission = React.useCallback(
