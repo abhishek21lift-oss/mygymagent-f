@@ -21,6 +21,15 @@ export interface MemberFilters {
 
 const KEY = "members";
 
+export interface MemberMetrics {
+  total: number;
+  active: number;
+  inactive: number;
+  frozen: number;
+  expired: number;
+  pt: number;
+}
+
 type MemberDetailPayload = Member & {
   memberships?: unknown;
 };
@@ -47,6 +56,14 @@ export function useMembers(params: MemberFilters = {}) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return api.get<Paginated<Member>>("/members", { query, branchId } as any);
     },
+  });
+}
+
+export function useMemberMetrics() {
+  return useQuery({
+    queryKey: [KEY, "metrics"],
+    queryFn: () => api.get<MemberMetrics>("/members/metrics"),
+    staleTime: 30_000,
   });
 }
 
