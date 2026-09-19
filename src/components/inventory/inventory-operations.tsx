@@ -23,6 +23,7 @@ import {
   useProducts,
 } from "@/lib/hooks/use-inventory"
 import { Button } from "@/components/ui/button"
+import { InventoryNav } from "@/components/inventory/inventory-nav"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 
@@ -101,6 +102,7 @@ export function InventoryOperationsPanel() {
 
   return (
     <section className="grid gap-5" aria-labelledby="inventory-operations">
+      <InventoryNav />
       <div>
         <h2 id="inventory-operations" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Operations</h2>
         <p className="mt-1 text-sm font-medium text-stone-500">Procure, receive, transfer and sell without bypassing the stock ledger.</p>
