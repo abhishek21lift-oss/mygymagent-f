@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { StatCard } from "@/components/shared/stat-card";
-import { useMembers, type MemberFilters } from "@/lib/hooks/use-members";
+import { useMemberMetrics, useMembers, type MemberFilters } from "@/lib/hooks/use-members";
 import { useMemberTags } from "@/lib/hooks/use-member-tags";
 import { useBulkStatusChange, useBulkTagAssignment, useBulkExport } from "@/lib/hooks/use-bulk-member-actions";
 import { toast } from "sonner";
@@ -165,6 +165,7 @@ export default function MembersPage() {
  const [filters, setFilters] = React.useState<MemberFilters>({ page: 1, pageSize: 25, orderBy: "createdAt", order: "desc" });
  const [selection, setSelection] = React.useState<RowSelectionState>({});
  const members = useMembers(filters);
+ const metrics = useMemberMetrics();
  const items = members.data?.items ?? [];
  const total = members.data?.total ?? 0;
  const active = items.filter((m) => m.status === "ACTIVE").length;
@@ -198,10 +199,10 @@ export default function MembersPage() {
     <section aria-labelledby="members-pulse">
      <h2 id="members-pulse" className="mb-3 text-xl font-semibold tracking-tight">Overview</h2>
      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <Metric icon={Users} label="Total members" value={members.isLoading ? "—" : total} tone="primary" />
-      <Metric icon={CheckCircle2} label="Active" value={members.isLoading ? "—" : active} tone="success" />
-      <Metric icon={AlertTriangle} label="Attention signals" value={members.isLoading ? "—" : inactive + frozen + expired} tone="warning" />
-      <Metric icon={Sparkles} label="PT members" value={members.isLoading ? "—" : items.filter((m) => m.memberType !== "GYM").length} tone="primary" />
+      <Metric icon={Users} label="Total members" value={metrics.isLoading ? "—" : metrics.data?.total ?? 0} tone="primary" />
+      <Metric icon={CheckCircle2} label="Active" value={metrics.isLoading ? "—" : metrics.data?.active ?? 0} tone="success" />
+      <Metric icon={AlertTriangle} label="Attention signals" value={metrics.isLoading ? "—" : (metrics.data?.inactive ?? 0) + (metrics.data?.frozen ?? 0) + (metrics.data?.expired ?? 0)} tone="warning" />
+      <Metric icon={Sparkles} label="PT members" value={metrics.isLoading ? "—" : metrics.data?.pt ?? 0} tone="primary" />
      </div>
     </section>
 
