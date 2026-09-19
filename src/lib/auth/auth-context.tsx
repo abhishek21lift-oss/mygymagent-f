@@ -4,6 +4,7 @@ import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { api, ApiError } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
+import { setCurrentBranchId } from "@/lib/branch-context"
 import type { AuthUser, LoginResponse, MeResponse, RegisterResponse } from "@/lib/types/auth"
 import type { LoginInput, RegisterInput } from "@/lib/validation/auth"
 
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null)
     setUser(null)
     setPermissions([])
+    setCurrentBranchId(null)
   }
 
   const loadMe = React.useCallback(async (): Promise<void> => {
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(me.user)
       setPermissions(me.permissions)
+      setCurrentBranchId(me.user.primaryBranchId)
     } catch (error) {
       // A newer session started while this request was in flight -- never
       // let the stale response clobber it.
@@ -81,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setAccessToken(null)
           setUser(null)
           setPermissions([])
+          setCurrentBranchId(null)
         }
       } finally {
         if (!cancelled) setIsLoading(false)
@@ -104,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(res.accessToken)
       setUser(res.user)
       setPermissions([])
+      setCurrentBranchId(res.user.primaryBranchId)
 
       void loadMe()
     },
@@ -119,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(res.accessToken)
       setUser(res.user)
       setPermissions([])
+      setCurrentBranchId(res.user.primaryBranchId)
       void loadMe()
     },
     [loadMe, queryClient],
@@ -136,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null)
     setUser(null)
     setPermissions([])
+    setCurrentBranchId(null)
   }, [queryClient])
 
   const hasPermission = React.useCallback(

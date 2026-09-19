@@ -1,4 +1,5 @@
 import { getAccessToken, setAccessToken } from "./token-store"
+import { getCurrentBranchId } from "@/lib/branch-context"
 
 const CONFIGURED_API_URL = process.env.NEXT_PUBLIC_API_URL
 if (!CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
@@ -135,7 +136,8 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   if (!isFormData) headers["Content-Type"] = "application/json"
   const token = getAccessToken()
   if (token) headers.Authorization = `Bearer ${token}`
-  if (branchId) headers["x-branch-id"] = branchId
+  const effectiveBranchId = branchId ?? getCurrentBranchId()
+  if (effectiveBranchId) headers["x-branch-id"] = effectiveBranchId
 
   let res: Response
   try {
