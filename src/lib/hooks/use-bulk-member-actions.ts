@@ -65,7 +65,7 @@ export function parseBulkExport(csv: string): BulkExportResult {
   const headers = rows[0] ?? [];
   const members = rows.slice(1).map((row) =>
     Object.fromEntries(
-      headers.map((header, index) => [header, escapeCsvField(row[index] ?? '')]),
+      headers.map((header, index) => [header, row[index] ?? '']),
     ),
   );
   return { members, total: members.length };
@@ -78,6 +78,7 @@ export function useBulkStatusChange() {
       api.post<BulkResult>('/members/bulk/status', payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: MEMBERS_KEY });
+      void queryClient.invalidateQueries({ queryKey: [...MEMBERS_KEY, 'metrics'] });
     },
     onError: (error: Error) => error,
   });
@@ -90,6 +91,7 @@ export function useBulkTagAssignment() {
       api.post<BulkResult>('/members/bulk/tags', payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: MEMBERS_KEY });
+      void queryClient.invalidateQueries({ queryKey: [...MEMBERS_KEY, 'metrics'] });
       void queryClient.invalidateQueries({ queryKey: ['member-tags'] });
     },
     onError: (error: Error) => error,
