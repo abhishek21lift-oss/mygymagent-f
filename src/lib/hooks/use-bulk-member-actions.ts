@@ -56,9 +56,6 @@ function parseCsvRows(csv: string): string[][] {
   return rows;
 }
 
-function escapeCsvField(value: string): string {
-  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-}
 
 export function parseBulkExport(csv: string): BulkExportResult {
   const rows = parseCsvRows(csv);
