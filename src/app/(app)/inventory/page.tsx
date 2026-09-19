@@ -9,6 +9,7 @@ import { Plus, PackagePlus, Boxes, AlertTriangle, ArrowRight, History, Package }
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
+import { InventoryOperationsPanel } from "@/components/inventory/inventory-operations";
 import { PageHero } from "@/components/shared/page-hero";
 import { ScanStockDialog } from "@/components/shared/scan-stock-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +70,9 @@ function AddProductDialog() {
    costPrice: undefined,
    quantityOnHand: 0,
    reorderLevel: 0,
+   reorderQuantity: 0,
+   barcode: "",
+   unit: "unit",
   },
  });
 
@@ -124,6 +128,14 @@ function AddProductDialog() {
          </FormItem>
         )}
        />
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+       <FormField control={form.control} name="barcode" render={({ field }) => (
+        <FormItem><FormLabel>Barcode</FormLabel><FormControl><Input placeholder="8901234567890" {...field} /></FormControl><FormMessage /></FormItem>
+       )} />
+       <FormField control={form.control} name="unit" render={({ field }) => (
+        <FormItem><FormLabel>Unit</FormLabel><FormControl><Input placeholder="unit / pack / bottle" {...field} /></FormControl><FormMessage /></FormItem>
+       )} />
       </div>
       <FormField
        control={form.control}
@@ -186,6 +198,19 @@ function AddProductDialog() {
         render={({ field }) => (
          <FormItem>
           <FormLabel>Starting quantity</FormLabel>
+          <FormControl>
+           <Input type="number" {...field} value={field.value ?? ""} />
+          </FormControl>
+          <FormMessage />
+         </FormItem>
+        )}
+       />
+       <FormField
+        control={form.control}
+        name="reorderQuantity"
+        render={({ field }) => (
+         <FormItem>
+          <FormLabel>Reorder quantity</FormLabel>
           <FormControl>
            <Input type="number" {...field} value={field.value ?? ""} />
           </FormControl>
@@ -348,6 +373,10 @@ const movementTypeVariant: Record<
  SALE: "secondary",
  ADJUSTMENT: "outline",
  DAMAGED: "destructive",
+ OPENING: "success",
+ TRANSFER_IN: "success",
+ TRANSFER_OUT: "secondary",
+ RETURN: "success",
 };
 
 const movementColumns: ColumnDef<StockMovement>[] = [
@@ -523,6 +552,8 @@ export default function InventoryPage() {
       />
      </div>
     </section>
+
+    <InventoryOperationsPanel />
    </div>
   </div>
  );
