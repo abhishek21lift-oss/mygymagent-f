@@ -14,13 +14,18 @@ export default function SearchPage() {
   const [results, setResults] = React.useState<Result[]>([]);
   const [loading, setLoading] = React.useState(false);
   React.useEffect(() => {
-    if (q.trim().length < 2) { setResults([]); return; }
+    if (q.trim().length < 2) return;
+    let active = true;
     const timer = setTimeout(async () => {
       setLoading(true);
-      try { const data = await api.get<{ results: Result[] }>("/search", { query: { q } }); setResults(data.results); }
-      finally { setLoading(false); }
+      try {
+        const data = await api.get<{ results: Result[] }>("/search", { query: { q: q.trim() } });
+        if (active) setResults(data.results);
+      } finally {
+        if (active) setLoading(false);
+      }
     }, 250);
-    return () => clearTimeout(timer);
+    return () => { active = false; clearTimeout(timer); };
   }, [q]);
   return <main className="space-y-8"><PageHero title="Global Search" icon={SearchIcon} />
     <section className="rounded-3xl border bg-white/80 p-6 shadow-sm">
