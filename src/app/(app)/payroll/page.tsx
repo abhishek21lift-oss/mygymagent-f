@@ -48,7 +48,7 @@ export default function PayrollPage() {
 
   return (
     <main className="space-y-8">
-      <PageHero eyebrow="Operations" title="Payroll & Commissions" description="Trainer session commissions, rules and payroll-ready summaries." icon={HandCoins}
+      <PageHero title="Payroll & Commissions" icon={HandCoins}
         actions={<Button onClick={generate} disabled={generating}><RefreshCw className="mr-2 size-4" />{generating ? "Generating…" : "Generate commissions"}</Button>} />
       <section className="grid gap-6 lg:grid-cols-3">
         <div className="rounded-3xl border bg-white/80 p-6 shadow-sm"><p className="text-sm text-stone-500">Trainers with commissions</p><p className="mt-2 text-3xl font-black">{summary.length}</p></div>
