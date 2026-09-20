@@ -71,7 +71,7 @@ export async function refreshSession(): Promise<boolean> {
     const tokenAtStart = getAccessToken()
 
     try {
-      const res = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
+      const res = await fetchWithTimeout(buildUrl("/auth/refresh"), {
         method: "POST",
         credentials: "include",
       })
