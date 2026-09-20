@@ -8,7 +8,7 @@ import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 
 type Plan = { id:string; key:string; name:string; priceMinor:number; currency:string; maxMembers:number|null; maxBranches:number|null; maxStaff:number|null; aiMonthlyRequests:number|null; };
-type Usage = { plan: Plan & { status:string } | null; usage:{members:number;branches:number;staff:number} };
+type Usage = { plan: (Plan & { status:string; planKey:string }) | null; usage:{members:number;branches:number;staff:number} };
 
 export default function PlatformBillingPage() {
  const [plans,setPlans]=React.useState<Plan[]>([]);
