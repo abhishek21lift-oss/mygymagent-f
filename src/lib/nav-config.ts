@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, ListChecks, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet } from "lucide-react";
+import { BarChart3, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare, CreditCard, Dumbbell, LayoutDashboard, ListChecks, Megaphone, Package, Salad, Settings, Sparkles, UserCog, Users, Wallet, HandCoins, Search } from "lucide-react";
 
 export interface NavItem { title: string; href: string; icon: LucideIcon; permission?: string | string[]; children?: NavItem[]; accent?: "ai" | "default"; comingSoon?: boolean }
 
@@ -30,6 +30,7 @@ export const primaryNav: NavItem[] = [
     { title: "Payments", href: "/billing", icon: Wallet, permission: "payments.read" },
     { title: "Membership Lifecycle", href: "/memberships", icon: CreditCard, permission: "memberships.read" },
     { title: "Membership Plans", href: "/membership-plans", icon: CreditCard, permission: "membership_plans.read" },
+    { title: "Payroll", href: "/payroll", icon: HandCoins, permission: "payroll.read" },
   ] },
   { title: "Operations", href: "/attendance", icon: CalendarCheck, permission: "attendance.read", children: [
     { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: "attendance.read" },
@@ -38,6 +39,7 @@ export const primaryNav: NavItem[] = [
     { title: "Branches", href: "/branches", icon: Building2, permission: "branches.read" },
   ] },
   { title: "Insights", href: "/owner-os", icon: BarChart3, permission: "reports.view" },
+  { title: "Search", href: "/search", icon: Search, permission: "search.read" },
   { title: "Intelligence", href: "/intelligence", icon: Brain, permission: "reports.view", accent: "ai" },
   { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai", children: [
     { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
