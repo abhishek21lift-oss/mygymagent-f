@@ -16,21 +16,23 @@ export default function PayrollPage() {
   const [loading, setLoading] = React.useState(true);
   const [generating, setGenerating] = React.useState(false);
 
-  const load = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const [s, r] = await Promise.all([
-        api.get<SummaryRow[]>("/payroll/summary"),
-        api.get<Rule[]>("/payroll/commission-rules"),
-      ]);
-      setSummary(s);
-      setRules(r);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Payroll data could not be loaded");
-    } finally { setLoading(false); }
+  React.useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const [s, r] = await Promise.all([
+          api.get<SummaryRow[]>("/payroll/summary"),
+          api.get<Rule[]>("/payroll/commission-rules"),
+        ]);
+        if (active) { setSummary(s); setRules(r); }
+      } catch (e) {
+        if (active) toast.error(e instanceof Error ? e.message : "Payroll data could not be loaded");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => { active = false; };
   }, []);
-
-  React.useEffect(() => { void load(); }, [load]);
 
   async function generate() {
     setGenerating(true);
@@ -40,7 +42,7 @@ export default function PayrollPage() {
       const to = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
       const result = await api.post<{ scanned: number; created: number }>("/payroll/commissions/generate", { from, to });
       toast.success(`Commission run complete: ${result.created} new entries`);
-      await load();
+      window.location.reload();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Commission run failed");
     } finally { setGenerating(false); }
