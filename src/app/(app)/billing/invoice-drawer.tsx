@@ -29,7 +29,7 @@ function RetryResult({ result }: { result: RetryCollectionResult }) {
   <div className="rounded-lg border border-emerald-200/70 bg-emerald-50/70 p-3 text-sm dark:border-emerald-900/50 dark:bg-emerald-950/30">
    <p className="font-bold text-emerald-900 dark:text-emerald-200">Collection started</p>
    <p className="mt-1 font-mono text-xs tabular-nums text-emerald-800 dark:text-emerald-300">
-    {result.currency} {Number(result.amount).toFixed(2)}
+    ₹ {Number(result.amount).toFixed(2)}
     {result.orderId ? ` · Order ${result.orderId}` : ""}
    </p>
   </div>
@@ -132,13 +132,13 @@ export function InvoiceDrawer({
         </span>
        )}
        <span className="ml-auto font-mono text-lg font-black tabular-nums text-stone-950 dark:text-white">
-        {invoice.currency} {Number(invoice.grandTotal).toFixed(2)}
+        ₹ {Number(invoice.grandTotal).toFixed(2)}
        </span>
       </div>
       <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
        <p className="text-stone-600 dark:text-stone-400">Issued: <span className="font-bold text-stone-900 tabular-nums dark:text-stone-100">{fmtDateTime(invoice.issuedAt)}</span></p>
        <p className="text-stone-600 dark:text-stone-400">Due: <span className="font-bold text-stone-900 tabular-nums dark:text-stone-100">{fmtDateTime(invoice.dueAt)}</span></p>
-       <p className="text-stone-600 dark:text-stone-400">Outstanding: <span className="font-bold tabular-nums text-rose-600">{invoice.currency} {outstanding.toFixed(2)}</span></p>
+       <p className="text-stone-600 dark:text-stone-400">Outstanding: <span className="font-bold tabular-nums text-rose-600">₹ {outstanding.toFixed(2)}</span></p>
       </div>
 
       <div>
@@ -157,7 +157,7 @@ export function InvoiceDrawer({
            <TableRow key={i}>
             <TableCell className="text-sm font-medium">{line.label}</TableCell>
             <TableCell className="text-right text-sm tabular-nums">{line.qty ?? 1}</TableCell>
-            <TableCell className="text-right text-sm tabular-nums">{invoice.currency} {Number(line.amount).toFixed(2)}</TableCell>
+            <TableCell className="text-right text-sm tabular-nums">₹ {Number(line.amount).toFixed(2)}</TableCell>
            </TableRow>
           ))}
          </TableBody>
@@ -168,7 +168,7 @@ export function InvoiceDrawer({
          <p className="mb-1 text-xs font-black uppercase tracking-wider text-stone-500">Tax breakup</p>
          {invoice.taxBreakup!.map((t, i) => (
           <p key={i} className="flex justify-between font-medium text-stone-700 tabular-nums dark:text-stone-300">
-           <span>{t.label}</span><span>{invoice.currency} {Number(t.amount).toFixed(2)}</span>
+           <span>{t.label}</span><span>₹ {Number(t.amount).toFixed(2)}</span>
           </p>
          ))}
         </div>
@@ -184,7 +184,7 @@ export function InvoiceDrawer({
          {invoice.payments.map((p) => (
           <div key={p.id} className="flex items-center justify-between rounded-lg border border-stone-200/70 bg-white/80 p-3 text-sm dark:border-white/10 dark:bg-white/5">
            <div>
-            <p className="font-bold tabular-nums">{p.currency} {Number(p.amount).toFixed(2)} · {p.method}</p>
+            <p className="font-bold tabular-nums">₹ {Number(p.amount).toFixed(2)} · {p.method}</p>
             <p className="text-xs text-stone-500 tabular-nums">{fmtDateTime(p.createdAt)}</p>
            </div>
            <Badge variant="outline">{p.status}</Badge>
