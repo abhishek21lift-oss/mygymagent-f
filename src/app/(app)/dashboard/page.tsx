@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
  const gymName = organization.data?.name ?? "Dashboard";
 
- const currency = data?.revenue.revenue[0]?.currency ?? "INR";
+ const currency = "₹";
  const revenue =
   data?.revenue.revenue.find((r) => r.currency === currency)?.netRevenue ?? "0.00";
 

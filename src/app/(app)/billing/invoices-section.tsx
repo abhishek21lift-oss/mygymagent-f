@@ -28,7 +28,7 @@ function AgingChips() {
    {rows.map((row) => (
     <div key={row.currency || "total"} className="flex flex-wrap items-center gap-2">
      {row.currency && (
-      <span className="font-mono text-xs font-black tabular-nums text-stone-500">{row.currency}</span>
+      <span className="font-mono text-xs font-black tabular-nums text-stone-500">₹</span>
      )}
      {(
       [
@@ -74,7 +74,7 @@ const columns: ColumnDef<InvoiceListItem>[] = [
   accessorKey: "grandTotal",
   cell: ({ row }) => (
    <span className="font-bold tabular-nums text-stone-950 dark:text-white">
-    {row.original.currency} {Number(row.original.grandTotal).toFixed(2)}
+    ₹ {Number(row.original.grandTotal).toFixed(2)}
    </span>
   ),
  },

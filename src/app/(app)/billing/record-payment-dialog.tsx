@@ -73,13 +73,13 @@ function InvoiceLinkPicker({
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-200/70 bg-emerald-50/60 p-3 dark:border-emerald-900/50 dark:bg-emerald-950/20">
         <div className="min-w-0 flex-1">
           <p className="font-mono text-sm font-bold tabular-nums text-emerald-950 dark:text-emerald-100">
-            {selected.number} · {selected.currency} {Number(selected.grandTotal).toFixed(2)}
+            {selected.number} · ₹ {Number(selected.grandTotal).toFixed(2)}
           </p>
           <p className="text-xs font-medium text-emerald-800 tabular-nums dark:text-emerald-300">
             {detailQuery.isLoading
               ? "Loading outstanding..."
               : outstanding !== null
-                ? `Outstanding: ${detailQuery.data!.currency} ${outstanding.toFixed(2)}`
+                ? `Outstanding: ₹ ${outstanding.toFixed(2)}`
                 : ""}
           </p>
         </div>
@@ -117,7 +117,7 @@ function InvoiceLinkPicker({
             >
               <span className="font-mono font-bold tabular-nums">{item.number}</span>
               <span className="text-xs font-medium tabular-nums text-muted-foreground">
-                {item.currency} {Number(item.grandTotal).toFixed(2)} · {item.status}
+                ₹ {Number(item.grandTotal).toFixed(2)} · {item.status}
               </span>
             </Button>
           ))}

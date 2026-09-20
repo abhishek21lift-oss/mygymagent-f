@@ -110,7 +110,7 @@ function ExpenseActions({ expense }: { expense: Expense }) {
 const columns: ColumnDef<Expense>[] = [
  { header: "Category", accessorKey: "category", cell: ({ row }) => <Badge variant="outline">{row.original.category}</Badge> },
  { header: "Vendor", accessorKey: "vendor", cell: ({ row }) => <span className="font-medium text-stone-700 dark:text-stone-300">{row.original.vendor ?? "—"}</span> },
- { header: "Amount", accessorKey: "amount", cell: ({ row }) => <span className="font-bold tabular-nums text-stone-950 dark:text-white">{row.original.currency} {row.original.amount}</span> },
+ { header: "Amount", accessorKey: "amount", cell: ({ row }) => <span className="font-bold tabular-nums text-stone-950 dark:text-white">₹ {row.original.amount}</span> },
  { header: "Status", accessorKey: "status", cell: ({ row }) => <Badge variant={statusVariant[row.original.status]}>{row.original.status}</Badge> },
  { header: "Date", accessorKey: "expenseDate", cell: ({ row }) => <span className="text-sm font-medium text-stone-600 tabular-nums dark:text-stone-400">{new Date(row.original.expenseDate).toLocaleDateString()}</span> },
  { id: "actions", header: "", cell: ({ row }) => <ExpenseActions expense={row.original} /> },
@@ -126,7 +126,7 @@ export function ExpensesSection() {
 
  const totals = summary.data?.totals ?? []
  const headline = totals.length > 0
-  ? totals.map((t) => `${t.currency} ${Number(t.total).toFixed(2)}`).join(" · ")
+  ? totals.map((t) => `₹ ${Number(t.total).toFixed(2)}`).join(" · ")
   : "—"
 
  return (

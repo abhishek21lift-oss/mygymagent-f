@@ -56,7 +56,7 @@ function CreatePlanDialog() {
 
  const form = useForm<CreateMembershipPlanInput>({
   resolver: zodResolver(createMembershipPlanSchema),
-  defaultValues: { name: "", description: "", durationDays: 30, price: 0, currency: "USD", maxFreezeDays: 0 },
+  defaultValues: { name: "", description: "", durationDays: 30, price: 0, currency: "INR", maxFreezeDays: 0 },
  });
 
  async function onSubmit(values: CreateMembershipPlanInput) {
@@ -227,7 +227,7 @@ export default function MembershipPlansPage() {
           <div className="flex flex-1 flex-col gap-2 px-5 py-5 text-sm sm:px-6">
            <p className="flex items-baseline gap-1.5 text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">
             <Wallet className="size-5 self-center text-emerald-600" aria-hidden="true" />
-            {plan.currency} {plan.price}
+            ₹ {plan.price}
             <span className="text-sm font-bold text-stone-600 dark:text-stone-400"> / {plan.durationDays}d</span>
            </p>
            {plan.description && <p className="text-sm font-medium leading-6 text-stone-600 dark:text-stone-400">{plan.description}</p>}
