@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - feat/android-apk-capacitor
+      - fix/android-apk-ci
   pull_request:
     paths:
       - "capacitor.config.ts"
@@ -45,6 +46,9 @@ jobs:
 
       - name: Generate Android project
         run: npx cap add android
+
+      - name: Prepare Capacitor assets directory
+        run: mkdir -p android/app/src/main/assets
 
       - name: Sync Capacitor
         run: npx cap sync android
