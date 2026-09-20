@@ -106,7 +106,7 @@ export default function MembershipLifecyclePage() {
        </SelectTrigger>
        <SelectContent>
         <SelectItem value="__none">Select target plan</SelectItem>
-        {activePlans.map(plan => <SelectItem key={plan.id} value={plan.id}>{plan.name} · {plan.currency} {plan.price}</SelectItem>)}
+        {activePlans.map(plan => <SelectItem key={plan.id} value={plan.id}>{plan.name} · ₹ {plan.price}</SelectItem>)}
        </SelectContent>
       </Select>
      </div>
