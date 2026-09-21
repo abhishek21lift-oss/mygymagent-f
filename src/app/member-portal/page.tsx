@@ -15,7 +15,7 @@ export default function MemberPortal(){
  const [data,setData]=React.useState<PortalData|null>(null)
  const [loading,setLoading]=React.useState(false)
  const [error,setError]=React.useState("")
- async function load(t:string){
+ const load=React.useCallback(async(t:string)=>{
    if(!t.trim()){setError("Enter your portal token.");return}
    setLoading(true);setError("")
    try{
@@ -24,7 +24,7 @@ export default function MemberPortal(){
      if(typeof window!=="undefined") window.history.replaceState({},document.title,"/member-portal")
    }catch(e){setData(null);setError(e instanceof Error?e.message:"This portal link is invalid or expired.")}
    finally{setLoading(false)}
- }
+ },[])
  React.useEffect(()=>{if(!token)return;const timer=window.setTimeout(()=>{void load(token)},0);return()=>window.clearTimeout(timer)},[token])
  return <main className="min-h-svh bg-gradient-to-br from-background via-background to-muted/40 p-4 sm:p-8"><div className="mx-auto max-w-5xl space-y-6">
    <Card className="border-0 shadow-lg"><CardHeader><div className="flex items-center gap-3"><div className="rounded-2xl bg-primary/10 p-3"><ShieldCheck className="size-6"/></div><div><CardTitle>Member Portal</CardTitle><p className="text-sm text-muted-foreground">Secure single-use access to your gym account.</p></div></div></CardHeader><CardContent><div className="flex flex-col gap-3 sm:flex-row"><Input value={token} onChange={e=>setToken(e.target.value)} placeholder="Paste portal token"/><Button className="sm:w-40" onClick={()=>void load(token)} disabled={loading}>{loading?<Loader2 className="mr-2 size-4 animate-spin"/>:null}{loading?"Opening...":"Open portal"}</Button></div>{error&&<div className="mt-3 flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"><XCircle className="size-4"/>{error}</div>}</CardContent></Card>
