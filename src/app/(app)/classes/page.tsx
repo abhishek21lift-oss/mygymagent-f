@@ -46,7 +46,6 @@ export default function ClassesPage() {
  React.useEffect(()=>{
   let cancelled=false
   if(!selectedBranchId) return
-  setLoading(true)
   Promise.all([
    api.get<Program[]>("/classes/programs",{query:{branchId:selectedBranchId}}),
    api.get<Session[]>("/classes/sessions",{query:{branchId:selectedBranchId}})
