@@ -34,6 +34,15 @@ export default function ClassesPage() {
 
  const selectedBranchId = branchId || branches.data?.items?.[0]?.id || ""
 
+ const refreshClasses = async () => {
+  if (!selectedBranchId) return
+  const [p,s] = await Promise.all([
+   api.get<Program[]>("/classes/programs",{query:{branchId:selectedBranchId}}),
+   api.get<Session[]>("/classes/sessions",{query:{branchId:selectedBranchId}}),
+  ])
+  setPrograms(p); setSessions(s)
+ }
+
  React.useEffect(()=>{
   let cancelled=false
   if(!selectedBranchId){ setLoading(false); return }
@@ -54,14 +63,14 @@ export default function ClassesPage() {
  async function createProgram(){
   if(!selectedBranchId||!name.trim()) return
   setBusy(true)
-  try{await api.post("/classes/programs",{branchId:selectedBranchId,name,capacity:Number(capacity),durationMinutes:Number(duration)});setName("");toast.success("Class program created");await (async()=>{ const [p,s]=await Promise.all([api.get<Program[]>("/classes/programs",{query:{branchId:selectedBranchId}}),api.get<Session[]>("/classes/sessions",{query:{branchId:selectedBranchId}})]);setPrograms(p);setSessions(s) })()}
+  try{await api.post("/classes/programs",{branchId:selectedBranchId,name,capacity:Number(capacity),durationMinutes:Number(duration)});setName("");toast.success("Class program created");await refreshClasses()}
   catch(e){toast.error(e instanceof Error?e.message:"Failed to create class")}
   finally{setBusy(false)}
  }
  async function createSession(){
   if(!selectedBranchId||!programId||!start||!end) return
   setBusy(true)
-  try{await api.post("/classes/sessions",{branchId:selectedBranchId,classProgramId:programId,startTime:new Date(start).toISOString(),endTime:new Date(end).toISOString()});toast.success("Class session scheduled");await load()}
+  try{await api.post("/classes/sessions",{branchId:selectedBranchId,classProgramId:programId,startTime:new Date(start).toISOString(),endTime:new Date(end).toISOString()});toast.success("Class session scheduled");await refreshClasses()}
   catch(e){toast.error(e instanceof Error?e.message:"Failed to schedule session")}
   finally{setBusy(false)}
  }
