@@ -35,7 +35,7 @@ export default function PayrollPage() {
     }
   }, []);
 
-  React.useEffect(() => { void load(); }, [load]);
+  React.useEffect(() => { const timer = window.setTimeout(() => { void load(); }, 0); return () => window.clearTimeout(timer); }, [load]);
 
   async function review(id: string, status: "APPROVED" | "REJECTED") {
     try {
