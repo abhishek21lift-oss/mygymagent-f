@@ -32,32 +32,36 @@ export default function ClassesPage() {
  const [memberId,setMemberId]=React.useState("")
  const [busy,setBusy]=React.useState(false)
 
- const load=React.useCallback(async()=>{
-  setLoading(true)
-  try {
-   const [p,s]=await Promise.all([
-    api.get<Program[]>("/classes/programs",{query:{branchId:branchId||undefined}}),
-    api.get<Session[]>("/classes/sessions",{query:{branchId:branchId||undefined}})
-   ])
-   setPrograms(p); setSessions(s); if(!programId && p[0]) setProgramId(p[0].id)
-  } catch(e){ toast.error(e instanceof Error?e.message:"Failed to load classes") }
-  finally{setLoading(false)}
- },[branchId,programId])
+ const selectedBranchId = branchId || branches.data?.items?.[0]?.id || ""
 
- React.useEffect(()=>{ if(!branchId && branches.data?.items?.[0]) setBranchId(branches.data.items[0].id) },[branchId,branches.data])
- React.useEffect(()=>{void load()},[load])
+ React.useEffect(()=>{
+  let cancelled=false
+  if(!selectedBranchId){ setLoading(false); return }
+  setLoading(true)
+  Promise.all([
+   api.get<Program[]>("/classes/programs",{query:{branchId:selectedBranchId}}),
+   api.get<Session[]>("/classes/sessions",{query:{branchId:selectedBranchId}})
+  ]).then(([p,s])=>{
+   if(cancelled) return
+   setPrograms(p); setSessions(s)
+   if(!programId && p[0]) setProgramId(p[0].id)
+  }).catch(e=>{
+   if(!cancelled) toast.error(e instanceof Error?e.message:"Failed to load classes")
+  }).finally(()=>{if(!cancelled) setLoading(false)})
+  return ()=>{cancelled=true}
+ },[selectedBranchId,programId])
 
  async function createProgram(){
-  if(!branchId||!name.trim()) return
+  if(!selectedBranchId||!name.trim()) return
   setBusy(true)
-  try{await api.post("/classes/programs",{branchId,name,capacity:Number(capacity),durationMinutes:Number(duration)});setName("");toast.success("Class program created");await load()}
+  try{await api.post("/classes/programs",{branchId:selectedBranchId,name,capacity:Number(capacity),durationMinutes:Number(duration)});setName("");toast.success("Class program created");await (async()=>{ const [p,s]=await Promise.all([api.get<Program[]>("/classes/programs",{query:{branchId:selectedBranchId}}),api.get<Session[]>("/classes/sessions",{query:{branchId:selectedBranchId}})]);setPrograms(p);setSessions(s) })()}
   catch(e){toast.error(e instanceof Error?e.message:"Failed to create class")}
   finally{setBusy(false)}
  }
  async function createSession(){
-  if(!branchId||!programId||!start||!end) return
+  if(!selectedBranchId||!programId||!start||!end) return
   setBusy(true)
-  try{await api.post("/classes/sessions",{branchId,classProgramId:programId,startTime:new Date(start).toISOString(),endTime:new Date(end).toISOString()});toast.success("Class session scheduled");await load()}
+  try{await api.post("/classes/sessions",{branchId:selectedBranchId,classProgramId:programId,startTime:new Date(start).toISOString(),endTime:new Date(end).toISOString()});toast.success("Class session scheduled");await load()}
   catch(e){toast.error(e instanceof Error?e.message:"Failed to schedule session")}
   finally{setBusy(false)}
  }
@@ -86,7 +90,7 @@ export default function ClassesPage() {
     <div className="sm:col-span-3"><Label>Name</Label><Input value={name} onChange={e=>setName(e.target.value)} placeholder="Yoga / HIIT / Strength" /></div>
     <div><Label>Capacity</Label><Input type="number" min="1" value={capacity} onChange={e=>setCapacity(e.target.value)} /></div>
     <div><Label>Duration (min)</Label><Input type="number" min="1" value={duration} onChange={e=>setDuration(e.target.value)} /></div>
-    <Button disabled={busy||!branchId||!name.trim()} onClick={()=>void createProgram()} className="mt-auto">{busy?<Loader2 className="mr-2 size-4 animate-spin"/>:<Plus className="mr-2 size-4"/>}Create</Button>
+    <Button disabled={busy||!selectedBranchId||!name.trim()} onClick={()=>void createProgram()} className="mt-auto">{busy?<Loader2 className="mr-2 size-4 animate-spin"/>:<Plus className="mr-2 size-4"/>}Create</Button>
    </CardContent></Card>}
 
    {hasPermission("classes.manage") && <Card><CardHeader><CardTitle>Schedule session</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2">
