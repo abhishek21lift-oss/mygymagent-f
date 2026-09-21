@@ -50,7 +50,7 @@ export default function BusinessOsPage(){
     finally{setLoading(false)}
   },[hasPermission])
 
-  React.useEffect(()=>{void refresh()},[refresh])
+  React.useEffect(()=>{const timer=window.setTimeout(()=>{void refresh()},0);return()=>window.clearTimeout(timer)},[refresh])
 
   const run=async(fn:()=>Promise<unknown>,message?:string)=>{
     try{const r=await fn();setOutput(r);if(message)toast.success(message);await refresh()}catch(e){toast.error(e instanceof Error?e.message:"Request failed")}
