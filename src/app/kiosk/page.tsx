@@ -14,7 +14,6 @@ export default function Kiosk(){
  const [memberId,setMemberId]=React.useState("")
  const [result,setResult]=React.useState<Result|null>(null)
  const [loading,setLoading]=React.useState(false)
- React.useEffect(()=>{const saved=localStorage.getItem("mygymagent:kiosk-device-key");if(saved)setDeviceKey(saved)},[])
  async function checkIn(){
    if(!deviceKey.trim()||!memberId.trim()) return
    setLoading(true);setResult(null)
