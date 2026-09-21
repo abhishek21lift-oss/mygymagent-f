@@ -3,6 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 import { NotificationCenter } from "./notification-center"
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), refresh: jest.fn() }),
+}))
+
 jest.mock("@/lib/notifications", () => ({
   getNotifications: jest.fn().mockResolvedValue({ items: [], unreadCount: 0 }),
   markNotificationRead: jest.fn(),
