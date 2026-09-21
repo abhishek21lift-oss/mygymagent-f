@@ -41,6 +41,7 @@ export const primaryNav: NavItem[] = [
   ] },
   { title: "Insights", href: "/owner-os", icon: BarChart3, permission: "reports.view" },
   { title: "Search", href: "/search", icon: Search, permission: "search.read" },
+  { title: "Business OS", href: "/business-os", icon: Sparkles, permission: "reports.view" },
   { title: "Intelligence", href: "/intelligence", icon: Brain, permission: "reports.view", accent: "ai" },
   { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai", children: [
     { title: "AI Agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
