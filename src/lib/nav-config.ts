@@ -22,6 +22,7 @@ export const primaryNav: NavItem[] = [
     { title: "PT OS", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read" },
     { title: "PT Sessions", href: "/pt-operations/sessions", icon: CalendarCheck, permission: "pt-sessions.read" },
     { title: "Calendar", href: "/calendar", icon: CalendarDays, permission: ["appointments.read", "appointments.read_assigned"] },
+    { title: "Group Training", href: "/classes", icon: Users, permission: "classes.read" },
     { title: "Today's Sessions", href: "/workout-sessions", icon: CalendarCheck, permission: "workouts.read" },
     { title: "Workouts", href: "/workouts", icon: Dumbbell, permission: "workouts.read" },
     { title: "Nutrition", href: "/nutrition", icon: Salad, permission: "nutrition.read" },
