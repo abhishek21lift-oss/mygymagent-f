@@ -77,7 +77,7 @@ export default function ClassesPage() {
  async function book(id:string){
   if(!memberId.trim()) {toast.error("Enter a member ID first");return}
   setBusy(true)
-  try{const r=await api.post<{status:string}>("/classes/sessions/"+id+"/book",{memberId});toast.success(r.status==="WAITLISTED"?"Added to waitlist":"Class booked");await load()}
+  try{const r=await api.post<{status:string}>("/classes/sessions/"+id+"/book",{memberId});toast.success(r.status==="WAITLISTED"?"Added to waitlist":"Class booked");await refreshClasses()}
   catch(e){toast.error(e instanceof Error?e.message:"Booking failed")}
   finally{setBusy(false)}
  }
