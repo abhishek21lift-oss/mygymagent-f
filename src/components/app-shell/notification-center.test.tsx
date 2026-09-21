@@ -18,6 +18,6 @@ describe("NotificationCenter", () => {
       </QueryClientProvider>,
     )
 
-    expect(await screen.findByRole("button", { name: "Notifications" })).toBeInTheDocument()
+    expect(await screen.findByRole("button", { name: "Notifications" })).toBeTruthy()
   })
 })
