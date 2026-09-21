@@ -24,7 +24,7 @@ export default function BusinessOsPage(){
   const [output,setOutput]=React.useState<unknown>(null)
   const run=async(fn:()=>Promise<unknown>,message?:string)=>{try{const r=await fn();setOutput(r);if(message)toast.success(message)}catch(e){toast.error(e instanceof Error?e.message:"Request failed")}}
   return <div className="space-y-6">
-    <PageHero id="business-os" icon={Sparkles} title="Business OS" subtitle="Loyalty, support, feedback, marketing, accounting, member portal, kiosk and AI command control." variant="light" accent="violet"/>
+    <PageHero id="business-os" icon={Sparkles} title="Business OS" description="Loyalty, support, feedback, marketing, accounting, member portal, kiosk and AI command control." variant="light" accent="violet"/>
     <div className="grid gap-5 xl:grid-cols-3">
       <Card><CardHeader><CardTitle className="flex items-center gap-2"><Gift className="size-5"/> Loyalty & Referral</CardTitle></CardHeader><CardContent className="space-y-3">
         <Label>Member ID</Label><Input value={memberId} onChange={e=>setMemberId(e.target.value)} placeholder="Member UUID"/>
