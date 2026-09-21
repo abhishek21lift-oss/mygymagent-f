@@ -7,6 +7,7 @@ import { ChevronsLeft, ChevronsRight, LogOut, Menu, Moon, Sun, User as UserIcon 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AICommandBar } from "@/components/app-shell/ai-command-bar";
+import { NotificationCenter } from "@/components/app-shell/notification-center";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth/auth-context";
 
