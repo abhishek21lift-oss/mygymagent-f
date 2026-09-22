@@ -15,7 +15,7 @@ export default function OnboardingPage() {
      variant="dark"
      accent="violet"
      icon={Sparkles}
-     title="MyGymAgent"
+      title="THE CULT CLIENT"
      align="center"
     />
     <div className="mx-auto w-full max-w-4xl overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">

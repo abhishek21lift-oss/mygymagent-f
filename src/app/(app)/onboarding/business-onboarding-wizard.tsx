@@ -157,7 +157,7 @@ function WelcomeStep({ onUpdate }: { onUpdate: (data: Partial<OnboardingData>) =
    <div className="mb-6 flex size-20 items-center justify-center rounded-2xl bg-primary shadow-md">
     <Sparkles className="size-10 text-white" aria-hidden="true" />
    </div>
-   <h2 className="font-serif text-3xl font-semibold tracking-tight text-stone-950">Welcome to MyGymAgent</h2>
+    <h2 className="font-serif text-3xl font-semibold tracking-tight text-stone-950">Welcome to THE CULT CLIENT</h2>
    <p className="mt-3 max-w-md text-sm font-medium leading-6 text-stone-600">
     Let&apos;s set up your gym business in just a few minutes. We&apos;ll help you configure your organization, branch, and team.
    </p>
