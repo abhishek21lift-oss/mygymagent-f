@@ -128,11 +128,6 @@ export function NotificationCenter() {
   })
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: notificationKey })
-  const mutation = <T extends (id: string) => Promise<unknown>>(fn: T, message: string) => useMutation({
-    mutationFn: fn,
-    onSuccess: invalidate,
-    onError: (error) => toast.error(error instanceof ApiError ? error.message : message),
-  })
   const readMutation = useMutation({ mutationFn: markNotificationRead, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to update notification") })
   const unreadMutation = useMutation({ mutationFn: markNotificationUnread, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to update notification") })
   const archiveMutation = useMutation({ mutationFn: archiveNotification, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to archive notification") })
