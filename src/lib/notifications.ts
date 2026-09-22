@@ -16,6 +16,16 @@ export interface NotificationItem {
 export interface NotificationListResponse {
   items: NotificationItem[]
   unreadCount: number
+  hasMore: boolean
+  nextCursor: string | null
+}
+
+export interface NotificationQuery {
+  limit?: number
+  unreadOnly?: boolean
+  type?: string
+  search?: string
+  cursor?: string
 }
 
 export interface NotificationPreference {
@@ -40,12 +50,24 @@ export interface NotificationPreferenceInput {
   push?: boolean
 }
 
-export function getNotifications(limit = 50) {
-  return api.get<NotificationListResponse>("/notifications", { query: { limit } })
+export function getNotifications(query: NotificationQuery = {}) {
+  return api.get<NotificationListResponse>("/notifications", {
+    query: {
+      limit: query.limit ?? 25,
+      unreadOnly: query.unreadOnly ? "true" : undefined,
+      type: query.type || undefined,
+      search: query.search || undefined,
+      cursor: query.cursor || undefined,
+    },
+  })
 }
 
 export function markNotificationRead(id: string) {
   return api.patch<NotificationItem>(`/notifications/${id}/read`)
+}
+
+export function markNotificationUnread(id: string) {
+  return api.patch<NotificationItem>(`/notifications/${id}/unread`)
 }
 
 export function markAllNotificationsRead() {
