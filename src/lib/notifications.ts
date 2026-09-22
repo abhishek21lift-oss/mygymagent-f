@@ -1,15 +1,27 @@
 import { api } from "@/lib/api/client"
 
+export type NotificationPriority = "LOW" | "NORMAL" | "HIGH" | "CRITICAL"
+
 export interface NotificationItem {
   id: string
   organizationId: string
   userId: string
+  branchId?: string | null
+  actorUserId?: string | null
   type: string
+  category: string
+  priority: NotificationPriority
   title: string
   body: string
   actionUrl?: string | null
+  entityType?: string | null
+  entityId?: string | null
+  groupKey?: string | null
   metadata?: Record<string, unknown> | null
   readAt?: string | null
+  archivedAt?: string | null
+  snoozedUntil?: string | null
+  expiresAt?: string | null
   createdAt: string
 }
 
@@ -24,8 +36,11 @@ export interface NotificationQuery {
   limit?: number
   unreadOnly?: boolean
   type?: string
+  category?: string
+  priority?: NotificationPriority
   search?: string
   cursor?: string
+  includeArchived?: boolean
 }
 
 export interface NotificationPreference {
@@ -56,8 +71,11 @@ export function getNotifications(query: NotificationQuery = {}) {
       limit: query.limit ?? 25,
       unreadOnly: query.unreadOnly ? "true" : undefined,
       type: query.type || undefined,
+      category: query.category || undefined,
+      priority: query.priority || undefined,
       search: query.search || undefined,
       cursor: query.cursor || undefined,
+      includeArchived: query.includeArchived ? "true" : undefined,
     },
   })
 }
@@ -65,25 +83,27 @@ export function getNotifications(query: NotificationQuery = {}) {
 export function markNotificationRead(id: string) {
   return api.patch<NotificationItem>(`/notifications/${id}/read`)
 }
-
 export function markNotificationUnread(id: string) {
   return api.patch<NotificationItem>(`/notifications/${id}/unread`)
 }
-
 export function markAllNotificationsRead() {
   return api.patch<{ updated: number }>("/notifications/read-all")
 }
-
+export function archiveNotification(id: string) {
+  return api.patch<NotificationItem>(`/notifications/${id}/archive`)
+}
+export function unarchiveNotification(id: string) {
+  return api.patch<NotificationItem>(`/notifications/${id}/unarchive`)
+}
+export function snoozeNotification(id: string, until: string) {
+  return api.patch<NotificationItem>(`/notifications/${id}/snooze`, { until })
+}
+export function deleteNotification(id: string) {
+  return api.delete<{ deleted: boolean }>(`/notifications/${id}`)
+}
 export function getNotificationPreferences() {
   return api.get<NotificationPreference[]>("/notifications/preferences")
 }
-
-export function updateNotificationPreference(
-  category: string,
-  input: NotificationPreferenceInput,
-) {
-  return api.patch<NotificationPreference>(
-    `/notifications/preferences/${encodeURIComponent(category)}`,
-    input,
-  )
+export function updateNotificationPreference(category: string, input: NotificationPreferenceInput) {
+  return api.patch<NotificationPreference>(`/notifications/preferences/${encodeURIComponent(category)}`, input)
 }
