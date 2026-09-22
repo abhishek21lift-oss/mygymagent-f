@@ -141,7 +141,7 @@ export default function DashboardPage() {
       <Button asChild size="sm">
        <Link href="/ai">
         <Sparkles className="size-4" aria-hidden="true" />
-        Ask MyGymAgent
+        Ask THE CULT CLIENT
        </Link>
       </Button>
       <Button asChild size="sm" variant="outline">

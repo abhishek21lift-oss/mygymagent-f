@@ -48,7 +48,7 @@ export default function OwnerOsPage() {
    title="Owner OS"
    actions={
     <>
-     <Button asChild className="min-h-10 rounded-xl bg-white font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] hover:bg-white/90"><Link href="/ai"><Brain className="size-4" aria-hidden="true" /> Ask MyGymAgent</Link></Button>
+      <Button asChild className="min-h-10 rounded-xl bg-white font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] hover:bg-white/90"><Link href="/ai"><Brain className="size-4" aria-hidden="true" /> Ask THE CULT CLIENT</Link></Button>
      <Button asChild variant="outline" className="min-h-10 rounded-xl border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white"><Link href="/intelligence">Intelligence <ArrowRight className="size-4" aria-hidden="true" /></Link></Button>
     </>
    }

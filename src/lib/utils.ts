@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 
 /**
- * MyGymAgent is an India-first product. Monetary values in the UI always
+ * THE CULT CLIENT is an India-first product. Monetary values in the UI always
  * use the Indian Rupee symbol, while the API currency field remains intact
  * for compatibility with existing records and contracts.
  */

@@ -7,6 +7,7 @@ const BACKEND_URL =
   "https://mygymagent-b.onrender.com"
 
 const ALLOWED_ACTIONS = new Set(["login", "register", "refresh", "logout"])
+const REFRESH_COOKIE_PATH = "/api/auth"
 
 function extractRefreshToken(setCookie: string | null): string | null {
   if (!setCookie) return null
@@ -15,7 +16,7 @@ function extractRefreshToken(setCookie: string | null): string | null {
 }
 
 function extractMaxAge(setCookie: string | null): number | undefined {
-  if (!setCookie) return undefined
+  if (!setCookie) return null as unknown as number | undefined
   const match = setCookie.match(/(?:^|;)\s*Max-Age=(\d+)/i)
   return match ? Number(match[1]) : undefined
 }
@@ -42,10 +43,36 @@ async function copyRefreshCookie(setCookie: string | null) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/",
+    // Scope to the BFF auth routes only -- never attach the long-lived
+    // refresh token to every frontend request.
+    path: REFRESH_COOKIE_PATH,
     ...(maxAge !== undefined ? { maxAge } : {}),
     ...(expires ? { expires } : {}),
   })
+}
+
+async function clearRefreshCookie() {
+  const store = await cookies()
+  store.set({
+    name: "refresh_token",
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: REFRESH_COOKIE_PATH,
+    maxAge: 0,
+    expires: new Date(0),
+  })
+}
+
+function assertSameOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin")
+  if (!origin) return true // non-browser client
+  try {
+    return origin === new URL(request.url).origin
+  } catch {
+    return false
+  }
 }
 
 export async function POST(
@@ -60,6 +87,14 @@ export async function POST(
     )
   }
 
+  // CSRF: reject cross-origin browser posts to this cookie-authenticated BFF.
+  if (!assertSameOrigin(request)) {
+    return NextResponse.json(
+      { error: { code: "FORBIDDEN", message: "Cross-origin request not allowed" } },
+      { status: 403 },
+    )
+  }
+
   const store = await cookies()
   const refreshToken = store.get("refresh_token")?.value
 
@@ -70,9 +105,20 @@ export async function POST(
   // Never forward the browser Origin/Referer to the backend. The BFF is the
   // trusted same-origin boundary and forwards the refresh cookie server-side.
   if (refreshToken) headers.set("cookie", "refresh_token=" + refreshToken)
+  // Preserve real client IP for backend throttler/audit (trust proxy).
+  const forwarded = request.headers.get("x-forwarded-for")
+  if (forwarded) headers.set("x-forwarded-for", forwarded)
+  const realIp = request.headers.get("x-real-ip")
+  if (realIp) headers.set("x-real-ip", realIp)
 
   const body =
     action === "refresh" || action === "logout" ? undefined : await request.text()
+
+  if (action === "logout") {
+    // Clear the cookie unconditionally first so a backend outage can never
+    // leave a live refresh session behind after the UI shows "logged out".
+    await clearRefreshCookie()
+  }
 
   let upstream: Response
   try {
@@ -83,6 +129,10 @@ export async function POST(
       cache: "no-store",
     })
   } catch {
+    if (action === "logout") {
+      // Local logout already succeeded; backend revocation is best-effort.
+      return new NextResponse(null, { status: 204 })
+    }
     return NextResponse.json(
       {
         error: {
@@ -94,10 +144,12 @@ export async function POST(
     )
   }
 
-  if (action === "logout") {
-    store.delete("refresh_token")
-  } else if (upstream.ok) {
+  if (action !== "logout" && upstream.ok) {
     await copyRefreshCookie(upstream.headers.get("set-cookie"))
+  }
+  if (action !== "logout" && upstream.status === 401) {
+    // Server says the session is dead — drop the local cookie too.
+    await clearRefreshCookie()
   }
 
   const responseBody = await upstream.text()

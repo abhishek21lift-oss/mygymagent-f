@@ -81,7 +81,7 @@ export function AICommandBar() {
     <span aria-hidden="true" className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
      <Sparkles className="size-4" />
     </span>
-    <span className="hidden flex-1 truncate sm:inline">Ask MyGymAgent anything...</span>
+    <span className="hidden flex-1 truncate sm:inline">Ask THE CULT CLIENT anything...</span>
     <kbd className="hidden shrink-0 rounded-md border bg-muted px-2 py-1 font-mono text-xs text-muted-foreground lg:inline">
      ⌘K
     </kbd>
@@ -92,7 +92,7 @@ export function AICommandBar() {
      <div
       role="dialog"
       aria-modal="true"
-      aria-label="MyGymAgent AI command center"
+      aria-label="THE CULT CLIENT AI command center"
       className="w-full max-w-2xl overflow-hidden rounded-xl border bg-card shadow-xl"
       onMouseDown={(event) => event.stopPropagation()}
      >
@@ -101,7 +101,7 @@ export function AICommandBar() {
         <Sparkles className="size-4" />
        </span>
        <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-       <label htmlFor="ai-command-input" className="sr-only">Ask MyGymAgent</label>
+       <label htmlFor="ai-command-input" className="sr-only">Ask THE CULT CLIENT</label>
        <Input
         ref={inputRef}
         id="ai-command-input"

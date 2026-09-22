@@ -485,7 +485,7 @@ export default function CommandCenterPage() {
         className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
        >
         <Sparkles className="size-4" aria-hidden="true" />
-        Ask MyGymAgent
+        Ask THE CULT CLIENT
         <ArrowRight className="size-4" aria-hidden="true" />
        </Link>
        <Link
@@ -1008,7 +1008,7 @@ export default function CommandCenterPage() {
       <Shortcut
        href="/ai"
        icon={Sparkles}
-       label="MyGymAgent AI"
+        label="THE CULT CLIENT AI"
        tile="from-fuchsia-600 to-violet-600 shadow-fuchsia-500/25"
        hoverRing="hover:border-fuchsia-200 hover:shadow-fuchsia-500/10"
       />

@@ -90,7 +90,9 @@ export async function refreshSession(): Promise<boolean> {
       if (getAccessToken() === tokenAtStart) setAccessToken(accessToken)
       return true
     } catch {
-      if (getAccessToken() === tokenAtStart) setAccessToken(null)
+      // Network/timeout failure: the refresh cookie may still be valid.
+      // Do NOT clear the access token here -- only authoritative non-OK
+      // HTTP responses should invalidate the session.
       return false
     } finally {
       refreshInFlight = null

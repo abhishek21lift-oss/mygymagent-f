@@ -121,7 +121,8 @@ export function NotificationCenter() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 5_000,
-    refetchInterval: 5_000,
+    // Poll only while the popover is open; badge refreshes on window focus.
+    refetchInterval: open ? 5_000 : false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     retry: 1,
