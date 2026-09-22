@@ -18,23 +18,16 @@ import {
 import { ApiError } from "@/lib/api/client"
 
 const categories = [
-  { key: "MEMBER_CREATED", label: "New members", description: "When a member is added to your organization." },
-  { key: "MEMBERSHIP_STARTED", label: "Memberships started", description: "When a member starts a membership." },
-  { key: "MEMBERSHIP_CANCELLED", label: "Memberships cancelled", description: "When a membership is cancelled." },
-  { key: "ATTENDANCE_RECORDED", label: "Attendance", description: "When attendance is recorded." },
-  { key: "PAYMENT_RECORDED", label: "Payments", description: "When a payment is recorded." },
-  { key: "PAYMENT_REFUNDED", label: "Refunds", description: "When a payment refund is recorded." },
-  { key: "LEAD_CREATED", label: "New leads", description: "When a CRM lead is created." },
-  { key: "LEAD_CONVERTED", label: "Lead conversions", description: "When a lead becomes a member." },
-  { key: "WORKOUT_ASSIGNED", label: "Workout assignments", description: "When a workout is assigned." },
-  { key: "WORKOUT_SESSION_STARTED", label: "Workout started", description: "When a member starts a workout session." },
-  { key: "WORKOUT_SESSION_COMPLETED", label: "Workout completed", description: "When a workout session is completed." },
-  { key: "DIET_ASSIGNED", label: "Diet assignments", description: "When a diet plan is assigned." },
-  { key: "INVENTORY_LOW", label: "Low inventory", description: "When a product reaches its reorder threshold." },
-  { key: "PT_SESSION_BOOKED", label: "PT bookings", description: "When a PT session is booked." },
-  { key: "PT_SESSION_COMPLETED", label: "PT completed", description: "When a PT session is completed." },
-  { key: "PT_SESSION_CANCELLED", label: "PT cancellations", description: "When a PT session is cancelled." },
-  { key: "WHATSAPP_RECEIVED", label: "WhatsApp", description: "When a WhatsApp message is received." },
+  { key: "MEMBERS", label: "Members", description: "New members and member activity." },
+  { key: "MEMBERSHIPS", label: "Memberships", description: "Membership starts, cancellations and lifecycle events." },
+  { key: "ATTENDANCE", label: "Attendance", description: "Member attendance activity." },
+  { key: "PAYMENTS", label: "Payments", description: "Payments and refunds." },
+  { key: "CRM", label: "CRM", description: "New leads and lead conversions." },
+  { key: "WORKOUT", label: "Workout", description: "Workout assignments and sessions." },
+  { key: "DIET", label: "Diet", description: "Diet plan assignments." },
+  { key: "INVENTORY", label: "Inventory", description: "Low stock and inventory alerts." },
+  { key: "PT", label: "Personal training", description: "PT bookings, completions and cancellations." },
+  { key: "WHATSAPP", label: "WhatsApp", description: "Incoming WhatsApp messages." },
 ] as const
 
 const channels = [
