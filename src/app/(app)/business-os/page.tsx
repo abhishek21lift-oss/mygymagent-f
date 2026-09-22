@@ -11,8 +11,8 @@ import { PageHero } from "@/components/shared/page-hero"
 import { toast } from "sonner"
 import { Brain, Gift, Headphones, Megaphone, ReceiptIndianRupee, RefreshCw, ShieldCheck, Sparkles, Star, Tablet, Users } from "lucide-react"
 
-type Campaign = { id:string; name:string; channel:string; status:string; audience_filter?:Record<string,unknown>; scheduled_at?:string|null }
-type Ticket = { id:string; subject:string; status:string; priority:string; created_at:string }
+type Campaign = { id:string; name:string; channel:string; status:string; audienceFilter?:Record<string,unknown>; scheduledAt?:string|null }
+type Ticket = { id:string; subject:string; status:string; priority:string; createdAt:string }
 type Survey = { id:string; name:string; kind:string; active:boolean }
 type Account = { id:string; code:string; name:string; type:string; active:boolean }
 
@@ -119,7 +119,7 @@ export default function BusinessOsPage(){
     </div>
 
     <div className="grid gap-5 lg:grid-cols-2">
-      <Card><CardHeader><CardTitle className="flex items-center gap-2"><Users className="size-5"/> Recent support tickets</CardTitle></CardHeader><CardContent><div className="space-y-2">{tickets.slice(0,8).map(t=><div key={t.id} className="flex items-center justify-between rounded-lg border p-3"><div><div className="font-medium">{t.subject}</div><div className="text-xs text-muted-foreground">{t.priority} · {new Date(t.created_at).toLocaleString()}</div></div><span className="rounded-full bg-muted px-2 py-1 text-xs">{t.status}</span></div>)}{tickets.length===0&&<div className="text-sm text-muted-foreground">No tickets found.</div>}</div></CardContent></Card>
+      <Card><CardHeader><CardTitle className="flex items-center gap-2"><Users className="size-5"/> Recent support tickets</CardTitle></CardHeader><CardContent><div className="space-y-2">{tickets.slice(0,8).map(t=><div key={t.id} className="flex items-center justify-between rounded-lg border p-3"><div><div className="font-medium">{t.subject}</div><div className="text-xs text-muted-foreground">{t.priority} · {new Date(t.createdAt).toLocaleString()}</div></div><span className="rounded-full bg-muted px-2 py-1 text-xs">{t.status}</span></div>)}{tickets.length===0&&<div className="text-sm text-muted-foreground">No tickets found.</div>}</div></CardContent></Card>
       <Card><CardHeader><CardTitle className="flex items-center gap-2"><ShieldCheck className="size-5"/> Member Portal & Kiosk</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-muted-foreground">Portal links are single-use and can be revoked. Kiosk devices are branch-bound.</p><div className="flex flex-wrap gap-3"><Button variant="outline" onClick={()=>window.open("/member-portal","_blank")}><Star className="mr-2 size-4"/>Member Portal</Button><Button variant="outline" onClick={()=>window.open("/kiosk","_blank")}><Tablet className="mr-2 size-4"/>Kiosk</Button></div></CardContent></Card>
     </div>
 
