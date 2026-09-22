@@ -64,15 +64,15 @@ function formatRelativeTime(value: string) {
   return new Date(value).toLocaleDateString()
 }
 
-function notificationIcon(type: string) {
-  if (type.includes("PAYMENT")) return CreditCard
-  if (type.includes("MEMBER")) return UserPlus
-  if (type.includes("LEAD")) return Users
-  if (type.includes("PT_SESSION") || type.includes("WORKOUT")) return Dumbbell
-  if (type.includes("INVENTORY")) return Package
-  if (type.includes("WHATSAPP")) return MessageCircle
-  if (type.includes("ATTENDANCE") || type.includes("MEMBERSHIP")) return CalendarCheck
-  return Bell
+function NotificationIcon({ type }: { type: string }) {
+  if (type.includes("PAYMENT")) return <CreditCard className="size-4" aria-hidden="true" />
+  if (type.includes("MEMBER")) return <UserPlus className="size-4" aria-hidden="true" />
+  if (type.includes("LEAD")) return <Users className="size-4" aria-hidden="true" />
+  if (type.includes("PT_SESSION") || type.includes("WORKOUT")) return <Dumbbell className="size-4" aria-hidden="true" />
+  if (type.includes("INVENTORY")) return <Package className="size-4" aria-hidden="true" />
+  if (type.includes("WHATSAPP")) return <MessageCircle className="size-4" aria-hidden="true" />
+  if (type.includes("ATTENDANCE") || type.includes("MEMBERSHIP")) return <CalendarCheck className="size-4" aria-hidden="true" />
+  return <Bell className="size-4" aria-hidden="true" />
 }
 
 function NotificationRow({
@@ -87,8 +87,6 @@ function NotificationRow({
   onOpen: (item: NotificationItem) => void
 }) {
   const unread = !item.readAt
-  const Icon = notificationIcon(item.type)
-
   return (
     <div
       className={cn(
@@ -102,7 +100,7 @@ function NotificationRow({
           "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border",
           unread ? "border-primary/20 bg-primary/10 text-primary" : "border-border/60 bg-muted text-muted-foreground",
         )}>
-          <Icon className="size-4" aria-hidden="true" />
+          <NotificationIcon type={item.type} />
         </span>
         <button
           type="button"
@@ -310,7 +308,7 @@ export function NotificationCenter() {
             <div className="p-6 text-center">
               <Bell className="mx-auto size-8 text-muted-foreground/50" aria-hidden="true" />
               <p className="mt-2 text-sm font-semibold">Notifications are unavailable</p>
-              <p className="mt-1 text-xs text-muted-foreground">We couldn't load your notification center.</p>
+              <p className="mt-1 text-xs text-muted-foreground">We could not load your notification center.</p>
               <Button variant="outline" size="sm" className="mt-4 rounded-xl" onClick={() => query.refetch()}>Try again</Button>
             </div>
           ) : items.length === 0 ? (
