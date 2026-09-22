@@ -135,9 +135,9 @@ Keep only verified completed work here. Add dates and evidence where possible.
 - [x] AI tool context uses authenticated organization identity rather than model-supplied organization IDs
 - [x] Assignment-scoped workout read permission added
 - [x] Trainer REST workout-assignment reads changed to assignment scope
-- [ ] Full verification of membership/attendance remediation
-- [ ] Full verification of workout/AI remediation
-- [ ] AI workout-history tool updated to consume `workouts.read_assigned` and assignment scope without regressions
+- [x] Full verification of membership/attendance remediation — verified 2026-09-22 by `mygymagent-b/test/assignment-scoping-rest.e2e-spec.ts`. The remediation was **half complete**: list/detail/check-in/check-out were correctly scoped, but five sibling routes were gated on a `*_assigned` permission while never applying the scope — `GET /memberships/analytics/summary`, `/memberships/renewal-reminders`, `/memberships/history/:id`, `/attendance/live`, and `/attendance/qr-token/:memberId` (which minted a working entry credential for any member). All five fixed; the suite fails exactly those five cases when the fixes are reverted, so it demonstrably detects the regression.
+- [x] Full verification of workout/AI remediation — `GET /workout-assignments` is assignment-scoped over REST (covered by the same suite, including that a client-supplied `memberId` narrows rather than widens scope).
+- [x] AI workout-history tool updated to consume `workouts.read_assigned` and assignment scope without regressions — confirmed in `ToolExecutorService.readWorkoutHistory`: it resolves access over `['workouts.read', 'workouts.read_assigned']` and derives `assignmentScope` from the matched key.
 - [ ] Architecture baseline fully documented
 - [ ] Multi-tenancy fully audited
 - [ ] Authentication fully audited
@@ -166,15 +166,16 @@ Keep only verified completed work here. Add dates and evidence where possible.
 
 | Blocker | Severity | Impact | Owner / Action |
 |---|---|---|---|
-| Remediation CI/API verification is pending | P1 | Cannot declare the trainer-scope fixes production-safe yet | Run typecheck, lint, tests and authorization/tenant-isolation verification |
-| AI workout-history adapter still uses the old `workouts.read` permission | P1 | Trainer AI workout-history access currently fails closed after the role was tightened; functionality must be restored safely with assignment scope | Update `ToolExecutorService.readWorkoutHistory` to accept `workouts.read_assigned` and pass assignment scope |
-| Full-system architecture/security audit is incomplete | P1 | Other issues may still exist outside the audited surface | Continue audit only after current remediation is verified |
+| ~~Remediation CI/API verification is pending~~ | Resolved 2026-09-22 | Verified: typecheck, lint, 82/82 unit and 31 e2e suites / 273 tests green against real Postgres/Redis, incl. the new assignment-scoping suite | — |
+| ~~AI workout-history adapter still uses the old `workouts.read` permission~~ | Resolved | `ToolExecutorService.readWorkoutHistory` now resolves `['workouts.read', 'workouts.read_assigned']` and derives the assignment scope from the matched key | — |
+| AI `read_attendance` tool is unreachable for trainers | P2 | It resolves access on `attendance.read` only, so a TRAINER holding just `attendance.read_assigned` is denied — fails closed (safe, not a leak), but the AI tool is inconsistent with the REST route, which *is* scoped and usable | Decide whether to add the `_assigned` key + scope like `readWorkoutHistory` does |
+| Full-system architecture/security audit is incomplete | P1 | Other issues may still exist outside the audited surface | Continue the audit; see `BACKLOG.md` in both repos for the itemized remainder |
 
 ## NEXT ACTION
 
 There must be exactly **ONE primary next action**.
 
-`Fix the AI workout-history tool so TRAINER requests use workouts.read_assigned + authenticated assignment scope, then run full verification before moving to another problem.`
+`Work the P0 items in BACKLOG.md (both repos) in order — next up is B-P0-4 (no MFA anywhere) and B-P0-7 (the remaining 18 @IsBoolean() DTO fields that silently coerce strings to true).`
 
 ## IMPORTANT DECISIONS
 
@@ -402,6 +403,10 @@ A new idea does not automatically replace the mission. A bug does not become the
 
 ## LAST UPDATED
 
-`2026-08-25`
+`2026-09-22`
 
-Current state: `PRODUCTION BASELINE → REMEDIATION OF CONFIRMED AUDIT FINDINGS`
+Current state: `AUDIT FINDINGS TRACKED IN BACKLOG.md (BOTH REPOS) → P0 REMEDIATION IN PROGRESS`
+
+F-05 (assignment scoping) is closed and verified. Remaining work is itemized in
+`BACKLOG.md` in each repo rather than here, so this file stays a statement of
+mission and standing rules instead of drifting into a stale task list again.
