@@ -37,3 +37,34 @@ export interface MeResponse {
   user: AuthUser
   permissions: string[]
 }
+
+/**
+ * `POST /auth/login` answers one of two shapes. A correct password alone
+ * earns no session when a second factor is enrolled: the backend returns
+ * only a short-lived, `mfa`-typed challenge token, and no refresh cookie
+ * is set until `/auth/mfa/verify` succeeds.
+ */
+export type LoginResult =
+  | ({ mfaRequired: false } & LoginResponse)
+  | { mfaRequired: true; mfaToken: string; expiresIn: number }
+
+export interface MfaStatus {
+  enabled: boolean
+  pendingEnrolment: boolean
+  /** Absent until MFA has actually been switched on. */
+  enabledAt?: string | null
+  recoveryCodesRemaining: number
+}
+
+/** Returned exactly once, by `POST /auth/mfa/setup`. The secret is stored
+ * only encrypted server-side and is never retrievable again. */
+export interface MfaSetupResponse {
+  secret: string
+  otpauthUri: string
+}
+
+/** Returned exactly once, by `POST /auth/mfa/enable`. */
+export interface MfaEnableResponse {
+  enabled: true
+  recoveryCodes: string[]
+}

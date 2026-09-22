@@ -6,7 +6,10 @@ const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "https://mygymagent-b.onrender.com"
 
-const ALLOWED_ACTIONS = new Set(["login", "register", "refresh", "logout"])
+// `mfa/verify` is two segments, which is why this route is a catch-all:
+// it completes a login and sets the same refresh cookie /auth/login does,
+// so it has to come back through this BFF rather than go direct.
+const ALLOWED_ACTIONS = new Set(["login", "register", "refresh", "logout", "mfa/verify"])
 const REFRESH_COOKIE_PATH = "/api/auth"
 
 function extractRefreshToken(setCookie: string | null): string | null {
@@ -77,9 +80,10 @@ function assertSameOrigin(request: Request): boolean {
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ action: string }> },
+  context: { params: Promise<{ action: string[] }> },
 ) {
-  const { action } = await context.params
+  const { action: segments } = await context.params
+  const action = (segments ?? []).join("/")
   if (!ALLOWED_ACTIONS.has(action)) {
     return NextResponse.json(
       { error: { code: "NOT_FOUND", message: "Unsupported auth action" } },
@@ -147,7 +151,10 @@ export async function POST(
   if (action !== "logout" && upstream.ok) {
     await copyRefreshCookie(upstream.headers.get("set-cookie"))
   }
-  if (action !== "logout" && upstream.status === 401) {
+  // A 401 from mfa/verify means the *challenge* was wrong or expired; it
+  // says nothing about a refresh cookie this browser may already hold for
+  // another account, so it must not clear one.
+  if (action !== "logout" && action !== "mfa/verify" && upstream.status === 401) {
     // Server says the session is dead — drop the local cookie too.
     await clearRefreshCookie()
   }

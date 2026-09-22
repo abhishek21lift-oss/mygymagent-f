@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { ArrowRight, Building2, MessageCircle, Settings2 } from "lucide-react";
+import { ArrowRight, Building2, MessageCircle, Settings2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
@@ -72,11 +72,17 @@ export default function SettingsPage() {
      variant="light"
      accent="indigo"
      actions={
-      canManageSettings ? (
-       <div className="flex flex-wrap gap-2"><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+      // The Security link is outside the `settings.manage` gate on purpose:
+      // two-step verification is the signed-in user's own account setting,
+      // so every role has to be able to reach it.
+      <div className="flex flex-wrap gap-2">
+       <Link href="/settings/security" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> <ShieldCheck className="size-4" aria-hidden="true" /> Security </Link>
+       {canManageSettings ? (
+       <><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
         <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp setup <ArrowRight className="size-4" aria-hidden="true" />
-       </Link></div>
-      ) : undefined
+       </Link></>
+       ) : null}
+      </div>
      }
     />
 

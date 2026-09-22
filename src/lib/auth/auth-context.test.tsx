@@ -2,6 +2,7 @@ import * as React from "react"
 import { act, render, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { api, ApiError } from "@/lib/api/client"
+import { getAccessToken } from "@/lib/api/token-store"
 import { AuthProvider, useAuth } from "@/lib/auth/auth-context"
 
 jest.mock("@/lib/api/client", () => {
@@ -94,5 +95,113 @@ describe("AuthProvider session handling", () => {
     await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
     expect(ctx.latest().user).toBeNull()
     expect(ctx.latest().isAuthenticated).toBe(false)
+  })
+})
+
+describe("AuthProvider MFA login", () => {
+  beforeEach(() => {
+    // Every case below starts from a settled, logged-out bootstrap.
+    mockGet.mockRejectedValueOnce(
+      new ApiError(401, { error: { code: "UNAUTHORIZED", message: "no session" } }),
+    )
+  })
+
+  it("establishes no session when the password is right but a second factor is owed", async () => {
+    const ctx = setup()
+    await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
+
+    mockPost.mockResolvedValueOnce({
+      mfaRequired: true,
+      mfaToken: "challenge-token",
+      expiresIn: 300,
+    })
+
+    let result: Awaited<ReturnType<Ctx["login"]>> | undefined
+    await act(async () => {
+      result = await ctx.latest().login({ email: "a@example.com", password: "password123" })
+    })
+
+    expect(result).toEqual({
+      mfaRequired: true,
+      mfaToken: "challenge-token",
+      expiresIn: 300,
+    })
+    // The important half: a correct password alone buys nothing.
+    expect(ctx.latest().user).toBeNull()
+    expect(ctx.latest().isAuthenticated).toBe(false)
+    expect(getAccessToken()).toBeNull()
+    // /auth/me must not have been called off the back of a half-login.
+    expect(mockGet).toHaveBeenCalledTimes(1)
+  })
+
+  it("adopts the session once the challenge is answered", async () => {
+    const ctx = setup()
+    await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
+
+    mockPost.mockResolvedValueOnce({
+      mfaRequired: true,
+      mfaToken: "challenge-token",
+      expiresIn: 300,
+    })
+    await act(async () => {
+      await ctx.latest().login({ email: "a@example.com", password: "password123" })
+    })
+
+    mockPost.mockResolvedValueOnce({ accessToken: "tok-a", user: userA })
+    mockGet.mockImplementationOnce(async () => ({ user: userA, permissions: ["members.read"] }))
+    await act(async () => {
+      await ctx.latest().completeMfaLogin("challenge-token", "123456")
+    })
+    await act(async () => {})
+
+    expect(mockPost).toHaveBeenLastCalledWith("/auth/mfa/verify", {
+      mfaToken: "challenge-token",
+      code: "123456",
+    })
+    await waitFor(() => expect(ctx.latest().user?.id).toBe("user-a"))
+    expect(getAccessToken()).toBe("tok-a")
+    expect(ctx.latest().permissions).toEqual(["members.read"])
+  })
+
+  it("leaves the user signed out when the code is rejected", async () => {
+    const ctx = setup()
+    await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
+
+    mockPost.mockResolvedValueOnce({
+      mfaRequired: true,
+      mfaToken: "challenge-token",
+      expiresIn: 300,
+    })
+    await act(async () => {
+      await ctx.latest().login({ email: "a@example.com", password: "password123" })
+    })
+
+    mockPost.mockRejectedValueOnce(
+      new ApiError(401, { error: { code: "UNAUTHORIZED", message: "Invalid code" } }),
+    )
+    await act(async () => {
+      await expect(
+        ctx.latest().completeMfaLogin("challenge-token", "000000"),
+      ).rejects.toBeInstanceOf(ApiError)
+    })
+
+    expect(ctx.latest().user).toBeNull()
+    expect(getAccessToken()).toBeNull()
+  })
+
+  it("still signs straight in for a user with no second factor", async () => {
+    const ctx = setup()
+    await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
+
+    mockPost.mockResolvedValueOnce({ mfaRequired: false, accessToken: "tok-a", user: userA })
+    mockGet.mockImplementationOnce(async () => ({ user: userA, permissions: [] }))
+    await act(async () => {
+      const result = await ctx.latest().login({ email: "a@example.com", password: "password123" })
+      expect(result.mfaRequired).toBe(false)
+    })
+    await act(async () => {})
+
+    await waitFor(() => expect(ctx.latest().user?.id).toBe("user-a"))
+    expect(getAccessToken()).toBe("tok-a")
   })
 })

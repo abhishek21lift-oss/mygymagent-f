@@ -11,7 +11,15 @@ if (!CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
 // prod, so any hardcoded host here would be dead code implying protection
 // it does not provide. Development falls back to the local API.
 const API_URL = CONFIGURED_API_URL ?? "http://localhost:4000"
-const AUTH_PROXY_PATHS = new Set(["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"])
+const AUTH_PROXY_PATHS = new Set([
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/logout",
+  // Second half of an MFA login: sets the refresh cookie just like
+  // /auth/login, so it has to go through the same BFF.
+  "/auth/mfa/verify",
+])
 const REQUEST_TIMEOUT_MS = 20_000
 
 export interface ApiErrorBody {

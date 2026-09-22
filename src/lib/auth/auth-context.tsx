@@ -5,7 +5,13 @@ import { useQueryClient } from "@tanstack/react-query"
 import { api, ApiError } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import { setCurrentBranchId } from "@/lib/branch-context"
-import type { AuthUser, LoginResponse, MeResponse, RegisterResponse } from "@/lib/types/auth"
+import type {
+  AuthUser,
+  LoginResponse,
+  LoginResult,
+  MeResponse,
+  RegisterResponse,
+} from "@/lib/types/auth"
 import type { LoginInput, RegisterInput } from "@/lib/validation/auth"
 
 interface AuthContextValue {
@@ -13,7 +19,12 @@ interface AuthContextValue {
   permissions: string[]
   isLoading: boolean
   isAuthenticated: boolean
-  login: (input: LoginInput) => Promise<void>
+  /** Resolves to `{ mfaRequired: true, ... }` when the password was
+   * correct but a second factor is enrolled. In that case NO session has
+   * been established -- the caller must collect a code and pass the
+   * returned `mfaToken` to `completeMfaLogin`. */
+  login: (input: LoginInput) => Promise<LoginResult>
+  completeMfaLogin: (mfaToken: string, code: string) => Promise<void>
   register: (input: RegisterInput) => Promise<void>
   logout: () => Promise<void>
   hasPermission: (key: string | string[]) => boolean
@@ -97,22 +108,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loadMe])
 
+  /** Shared tail of both login halves: adopt the returned session. */
+  const adoptSession = React.useCallback(
+    (res: LoginResponse) => {
+      setAccessToken(res.accessToken)
+      setUser(res.user)
+      setPermissions([])
+      setCurrentBranchId(res.user.primaryBranchId)
+      void loadMe()
+    },
+    [loadMe],
+  )
+
   const login = React.useCallback(
-    async (input: LoginInput) => {
+    async (input: LoginInput): Promise<LoginResult> => {
       // New session: drop any cached data from a previous account first so
       // tenant data can never bleed across logins on a shared device.
       sessionGen.current += 1
       await queryClient.cancelQueries().catch(() => undefined)
       queryClient.clear()
-      const res = await api.post<LoginResponse>("/auth/login", input)
-      setAccessToken(res.accessToken)
-      setUser(res.user)
-      setPermissions([])
-      setCurrentBranchId(res.user.primaryBranchId)
+      const res = await api.post<LoginResult>("/auth/login", input)
 
-      void loadMe()
+      // Second factor outstanding: there is no token to adopt yet, and the
+      // session state stays cleared so the UI cannot show a half-login.
+      if (res.mfaRequired) {
+        clearSession(sessionGen.current)
+        return res
+      }
+
+      adoptSession(res)
+      return res
     },
-    [loadMe, queryClient],
+    [adoptSession, queryClient],
+  )
+
+  const completeMfaLogin = React.useCallback(
+    async (mfaToken: string, code: string) => {
+      // The challenge token, not a session, authenticates this call. Bump
+      // the generation again so a /auth/me left in flight from the failed
+      // first half can never land on the session this establishes.
+      sessionGen.current += 1
+      await queryClient.cancelQueries().catch(() => undefined)
+      queryClient.clear()
+      const res = await api.post<LoginResponse>("/auth/mfa/verify", {
+        mfaToken,
+        code,
+      })
+      adoptSession(res)
+    },
+    [adoptSession, queryClient],
   )
 
   const register = React.useCallback(
@@ -158,12 +202,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading,
       isAuthenticated: user !== null,
       login,
+      completeMfaLogin,
       register,
       logout,
       hasPermission,
       refetchMe: loadMe,
     }),
-    [user, permissions, isLoading, login, register, logout, hasPermission, loadMe],
+    [
+      user,
+      permissions,
+      isLoading,
+      login,
+      completeMfaLogin,
+      register,
+      logout,
+      hasPermission,
+      loadMe,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
