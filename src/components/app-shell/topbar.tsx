@@ -38,6 +38,7 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
         </div>
         <div className="flex min-w-0 flex-1 justify-end sm:justify-start"><div className="w-full max-w-2xl"><AICommandBar /></div></div>
         <div className="flex shrink-0 items-center gap-1">
+          <NotificationCenter />
           <Button variant="ghost" size="icon" className="min-h-10 min-w-10 rounded-xl border border-transparent hover:border-border/60 hover:bg-card/70" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
             <Sun className="size-4 dark:hidden" aria-hidden="true" /><Moon className="hidden size-4 dark:block" aria-hidden="true" />
           </Button>
