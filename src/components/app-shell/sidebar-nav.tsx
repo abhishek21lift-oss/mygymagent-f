@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import { primaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
+import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_DATA_URI } from "@/lib/brand";
 
 function NavLink({ item, active, nested = false, collapsed = false, onNavigate, itemRef }: { item: NavItem; active: boolean; nested?: boolean; collapsed?: boolean; onNavigate?: () => void; itemRef?: React.RefObject<HTMLAnchorElement | null> }) {
   const Icon = item.icon;
@@ -103,25 +104,24 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
       <Link
         href="/command-center"
         onClick={onNavigate}
-        title={collapsed ? "MyGymAgent" : undefined}
+        title={collapsed ? PRODUCT_LOGO_ALT : undefined}
         className={cn(
-          "group relative mb-4 flex shrink-0 items-center overflow-hidden rounded-2xl border border-sidebar-border/60 bg-white/45 px-2.5 py-2.5 shadow-sm backdrop-blur-xl transition-all hover:border-sidebar-primary/20 hover:bg-white/70 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]",
+          "group relative mb-4 flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-sidebar-border/60 bg-white/45 px-2.5 py-2.5 shadow-sm backdrop-blur-xl transition-all hover:border-sidebar-primary/20 hover:bg-white/70 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]",
           collapsed ? "justify-center px-1.5" : "gap-2.5",
         )}
       >
         <span aria-hidden="true" className="absolute -right-5 -top-6 size-16 rounded-full bg-violet-400/15 blur-2xl" />
-        <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-xl border border-sidebar-primary/15 bg-gradient-to-br from-sidebar-primary/15 via-violet-500/10 to-cyan-400/10 shadow-sm">
-          <Image src="/logo-mark.webp" alt="" width={38} height={38} className="size-7 shrink-0 object-contain" priority />
+        <span aria-hidden="true" className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/15 bg-white/70 shadow-sm dark:bg-white/[0.06]">
+          <Image
+            src={PRODUCT_LOGO_DATA_URI}
+            alt={PRODUCT_LOGO_ALT}
+            width={64}
+            height={64}
+            unoptimized
+            className="size-12 shrink-0 object-contain"
+            priority
+          />
         </span>
-        {!collapsed && (
-          <div className="min-w-0">
-            <div className="truncate text-[15px] font-extrabold tracking-[-0.02em]">MyGymAgent</div>
-            <div className="mt-0.5 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-sidebar-foreground/50">
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              Gym OS
-            </div>
-          </div>
-        )}
       </Link>
 
       {!collapsed && <SectionLabel>Workspace</SectionLabel>}

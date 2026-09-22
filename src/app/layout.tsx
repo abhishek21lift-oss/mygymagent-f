@@ -6,6 +6,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
+import { PRODUCT_LOGO_DATA_URI, PRODUCT_NAME } from "@/lib/brand";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,8 +19,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MyGymAgent",
+  title: PRODUCT_NAME,
   description: "AI-driven gym management and personal training platform",
+  icons: {
+    icon: PRODUCT_LOGO_DATA_URI,
+    apple: PRODUCT_LOGO_DATA_URI,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
