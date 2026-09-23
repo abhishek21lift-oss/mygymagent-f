@@ -11,25 +11,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import {
+ getNotificationCategories,
  getNotificationPreferences,
  updateNotificationPreference,
  type NotificationPreference,
 } from "@/lib/notifications"
 import { ApiError } from "@/lib/api/client"
-
-const categories = [
- { key: "MEMBERS", label: "Members", description: "New members and member activity." },
- { key: "MEMBERSHIPS", label: "Memberships", description: "Membership starts, cancellations and lifecycle events." },
- { key: "ATTENDANCE", label: "Attendance", description: "Member attendance activity." },
- { key: "PAYMENTS", label: "Payments", description: "Payments and refunds." },
- { key: "CRM", label: "CRM", description: "New leads and lead conversions." },
- { key: "WORKOUT", label: "Workout", description: "Workout assignments and sessions." },
- { key: "DIET", label: "Diet", description: "Diet plan assignments." },
- { key: "INVENTORY", label: "Inventory", description: "Low stock and inventory alerts." },
- { key: "PT", label: "Personal training", description: "PT bookings, completions and cancellations." },
- { key: "WHATSAPP", label: "WhatsApp", description: "Incoming WhatsApp messages." },
-] as const
-
 const channels = [
  { key: "inApp", label: "In-app", icon: Bell },
  { key: "email", label: "Email", icon: Mail },
@@ -47,6 +34,14 @@ function preferenceValue(preference: NotificationPreference | undefined, channel
 
 export default function NotificationSettingsPage() {
  const queryClient = useQueryClient()
+ // The catalog is the backend's, not a copy of it kept in step by hand:
+ // a category added there shows up here without a frontend change, and a
+ // category removed there stops offering a switch that saves nothing.
+ const categories = useQuery({
+ queryKey: ["notification-categories"],
+ queryFn: getNotificationCategories,
+ staleTime: 60 * 60 * 1000,
+ })
  const preferences = useQuery({
  queryKey: ["notification-preferences"],
  queryFn: getNotificationPreferences,
@@ -124,19 +119,19 @@ export default function NotificationSettingsPage() {
  ))}
  </div>
 
- {preferences.isPending ? (
+ {categories.isPending || preferences.isPending ? (
  <div className="space-y-4 p-6" role="status" aria-label="Loading notification preferences">
  {[1, 2, 3, 4].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-muted" />)}
  </div>
- ) : preferences.isError ? (
+ ) : categories.isError || preferences.isError ? (
  <div className="p-8 text-center">
  <p className="text-sm font-semibold">Preferences could not be loaded.</p>
  <p className="mt-1 text-xs text-muted-foreground">Please retry without leaving this page.</p>
- <Button variant="outline" className="mt-4 rounded-xl" onClick={() => preferences.refetch()}>Try again</Button>
+ <Button variant="outline" className="mt-4 rounded-xl" onClick={() => { void categories.refetch(); void preferences.refetch() }}>Try again</Button>
  </div>
  ) : (
  <div>
- {categories.map((category) => {
+ {(categories.data ?? []).map((category) => {
  const preference = preferenceMap.get(category.key)
  return (
  <div key={category.key} className="grid grid-cols-[minmax(18rem,1fr)_repeat(5,6rem)] items-center gap-0 border-b border-stone-100 px-5 py-4 last:border-b-0">

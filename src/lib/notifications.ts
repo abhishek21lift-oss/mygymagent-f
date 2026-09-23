@@ -57,6 +57,16 @@ export interface NotificationPreference {
   createdAt: string
 }
 
+/** One row of the settings grid. Served by the API rather than written
+ * out here: the backend's `notification-categories.ts` is the catalog the
+ * fan-out and the preference validator both read, so a category listed
+ * here by hand could drift into one nothing notifies on. */
+export interface NotificationCategory {
+  key: string
+  label: string
+  description: string
+}
+
 export interface NotificationPreferenceInput {
   inApp?: boolean
   email?: boolean
@@ -100,6 +110,9 @@ export function snoozeNotification(id: string, until: string) {
 }
 export function deleteNotification(id: string) {
   return api.delete<{ deleted: boolean }>(`/notifications/${id}`)
+}
+export function getNotificationCategories() {
+  return api.get<NotificationCategory[]>("/notifications/categories")
 }
 export function getNotificationPreferences() {
   return api.get<NotificationPreference[]>("/notifications/preferences")
