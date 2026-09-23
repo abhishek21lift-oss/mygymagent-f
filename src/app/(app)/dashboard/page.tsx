@@ -29,6 +29,7 @@ import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
 import { useMemberStatusBreakdown, useRevenueTrend } from "@/lib/hooks/use-analytics";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { PageHero } from "@/components/shared/page-hero";
+import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 
@@ -52,9 +53,17 @@ export default function DashboardPage() {
 
  const gymName = organization.data?.name ?? "Dashboard";
 
- const currency = "₹";
- const revenue =
-  data?.revenue.revenue.find((r) => r.currency === currency)?.netRevenue ?? "0.00";
+ // The API keys revenue rows by currency *code* ("INR"); this used to
+ // look them up by the display *symbol* ("₹"), which never matches — so
+ // the headline figure on the owner's home screen read ₹0.00 no matter
+ // how much money had come in. Fall back to the first row rather than to
+ // zero, so a tenant on another currency still sees its own takings.
+ const currencyCode = organization.data?.currency ?? "INR";
+ const revenueRow =
+  data?.revenue.revenue.find((r) => r.currency === currencyCode) ??
+  data?.revenue.revenue[0];
+ const currency = currencySymbol(currencyCode);
+ const revenue = revenueRow?.netRevenue ?? "0.00";
 
  const visibleActions = QUICK_ACTIONS.filter(
   ([, , , , permission]) => hasPermission(permission as string),
@@ -110,6 +119,10 @@ export default function DashboardPage() {
  }, [revenueTrend.data]);
 
  const maxRevenue = Math.max(1, ...weeklyData.map((d) => d.value));
+ // The series arrives six-months-long whether or not any money came in,
+ // so "is there a chart to draw?" is a question about the values, not the
+ // length of the array.
+ const hasRevenue = weeklyData.some((d) => d.value > 0);
 
  const membershipData = useMemo(() => {
   return (statusBreakdown.data ?? []).map((row) => ({
@@ -123,7 +136,7 @@ export default function DashboardPage() {
   if (!data) return [];
   return [
    { label: "Check-ins", time: "Today", value: Math.min(1, data.today.checkIns / 50), detail: `${data.today.checkIns} check-ins` },
-   { label: "Revenue", time: "This month", value: Math.min(1, Number(data.revenue.revenue[0]?.netRevenue || 0) / 10000), detail: `${currency} ${revenue}` },
+   { label: "Revenue", time: "This month", value: Math.min(1, Number(revenueRow?.netRevenue ?? 0) / 10000), detail: displayCurrencyAmount(revenue, currencyCode) },
    { label: "Conversions", time: "This month", value: Math.min(1, data.salesFunnel.wonLeads / 20), detail: `${data.salesFunnel.wonLeads} won` },
    { label: "Follow-ups", time: "Tracked", value: Math.min(1, data.salesFunnel.followUps.total / 10), detail: `${data.salesFunnel.followUps.total} total` },
   ];
@@ -154,41 +167,6 @@ export default function DashboardPage() {
     }
    />
 
-   <section aria-label="Today at a glance" className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-    <div className="flex flex-wrap items-center justify-between gap-2">
-     <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      <Activity className="size-4 text-primary" aria-hidden="true" />
-      Today at a glance
-     </p>
-     <Button asChild variant="ghost" size="sm">
-      <Link href="/intelligence">
-       Intelligence
-       <ArrowRight className="size-4" aria-hidden="true" />
-      </Link>
-     </Button>
-    </div>
-    <div className="mt-3 grid gap-3 sm:grid-cols-3">
-     <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-4 py-3">
-      <span className="text-sm text-muted-foreground">Net revenue</span>
-      <span className="font-mono text-base font-semibold tabular-nums">
-       {briefing.isLoading ? "—" : `${currency} ${revenue}`}
-      </span>
-     </div>
-     <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-4 py-3">
-      <span className="text-sm text-muted-foreground">Members at risk</span>
-      <span className="font-mono text-base font-semibold tabular-nums">
-       {briefing.isLoading ? "—" : (data?.atRiskMembers.count ?? 0)}
-      </span>
-     </div>
-     <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-4 py-3">
-      <span className="text-sm text-muted-foreground">AI awaiting approval</span>
-      <span className="font-mono text-base font-semibold tabular-nums">
-       {briefing.isLoading ? "—" : (data?.pendingAiActions ?? 0)}
-      </span>
-     </div>
-    </div>
-   </section>
-
    <section aria-labelledby="dash-pulse">
     <div className="mb-3 flex items-end justify-between gap-4">
      <h2 id="dash-pulse" className="text-xl font-semibold tracking-tight">
@@ -202,7 +180,7 @@ export default function DashboardPage() {
     </div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
      <StatCard icon={CalendarCheck} title="Today's check-ins" value={data?.today.checkIns} isLoading={briefing.isLoading} tone="primary" />
-     <StatCard icon={Wallet} title="Net revenue" value={data ? `${currency} ${revenue}` : undefined} isLoading={briefing.isLoading} tone="success" />
+     <StatCard icon={Wallet} title="Net revenue" value={data ? displayCurrencyAmount(revenue, currencyCode) : undefined} isLoading={briefing.isLoading} tone="success" />
      <StatCard icon={Users} title="Members at risk" value={data?.atRiskMembers.count} isLoading={briefing.isLoading} tone="warning" />
      <StatCard icon={Sparkles} title="AI actions" value={data?.pendingAiActions} isLoading={briefing.isLoading} tone="primary" />
     </div>
@@ -213,9 +191,6 @@ export default function DashboardPage() {
      <CardHeader className="border-b pb-4">
       <div className="flex items-center justify-between gap-3">
        <div className="flex items-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-         <Activity className="size-5" aria-hidden="true" />
-        </span>
         <CardTitle className="text-base">Revenue trend</CardTitle>
        </div>
        <Button asChild variant="ghost" size="sm">
@@ -228,15 +203,24 @@ export default function DashboardPage() {
        <div className="space-y-2" role="status" aria-label="Loading revenue trend">
         <Skeleton className="h-32 w-full rounded-lg" />
        </div>
-      ) : weeklyData.length === 0 ? (
+      ) : !hasRevenue ? (
        <EmptyState title="No revenue yet" description="Revenue will appear here once payments are recorded." />
        ) : (
         <>
+        <p className="mb-2 text-xs text-muted-foreground">
+         Peak <span className="font-medium tabular-nums text-foreground">{currency}{maxRevenue.toLocaleString()}</span> · last 6 months
+        </p>
         <div role="img" aria-label={`Revenue trend: ${weeklyData.map((d) => `${d.day} ${d.value}`).join(", ")}`} className="flex h-48 items-end gap-2">
          {weeklyData.map((d) => (
           <div key={d.day} className="flex min-w-0 flex-1 flex-col items-center gap-1.5" title={`${d.day}: ${d.value}`}>
-           <div className="flex h-36 w-full items-end rounded-md bg-muted/60" aria-hidden="true">
-            <div className="w-full rounded-md bg-primary/80 transition-[height] motion-reduce:transition-none" aria-hidden="true" style={{ height: `${Math.max(4, Math.round((d.value / maxRevenue) * 100))}%` }} />
+           <div className="flex h-36 w-full items-end border-b border-border" aria-hidden="true">
+            {/* No minimum height: a month with no revenue draws nothing.
+                The old `Math.max(4, …)` floor painted a bar for zero. */}
+            <div
+             className="w-full rounded-t-[3px] bg-chart-1 transition-[height] motion-reduce:transition-none"
+             aria-hidden="true"
+             style={{ height: `${(d.value / maxRevenue) * 100}%` }}
+            />
            </div>
            <span className="truncate text-xs text-muted-foreground">{d.day}</span>
           </div>
@@ -268,9 +252,6 @@ export default function DashboardPage() {
      <CardHeader className="border-b pb-4">
       <div className="flex items-center justify-between gap-3">
        <div className="flex items-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-         <Users className="size-5" aria-hidden="true" />
-        </span>
         <CardTitle className="text-base">Member status</CardTitle>
        </div>
        <Button asChild variant="ghost" size="sm">
