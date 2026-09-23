@@ -45,6 +45,14 @@ import { ApiError } from "@/lib/api/client";
 import type { Member, MemberStatus, MemberType } from "@/lib/types/gym";
 
 const STATUS_OPTIONS: MemberStatus[] = ["ACTIVE", "INACTIVE", "FROZEN", "EXPIRED"];
+const SEGMENTS: ReadonlyArray<readonly [SegmentKey, string]> = [
+  ["all", "All"],
+  ["active", "Active"],
+  ["inactive", "Inactive"],
+  ["frozen", "Frozen"],
+  ["expired", "Expired"],
+  ["pt", "PT clients"],
+] as const;
 const TYPE_OPTIONS: MemberType[] = ["GYM", "PT", "GYM_PT"];
 const statusVariant: Record<MemberStatus, "success" | "warning" | "secondary" | "destructive"> = {
  ACTIVE: "success",
@@ -66,23 +74,34 @@ function Metric({ icon: Icon, label, value, tone }: { icon: typeof Users; label:
  );
 }
 
-function Segment({ title, description, icon: Icon, onClick }: { title: string; description: string; icon: typeof Users; tone: string; onClick: () => void }) {
+type SegmentKey = "all" | "active" | "inactive" | "frozen" | "expired" | "pt";
+
+/** A segment is a filter, so it looks like one. The six cards this
+ * replaces cost ~170px above the table to do what a chip row does in 36,
+ * and named themselves "navigation" while doing it. */
+function SegmentChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-   <Button
-    type="button"
-    variant="outline"
-    onClick={onClick}
-    className="h-auto min-h-11 w-full flex-col items-stretch justify-start rounded-lg p-4 text-left text-sm font-normal whitespace-normal"
-   >
-    <span className="flex items-center gap-2.5">
-     <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-      <Icon className="size-4" aria-hidden="true" />
-     </span>
-     <span className="text-sm font-semibold tracking-tight">{title}</span>
-     <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-    </span>
-    <span className="mt-2 block text-xs leading-5 text-muted-foreground">{description}</span>
-   </Button>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={
+        "inline-flex h-8 shrink-0 items-center rounded-full border px-3 text-[13px] font-medium transition-colors " +
+        (active
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-card text-muted-foreground hover:bg-surface-hover hover:text-foreground")
+      }
+    >
+      {label}
+    </button>
   );
 }
 
@@ -152,8 +171,10 @@ function BulkBar({ selected, clear }: { selected: string[]; clear: () => void })
 
 const columns: ColumnDef<Member>[] = [
  { id: "select", header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? "indeterminate" : false} onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)} aria-label="Select all" />, cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(v) => row.toggleSelected(!!v)} aria-label="Select member" />, size: 42 },
- { header: "Member", accessorKey: "firstName", cell: ({ row }) => <div className="flex items-center gap-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><UserRound className="size-4" aria-hidden="true" /></span><div className="min-w-0"><span className="block truncate font-medium">{row.original.firstName} {row.original.lastName}</span><span className="font-mono text-xs text-muted-foreground tabular-nums">{row.original.memberCode}</span></div></div> },
- { header: "Contact", accessorKey: "email", cell: ({ row }) => <div className="text-sm"><span className="block font-medium">{row.original.email ?? "—"}</span><span className="text-xs text-muted-foreground tabular-nums">{row.original.phone ?? ""}</span></div> },
+ // No avatar chip: the same generic glyph on every row carries no
+ // information and set the row height for the whole table.
+ { header: "Member", accessorKey: "firstName", cell: ({ row }) => <div className="min-w-0"><span className="block truncate font-medium leading-tight">{row.original.firstName} {row.original.lastName}</span><span className="font-mono text-[11px] leading-tight text-muted-foreground tabular-nums">{row.original.memberCode}</span></div> },
+ { header: "Contact", accessorKey: "email", cell: ({ row }) => <div className="text-sm"><span className="block truncate leading-tight">{row.original.email ?? "—"}</span><span className="text-[11px] leading-tight text-muted-foreground tabular-nums">{row.original.phone ?? ""}</span></div> },
  { header: "Branch", accessorKey: "primaryBranch", cell: ({ row }) => <span className="text-sm">{row.original.primaryBranch?.name ?? "—"}</span> },
  { header: "Status", accessorKey: "status", cell: ({ row }) => <Badge variant={statusVariant[row.original.status]}>{row.original.status}</Badge> },
  { header: "Type", accessorKey: "memberType", cell: ({ row }) => row.original.memberType ? <Badge variant="secondary">{row.original.memberType}</Badge> : <span className="text-sm text-muted-foreground">—</span> },
@@ -163,105 +184,99 @@ export default function MembersPage() {
  const router = useRouter();
  const [filters, setFilters] = React.useState<MemberFilters>({ page: 1, pageSize: 25, orderBy: "createdAt", order: "desc" });
  const [selection, setSelection] = React.useState<RowSelectionState>({});
+ const [segment, setSegment] = React.useState<SegmentKey>("all");
  const members = useMembers(filters);
  const metrics = useMemberMetrics();
  const items = members.data?.items ?? [];
  const selectedIds = Object.entries(selection).filter(([, value]) => value).map(([id]) => items[Number(id)]?.id).filter((id): id is string => Boolean(id));
  const setSearch = (search: string) => setFilters((f) => ({ ...f, search: search || undefined, page: 1 }));
- const setSegment = (segment: "all" | "active" | "inactive" | "frozen" | "expired" | "pt") => setFilters((f) => ({ ...f, page: 1, status: segment === "all" || segment === "pt" ? undefined : [segment.toUpperCase() as MemberStatus], memberType: segment === "pt" ? ["PT", "GYM_PT"] : undefined }));
+ // The chip row needs to show which segment is on, so the choice is held
+ // here rather than inferred back out of the filter object.
+ const applySegment = (next: SegmentKey) => {
+  setSegment(next);
+  setFilters((f) => ({
+   ...f,
+   page: 1,
+   status: next === "all" || next === "pt" ? undefined : [next.toUpperCase() as MemberStatus],
+   memberType: next === "pt" ? ["PT", "GYM_PT"] : undefined,
+  }));
+ };
 
  return (
-  <div className="mx-auto flex w-full max-w-[100rem] flex-col gap-6 pb-8">
-    <PageHero
-     id="members-title"
-     icon={Users}
-     title="Members"
-     variant="light"
-     accent="indigo"
-     actions={
-      <>
-       <Button variant="outline" className="min-h-10" onClick={() => document.getElementById("member-table")?.scrollIntoView()}>
-        <Search className="mr-2 size-4" aria-hidden="true" /> Explore
-       </Button>
-       <Button className="min-h-10" onClick={() => router.push("/members/new")}>
-        <Plus className="mr-2 size-4" aria-hidden="true" /> Add member
-       </Button>
-      </>
-     }
+  <div className="flex w-full flex-col gap-4 pb-8">
+   <PageHero
+    id="members-title"
+    icon={Users}
+    title="Members"
+    description={metrics.data ? `${metrics.data.total} on the roll \u00b7 ${metrics.data.active} active` : undefined}
+    actions={
+     <Button className="min-h-9" onClick={() => router.push("/members/new")}>
+      <Plus className="mr-2 size-4" aria-hidden="true" /> Add member
+     </Button>
+    }
+   />
+
+   {/* Four numbers do not need a section heading telling you they are
+       numbers; the old "Overview" title cost a line and said nothing. */}
+   <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+    <Metric icon={Users} label="Total members" value={metrics.isLoading ? "\u2014" : metrics.data?.total ?? 0} tone="primary" />
+    <Metric icon={CheckCircle2} label="Active" value={metrics.isLoading ? "\u2014" : metrics.data?.active ?? 0} tone="success" />
+    <Metric icon={AlertTriangle} label="Needs attention" value={metrics.isLoading ? "\u2014" : (metrics.data?.inactive ?? 0) + (metrics.data?.frozen ?? 0) + (metrics.data?.expired ?? 0)} tone="warning" />
+    <Metric icon={Sparkles} label="PT members" value={metrics.isLoading ? "\u2014" : metrics.data?.pt ?? 0} tone="primary" />
+   </div>
+
+   <section id="member-table" aria-labelledby="members-directory" className="flex scroll-mt-6 flex-col gap-3">
+    <h2 id="members-directory" className="sr-only">Member directory</h2>
+
+    {/* Search, segments and filters on one row, directly above the rows
+        they act on, so a control and its effect stay visible together. */}
+    <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
+     <div className="relative min-w-0 lg:w-72">
+      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+      <label htmlFor="member-search" className="sr-only">Search members</label>
+      <Input
+       id="member-search"
+       value={filters.search ?? ""}
+       onChange={(e) => setSearch(e.target.value)}
+       placeholder="Name, code, email or phone…"
+       className="h-9 pl-9 pr-9"
+      />
+      {filters.search ? (
+       <button type="button" onClick={() => setSearch("")} aria-label="Clear search" className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground">
+        <X className="size-3.5" aria-hidden="true" />
+       </button>
+      ) : null}
+     </div>
+
+     <div className="-mx-1 flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto px-1 pb-0.5">
+      {SEGMENTS.map(([key, label]) => (
+       <SegmentChip key={key} label={label} active={segment === key} onClick={() => applySegment(key)} />
+      ))}
+     </div>
+
+     <div className="flex shrink-0 items-center gap-2">
+      <Filters filters={filters} onChange={setFilters} />
+     </div>
+    </div>
+
+    {selectedIds.length ? <BulkBar selected={selectedIds} clear={() => setSelection({})} /> : null}
+
+    <DataTable
+     columns={columns}
+     data={members.data}
+     isLoading={members.isLoading}
+     isError={members.isError}
+     onRetry={() => void members.refetch()}
+     onRowClick={(member) => router.push(`/members/${member.id}`)}
+     page={filters.page}
+     onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
+     rowSelection={selection}
+     onRowSelectionChange={setSelection}
+     emptyTitle="No members found"
+     emptyDescription="Try adjusting your search or filters."
+     emptyAction={<Button className="min-h-9" onClick={() => router.push("/members/new")}><Plus className="mr-2 size-4" aria-hidden="true" /> Add member</Button>}
     />
-
-    <section aria-labelledby="members-pulse">
-     <h2 id="members-pulse" className="mb-3 text-xl font-semibold tracking-tight">Overview</h2>
-     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <Metric icon={Users} label="Total members" value={metrics.isLoading ? "—" : metrics.data?.total ?? 0} tone="primary" />
-      <Metric icon={CheckCircle2} label="Active" value={metrics.isLoading ? "—" : metrics.data?.active ?? 0} tone="success" />
-      <Metric icon={AlertTriangle} label="Attention signals" value={metrics.isLoading ? "—" : (metrics.data?.inactive ?? 0) + (metrics.data?.frozen ?? 0) + (metrics.data?.expired ?? 0)} tone="warning" />
-      <Metric icon={Sparkles} label="PT members" value={metrics.isLoading ? "—" : metrics.data?.pt ?? 0} tone="primary" />
-     </div>
-    </section>
-
-    <section aria-labelledby="members-segments">
-     <h2 id="members-segments" className="mb-3 text-xl font-semibold tracking-tight">Segments</h2>
-     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      <Segment title="All members" description="Full operational directory." icon={Users} tone="all" onClick={() => setSegment("all")} />
-      <Segment title="Active" description="Currently active members." icon={CheckCircle2} tone="active" onClick={() => setSegment("active")} />
-      <Segment title="Inactive" description="Members needing re-engagement." icon={AlertTriangle} tone="inactive" onClick={() => setSegment("inactive")} />
-      <Segment title="Frozen" description="Paused memberships." icon={CalendarClock} tone="frozen" onClick={() => setSegment("frozen")} />
-      <Segment title="Expired" description="Membership lifecycle attention." icon={Wallet} tone="expired" onClick={() => setSegment("expired")} />
-      <Segment title="PT clients" description="Personal-training cohort." icon={Sparkles} tone="pt" onClick={() => setSegment("pt")} />
-     </div>
-    </section>
-
-    <section id="member-table" aria-labelledby="members-directory" className="scroll-mt-6">
-     <Card className="overflow-hidden">
-      <CardHeader className="border-b px-5 py-4 sm:px-6">
-       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-         <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Users className="size-5" aria-hidden="true" />
-         </span>
-         <CardTitle id="members-directory" className="text-lg">Member directory</CardTitle>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-         <Filters filters={filters} onChange={setFilters} />
-         <Button variant="outline" size="sm" className="min-h-10" onClick={() => router.push("/members/new")}><Plus className="mr-1.5 size-3.5" aria-hidden="true" /> Add</Button>
-        </div>
-       </div>
-      </CardHeader>
-      <CardContent className="p-4 sm:p-5">
-       {selectedIds.length ? <div className="mb-4"><BulkBar selected={selectedIds} clear={() => setSelection({})} /></div> : null}
-       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-         <label htmlFor="member-search" className="sr-only">Search members</label>
-         <Input
-          id="member-search"
-          value={filters.search ?? ""}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, member code, email or phone..."
-          className="h-11 pl-10"
-         />
-        </div>
-        {filters.search ? <Button variant="ghost" size="icon" className="min-h-10 min-w-10" onClick={() => setSearch("")} aria-label="Clear search"><X className="size-4" aria-hidden="true" /></Button> : null}
-       </div>
-       <DataTable
-        columns={columns}
-        data={members.data}
-        isLoading={members.isLoading}
-        isError={members.isError}
-        onRetry={() => void members.refetch()}
-        onRowClick={(member) => router.push(`/members/${member.id}`)}
-        page={filters.page}
-        onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
-        rowSelection={selection}
-        onRowSelectionChange={setSelection}
-        emptyTitle="No members found"
-        emptyDescription="Try adjusting your search or filters."
-        emptyAction={<Button className="min-h-10" onClick={() => router.push("/members/new")}><Plus className="mr-2 size-4" aria-hidden="true" /> Add member</Button>}
-       />
-      </CardContent>
-     </Card>
-    </section>
+   </section>
   </div>
  );
 }

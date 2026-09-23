@@ -126,13 +126,16 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
 
       {!collapsed && <SectionLabel>Workspace</SectionLabel>}
       <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5 pb-2">
-        {visiblePrimary.map((item) => {
+        {visiblePrimary.map((item, index) => {
           const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
           const active = isNavItemActive(pathname, item.href) || children.some((child) => isNavItemActive(pathname, child.href));
           const isAi = item.accent === "ai";
+          // The divider heads the AI group, so it belongs to the first AI
+          // item only -- rendering it per item printed "AI Layer" twice.
+          const startsAiGroup = isAi && visiblePrimary[index - 1]?.accent !== "ai";
           return (
-            <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined} className={cn("shrink-0", isAi && !collapsed && "mt-1")}>
-              {!collapsed && isAi && <div className="mb-1 flex items-center gap-1.5 px-2.5 text-[9px] font-bold uppercase tracking-[0.16em] text-violet-600/70 dark:text-violet-300/70"><span className="size-1.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" />AI Layer</div>}
+            <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined} className={cn("shrink-0", startsAiGroup && !collapsed && "mt-1")}>
+              {!collapsed && startsAiGroup && <div className="mb-1 flex items-center gap-1.5 px-2.5 text-[9px] font-bold uppercase tracking-[0.16em] text-violet-600/70 dark:text-violet-300/70"><span className="size-1.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" />AI Layer</div>}
               <NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} itemRef={mobile && !collapsed && active ? activeRef : undefined} />
               {!collapsed && active && children.length > 0 && (
                 <ul aria-label={`${item.title} sub-pages`} className={cn("mt-1 mb-2 ml-4 space-y-0.5 rounded-xl border p-1", isAi ? "border-violet-200/50 bg-gradient-to-br from-violet-500/[0.05] via-fuchsia-500/[0.03] to-cyan-400/[0.05]" : "border-sidebar-border/50 bg-sidebar-accent/30")}>

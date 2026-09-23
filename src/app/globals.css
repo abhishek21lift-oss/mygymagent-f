@@ -171,12 +171,20 @@
   --ring: oklch(0.520 0.190 264 / 0.45);
 
   /* Charts: colourblind-safe, distinguishable by order as well as hue. */
-  --chart-1: oklch(0.520 0.190 264);
-  --chart-2: oklch(0.556 0.136 155);
-  --chart-3: oklch(0.648 0.141 75);
-  --chart-4: oklch(0.556 0.130 225);
-  --chart-5: oklch(0.520 0.180 292);
-  --chart-6: oklch(0.556 0.196 20);
+  /* Categorical series, assigned in this fixed order and never cycled.
+     Deliberately NOT the status hues above: "warning" must never also mean
+     "series 3". Validated with the dataviz skill's six checks (lightness
+     band, chroma floor, CVD separation, normal-vision floor, contrast) —
+     the first attempt reused the semantic ramp and failed protanopia
+     separation at dE 5.8 between the green and the amber, which is
+     invisible to a colourblind reader. Lightness carries part of the
+     separation so the order survives CVD. */
+  --chart-1: oklch(0.500 0.190 264);
+  --chart-2: oklch(0.660 0.150 70);
+  --chart-3: oklch(0.560 0.150 215);
+  --chart-4: oklch(0.600 0.190 15);
+  --chart-5: oklch(0.460 0.180 300);
+  --chart-6: oklch(0.620 0.150 145);
   --chart-grid: oklch(0.912 0.006 265);
 
   /* Sidebar stays dark in both themes: it is the one fixed landmark,
@@ -345,12 +353,15 @@
   --input: oklch(0.320 0.022 265);
   --ring: oklch(0.706 0.152 264 / 0.55);
 
-  --chart-1: oklch(0.706 0.152 264);
-  --chart-2: oklch(0.706 0.140 155);
-  --chart-3: oklch(0.775 0.140 75);
-  --chart-4: oklch(0.706 0.126 225);
-  --chart-5: oklch(0.716 0.150 292);
-  --chart-6: oklch(0.672 0.180 20);
+  /* Selected for the dark surface, not flipped from light: the validator's
+     dark lightness band is L 0.48–0.67, far narrower than light's, so an
+     automatic inversion lands outside it. Re-validated: all six checks pass. */
+  --chart-1: oklch(0.610 0.170 264);
+  --chart-2: oklch(0.660 0.150 70);
+  --chart-3: oklch(0.600 0.130 215);
+  --chart-4: oklch(0.630 0.170 15);
+  --chart-5: oklch(0.550 0.170 300);
+  --chart-6: oklch(0.650 0.150 145);
   --chart-grid: oklch(0.296 0.020 265);
 
   --sidebar: oklch(0.146 0.014 265);

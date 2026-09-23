@@ -1,31 +1,34 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-type HeroAccent = "violet" | "emerald" | "cyan" | "amber" | "rose" | "indigo" | "orange" | "blue";
+/** Retained only so the 37 existing call sites keep type-checking; the
+ * tinted chip these used to drive is gone. Colour now means state, not
+ * decoration, so a page's own title has no business carrying an accent. */
+type HeroAccent =
+  | "violet" | "emerald" | "cyan" | "amber"
+  | "rose" | "indigo" | "orange" | "blue";
 
 /**
- * Premium page header — clean card + tinted icon tile.
- * `accent` is retained for API compatibility and maps to subtle tints.
+ * The page masthead.
+ *
+ * Deliberately not a card. A card says "separate object", and the page's
+ * own title is not an object sitting on the page — it *is* the page. The
+ * previous version was a bordered, shadowed card carrying a tinted icon
+ * tile, which cost ~90px of vertical space on every one of 37 routes and
+ * put a decorative chip at the top of each. On a 1512x950 screen that was
+ * the difference between seeing three member rows and seeing ten.
+ *
+ * What remains: the title, an optional line of context, and the actions —
+ * on one row, over a hairline rule.
  */
-const ACCENTS: Record<HeroAccent, string> = {
-  violet: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
-  emerald: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  cyan: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
-  amber: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  rose: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
-  indigo: "bg-primary/10 text-primary",
-  orange: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
-  blue: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
-};
-
 export function PageHero({
   id,
+  eyebrow,
   icon: Icon,
   title,
+  description,
   actions,
   children,
-  accent = "indigo",
 }: {
   id?: string;
   eyebrow?: string;
@@ -38,39 +41,54 @@ export function PageHero({
   accent?: HeroAccent;
   align?: "left" | "center";
 }) {
-  const headingId = id ?? `page-title-${typeof title === "string" ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "header"}`;
+  const headingId =
+    id ??
+    `page-title-${
+      typeof title === "string"
+        ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        : "header"
+    }`;
+
   return (
-    <section
+    <header
       aria-labelledby={headingId}
-      className="relative rounded-xl border bg-card px-4 py-4 shadow-sm sm:px-5"
+      className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          {Icon && (
-            <span
-              className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-lg",
-                ACCENTS[accent],
-              )}
-            >
-              <Icon className="size-5" aria-hidden="true" strokeWidth={2.25} />
-            </span>
-          )}
+      <div className="flex min-w-0 items-center gap-2.5">
+        {/* The sidebar already says where you are; on phone width it is
+            hidden, so a small plain glyph still earns its place. */}
+        {Icon ? (
+          <Icon
+            className="size-5 shrink-0 text-muted-foreground sm:hidden"
+            aria-hidden="true"
+          />
+        ) : null}
+        <div className="min-w-0">
+          {eyebrow ? (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              {eyebrow}
+            </p>
+          ) : null}
           <h1
             id={headingId}
-            className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight sm:text-xl"
+            className="truncate text-xl font-semibold tracking-tight text-foreground sm:text-[1.375rem]"
             title={typeof title === "string" ? title : undefined}
           >
             {title}
           </h1>
+          {description ? (
+            <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
         </div>
-        {actions && (
-          <div className="flex flex-wrap items-center gap-2 [&>*]:min-h-10">
-            {actions}
-          </div>
-        )}
       </div>
-      {children && <div className="mt-3 rounded-lg border bg-muted/50 p-3">{children}</div>}
-    </section>
+
+      {actions ? (
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
+      ) : null}
+
+      {children ? <div className="w-full sm:w-auto">{children}</div> : null}
+    </header>
   );
 }

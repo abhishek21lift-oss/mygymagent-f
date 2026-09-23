@@ -52,7 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onOpenMobileNav={() => setMobileNavOpen(true)} sidebarCollapsed={sidebarCollapsed} onToggleSidebar={() => setSidebarCollapsed((value) => !value)} />
         <main className="page-ambient relative min-h-0 flex-1 overflow-y-auto">
-          <div className="relative mx-auto w-full max-w-[100rem] px-3 pt-4 pb-24 sm:px-6 sm:pt-6 md:pb-6 lg:px-8 lg:pt-6"><MfaGraceBanner />{children}</div>
+          <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pt-4 pb-24 sm:px-5 md:pb-6 lg:px-6"><MfaGraceBanner />{children}</div>
         </main>
         <BottomTabBar onOpenMore={() => setMobileNavOpen(true)} />
       </div>
