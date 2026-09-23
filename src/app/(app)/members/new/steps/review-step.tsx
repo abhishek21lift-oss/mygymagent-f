@@ -29,14 +29,11 @@ function SectionCard({ icon: Icon, title, tint, onEdit, children }: {
  children: React.ReactNode
 }) {
  return (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm ">
- <CardHeader className={`border-b border-stone-100/80 px-5 py-4 ${tint}`}>
+ <Card className="overflow-hidden border-border bg-card shadow-sm">
+ <CardHeader className={`border-b border-border px-5 py-4 ${tint}`}>
  <div className="flex items-center justify-between gap-3">
  <div className="flex items-center gap-2.5">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
- <Icon className="size-4" aria-hidden="true" />
- </span>
- <CardTitle className="font-semibold text-base tracking-tight text-stone-950">{title}</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">{title}</CardTitle>
  </div>
  <Button variant="ghost" size="sm" onClick={onEdit} className="min-h-11 rounded-xl font-bold text-stone-600 hover:text-stone-950">
  <Edit2 className="mr-1 size-3" aria-hidden="true" /> Edit
@@ -68,7 +65,7 @@ export function ReviewStep({ data, onEdit, onSubmit, isSubmitting }: ReviewStepP
  <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg shadow-violet-500/25">
  <Sparkles className="size-5" aria-hidden="true" />
  </span>
- <h2 className="mt-3 font-semibold text-2xl font-semibold tracking-tight text-stone-950">Review & Create Member</h2>
+ <h2 className="mt-3 text-base font-semibold tracking-tight text-foreground">Review & Create Member</h2>
  <p className="mt-1 text-xs font-medium text-stone-600">Please review all details before creating</p>
  </div>
 

@@ -84,7 +84,8 @@ export default function ClassesPage() {
  if(!hasPermission("classes.read")) return <div className="p-8"><Card><CardContent className="p-8">You do not have permission to view Group Training.</CardContent></Card></div>
 
  return <div className="flex flex-col gap-4 pb-4">
- <PageHero id="classes-title" icon={CalendarDays} title="Group Training" variant="light" accent="violet" />
+ <PageHero id="classes-title" icon={CalendarDays} title="Classes"
+ description="Programmes, schedule and bookings" variant="light" accent="violet" />
  <div className="flex flex-wrap items-center gap-3">
  <Label htmlFor="class-branch">Branch</Label>
  <select id="class-branch" value={branchId} onChange={e=>setBranchId(e.target.value)} className="h-10 rounded-xl border bg-background px-3 text-sm">

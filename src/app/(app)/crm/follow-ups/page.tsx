@@ -77,14 +77,11 @@ export default function SalesFollowUpsPage() {
  </div>
  </section>
 
- <section aria-labelledby="followups-list" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex flex-col gap-4 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+ <section aria-labelledby="followups-list" className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex flex-col gap-4 border-b border-border px-4 py-2.5 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
- <ListChecks className="size-5" aria-hidden="true" />
- </span>
  <div>
- <h2 id="followups-list" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">
+ <h2 id="followups-list" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Sales actions
  </h2>
  </div>
@@ -120,7 +117,7 @@ export default function SalesFollowUpsPage() {
  {!query.isLoading && !query.isError && rows.map((row) => (
  <div
  key={row.id}
- className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-white/90 bg-card p-4 shadow-sm transition hover:-translate-y-px hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
+ className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-px hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
  >
  <span
  className={`absolute inset-y-3 left-0 w-1 rounded-full ${row.completedAt ? "bg-emerald-500" : row.isOverdue ? "bg-rose-500" : "bg-blue-600"}`}

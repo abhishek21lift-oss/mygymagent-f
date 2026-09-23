@@ -212,7 +212,7 @@ export default function BranchesPage() {
  <section aria-labelledby="branches-grid-title" className="">
  <div className="mb-4 flex items-end justify-between gap-4">
  <div>
- <h2 id="branches-grid-title" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">All locations</h2>
+ <h2 id="branches-grid-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">All locations</h2>
  </div>
  {!branchesQuery.isLoading && !branchesQuery.isError && branchesQuery.data && branchesQuery.data.items.length > 0 && (
  <span className="rounded-full bg-cyan-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-cyan-500/20">{branchesQuery.data.items.length}</span>
@@ -222,11 +222,11 @@ export default function BranchesPage() {
  {branchesQuery.isLoading ? (
  <TableSkeleton />
  ) : branchesQuery.isError ? (
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/80">
+ <div className="overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm dark:bg-card">
  <ErrorState onRetry={() => branchesQuery.refetch()} />
  </div>
  ) : !branchesQuery.data || branchesQuery.data.items.length === 0 ? (
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/80">
+ <div className="overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm dark:bg-card">
  <EmptyState title="No branches yet" />
  </div>
  ) : (
@@ -235,7 +235,7 @@ export default function BranchesPage() {
  const top = BRANCH_TOPS[index % BRANCH_TOPS.length];
  const tile = BRANCH_TILES[index % BRANCH_TILES.length];
  return (
- <article key={branch.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:border-white/10 dark:bg-stone-950/80">
+ <article key={branch.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:bg-card">
  <span className={`absolute inset-x-0 top-0 h-1.5 ${top}`} aria-hidden="true" />
  <div className="flex flex-row items-center justify-between gap-3 px-5 pt-5 sm:px-6">
  <div className="flex min-w-0 items-center gap-3">

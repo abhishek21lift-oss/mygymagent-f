@@ -255,9 +255,9 @@ function WatchlistCard({
 }) {
  const w = WATCH_STYLES[tone];
  return (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <Card className="overflow-hidden border-border bg-card">
  <div
- className={`flex items-start gap-3 border-b border-stone-100/80 px-5 py-5 ${w.header}`}
+ className={`flex items-start gap-3 border-b border-border px-5 py-5 ${w.header}`}
  >
  <span
  className={`flex size-11 shrink-0 items-center justify-center rounded-lg text-white shadow-md ${w.tile}`}
@@ -265,7 +265,7 @@ function WatchlistCard({
  <Icon className="size-5" aria-hidden="true" />
  </span>
  <div className="min-w-0 flex-1">
- <h3 id={id} className="text-sm font-extrabold tracking-tight text-stone-950">
+ <h3 id={id} className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  {title}
  </h3>
  {caption ? <p className="mt-0.5 text-xs font-medium text-stone-600">{caption}</p> : null}
@@ -318,7 +318,7 @@ function Shortcut({
  return (
  <Link
  href={href}
- className={`group/sc flex min-h-11 flex-col gap-3 rounded-xl border border-white/90 bg-card p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${hoverRing}`}
+ className={`group/sc flex min-h-11 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${hoverRing}`}
  >
  <span
  className={`flex size-11 items-center justify-center rounded-lg text-white shadow-md transition-transform duration-300 group-hover/sc:scale-110 group-hover/sc:-rotate-3 ${tile}`}
@@ -420,7 +420,7 @@ export default function CommandCenterPage() {
  variant="dark"
  accent="violet"
  icon={Zap}
- title="Command Center"
+ title="Command centre"
  actions={
  <>
  <Link
@@ -442,7 +442,7 @@ export default function CommandCenterPage() {
  }
  >
  <div className="grid gap-2 sm:grid-cols-3">
- <div className="rounded-lg border border-white/10 bg-card p-3 ">
+ <div className="rounded-lg border border-white/10 bg-card p-3">
  <div className="flex items-baseline justify-between gap-2">
  <span className="text-xs font-bold text-white/70">Check-ins</span>
  <span className="font-mono text-xl font-black tabular-nums">
@@ -456,7 +456,7 @@ export default function CommandCenterPage() {
  />
  </div>
  </div>
- <div className="rounded-lg border border-white/10 bg-card p-3 ">
+ <div className="rounded-lg border border-white/10 bg-card p-3">
  <div className="flex items-baseline justify-between gap-2">
  <span className="text-xs font-bold text-white/70">Follow-ups done</span>
  <span className="font-mono text-xl font-black tabular-nums">
@@ -470,7 +470,7 @@ export default function CommandCenterPage() {
  />
  </div>
  </div>
- <div className="rounded-lg border border-white/10 bg-card p-3 ">
+ <div className="rounded-lg border border-white/10 bg-card p-3">
  <div className="flex items-baseline justify-between gap-2">
  <span className="text-xs font-bold text-white/70">Lead conversion</span>
  <span className="font-mono text-xl font-black tabular-nums">
@@ -500,9 +500,6 @@ export default function CommandCenterPage() {
  role="alert"
  className="flex flex-col gap-3 rounded-xl border border-rose-200 bg-muted/40 p-5 sm:flex-row sm:items-center"
  >
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md">
- <AlertTriangle className="size-5" aria-hidden="true" />
- </span>
  <div className="min-w-0 flex-1">
  <p className="text-sm font-extrabold text-stone-900">
  Couldn&apos;t load the briefing
@@ -532,7 +529,7 @@ export default function CommandCenterPage() {
  <section aria-labelledby="cc-pulse" className="">
  <div className="mb-4 flex items-end justify-between gap-4">
  <div>
- <h2 id="cc-pulse" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950">
+ <h2 id="cc-pulse" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Business pulse
  </h2>
  </div>
@@ -585,14 +582,14 @@ export default function CommandCenterPage() {
  aria-labelledby="cc-decisions"
  className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]"
  >
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-white px-6 py-5">
+ <Card className="overflow-hidden border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border bg-white px-6 py-5">
  <div className="flex items-center gap-3">
  <span className="flex size-11 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/25">
  <Zap className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="cc-decisions" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">
+ <h2 id="cc-decisions" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Decision queue
  </h2>
  </div>
@@ -635,11 +632,11 @@ export default function CommandCenterPage() {
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
  <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
  <div className="relative flex items-center gap-3">
- <span className="flex size-11 items-center justify-center rounded-lg bg-card ring-1 ring-white/20 ">
+ <span className="flex size-11 items-center justify-center rounded-lg bg-card ring-1 ring-white/20">
  <TrendingUp className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight">Sales health</h2>
+ <h2 className="text-sm font-semibold tracking-tight">Sales health</h2>
  </div>
  </div>
  <div className="relative mt-4 grid grid-cols-2 gap-2">
@@ -685,7 +682,7 @@ export default function CommandCenterPage() {
  <CreditCard className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="cc-money" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950">
+ <h2 id="cc-money" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Money movement
  </h2>
  {data ? (
@@ -738,7 +735,7 @@ export default function CommandCenterPage() {
  ).map((item) => (
  <Card
  key={item.label}
- className={`relative overflow-hidden border-white/90 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 ${item.card}`}
+ className={`relative overflow-hidden border-border shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 ${item.card}`}
  >
  <span className={`absolute inset-x-0 top-0 h-1.5 ${item.bar}`} aria-hidden="true" />
  <CardContent className="flex items-center gap-4 p-5 lg:p-6">
@@ -762,9 +759,6 @@ export default function CommandCenterPage() {
  href="/billing"
  className="group/collect mt-4 flex items-center gap-4 rounded-xl border border-amber-200/80 bg-muted/40 px-5 py-4 shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 lg:px-6"
  >
- <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg shadow-amber-500/25">
- <CreditCard className="size-5" aria-hidden="true" />
- </span>
  <span className="min-w-0 flex-1">
  <span className="block text-sm font-extrabold text-stone-900">
  Keep collections moving
@@ -885,7 +879,7 @@ export default function CommandCenterPage() {
  <Zap className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="cc-fast" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950">
+ <h2 id="cc-fast" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Move faster
  </h2>
  </div>

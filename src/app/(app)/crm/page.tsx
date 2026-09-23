@@ -9,7 +9,6 @@ import {
  ArrowRightCircle,
  CalendarClock,
  Check,
- Flame,
  Megaphone,
  Plus,
  Sparkles,
@@ -19,10 +18,10 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
 import { PageHero } from "@/components/shared/page-hero";
+import { MetricStrip } from "@/components/shared/panel";
 import { BranchSelect } from "@/components/shared/branch-select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -660,7 +659,8 @@ export default function CrmPage() {
  <PageHero
  id="crm-title"
  icon={Megaphone}
- title="Sales OS"
+ title="Leads"
+ description="Pipeline, follow-ups and conversion"
  variant="light"
  accent="blue"
  actions={
@@ -694,33 +694,26 @@ export default function CrmPage() {
  </div>
  </PageHero>
 
- {/* Stats */}
- <section aria-label="Pipeline snapshot">
- <div className="grid gap-4 sm:grid-cols-2">
- <Metric icon={Users} label="Visible leads" value={visible} tone="cyan" />
- <Metric
- icon={Flame}
- label="Current stage"
- value={filter === "ALL" ? "All" : filter}
- tone="rose"
- />
- </div>
- </section>
+ {/* One figure, because there is one. "Current stage" was a tile
+ restating which pipeline tab is selected directly below it -- a
+ filter's own state is not a measurement, and putting it in a
+ metric slot made the page look like it had twice the information
+ it has. */}
+ <MetricStrip label="Pipeline" columns={4}>
+ <Metric icon={Users} label="Visible leads" value={visible} hint={filter === "ALL" ? "All stages" : `Stage: ${filter}`} />
+ </MetricStrip>
 
  {/* Pipeline filter */}
  <section
  aria-labelledby="crm-pipeline"
- className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 "
+ className="overflow-hidden rounded-xl border border-border bg-card"
  >
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
- <Megaphone className="size-5" aria-hidden="true" />
- </span>
  <div>
  <h2
  id="crm-pipeline"
- className="font-semibold text-xl font-semibold tracking-tight text-stone-950"
+ className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground"
  >
  Conversion pipeline
  </h2>
@@ -750,9 +743,9 @@ export default function CrmPage() {
 
  {/* Leads */}
  <section className="grid gap-5">
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6">
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Leads
  </h2>
  {sla.data && (

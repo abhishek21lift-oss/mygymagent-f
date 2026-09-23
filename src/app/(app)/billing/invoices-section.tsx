@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Receipt } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/shared/data-table";
 import { Label } from "@/components/ui/label";
@@ -161,11 +160,8 @@ export function InvoicesSection() {
 export function InvoicesSectionHeader() {
  return (
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
- <Receipt className="size-5" aria-hidden="true" />
- </span>
  <div>
- <h2 id="billing-activity" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Invoices</h2>
+ <h2 id="billing-activity" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Invoices</h2>
  </div>
  </div>
  );

@@ -6,10 +6,11 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { CreditCard, Sparkles, Undo2, Wallet, TrendingUp } from "lucide-react";
+import { Sparkles, Undo2, Wallet } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
 import { PageHero } from "@/components/shared/page-hero";
+import { MetricStrip } from "@/components/shared/panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,13 +42,12 @@ export default function BillingPage() {
  const currency = items[0]?.currency ?? "INR";
  return (
  <div className="pb-4">
- <div className="flex flex-col gap-5">
+ <div className="flex w-full flex-col gap-4">
  <PageHero
  id="billing-title"
  icon={Wallet}
- title="Finance OS"
- variant="light"
- accent="emerald"
+ title="Finance"
+ description="Payments, invoices and expenses"
  actions={
  <>
  {hasPermission("payments.create") && <RecordPaymentDialog />}
@@ -58,36 +58,25 @@ export default function BillingPage() {
  }
  />
 
- <section aria-labelledby="billing-stats" className="">
- <div className="mb-4 flex items-end justify-between gap-4">
- <div>
- <h2 id="billing-stats" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Collections snapshot</h2>
- </div>
- </div>
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
- <FinanceMetric icon={Wallet} label="Collected · current page" value={`₹ ${totalCollected.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="green" />
- <FinanceMetric icon={Undo2} label="Refunded · current page" value={`₹ ${totalRefunded.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="amber" />
- <FinanceMetric icon={CreditCard} label="Transactions" value={items.length} loading={paymentsQuery.isLoading} tone="violet" />
- <FinanceMetric icon={TrendingUp} label="Payment activity" value="Live" loading={paymentsQuery.isLoading} tone="cyan" />
- </div>
- </section>
+ {/* No "Collections snapshot" heading: four numbers do not need a line
+ telling you they are numbers. The tiles say what they are.
+ "Payment activity · Live" went with it -- it was not a figure, it
+ was a tile asserting the page was working. */}
+ <MetricStrip label="Collections" columns={3}>
+ <FinanceMetric label="Collected · this page" value={`₹ ${totalCollected.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="green" />
+ <FinanceMetric label="Refunded · this page" value={`₹ ${totalRefunded.toFixed(2)}`} loading={paymentsQuery.isLoading} tone={totalRefunded > 0 ? "amber" : "primary"} />
+ <FinanceMetric label="Transactions" value={items.length} loading={paymentsQuery.isLoading} />
+ </MetricStrip>
 
- <section aria-labelledby="billing-activity" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
+ <section aria-labelledby="billing-activity" className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
  {tab === "payments" ? (
- <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
- <CreditCard className="size-5" aria-hidden="true" />
- </span>
- <div>
- <h2 id="billing-activity" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Payment activity</h2>
- </div>
- </div>
+ <h2 id="billing-activity" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Payment activity</h2>
  ) : (
  <InvoicesSectionHeader />
  )}
  <div className="flex flex-wrap items-center gap-2">
- <div role="tablist" aria-label="Billing views" className="inline-flex items-center gap-1 rounded-lg border border-emerald-200/70 bg-card p-1 dark:border-white/10 dark:bg-card">
+ <div role="tablist" aria-label="Billing views" className="inline-flex items-center gap-1 rounded-lg border border-border bg-card p-1">
  {(["payments", "invoices"] as const).map((t) => (
  <Button
  key={t}
@@ -104,7 +93,7 @@ export default function BillingPage() {
  ))}
  </div>
  {tab === "payments" && (
- <Badge variant="outline" className="rounded-full border-emerald-200 bg-emerald-50/70 font-mono text-xs font-bold text-emerald-800 tabular-nums">Page {page}</Badge>
+ <Badge variant="outline" className="rounded-full font-mono text-xs tabular-nums">Page {page}</Badge>
  )}
  </div>
  </div>

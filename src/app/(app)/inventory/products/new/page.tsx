@@ -54,7 +54,7 @@ function Field({
  <FormControl>
  <Input
  {...props}
- className="h-12 rounded-xl border-stone-200 bg-card px-4 text-sm font-medium shadow-sm transition focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:border-white/10 dark:bg-stone-900/80"
+ className="h-12 rounded-xl border-stone-200 bg-card px-4 text-sm font-medium shadow-sm transition focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:bg-stone-900/80"
  />
  </FormControl>
  {hint && <p className="text-xs font-medium leading-5 text-stone-500">{hint}</p>}
@@ -75,12 +75,9 @@ function Section({
  children: React.ReactNode
 }) {
  return (
- <section className="overflow-hidden rounded-lg border border-white/90 bg-card shadow-[0_24px_70px_-48px_rgba(79,70,229,.45)] dark:border-white/10 dark:bg-stone-950/75">
- <div className="border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:border-white/10 dark:from-amber-950/20 dark:via-stone-950 dark:to-orange-950/10">
+ <section className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_24px_70px_-48px_rgba(79,70,229,.45)] dark:bg-stone-950/75">
+ <div className="border-b border-border px-4 py-2.5 sm:px-5 dark:from-amber-950/20 dark:via-stone-950 dark:to-orange-950/10">
  <div className="flex items-start gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/20">
- <Icon className="size-5" aria-hidden="true" />
- </span>
  <div>
  <h2 className="text-base font-extrabold tracking-tight text-stone-950 dark:text-white">
  {title}
@@ -137,7 +134,7 @@ export default function NewInventoryProductPage() {
  title="New Product"
  description="Create a product for your inventory catalogue."
  >
- <section className="rounded-lg border border-amber-200/70 bg-card p-8 text-center shadow-sm dark:border-white/10 dark:bg-stone-950/75">
+ <section className="rounded-lg border border-amber-200/70 bg-card p-8 text-center shadow-sm dark:bg-stone-950/75">
  <PackagePlus className="mx-auto size-10 text-amber-600" />
  <h2 className="mt-4 text-lg font-extrabold text-stone-950 dark:text-white">
  Inventory management access required
@@ -263,7 +260,7 @@ export default function NewInventoryProductPage() {
  placeholder="Scan barcode or enter manually"
  inputMode="numeric"
  autoComplete="off"
- className="h-12 rounded-xl border-stone-200 bg-card px-4 text-sm font-medium shadow-sm transition focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:border-white/10 dark:bg-stone-900/80"
+ className="h-12 rounded-xl border-stone-200 bg-card px-4 text-sm font-medium shadow-sm transition focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:bg-stone-900/80"
  />
  </FormControl>
  <p className="text-xs font-medium leading-5 text-stone-500">
@@ -288,7 +285,7 @@ export default function NewInventoryProductPage() {
  {...field}
  rows={4}
  placeholder="Short product description, variant or internal notes..."
- className="resize-y rounded-xl border-stone-200 bg-card px-4 py-3 text-sm font-medium shadow-sm focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:border-white/10 dark:bg-stone-900/80"
+ className="resize-y rounded-xl border-stone-200 bg-card px-4 py-3 text-sm font-medium shadow-sm focus-visible:border-amber-500 focus-visible:ring-amber-500/20 dark:bg-stone-900/80"
  />
  </FormControl>
  <FormMessage />
@@ -408,7 +405,7 @@ export default function NewInventoryProductPage() {
  This creates the product master record and records the opening quantity in the stock ledger.
  </p>
 
- <div className="mt-5 grid gap-2 rounded-xl border border-white/80 bg-card p-3 text-xs font-semibold text-stone-600 dark:border-white/10 dark:bg-card dark:text-stone-300">
+ <div className="mt-5 grid gap-2 rounded-xl border border-border bg-card p-3 text-xs font-semibold text-stone-600 dark:bg-card dark:text-stone-300">
  <div className="flex items-center gap-2">
  <Check className="size-4 text-emerald-600" />
  SKU and barcode searchable

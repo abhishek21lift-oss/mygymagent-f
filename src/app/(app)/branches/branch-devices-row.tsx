@@ -87,7 +87,7 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3 border-t border-stone-100/80 px-5 py-4 sm:px-6 dark:border-white/10">
+      <div className="flex items-center justify-between gap-3 border-t border-border px-5 py-4 sm:px-6 dark:border-white/10">
         <div className="flex min-w-0 items-center gap-2.5">
           <MonitorSmartphone className="size-4 shrink-0 text-cyan-600" aria-hidden="true" />
           <div className="min-w-0">
@@ -127,7 +127,7 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
                 This key is shown once and won&apos;t be displayed again. Configure the device with
                 it now.
               </p>
-              <p className="break-all rounded-lg border border-stone-200/70 bg-stone-50/70 px-4 py-3 font-mono text-sm font-bold text-stone-900 dark:border-white/10 dark:bg-card dark:text-stone-100">
+              <p className="break-all rounded-lg border border-stone-200/70 bg-stone-50/70 px-4 py-3 font-mono text-sm font-bold text-stone-900 dark:bg-card dark:text-stone-100">
                 {issuedKey}
               </p>
               <DialogFooter>

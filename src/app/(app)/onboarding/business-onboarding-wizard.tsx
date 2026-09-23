@@ -231,7 +231,7 @@ function StepHeading({ icon: Icon, tile, title, subtitle }: { icon: typeof Build
  <div className={`mb-4 inline-flex size-14 items-center justify-center rounded-lg text-white shadow-lg ${tile}`}>
  <Icon className="size-6" aria-hidden="true" />
  </div>
- <h2 className="font-semibold text-2xl font-semibold tracking-tight text-stone-950">{title}</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{title}</h2>
  <p className="mt-2 text-sm font-medium text-stone-600">{subtitle}</p>
  </div>
  );
@@ -931,7 +931,7 @@ export function BusinessOnboardingWizard() {
  return (
  <div className="flex min-h-[600px] flex-col">
  {currentStep < STEPS.length - 1 && (
- <div className="mb-8 border-b border-stone-100/80 bg-muted/40 px-4 pt-6 sm:px-8">
+ <div className="mb-8 border-b border-border bg-muted/40 px-4 pt-6 sm:px-8">
  <ProgressIndicator currentStep={currentStep} />
  <div className="h-6" aria-hidden="true" />
  </div>

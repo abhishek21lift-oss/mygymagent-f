@@ -170,14 +170,11 @@ export default function CalendarPage() {
  />
 
  <section aria-labelledby="calendar-board-title" className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-rose-900/5 ">
- <div className="flex flex-col gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-rose-900/5">
+ <div className="flex flex-col gap-3 border-b border-border px-4 py-2.5 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">
- <CalendarDays className="size-5" />
- </span>
  <div>
- <h2 id="calendar-board-title" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">{title}</h2>
+ <h2 id="calendar-board-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{title}</h2>
  </div>
  </div>
  <div className="flex flex-wrap items-center gap-2">
@@ -419,13 +416,10 @@ function BookingPanel({ branchId }: { branchId: string }) {
  }
 
  return (
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-rose-900/5 ">
- <div className="flex items-start gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md shadow-orange-500/25" aria-hidden="true">
- <CalendarX2 className="size-5" />
- </span>
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-rose-900/5">
+ <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Book an appointment</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Book an appointment</h2>
  </div>
  </div>
  <CardContent className="pt-5">
@@ -560,13 +554,10 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  }
 
  return (
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-cyan-900/5 ">
- <div className="flex items-start gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-md shadow-cyan-500/25" aria-hidden="true">
- <Clock3 className="size-5" />
- </span>
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-cyan-900/5">
+ <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Trainer availability &amp; time off</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Trainer availability &amp; time off</h2>
  </div>
  </div>
  <CardContent className="flex flex-col gap-5 pt-5">

@@ -391,7 +391,7 @@ export default function SecuritySettingsPage() {
  }
  />
 
- <Card className="overflow-hidden border-white/80 bg-card shadow-sm shadow-indigo-900/5 ">
+ <Card className="overflow-hidden border-border bg-card">
  <CardContent className="flex flex-col gap-5 p-6">
  <div>
  <h2 className="text-lg font-semibold tracking-tight">Two-step verification</h2>
@@ -405,7 +405,7 @@ export default function SecuritySettingsPage() {
  </Card>
 
  {canSetPolicy ? (
- <Card className="overflow-hidden border-white/80 bg-card shadow-sm shadow-indigo-900/5 ">
+ <Card className="overflow-hidden border-border bg-card">
  <CardContent className="p-6">
  <PolicySection />
  </CardContent>

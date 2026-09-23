@@ -157,7 +157,7 @@ export function NotificationCenter() {
  {unreadCount > 0 && <Badge variant="destructive" className="pointer-events-none absolute -right-0.5 -top-0.5 min-w-5 border-2 border-background px-1 py-0 text-[9px] leading-4 shadow-sm" aria-hidden="true">{unreadCount > 99 ? "99+" : unreadCount}</Badge>}
  </Button>
  </PopoverTrigger>
- <PopoverContent align="end" sideOffset={10} className="w-[min(34rem,calc(100vw-1rem))] overflow-hidden rounded-lg border-border/60 bg-background/95 p-0 shadow-sm ">
+ <PopoverContent align="end" sideOffset={10} className="w-[min(34rem,calc(100vw-1rem))] overflow-hidden rounded-lg border-border/60 bg-background/95 p-0 shadow-sm">
  <div className="border-b border-border/60 px-4 py-3">
  <div className="flex items-center justify-between gap-3">
  <div><div className="text-sm font-bold tracking-tight">Notifications</div><div className="text-xs text-muted-foreground">{unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up"}</div></div>

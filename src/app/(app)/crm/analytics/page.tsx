@@ -81,7 +81,7 @@ export default function SalesAnalyticsPage() {
  <PageHero
  id="analytics-title"
  icon={BarChart3}
- title="Analytics"
+ title="Sales analytics"
  variant="light"
  accent="violet"
  actions={
@@ -96,10 +96,10 @@ export default function SalesAnalyticsPage() {
  }
  />
 
- <section aria-labelledby="analytics-window" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <section aria-labelledby="analytics-window" className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
  <div>
- <h2 id="analytics-window" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">
+ <h2 id="analytics-window" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
  Reporting window
  </h2>
  </div>
@@ -128,14 +128,11 @@ export default function SalesAnalyticsPage() {
  </section>
 
  <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Pipeline distribution</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Pipeline distribution</h2>
  </div>
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
- <Flame className="size-5" aria-hidden="true" />
- </span>
  </div>
  <div className="space-y-4 p-5 sm:p-6">
  {statusRows.length === 0 && <p className="py-8 text-center text-sm font-medium text-stone-600">No sales data for this window.</p>}
@@ -160,14 +157,11 @@ export default function SalesAnalyticsPage() {
  </div>
  </div>
 
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Follow-up discipline</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Follow-up discipline</h2>
  </div>
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-md shadow-violet-500/25">
- <CalendarDays className="size-5" aria-hidden="true" />
- </span>
  </div>
  <div className="grid gap-3 p-5 sm:grid-cols-3 xl:grid-cols-1">
  <Mini label="Scheduled" value={data?.followUps?.total ?? 0} tint="bg-blue-50/80" />
@@ -177,10 +171,10 @@ export default function SalesAnalyticsPage() {
  </div>
  </section>
 
- <section aria-labelledby="analytics-sources" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex flex-col gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+ <section aria-labelledby="analytics-sources" className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex flex-col gap-3 border-b border-border px-4 py-2.5 sm:px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
  <div>
- <h2 id="analytics-sources" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Lead source performance</h2>
+ <h2 id="analytics-sources" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Lead source performance</h2>
  </div>
  <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
  <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
@@ -219,14 +213,11 @@ export default function SalesAnalyticsPage() {
  </section>
 
  <section className="grid gap-5 xl:grid-cols-2">
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Why leads are lost</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Why leads are lost</h2>
  </div>
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md shadow-rose-500/25">
- <Flame className="size-5" aria-hidden="true" />
- </span>
  </div>
  <div className="space-y-3 p-5 sm:p-6">
  {lostReasonRows.length === 0 && <p className="py-6 text-center text-sm font-medium text-stone-600">No lost leads recorded in this window.</p>}
@@ -248,14 +239,11 @@ export default function SalesAnalyticsPage() {
  </div>
  </div>
 
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Rep performance</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Rep performance</h2>
  </div>
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
- <Users className="size-5" aria-hidden="true" />
- </span>
  </div>
  <div className="p-4 sm:p-5">
  {assigneeRows.length === 0 ? (
@@ -314,7 +302,7 @@ function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: 
 
 function Mini({ label, value, tint }: { label: string; value: string | number; tint: string }) {
  return (
- <div className={`rounded-xl border border-white/80 p-4 shadow-sm ${tint}`}>
+ <div className={`rounded-xl border border-border p-4 shadow-sm ${tint}`}>
  <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">{label}</p>
  <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
  </div>

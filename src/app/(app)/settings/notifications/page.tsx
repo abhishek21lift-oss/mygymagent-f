@@ -106,10 +106,10 @@ export default function NotificationSettingsPage() {
  }
  />
 
- <Card className="overflow-hidden border-white/80 bg-card shadow-sm shadow-indigo-900/5 ">
+ <Card className="overflow-hidden border-border bg-card">
  <CardContent className="overflow-x-auto p-0">
  <div className="min-w-[760px]">
- <div className="grid grid-cols-[minmax(18rem,1fr)_repeat(5,6rem)] items-center border-b border-stone-200/80 bg-stone-50/80 px-5 py-3">
+ <div className="grid grid-cols-[minmax(18rem,1fr)_repeat(5,6rem)] items-center border-b border-border bg-stone-50/80 px-5 py-3">
  <div className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">Activity</div>
  {channels.map(({ key, label, icon: Icon }) => (
  <div key={key} className="flex flex-col items-center gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-stone-500">

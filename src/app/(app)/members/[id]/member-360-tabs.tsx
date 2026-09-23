@@ -1581,7 +1581,7 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
  {openInvoices.map((inv) => (
  <div
  key={inv.id}
- className="flex items-center justify-between gap-2 rounded-lg border border-amber-200/50 bg-card p-3 text-sm dark:border-white/10 dark:bg-card"
+ className="flex items-center justify-between gap-2 rounded-lg border border-amber-200/50 bg-card p-3 text-sm dark:bg-card"
  >
  <div>
  <p className="font-mono font-bold tabular-nums">{inv.number}</p>

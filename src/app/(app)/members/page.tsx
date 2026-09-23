@@ -24,7 +24,6 @@ import { DataTable } from "@/components/shared/data-table";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
  Dialog,

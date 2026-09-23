@@ -5,7 +5,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, Sparkles, UserRound, UserX, Users } from "lucide-react";
+import { Plus, Sparkles, UserX, Users } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
@@ -205,9 +205,6 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
  accessorKey: "firstName",
  cell: ({ row }) => (
  <div className="flex items-center gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
- <UserRound className="size-4" aria-hidden="true" />
- </span>
  <div className="flex min-w-0 flex-col">
  <span className="truncate font-bold text-stone-900 dark:text-stone-100">
  {row.original.firstName} {row.original.lastName}
@@ -295,14 +292,9 @@ export default function StaffPage() {
  }
  />
 
- <section aria-labelledby="staff-roster" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-cyan-950/40 dark:via-stone-950 dark:to-teal-950/30">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg shadow-cyan-500/25">
- <Users className="size-5" aria-hidden="true" />
- </span>
- <div>
- <h2 id="staff-roster" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Team roster</h2>
- </div>
+ <section aria-labelledby="staff-roster" className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+ <h2 id="staff-roster" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team roster</h2>
  </div>
  <div className="p-4 sm:p-5">
  <DataTable

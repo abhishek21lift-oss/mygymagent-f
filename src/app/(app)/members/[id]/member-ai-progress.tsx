@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Brain, Sparkles, TrendingUp } from "lucide-react";
+import { Sparkles, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,14 +32,11 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
  }
 
  return (
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6">
+ <Card className="overflow-hidden rounded-xl border-border bg-card">
+ <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex items-start gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/25">
- <Brain className="size-5" aria-hidden="true" />
- </span>
  <div>
- <CardTitle className="font-semibold text-xl tracking-tight text-stone-950">
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">
  AI workout progress
  </CardTitle>
  <p className="mt-0.5 text-xs font-medium text-stone-600">

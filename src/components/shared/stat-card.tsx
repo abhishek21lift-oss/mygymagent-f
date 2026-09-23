@@ -37,13 +37,23 @@ export function StatCard({
  hint?: string;
  tone?: "primary" | "success" | "warning" | "destructive";
 }) {
- const flagged = tone === "warning" || tone === "destructive";
+ // A zero is not a problem, whatever tone the page asked for.
+ // "Expired: 0", "Low stock: 0" and "Refunded: \u20b9 0.00" were each
+ // painting a state rule and coloured digits over the good news -- and
+ // once several tiles on a screen are tinted, none of them reads as
+ // needing attention, which is the only thing colour is for here.
+ // Tested on the rendered value, not a number, because pages pass these
+ // pre-formatted ("\u20b9 0.00", "0 due").
+ const isZero = value === undefined || value === null || !/[1-9]/.test(String(value));
+ const effectiveTone =
+ isZero && (tone === "warning" || tone === "destructive") ? "primary" : tone;
+ const flagged = effectiveTone === "warning" || effectiveTone === "destructive";
 
  return (
  <div
  className={cn( "relative min-w-0 rounded-lg border border-border bg-card px-4 py-3",
  flagged && "before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:content-['']",
- TONE_RULE[tone],
+ TONE_RULE[effectiveTone],
  )}
  >
  <p className="truncate text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
@@ -57,8 +67,8 @@ export function StatCard({
  ) : (
  <p
  className={cn( "mt-0.5 truncate text-[1.625rem] font-semibold leading-tight tracking-tight tabular-nums",
- tone === "destructive" && "text-destructive",
- tone === "warning" && "text-warning",
+ effectiveTone === "destructive" && "text-destructive",
+ effectiveTone === "warning" && "text-warning",
  )}
  >
  {value ?? 0}

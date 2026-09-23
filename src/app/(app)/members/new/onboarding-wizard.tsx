@@ -197,12 +197,9 @@ export function OnboardingWizard() {
 
  return (
  <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
- <section aria-label="Onboarding progress" className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="border-b border-stone-100/80 bg-muted/40 px-5 py-4 sm:px-6">
+ <section aria-label="Onboarding progress" className="overflow-hidden rounded-xl border-border bg-card">
+ <div className="border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex items-center gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/25">
- <Sparkles className="size-4" aria-hidden="true" />
- </span>
  <div className="min-w-0">
  <h2 className="font-semibold text-lg font-semibold tracking-tight text-stone-950">
  Step {currentStep + 1} of {STEPS.length} — {STEPS[currentStep].label}
@@ -250,7 +247,7 @@ export function OnboardingWizard() {
  </section>
 
  {/* Step Content */}
- <section aria-label={`Step ${currentStep + 1}: ${STEPS[currentStep].label}`} className="min-h-[400px] overflow-hidden rounded-xl border-white/90 bg-card p-5 shadow-sm shadow-violet-900/5 sm:p-7">
+ <section aria-label={`Step ${currentStep + 1}: ${STEPS[currentStep].label}`} className="min-h-[400px] overflow-hidden rounded-xl border-border bg-card p-5 sm:p-7">
  {currentStep === 0 && (
  <LeadSelectionStep
  onSelectLead={(lead) => {

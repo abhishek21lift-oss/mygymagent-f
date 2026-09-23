@@ -5,7 +5,7 @@ import { StatCard, toStatTone } from "@/components/shared/stat-card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Apple, Leaf, Plus, Salad, Trash2, UserPlus, Users, Utensils } from "lucide-react";
+import { Apple, Leaf, Plus, Trash2, UserPlus, Users, Utensils } from "lucide-react";
 import { MemberPicker } from "@/components/shared/member-picker";
 import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
@@ -211,11 +211,8 @@ function Assignment({ item }: { item: DietAssignment }) {
  const { hasPermission } = useAuth();
  const update = useUpdateDietAssignmentStatus();
  return (
- <div className="group flex flex-col gap-3 rounded-xl border border-stone-200/80 bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-white hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)] sm:flex-row sm:items-center">
+ <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-white hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)] sm:flex-row sm:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25 transition-transform duration-200 group-hover:scale-110" aria-hidden="true">
- <UserPlus className="size-4" />
- </span>
  <div className="min-w-0">
  <p className="truncate text-sm font-extrabold text-stone-900">{item.member ? `${item.member.firstName} ${item.member.lastName}` : "Member unavailable"}</p>
  <p className="truncate text-xs font-medium text-stone-600">{item.dietPlan?.name ?? "Diet plan"}</p>
@@ -310,13 +307,10 @@ export default function NutritionPage() {
  </section>
 
  <section aria-label="Plans" className="grid gap-5">
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-emerald-900/5 ">
- <div className="flex items-start gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/25" aria-hidden="true">
- <Salad className="size-5" />
- </span>
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-emerald-900/5">
+ <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Diet plan library</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Diet plan library</h2>
  </div>
  </div>
  <CardContent className="p-4">
@@ -325,7 +319,7 @@ export default function NutritionPage() {
  ) : (
  <div className="grid gap-3 sm:grid-cols-2">
  {plans.data?.items.map((plan) => (
- <div key={plan.id} className="group rounded-xl border border-stone-200/80 bg-card p-4 transition duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)]">
+ <div key={plan.id} className="group rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)]">
  <div className="flex items-start justify-between gap-3">
  <span className="flex size-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25 transition-transform duration-200 group-hover:scale-110" aria-hidden="true">
  <Utensils className="size-5" />
@@ -351,13 +345,10 @@ export default function NutritionPage() {
  </Card>
  </section>
 
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-lg ">
- <div className="flex items-start gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-lime-500 text-white shadow-md shadow-lime-500/25" aria-hidden="true">
- <Users className="size-5" />
- </span>
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-lg">
+ <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Recent nutrition assignments</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Recent nutrition assignments</h2>
  </div>
  </div>
  <CardContent className="space-y-3 p-4">

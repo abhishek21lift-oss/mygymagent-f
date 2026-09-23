@@ -25,7 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
  if (isLoading || !isAuthenticated) {
  return (
  <div className="flex h-svh items-center justify-center bg-background px-4">
- <div role="status" aria-label="Loading application" className="relative flex w-full max-w-sm flex-col gap-3 overflow-hidden rounded-lg border border-sidebar-border bg-card/80 p-6 shadow-sm ">
+ <div role="status" aria-label="Loading application" className="relative flex w-full max-w-sm flex-col gap-3 overflow-hidden rounded-lg border border-sidebar-border bg-card/80 p-6 shadow-sm">
  <span aria-hidden="true" className="absolute -right-8 -top-8 size-24 rounded-full bg-violet-500/10 blur-2xl" />
  <Skeleton className="h-10 w-40 rounded-xl" />
  <Skeleton className="h-4 w-full rounded-md" />

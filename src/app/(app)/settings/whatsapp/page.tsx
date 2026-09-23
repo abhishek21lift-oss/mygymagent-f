@@ -166,15 +166,15 @@ export default function WhatsAppSettingsPage() {
  />
 
  {integrationQuery.isLoading ? (
- <Card className="max-w-3xl border-white/90 bg-card dark:border-white/10 dark:bg-stone-950/80"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full rounded-lg" /><Skeleton className="h-11 w-40 rounded-lg" /></CardContent></Card>
+ <Card className="max-w-3xl border-border bg-card dark:bg-card"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full rounded-lg" /><Skeleton className="h-11 w-40 rounded-lg" /></CardContent></Card>
  ) : integrationQuery.isError ? <ErrorState onRetry={() => integrationQuery.refetch()} /> : (
- <Card className="max-w-3xl overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
+ <Card className="max-w-3xl overflow-hidden border-border bg-card dark:bg-card">
  <span className="block h-1.5 bg-emerald-500" aria-hidden="true" />
- <CardHeader className="border-b border-stone-100/80 bg-muted/40 dark:border-white/10 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
+ <CardHeader className="border-b border-border bg-muted/40 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
  <div className="flex items-start justify-between gap-4">
  <div className="flex items-start gap-3">
  <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><MessageCircle className="size-6" aria-hidden="true" /></span>
- <div><CardTitle className="font-semibold text-lg tracking-tight text-stone-950 dark:text-stone-50">WhatsApp Business</CardTitle></div>
+ <div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">WhatsApp Business</CardTitle></div>
  </div>
  <Badge variant={connected ? "default" : "secondary"} className={connected ? "rounded-full bg-emerald-500 text-white" : "rounded-full"}>{connected ? "Connected" : "Not connected"}</Badge>
  </div>
@@ -231,12 +231,12 @@ function TestSendCard({ canManage, orgCountry }: { canManage: boolean; orgCountr
  }
 
  return (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <CardHeader className="border-b border-stone-100/80 bg-muted/40 dark:border-white/10 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
+ <Card className="overflow-hidden border-border bg-card dark:bg-card">
+ <CardHeader className="border-b border-border bg-muted/40 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
  <div className="flex items-start gap-3">
  <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><Send className="size-5" aria-hidden="true" /></span>
  <div>
- <CardTitle className="font-semibold text-lg tracking-tight text-stone-950 dark:text-stone-50">Send test</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">Send test</CardTitle>
  <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">
  {orgCountry ? `Default org country: ${orgCountry} — always include the country code.` : "Include the country code (E.164 format)."}
  </p>
@@ -286,12 +286,12 @@ function TemplatesCard() {
  const templatesQuery = useWhatsappTemplates()
 
  return (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <CardHeader className="border-b border-stone-100/80 bg-muted/40 dark:border-white/10 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
+ <Card className="overflow-hidden border-border bg-card dark:bg-card">
+ <CardHeader className="border-b border-border bg-muted/40 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
  <div className="flex items-start gap-3">
  <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><FileText className="size-5" aria-hidden="true" /></span>
  <div>
- <CardTitle className="font-semibold text-lg tracking-tight text-stone-950 dark:text-stone-50">Templates</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">Templates</CardTitle>
  <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">System templates with your organization overrides.</p>
  </div>
  </div>
@@ -309,7 +309,7 @@ function TemplatesCard() {
  ) : (
  <ul className="flex flex-col gap-3">
  {templatesQuery.data.map((template) => (
- <li key={template.key} className="rounded-xl border border-stone-200/70 bg-card p-4 dark:border-white/10 dark:bg-card">
+ <li key={template.key} className="rounded-xl border border-stone-200/70 bg-card p-4 dark:bg-card">
  <div className="flex flex-wrap items-center gap-2">
  <Badge variant="outline" className="rounded-full">{template.channel}</Badge>
  <span className="break-all font-mono text-xs font-bold text-stone-700 dark:text-stone-300">{template.key}</span>
@@ -331,12 +331,12 @@ function DeliveryLogCard() {
  const logsQuery = useWhatsappLogs(LOG_LIMIT)
 
  return (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <CardHeader className="border-b border-stone-100/80 bg-muted/40 dark:border-white/10 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
+ <Card className="overflow-hidden border-border bg-card dark:bg-card">
+ <CardHeader className="border-b border-border bg-muted/40 dark:from-emerald-500/10 dark:via-transparent dark:to-teal-500/10">
  <div className="flex items-start gap-3">
  <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><History className="size-5" aria-hidden="true" /></span>
  <div>
- <CardTitle className="font-semibold text-lg tracking-tight text-stone-950 dark:text-stone-50">Delivery log</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">Delivery log</CardTitle>
  <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Newest first (last {LOG_LIMIT}).</p>
  </div>
  </div>
@@ -415,7 +415,7 @@ function DangerZoneCard({ canManage }: { canManage: boolean }) {
  <div className="flex items-start gap-3">
  <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-lg"><TriangleAlert className="size-5" aria-hidden="true" /></span>
  <div>
- <CardTitle className="font-semibold text-lg tracking-tight text-stone-950 dark:text-stone-50">Danger zone</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">Danger zone</CardTitle>
  <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Disconnecting stops all WhatsApp messaging for this organization.</p>
  </div>
  </div>
@@ -469,9 +469,9 @@ function statusVariant(status: string): "default" | "secondary" | "destructive" 
 }
 
 function Info({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
- return <div className="rounded-xl border border-stone-200/70 bg-card p-4 dark:border-white/10 dark:bg-card"><div className="text-xs font-black uppercase tracking-[.16em] text-stone-500 dark:text-stone-400">{label}</div><div className={`mt-1 break-all text-sm font-bold text-stone-900 dark:text-stone-100 ${mono ? "font-mono" : ""}`}>{value}</div></div>
+ return <div className="rounded-xl border border-stone-200/70 bg-card p-4 dark:bg-card"><div className="text-xs font-black uppercase tracking-[.16em] text-stone-500 dark:text-stone-400">{label}</div><div className={`mt-1 break-all text-sm font-bold text-stone-900 dark:text-stone-100 ${mono ? "font-mono" : ""}`}>{value}</div></div>
 }
 
 function Step({ n, text }: { n: string; text: string }) {
- return <div className="flex items-center gap-3 rounded-xl border border-stone-200/70 bg-card p-4 dark:border-white/10 dark:bg-card"><span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-black text-white shadow-md">{n}</span><span className="text-xs font-bold text-stone-700 dark:text-stone-300">{text}</span><CheckCircle2 className="ml-auto size-4 shrink-0 text-emerald-500" aria-hidden="true" /></div>
+ return <div className="flex items-center gap-3 rounded-xl border border-stone-200/70 bg-card p-4 dark:bg-card"><span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-black text-white shadow-md">{n}</span><span className="text-xs font-bold text-stone-700 dark:text-stone-300">{text}</span><CheckCircle2 className="ml-auto size-4 shrink-0 text-emerald-500" aria-hidden="true" /></div>
 }

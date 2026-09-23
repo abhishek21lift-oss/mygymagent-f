@@ -90,7 +90,7 @@ export default function AiPage() {
  variant="dark"
  accent="violet"
  icon={Sparkles}
- title="AI Assistant"
+ title="AI agent"
  actions={
  <Link
  href="/ai-actions"
@@ -104,12 +104,12 @@ export default function AiPage() {
  />
 
  {notConfigured ? (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm ">
+ <Card className="overflow-hidden border-border bg-card shadow-sm">
  <CardContent className="flex flex-col items-center gap-2 px-6 py-14 text-center">
  <span className="flex size-14 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/30">
  <Sparkles className="size-6" aria-hidden="true" />
  </span>
- <p className="mt-2 font-semibold text-xl font-semibold text-stone-950">AI isn&apos;t configured yet</p>
+ <p className="mt-2 text-base font-semibold text-foreground">AI isn&apos;t configured yet</p>
  <p className="max-w-sm text-sm font-medium text-stone-600">
  An administrator needs to set an OpenRouter API key on the backend before the
  assistant can respond.
@@ -118,13 +118,13 @@ export default function AiPage() {
  </Card>
  ) : (
  <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
- <section aria-label="Conversation" className="flex min-h-[480px] flex-col overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-4">
+ <section aria-label="Conversation" className="flex min-h-[480px] flex-col overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-4">
  <span className="flex size-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md">
  <Sparkles className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Conversation</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Conversation</h2>
  </div>
  {chat.isPending && <span className="ml-auto rounded-full bg-violet-500/10 px-3 py-1 text-xs font-black text-violet-700">THINKING…</span>}
  </div>
@@ -181,7 +181,7 @@ export default function AiPage() {
  </div>
  )}
  </div>
- <div className="border-t border-stone-100/80 bg-card p-4">
+ <div className="border-t border-border bg-card p-4">
  <div className="flex gap-2">
  <label htmlFor="ai-input" className="sr-only">Ask the assistant</label>
  <Textarea
@@ -215,7 +215,7 @@ export default function AiPage() {
  <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
  <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
- <h2 className="relative font-semibold text-xl font-semibold tracking-tight">Grounded answers</h2>
+ <h2 className="relative text-sm font-semibold tracking-tight">Grounded answers</h2>
  <Link
  href="/ai-actions"
  className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -223,7 +223,7 @@ export default function AiPage() {
  Open approval queue <ArrowRight className="size-4" aria-hidden="true" />
  </Link>
  </div>
- <Card className="border-white/90 bg-card ">
+ <Card className="border-border bg-card">
  <CardContent className="space-y-3 p-5">
  <h2 className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Power prompts</h2>
  {["Flag members likely to churn this week", "Write a win-back message for lapsed members", "Plan tomorrow's floor staffing from attendance"].map((tip) => (

@@ -165,7 +165,7 @@ export default function MembershipPlansPage() {
  <PageHero
  id="plans-title"
  icon={Sparkles}
- title="Membership Plans"
+ title="Plans"
  variant="light"
  accent="emerald"
  actions={
@@ -181,7 +181,7 @@ export default function MembershipPlansPage() {
  <section aria-labelledby="plans-grid-title" className="">
  <div className="mb-4 flex items-end justify-between gap-4">
  <div>
- <h2 id="plans-grid-title" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">All plans</h2>
+ <h2 id="plans-grid-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">All plans</h2>
  </div>
  {!plansQuery.isLoading && !plansQuery.isError && plansQuery.data && plansQuery.data.items.length > 0 && (
  <span className="rounded-full bg-emerald-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-emerald-500/20">{plansQuery.data.items.length}</span>
@@ -191,11 +191,11 @@ export default function MembershipPlansPage() {
  {plansQuery.isLoading ? (
  <TableSkeleton />
  ) : plansQuery.isError ? (
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/80">
+ <div className="overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm dark:bg-card">
  <ErrorState onRetry={() => plansQuery.refetch()} />
  </div>
  ) : !plansQuery.data || plansQuery.data.items.length === 0 ? (
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/80">
+ <div className="overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm dark:bg-card">
  <EmptyState title="No membership plans yet" description="Create your first plan to start selling memberships." />
  </div>
  ) : (
@@ -204,7 +204,7 @@ export default function MembershipPlansPage() {
  const top = PLAN_TOPS[index % PLAN_TOPS.length];
  const tile = PLAN_TILES[index % PLAN_TILES.length];
  return (
- <article key={plan.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:border-white/10 dark:bg-stone-950/80">
+ <article key={plan.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:bg-card">
  <span className={`absolute inset-x-0 top-0 h-1.5 ${top}`} aria-hidden="true" />
  <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
  <div className="flex min-w-0 items-center gap-3">

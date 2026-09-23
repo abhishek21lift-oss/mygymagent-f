@@ -84,13 +84,13 @@ export default function SettingsPage() {
 
  <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
  <section aria-labelledby="settings-org">
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <Card className="overflow-hidden border-border bg-card">
+ <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <span className="flex size-11 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-lg">
  <Building2 className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="settings-org" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Organization profile</h2>
+ <h2 id="settings-org" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Organization profile</h2>
  </div>
  </div>
  <CardContent className="p-5 sm:p-6">
@@ -157,7 +157,7 @@ export default function SettingsPage() {
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-card blur-3xl" aria-hidden="true" />
  <CardContent className="relative flex items-center justify-between gap-4 p-5 sm:p-6">
  <div className="flex min-w-0 items-center gap-3">
- <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-white/25 "><MessageCircle className="size-6" aria-hidden="true" /></span>
+ <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-white/25"><MessageCircle className="size-6" aria-hidden="true" /></span>
  <div className="min-w-0">
  <div className="font-semibold text-lg font-semibold tracking-tight">WhatsApp Business</div>
  </div>

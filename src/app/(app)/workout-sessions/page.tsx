@@ -108,7 +108,7 @@ export default function WorkoutSessionsPage() {
  <PageHero
  id="ws-title"
  icon={Dumbbell}
- title="Sessions"
+ title="Today's sessions"
  variant="light"
  accent="rose"
  actions={
@@ -131,13 +131,10 @@ export default function WorkoutSessionsPage() {
  </section>
 
  <section aria-label="Execution workspace" className="grid gap-5 xl:grid-cols-[.9fr_1.35fr]">
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-rose-900/5 ">
- <div className="flex items-start gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">
- <Flame className="size-5" />
- </span>
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-rose-900/5">
+ <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Execution queue</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Execution queue</h2>
  </div>
  </div>
  <CardContent className="space-y-5 p-4">
@@ -146,10 +143,7 @@ export default function WorkoutSessionsPage() {
  <p className="mb-2 text-xs font-black uppercase tracking-[.18em] text-stone-500">Ready to start</p>
  <div className="space-y-2">
  {activeAssignments.map((a) => (
- <div key={a.id} className="group flex items-center gap-3 rounded-xl border border-stone-200/80 bg-card p-3 transition duration-200 hover:-translate-y-px hover:border-rose-200 hover:bg-rose-50/50 hover:shadow-md">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-500 text-white shadow-md shadow-rose-500/25 transition-transform duration-200 group-hover:scale-110" aria-hidden="true">
- <Dumbbell className="size-4" />
- </span>
+ <div key={a.id} className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition duration-200 hover:-translate-y-px hover:border-rose-200 hover:bg-rose-50/50 hover:shadow-md">
  <div className="min-w-0 flex-1">
  <p className="truncate text-sm font-bold text-stone-900">{a.member ? `${a.member.firstName} ${a.member.lastName}` : "Member"}</p>
  <p className="truncate text-xs font-medium text-stone-600">{a.workoutPlan?.name ?? "Workout plan"}</p>
@@ -200,14 +194,11 @@ export default function WorkoutSessionsPage() {
  </CardContent>
  </Card>
 
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-cyan-900/5 ">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-cyan-900/5">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-md shadow-cyan-500/25" aria-hidden="true">
- <Target className="size-5" />
- </span>
  <div>
- <h2 className="text-sm font-extrabold tracking-tight text-stone-950">Session execution</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Session execution</h2>
  </div>
  </div>
  {selected.data && <Badge variant={selected.data.status === "COMPLETED" ? "success" : "default"}>{selected.data.status.replace("_", " ")}</Badge>}
@@ -240,7 +231,7 @@ export default function WorkoutSessionsPage() {
  const draft = drafts[exercise.id] ?? { weightKg: "", reps: "", rpe: "" }
  const next = logs.length + 1
  return (
- <div key={exercise.id} className="rounded-xl border border-stone-200/80 bg-card p-4 transition hover:border-orange-200 hover:shadow-md">
+ <div key={exercise.id} className="rounded-xl border border-border bg-card p-4 transition hover:border-orange-200 hover:shadow-md">
  <div className="flex items-start justify-between gap-3">
  <div className="min-w-0">
  <p className="font-bold text-stone-900">{exercise.exerciseName}</p>

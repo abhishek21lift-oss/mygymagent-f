@@ -191,10 +191,10 @@ export function RaiseInvoiceDialog() {
  <Label htmlFor="invoice-draft">Save as draft</Label>
  </div>
 
- <div className="rounded-lg border border-stone-200/70 bg-stone-50/70 p-3 text-sm tabular-nums dark:border-white/10 dark:bg-card">
+ <div className="rounded-lg border border-stone-200/70 bg-stone-50/70 p-3 text-sm tabular-nums dark:bg-card">
  <p className="flex justify-between text-stone-600 dark:text-stone-400"><span>Subtotal</span><span>{subtotal.toFixed(2)}</span></p>
  <p className="flex justify-between text-stone-600 dark:text-stone-400"><span>Discount</span><span>−{discount.toFixed(2)}</span></p>
- <p className="mt-1 flex justify-between border-t border-stone-200/70 pt-1 font-black text-stone-950 dark:border-white/10 dark:text-white">
+ <p className="mt-1 flex justify-between border-t border-stone-200/70 pt-1 font-black text-stone-950 dark:text-white">
  <span>Preview total</span><span>{previewTotal.toFixed(2)}</span>
  </p>
  <p className="mt-1 text-xs text-stone-500">Preview only — the server computes the final total.</p>

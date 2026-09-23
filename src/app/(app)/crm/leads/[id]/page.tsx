@@ -106,13 +106,10 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  </section>
 
  <section className="grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
- <Edit3 className="size-5" aria-hidden="true" />
- </span>
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Lead profile</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Lead profile</h2>
  </div>
  </div>
  <div className="p-5 sm:p-6">
@@ -153,9 +150,9 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  </div>
  </div>
 
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="border-b border-stone-100/80 bg-muted/40 px-5 py-5">
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Pipeline control</h2>
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="border-b border-border px-4 py-2.5 sm:px-5">
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Pipeline control</h2>
  </div>
  <div className="space-y-5 p-5 sm:p-6">
  <div>
@@ -192,13 +189,10 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  </div>
  </section>
 
- <section aria-labelledby="lead-followups" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-md shadow-cyan-500/25">
- <CalendarClock className="size-5" aria-hidden="true" />
- </span>
+ <section aria-labelledby="lead-followups" className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 id="lead-followups" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Follow-ups</h2>
+ <h2 id="lead-followups" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Follow-ups</h2>
  </div>
  </div>
  <div className="space-y-5 p-5 sm:p-6">
@@ -215,7 +209,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  </Form>
  <div className="space-y-3">
  {currentLead.followUps?.map((followUp) => (
- <div key={followUp.id} className="flex flex-col gap-3 rounded-xl border border-white/90 bg-card p-4 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+ <div key={followUp.id} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
  <div className="min-w-0">
  <div className="flex flex-wrap items-center gap-2">
  <Badge variant={followUp.completedAt ? "secondary" : "warning"}>{followUp.completedAt ? "Completed" : "Open"}</Badge>

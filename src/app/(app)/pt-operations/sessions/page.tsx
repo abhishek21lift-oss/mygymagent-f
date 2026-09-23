@@ -43,9 +43,6 @@ function SessionRow({ session }: { session: PtSession }) {
  return (
  <div className="group flex flex-col gap-4 rounded-lg border bg-card p-4 transition-colors lg:flex-row lg:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
- <UserRound className="size-5" />
- </span>
  <div className="min-w-0">
  <p className="truncate text-sm font-semibold">{member}</p>
  <p className="truncate text-xs text-muted-foreground">{session.member?.memberCode ?? ""} · {trainer}</p>
@@ -154,7 +151,7 @@ export default function PtSessionsPage() {
  <PageHero
  id="pt-sessions-title"
  icon={CalendarDays}
- title="PT Sessions"
+ title="PT sessions"
  variant="light"
  accent="rose"
  actions={
@@ -177,9 +174,6 @@ export default function PtSessionsPage() {
  <section aria-label="Booking and timeline" className="grid gap-5 xl:grid-cols-[.82fr_1.45fr]">
  <Card className="overflow-hidden rounded-lg">
  <div className="flex items-start gap-3 border-b px-5 py-4">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
- <Zap className="size-5" />
- </span>
  <div className="min-w-0">
  <h2 className="text-sm font-semibold tracking-tight">Book a PT session</h2>
  </div>
@@ -249,9 +243,6 @@ export default function PtSessionsPage() {
 
  <Card className="overflow-hidden rounded-lg">
  <div className="flex items-start gap-3 border-b px-5 py-4">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
- <CalendarDays className="size-5" />
- </span>
  <div className="min-w-0">
  <h2 className="text-sm font-semibold tracking-tight">Today&apos;s coaching timeline</h2>
  </div>

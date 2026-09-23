@@ -191,7 +191,7 @@ export default function DashboardPage() {
  <CardHeader className="border-b pb-4">
  <div className="flex items-center justify-between gap-3">
  <div className="flex items-center gap-3">
- <CardTitle className="text-base">Revenue trend</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Revenue trend</CardTitle>
  </div>
  <Button asChild variant="ghost" size="sm">
  <Link href="/billing">Details</Link>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
  <CardHeader className="border-b pb-4">
  <div className="flex items-center justify-between gap-3">
  <div className="flex items-center gap-3">
- <CardTitle className="text-base">Member status</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Member status</CardTitle>
  </div>
  <Button asChild variant="ghost" size="sm">
  <Link href="/members">Members</Link>
@@ -311,7 +311,7 @@ export default function DashboardPage() {
  <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
  <Activity className="size-5" aria-hidden="true" />
  </span>
- <CardTitle className="text-base">Today&apos;s activity</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Today&apos;s activity</CardTitle>
  </div>
  </CardHeader>
  <CardContent className="pt-4">
@@ -347,7 +347,7 @@ export default function DashboardPage() {
  <span className="flex size-10 items-center justify-center rounded-lg bg-warning/15 text-warning">
  <AlertTriangle className="size-5" aria-hidden="true" />
  </span>
- <CardTitle className="text-base">Today&apos;s priorities</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Today&apos;s priorities</CardTitle>
  </div>
  <Button asChild variant="ghost" size="sm">
  <Link href="/owner-os">Owner OS</Link>

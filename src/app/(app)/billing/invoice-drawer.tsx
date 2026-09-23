@@ -182,7 +182,7 @@ export function InvoiceDrawer({
  ) : (
  <div className="flex flex-col gap-2">
  {invoice.payments.map((p) => (
- <div key={p.id} className="flex items-center justify-between rounded-lg border border-stone-200/70 bg-card p-3 text-sm dark:border-white/10 dark:bg-card">
+ <div key={p.id} className="flex items-center justify-between rounded-lg border border-stone-200/70 bg-card p-3 text-sm dark:bg-card">
  <div>
  <p className="font-bold tabular-nums">₹ {Number(p.amount).toFixed(2)} · {p.method}</p>
  <p className="text-xs text-stone-500 tabular-nums">{fmtDateTime(p.createdAt)}</p>

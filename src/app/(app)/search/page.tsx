@@ -27,7 +27,7 @@ export default function SearchPage() {
  }, 250);
  return () => { active = false; clearTimeout(timer); };
  }, [q]);
- return <main className="space-y-8"><PageHero title="Global Search" icon={SearchIcon} />
+ return <main className="space-y-8"><PageHero title="Search" icon={SearchIcon} />
  <section className="rounded-xl border bg-card p-6 shadow-sm">
  <div className="relative"><SearchIcon className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-stone-400" /><Input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search by name, phone, SKU or invoice number…" className="h-14 rounded-lg pl-12 text-base" /></div>
  <div className="mt-5 space-y-2">{loading && <p className="text-sm text-stone-500">Searching…</p>}{results.map(r => <Link key={`${r.type}-${r.id}`} href={r.href || "#"} className="flex items-center justify-between rounded-lg border p-4 transition hover:-translate-y-0.5 hover:shadow-md"><div><p className="font-black">{r.title}</p><p className="text-sm text-stone-500">{r.subtitle || r.type}</p></div><span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold uppercase">{r.type}</span></Link>)}{q.length >= 2 && !loading && results.length === 0 && <p className="py-8 text-center text-sm text-stone-500">No matches.</p>}</div>

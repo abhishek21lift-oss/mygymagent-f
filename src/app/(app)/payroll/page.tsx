@@ -235,7 +235,8 @@ export default function PayrollPage() {
  return (
  <main className="space-y-8">
  <PageHero
- title="HR & Payroll"
+ title="Payroll"
+ description="Runs, leave and payslips"
  icon={HandCoins}
  actions={
  <Button variant="outline" onClick={() => void load()} disabled={loading}>

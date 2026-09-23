@@ -1,13 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Plus, Receipt, Wallet } from "lucide-react"
+import { Plus } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CardContent } from "@/components/ui/card"
 import { DataTable } from "@/components/shared/data-table"
+import { MetricStrip } from "@/components/shared/panel"
+import { StatCard } from "@/components/shared/stat-card"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -131,40 +132,20 @@ export function ExpensesSection() {
 
  return (
  <section aria-labelledby="expenses-title" className="flex flex-col gap-4">
- <div className="grid gap-4 sm:grid-cols-2">
- <div className="group relative overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-stone-950/80">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-emerald-400" aria-hidden="true" />
- <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-emerald-400/20 blur-2xl transition duration-300 group-hover:scale-125" aria-hidden="true" />
- <CardContent className="relative flex items-center gap-4 p-5 lg:p-6">
- <span className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"><Wallet className="size-6" aria-hidden="true" /></span>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Total spend</p>
- {summary.isLoading ? <div className="mt-2 h-7 w-32 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading total spend" /> : <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{headline}</p>}
- <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Total spend · approved + paid</p>
- </div>
- </CardContent>
- </div>
- <div className="group relative overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-stone-950/80">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-amber-400" aria-hidden="true" />
- <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-amber-400/20 blur-2xl transition duration-300 group-hover:scale-125" aria-hidden="true" />
- <CardContent className="relative flex items-center gap-4 p-5 lg:p-6">
- <span className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3"><Receipt className="size-6" aria-hidden="true" /></span>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Spend categories</p>
- {summary.isLoading ? <div className="mt-2 h-7 w-16 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading categories" /> : <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{summary.data?.byCategory.length ?? 0}</p>}
- <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">Active spend categories</p>
- </div>
- </CardContent>
- </div>
- </div>
- <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-emerald-950/40 dark:via-stone-950 dark:to-amber-950/20">
+ {/* Two figures on the shared tile. This pair carried the same four
+ decorations the inventory page did -- a coloured top bar, a blurred
+ orb, a 56px icon tile that scaled and rotated on hover, and a
+ two-tone shadow -- which is how a spend total came to look more
+ important than the list of expenses under it. */}
+ <MetricStrip label="Spend" columns={2}>
+ <StatCard title="Total spend" value={headline} isLoading={summary.isLoading} hint="Approved + paid" />
+ <StatCard title="Spend categories" value={summary.data?.byCategory.length ?? 0} isLoading={summary.isLoading} hint="Active" />
+ </MetricStrip>
+ <div className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-emerald-950/40 dark:via-stone-950 dark:to-amber-950/20">
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
- <Receipt className="size-5" aria-hidden="true" />
- </span>
  <div>
- <h2 id="expenses-title" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Expenses</h2>
+ <h2 id="expenses-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Expenses</h2>
  <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Rent, salaries, utilities and everything the gym spends.</p>
  </div>
  </div>

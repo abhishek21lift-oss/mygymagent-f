@@ -50,7 +50,7 @@ const PARQ_QUESTIONS = [
  { key: "parqOtherConcerns", label: "Do you have any other health concerns?" },
 ]
 
-const inputClass = "rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+const inputClass = "rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
 
 export function FitnessHealthStep({ data, onUpdate, onContinue, onBack }: FitnessHealthStepProps) {
  const [form, setForm] = React.useState<FitnessHealthData>(data)

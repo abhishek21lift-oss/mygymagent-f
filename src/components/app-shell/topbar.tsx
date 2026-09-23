@@ -49,7 +49,7 @@ export function Topbar({ onOpenMobileNav, sidebarCollapsed = false, onToggleSide
  <span className="hidden text-sm font-semibold tracking-tight sm:inline">{user ? `${user.firstName} ${user.lastName}` : ""}</span>
  </Button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="w-64 rounded-lg border-border/60 p-1.5 shadow-sm ">
+ <DropdownMenuContent align="end" className="w-64 rounded-lg border-border/60 p-1.5 shadow-sm">
  <DropdownMenuLabel className="px-3 py-2.5 font-normal">
  <div className="flex flex-col gap-0.5"><span className="text-sm font-semibold tracking-tight">{user?.firstName} {user?.lastName}</span><span className="font-mono text-xs text-muted-foreground">{user?.email}</span></div>
  </DropdownMenuLabel>

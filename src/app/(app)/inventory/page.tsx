@@ -5,12 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { toast } from "sonner";
-import { PackagePlus, Boxes, AlertTriangle, ArrowRight, History, Package } from "lucide-react";
+import { PackagePlus, Boxes, AlertTriangle, ArrowRight, Package } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
 import { InventoryOperationsPanel } from "@/components/inventory/inventory-operations";
 import { PageHero } from "@/components/shared/page-hero";
+import { MetricStrip } from "@/components/shared/panel";
+import { StatCard } from "@/components/shared/stat-card";
 import { ScanStockDialog } from "@/components/shared/scan-stock-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -258,7 +260,8 @@ export default function InventoryPage() {
  <PageHero
  id="inventory-title"
  icon={Package}
- title="Inventory OS"
+ title="Inventory"
+ description="Products, stock and suppliers"
  variant="light"
  accent="amber"
  actions={
@@ -277,51 +280,24 @@ export default function InventoryPage() {
  }
  />
 
- <section aria-labelledby="inventory-pulse" className="">
- <div className="mb-4">
- <h2 id="inventory-pulse" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Stock pulse</h2>
- </div>
- <div className="grid gap-4 sm:grid-cols-2">
- <div className="group relative overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:border-amber-200 hover:shadow-amber-500/10 dark:border-white/10 dark:bg-stone-950/80">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-amber-400" aria-hidden="true" />
- <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-amber-400/20 blur-2xl transition duration-300 group-hover:scale-125" aria-hidden="true" />
- <div className="relative flex items-center gap-4 p-5 lg:p-6">
- <span className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
- <Boxes className="size-6" aria-hidden="true" />
- </span>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Products · this page</p>
- {productsQuery.isLoading ? <div className="mt-2 h-7 w-16 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading products" /> : <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{productsQuery.data?.total ?? 0}</p>}
- </div>
- </div>
- </div>
- <div className={`group relative overflow-hidden rounded-xl border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 dark:bg-stone-950/80 ${lowStockCount > 0 ? "border-amber-300/80 hover:border-amber-300 hover:shadow-amber-500/15" : "border-white/90 hover:border-emerald-200 hover:shadow-emerald-500/10 dark:border-white/10"}`}>
- <span className={`absolute inset-x-0 top-0 h-1.5 ${lowStockCount > 0 ? "bg-amber-400" : "bg-emerald-400"}`} aria-hidden="true" />
- <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${lowStockCount > 0 ? "bg-amber-400/25" : "bg-emerald-400/20"}`} aria-hidden="true" />
- <div className="relative flex items-center gap-4 p-5 lg:p-6">
- <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${lowStockCount > 0 ? "bg-amber-500 shadow-amber-500/30" : "bg-emerald-500 shadow-emerald-500/30"}`}>
- <AlertTriangle className="size-6" aria-hidden="true" />
- </span>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Low stock · this page</p>
- {productsQuery.isLoading ? <div className="mt-2 h-7 w-16 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading low stock" /> : <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{lowStockCount}</p>}
- </div>
- {!productsQuery.isLoading && lowStockCount > 0 && (
- <span className="shrink-0 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-amber-800 ring-1 ring-amber-200/60">Reorder</span>
- )}
- </div>
- </div>
- </div>
- </section>
+ <MetricStrip label="Stock" columns={2}>
+ {/* This page kept its own metric component to the very end: a coloured
+ top bar, a blurred orb, a 56px icon tile that scaled and rotated on
+ hover, and a two-tone shadow -- four decorative devices on one
+ number, on a screen whose job is to tell you what is running out. */}
+ <StatCard title="Products · this page" value={productsQuery.data?.total ?? 0} isLoading={productsQuery.isLoading} />
+ <StatCard
+ title="Low stock · this page"
+ value={lowStockCount}
+ isLoading={productsQuery.isLoading}
+ tone={lowStockCount > 0 ? "warning" : "primary"}
+ hint={lowStockCount > 0 ? "Reorder due" : undefined}
+ />
+ </MetricStrip>
 
- <section aria-labelledby="inventory-products" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-amber-950/30 dark:via-stone-950 dark:to-orange-950/20">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg shadow-amber-500/25">
- <Package className="size-5" aria-hidden="true" />
- </span>
- <div>
- <h2 id="inventory-products" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Products</h2>
- </div>
+ <section aria-labelledby="inventory-products" className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+ <h2 id="inventory-products" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Products</h2>
  </div>
  <div className="p-4 sm:p-5">
  <DataTable
@@ -338,14 +314,11 @@ export default function InventoryPage() {
  </div>
  </section>
 
- <section aria-labelledby="inventory-movements" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-orange-950/30 dark:via-stone-950 dark:to-yellow-950/10">
+ <section aria-labelledby="inventory-movements" className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-orange-950/30 dark:via-stone-950 dark:to-yellow-950/10">
  <div className="flex items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white shadow-lg shadow-orange-500/25">
- <History className="size-5" aria-hidden="true" />
- </span>
  <div>
- <h2 id="inventory-movements" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Stock movements</h2>
+ <h2 id="inventory-movements" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Stock movements</h2>
  </div>
  </div>
  <Link href="/command-center" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">

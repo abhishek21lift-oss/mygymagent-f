@@ -87,11 +87,11 @@ export function PtPackagesSection() {
  const active = items.filter((p) => p.status === "ACTIVE")
 
  return (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <CardHeader className="border-b border-stone-100/80 bg-white px-5 py-5">
+ <Card className="overflow-hidden border-border bg-card">
+ <CardHeader className="border-b border-border bg-white px-5 py-5">
  <div className="flex flex-wrap items-center justify-between gap-3">
  <div>
- <CardTitle className="flex items-center gap-3 font-semibold text-xl text-stone-950">
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground flex items-center gap-3 text-stone-950">
  <span className="flex size-10 items-center justify-center rounded-xl bg-muted/40 text-orange-700"><Package className="size-4" /></span>
  PT packages
  </CardTitle>

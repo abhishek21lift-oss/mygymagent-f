@@ -150,7 +150,7 @@ export function GymSetupStep({ data, onUpdate, onContinue, onBack }: GymSetupSte
  <div className="space-y-2">
  <Label>Fitness Goal</Label>
  <Select value={form.fitnessGoal} onValueChange={(v) => updateField("fitnessGoal", v)}>
- <SelectTrigger className="h-11 rounded-lg border-stone-200/80 bg-card">
+ <SelectTrigger className="h-11 rounded-lg border-border bg-card">
  <SelectValue placeholder="Select goal" />
  </SelectTrigger>
  <SelectContent>
@@ -163,7 +163,7 @@ export function GymSetupStep({ data, onUpdate, onContinue, onBack }: GymSetupSte
  <div className="space-y-2">
  <Label>Lead Source</Label>
  <Select value={form.leadSource} onValueChange={(v) => updateField("leadSource", v)}>
- <SelectTrigger className="h-11 rounded-lg border-stone-200/80 bg-card">
+ <SelectTrigger className="h-11 rounded-lg border-border bg-card">
  <SelectValue placeholder="How did they hear about us?" />
  </SelectTrigger>
  <SelectContent>

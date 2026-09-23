@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/shared/empty-state"
 import { ErrorState } from "@/components/shared/error-state"
 import { StatCard } from "@/components/shared/stat-card"
+import { MetricStrip } from "@/components/shared/panel"
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans"
 import { useMembershipAnalytics, useMembershipRenewalReminders, useMemberships, usePauseMembership, useResumeMembership, useExtendMembership, useUpgradeMembership, useDowngradeMembership, useRenewMembership, useCancelMembership, useTransferMembership } from "@/lib/hooks/use-memberships"
 import type { Membership } from "@/lib/types/gym"
@@ -62,7 +63,8 @@ export default function MembershipLifecyclePage() {
  <PageHero
  id="memberships-title"
  icon={CreditCard}
- title="Membership Lifecycle"
+ title="Memberships"
+ description="Starts, freezes, renewals and expiries"
  variant="light"
  accent="emerald"
  actions={
@@ -77,26 +79,22 @@ export default function MembershipLifecyclePage() {
  }
  />
 
- <section aria-labelledby="memberships-pulse">
- <h2 id="memberships-pulse" className="mb-3 text-lg font-semibold tracking-tight">Lifecycle pulse</h2>
- <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+ {/* "Lifecycle pulse" is gone: five labelled tiles do not need a
+ heading announcing that they are figures. */}
+ <MetricStrip label="Membership lifecycle" columns={5}>
  <StatCard icon={Users} title="Total" value={stats.total as string | number | undefined} isLoading={loading} tone="primary" />
  <StatCard icon={PlayCircle} title="Active" value={stats.active as string | number | undefined} isLoading={loading} tone="success" />
  <StatCard icon={PauseCircle} title="Frozen" value={stats.frozen as string | number | undefined} isLoading={loading} tone="primary" />
  <StatCard icon={CalendarClock} title="Expiring 30d" value={stats.expiringNext30Days as string | number | undefined} isLoading={loading} tone="warning" />
  <StatCard icon={CreditCard} title="Expired" value={stats.expired as string | number | undefined} isLoading={loading} tone="destructive" />
- </div>
- </section>
+ </MetricStrip>
 
  <Card className="overflow-hidden rounded-xl">
- <CardHeader className="border-b px-5 py-4 sm:px-6">
+ <CardHeader className="border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex flex-wrap items-center justify-between gap-3">
  <div className="flex items-center gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
- <CreditCard className="size-5" aria-hidden="true" />
- </span>
  <div>
- <CardTitle id="memberships-plan-change" className="text-lg">Plan change</CardTitle>
+ <CardTitle id="memberships-plan-change" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Plan change</CardTitle>
  <CardDescription className="text-sm">Select a target plan for upgrades or downgrades.</CardDescription>
  </div>
  </div>
@@ -114,13 +112,10 @@ export default function MembershipLifecyclePage() {
  </Card>
 
  <Card className="overflow-hidden rounded-xl">
- <CardHeader className="border-b px-5 py-4 sm:px-6">
+ <CardHeader className="border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex items-center gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
- <CalendarClock className="size-5" aria-hidden="true" />
- </span>
  <div>
- <CardTitle id="memberships-renewals" className="text-lg">Renewal watchlist</CardTitle>
+ <CardTitle id="memberships-renewals" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Renewal watchlist</CardTitle>
  <CardDescription className="text-sm">Memberships expiring soon.</CardDescription>
  </div>
  </div>
@@ -154,13 +149,10 @@ export default function MembershipLifecyclePage() {
  </Card>
 
  <Card className="overflow-hidden rounded-xl">
- <CardHeader className="border-b px-5 py-4 sm:px-6">
+ <CardHeader className="border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex items-center gap-3">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
- <Users className="size-5" aria-hidden="true" />
- </span>
  <div>
- <CardTitle id="memberships-all" className="text-lg">All memberships</CardTitle>
+ <CardTitle id="memberships-all" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">All memberships</CardTitle>
  <CardDescription className="text-sm">Full lifecycle directory with quick actions.</CardDescription>
  </div>
  </div>

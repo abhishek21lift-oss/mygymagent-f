@@ -146,7 +146,7 @@ function SellMembershipDialog({ memberId }: { memberId: string }) {
  Sell Membership
  </Button>
  </DialogTrigger>
- <DialogContent className="border-white/90 bg-card ">
+ <DialogContent className="border-border bg-card">
  <DialogHeader>
  <DialogTitle>Sell a Membership</DialogTitle>
  </DialogHeader>
@@ -269,7 +269,7 @@ function CollectPaymentDialog({
  Collect Payment
  </Button>
  </DialogTrigger>
- <DialogContent className="border-white/90 bg-card ">
+ <DialogContent className="border-border bg-card">
  <DialogHeader>
  <DialogTitle>Collect Payment</DialogTitle>
  </DialogHeader>
@@ -871,7 +871,7 @@ function EditMemberDialog({
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>{children}</DialogTrigger>
- <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-white/90 bg-card ">
+ <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-border bg-card">
  <DialogHeader>
  <DialogTitle className="font-semibold text-xl tracking-tight">Edit Member</DialogTitle>
  </DialogHeader>
@@ -1480,7 +1480,7 @@ function MemberHeader({
 function QuickStatsRow({ memberId }: { memberId: string }) {
  return (
  <section aria-label="Member quick stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
- <Card className="group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
+ <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
  <span className="absolute inset-x-0 top-0 h-1.5 bg-emerald-400" aria-hidden="true" />
  <CardContent className="flex items-center gap-4 p-5">
  <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110">
@@ -1493,7 +1493,7 @@ function QuickStatsRow({ memberId }: { memberId: string }) {
  </CardContent>
  </Card>
 
- <Card className="group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
+ <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
  <span className="absolute inset-x-0 top-0 h-1.5 bg-cyan-400" aria-hidden="true" />
  <CardContent className="flex items-center gap-4 p-5">
  <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 transition-transform duration-300 group-hover:scale-110">
@@ -1508,7 +1508,7 @@ function QuickStatsRow({ memberId }: { memberId: string }) {
  </CardContent>
  </Card>
 
- <Card className="group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
+ <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
  <span className="absolute inset-x-0 top-0 h-1.5 bg-violet-600" aria-hidden="true" />
  <CardContent className="flex items-center gap-4 p-5">
  <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/30 transition-transform duration-300 group-hover:scale-110">
@@ -1523,7 +1523,7 @@ function QuickStatsRow({ memberId }: { memberId: string }) {
  </CardContent>
  </Card>
 
- <Card className="group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
+ <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
  <span className="absolute inset-x-0 top-0 h-1.5 bg-amber-400" aria-hidden="true" />
  <CardContent className="flex items-center gap-4 p-5">
  <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110">
@@ -1602,14 +1602,14 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  <EntryAccessCard memberId={memberId} branchId={member.primaryBranchId} />
 
  {/* AI Progress Card */}
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card p-0 shadow-sm shadow-violet-900/5 ">
+ <Card className="overflow-hidden rounded-xl border-border bg-card p-0">
  <CardContent className="p-0">
  <MemberAiProgress memberId={memberId} />
  </CardContent>
  </Card>
 
  {/* Tabbed Content */}
- <Card className="overflow-hidden rounded-xl border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <Card className="overflow-hidden rounded-xl border-border bg-card">
  <CardContent className="p-4 sm:p-6">
  <Member360Tabs memberId={memberId} />
  </CardContent>

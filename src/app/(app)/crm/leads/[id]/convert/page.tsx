@@ -88,22 +88,16 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  />
 
  <div className="grid gap-5 lg:grid-cols-[1fr_0.85fr]">
- <Card className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/25">
- <CheckCircle2 className="size-5" aria-hidden="true" />
- </span>
+ <Card className="overflow-hidden rounded-xl border border-border bg-card">
+ <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Conversion handoff</h2>
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Conversion handoff</h2>
  </div>
  </div>
  <CardContent className="space-y-6 p-5 sm:p-6">
  <div className="flex items-start gap-3 rounded-xl border border-blue-100/70 bg-muted/40 p-5">
- <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-500/25">
- <UserRound className="size-5" aria-hidden="true" />
- </span>
  <div className="min-w-0">
- <h3 className="text-sm font-extrabold tracking-tight text-stone-950">{lead.firstName} {lead.lastName}</h3>
+ <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{lead.firstName} {lead.lastName}</h3>
  <p className="mt-0.5 truncate text-sm font-medium text-stone-600">{lead.email ?? "No email"} · {lead.phone ?? "No phone"}</p>
  <p className="mt-1 text-xs font-medium text-stone-600">Source: {lead.source ?? "Unknown"}</p>
  </div>
@@ -159,7 +153,7 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-cyan-400/25 blur-3xl" aria-hidden="true" />
  <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
  <div className="relative flex items-center gap-3">
- <span className="flex size-11 items-center justify-center rounded-lg bg-card ring-1 ring-white/20 ">
+ <span className="flex size-11 items-center justify-center rounded-lg bg-card ring-1 ring-white/20">
  <Sparkles className="size-5" aria-hidden="true" />
  </span>
  <div>
@@ -167,13 +161,13 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  </div>
  </div>
  <ul className="relative mt-6 space-y-3 text-sm">
- <li className="rounded-lg border border-white/15 bg-card p-4 ">
+ <li className="rounded-lg border border-white/15 bg-card p-4">
  <p className="font-extrabold">Member profile is created</p>
  </li>
- <li className="rounded-lg border border-white/15 bg-card p-4 ">
+ <li className="rounded-lg border border-white/15 bg-card p-4">
  <p className="font-extrabold">Branch + trainer attached</p>
  </li>
- <li className="rounded-lg border border-white/15 bg-card p-4 ">
+ <li className="rounded-lg border border-white/15 bg-card p-4">
  <p className="font-extrabold">Pipeline marked won</p>
  </li>
  </ul>

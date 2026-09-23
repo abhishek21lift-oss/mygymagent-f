@@ -22,10 +22,10 @@ export default function AiActionsPage() {
  variant="dark"
  accent="violet"
  icon={ShieldCheck}
- title="AI Action Center"
+ title="AI actions"
  actions={
  <>
- <span className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-card px-4 py-2.5 text-sm font-extrabold ring-1 ring-white/20 ">
+ <span className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-card px-4 py-2.5 text-sm font-extrabold ring-1 ring-white/20">
  <Clock3 className="size-4 text-amber-300" aria-hidden="true" />
  {actions.isLoading ? "Syncing…" : `${count} pending`}
  </span>
@@ -51,16 +51,16 @@ export default function AiActionsPage() {
  ) : actions.isLoading ? (
  <div className="grid gap-4" aria-label="Loading proposals">
  {[1, 2, 3].map((i) => (
- <Card key={i} className="border-white/90 bg-card"><CardContent className="py-10"><div className="h-6 w-2/3 animate-pulse rounded-full bg-stone-200" /><div className="mt-3 h-4 w-full animate-pulse rounded-full bg-stone-100" /></CardContent></Card>
+ <Card key={i} className="border-border bg-card"><CardContent className="py-10"><div className="h-6 w-2/3 animate-pulse rounded-full bg-stone-200" /><div className="mt-3 h-4 w-full animate-pulse rounded-full bg-stone-100" /></CardContent></Card>
  ))}
  </div>
  ) : actions.data?.items.length === 0 ? (
- <Card className="overflow-hidden border-white/90 bg-card shadow-sm ">
+ <Card className="overflow-hidden border-border bg-card shadow-sm">
  <CardContent className="flex flex-col items-center gap-2 py-14 text-center">
  <span className="flex size-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
  <Check className="size-7" aria-hidden="true" />
  </span>
- <p className="mt-2 font-semibold text-xl font-semibold text-stone-950">No pending AI actions</p>
+ <p className="mt-2 text-base font-semibold text-foreground">No pending AI actions</p>
  <Link href="/ai" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg bg-stone-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
  Ask AI <ArrowRight className="size-4" aria-hidden="true" />
  </Link>
@@ -73,20 +73,17 @@ export default function AiActionsPage() {
  <Zap className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="aia-queue" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950">Approval queue</h2>
+ <h2 id="aia-queue" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Approval queue</h2>
  </div>
  </div>
  <div className="grid gap-4">
  {actions.data?.items.map((action) => (
- <Card key={action.id} className="group relative overflow-hidden border-white/90 bg-card shadow-sm shadow-violet-900/5 transition duration-300 hover:-translate-y-0.5">
+ <Card key={action.id} className="group relative overflow-hidden border-border bg-card transition duration-300 hover:-translate-y-0.5">
  <span className="absolute inset-x-0 top-0 h-1.5 bg-violet-600" aria-hidden="true" />
  <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
  <div className="flex min-w-0 items-start gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-md shadow-violet-500/25">
- <Sparkles className="size-5" aria-hidden="true" />
- </span>
  <div className="min-w-0">
- <CardTitle className="text-base font-extrabold tracking-tight text-stone-950">{action.type.replaceAll("_", " ")}</CardTitle>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">{action.type.replaceAll("_", " ")}</CardTitle>
  <p className="mt-1 text-sm font-medium leading-6 text-stone-600">{action.reasoning}</p>
  </div>
  </div>

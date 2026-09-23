@@ -35,7 +35,7 @@ interface ContactEmergencyStepProps {
 const INDIAN_STATES = [ "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu & Kashmir", "Ladakh", "Chandigarh", "Puducherry", "Andaman & Nicobar Islands", "Dadra & Nagar Haveli", "Daman & Diu", "Lakshadweep"
 ]
 
-const inputClass = "h-11 rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+const inputClass = "h-11 rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
 
 export function ContactEmergencyStep({ data, onUpdate, onContinue, onBack }: ContactEmergencyStepProps) {
  const [form, setForm] = React.useState<ContactEmergencyData>(data)
@@ -52,10 +52,7 @@ export function ContactEmergencyStep({ data, onUpdate, onContinue, onBack }: Con
  <div className="flex flex-col gap-5">
  {/* Address Section */}
  <section aria-labelledby="contact-address-heading" className="overflow-hidden rounded-xl border border-cyan-100/70 bg-card">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-4">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-white shadow-md shadow-cyan-500/25">
- <MapPin className="size-4" aria-hidden="true" />
- </span>
+ <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-4">
  <div>
  <h3 id="contact-address-heading" className="font-semibold text-lg font-semibold tracking-tight text-stone-950">Address</h3>
  <p className="text-xs font-medium text-stone-600">Where should bills and updates go?</p>
@@ -134,10 +131,7 @@ export function ContactEmergencyStep({ data, onUpdate, onContinue, onBack }: Con
 
  {/* Emergency Contact Section */}
  <section aria-labelledby="contact-emergency-heading" className="overflow-hidden rounded-xl border border-rose-100/70 bg-card">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-4">
- <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-rose-500 text-white shadow-md shadow-rose-500/25">
- <PhoneCall className="size-4" aria-hidden="true" />
- </span>
+ <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-4">
  <div>
  <h3 id="contact-emergency-heading" className="font-semibold text-lg font-semibold tracking-tight text-stone-950">Emergency Contact</h3>
  <p className="text-xs font-medium text-stone-600">Someone we can reach when it matters most.</p>

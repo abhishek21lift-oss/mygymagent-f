@@ -279,7 +279,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  value={form.firstName}
  onChange={(e) => updateField("firstName", e.target.value)}
  placeholder="John"
- className="h-11 rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+ className="h-11 rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
  />
  </div>
  <div className="space-y-2">
@@ -289,7 +289,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  value={form.lastName}
  onChange={(e) => updateField("lastName", e.target.value)}
  placeholder="Doe"
- className="h-11 rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+ className="h-11 rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
  />
  </div>
  </div>
@@ -302,7 +302,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  value={form.phone}
  onChange={(e) => updateField("phone", e.target.value)}
  placeholder="+91 98765 43210"
- className="h-11 rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+ className="h-11 rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
  />
  </div>
  <div className="space-y-2">
@@ -313,7 +313,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  value={form.email}
  onChange={(e) => updateField("email", e.target.value)}
  placeholder="john@example.com"
- className="h-11 rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+ className="h-11 rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
  />
  </div>
  </div>
@@ -326,13 +326,13 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  type="date"
  value={form.dateOfBirth}
  onChange={(e) => updateField("dateOfBirth", e.target.value)}
- className="h-11 rounded-lg border-stone-200/80 bg-card focus-visible:ring-violet-500/20"
+ className="h-11 rounded-lg border-border bg-card focus-visible:ring-violet-500/20"
  />
  </div>
  <div className="space-y-2">
  <Label htmlFor="gender">Gender</Label>
  <Select value={form.gender} onValueChange={(v) => updateField("gender", v as PersonalInfoData["gender"])}>
- <SelectTrigger id="gender" className="h-11 rounded-lg border-stone-200/80 bg-card">
+ <SelectTrigger id="gender" className="h-11 rounded-lg border-border bg-card">
  <SelectValue placeholder="Select gender" />
  </SelectTrigger>
  <SelectContent>

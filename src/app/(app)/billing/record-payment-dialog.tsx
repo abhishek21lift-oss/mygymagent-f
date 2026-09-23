@@ -102,7 +102,7 @@ function InvoiceLinkPicker({
  onFocus={() => setOpen(true)}
  />
  {open && search.trim() && (
- <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-stone-200/80 bg-white p-1.5 shadow-sm dark:border-white/10 dark:bg-stone-950">
+ <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-border bg-white p-1.5 shadow-sm dark:bg-stone-950">
  {invoicesQuery.isLoading && <p className="p-2 text-sm text-muted-foreground">Searching...</p>}
  {!invoicesQuery.isLoading && results.length === 0 && (
  <p className="p-2 text-sm text-muted-foreground">No invoices match.</p>

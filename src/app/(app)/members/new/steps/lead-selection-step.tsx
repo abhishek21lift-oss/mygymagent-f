@@ -53,7 +53,7 @@ export function LeadSelectionStep({ onSelectLead, onSkip }: LeadSelectionStepPro
  placeholder="Search by name, email or phone..."
  value={search}
  onChange={(e) => setSearch(e.target.value)}
- className="h-11 rounded-lg border-stone-200/80 bg-card pl-10 focus-visible:ring-violet-500/20"
+ className="h-11 rounded-lg border-border bg-card pl-10 focus-visible:ring-violet-500/20"
  />
  </div>
  </div>

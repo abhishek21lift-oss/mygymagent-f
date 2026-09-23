@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { CalendarCheck, LogIn, LogOut, ScanLine, ShieldAlert, Sparkles, Users } from "lucide-react";
+import { CalendarCheck, LogIn, LogOut, Sparkles } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
@@ -49,14 +49,9 @@ function CheckInForm() {
  }
 
  return (
- <section aria-labelledby="attendance-checkin" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-cyan-950/40 dark:via-stone-950 dark:to-teal-950/30">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg shadow-cyan-500/25">
- <ScanLine className="size-5" aria-hidden="true" />
- </span>
- <div>
- <h2 id="attendance-checkin" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Manual check-in</h2>
- </div>
+ <section aria-labelledby="attendance-checkin" className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+ <h2 id="attendance-checkin" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Manual check-in</h2>
  </div>
  <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:p-6">
  <div className="flex-1">
@@ -97,13 +92,10 @@ function LiveBoards() {
 
  return (
  <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
- <section aria-labelledby="attendance-inside" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 [animation-delay:125ms] dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
+ <section aria-labelledby="attendance-inside" className="overflow-hidden rounded-xl border border-border bg-card [animation-delay:125ms] dark:bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
  <div className="flex min-w-0 items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
- <Users className="size-5" aria-hidden="true" />
- </span>
- <h2 id="attendance-inside" className="truncate font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Who&apos;s inside</h2>
+ <h2 id="attendance-inside" className="truncate text-sm font-semibold tracking-tight text-foreground">Who&apos;s inside</h2>
  </div>
  <span aria-label={`${inside.length} inside now`} className="shrink-0 rounded-full bg-emerald-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-emerald-500/20">
  {live.isLoading ? "…" : inside.length}
@@ -119,7 +111,7 @@ function LiveBoards() {
  ) : (
  <ul className="flex flex-col gap-2">
  {inside.map((entry) => (
- <li key={entry.id} className="flex items-center justify-between gap-3 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:border-white/10 dark:bg-card">
+ <li key={entry.id} className="flex items-center justify-between gap-3 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:bg-card">
  <span className="min-w-0 truncate text-sm font-bold text-stone-900 dark:text-stone-100">
  {entry.member ? `${entry.member.firstName} ${entry.member.lastName}` : "Unknown member"}
  </span>
@@ -133,13 +125,10 @@ function LiveBoards() {
  </div>
  </section>
 
- <section aria-labelledby="attendance-denied" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 [animation-delay:140ms] dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-rose-950/40 dark:via-stone-950 dark:to-orange-950/20">
+ <section aria-labelledby="attendance-denied" className="overflow-hidden rounded-xl border border-border bg-card [animation-delay:140ms] dark:bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-rose-950/40 dark:via-stone-950 dark:to-orange-950/20">
  <div className="flex min-w-0 items-center gap-3">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-lg shadow-rose-500/25">
- <ShieldAlert className="size-5" aria-hidden="true" />
- </span>
- <h2 id="attendance-denied" className="truncate font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Denied today</h2>
+ <h2 id="attendance-denied" className="truncate text-sm font-semibold tracking-tight text-foreground">Denied today</h2>
  </div>
  <span aria-label={`${denied.length} denied today`} className="shrink-0 rounded-full bg-rose-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-rose-500/20">
  {live.isLoading ? "…" : denied.length}
@@ -155,7 +144,7 @@ function LiveBoards() {
  ) : (
  <ul className="flex flex-col gap-2">
  {denied.map((entry) => (
- <li key={entry.id} className="flex flex-col gap-1 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:border-white/10 dark:bg-card">
+ <li key={entry.id} className="flex flex-col gap-1 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:bg-card">
  <span className="truncate text-sm font-bold text-stone-900 dark:text-stone-100">
  {entry.member ? `${entry.member.firstName} ${entry.member.lastName}` : "Unknown member"}
  </span>
@@ -239,6 +228,7 @@ export default function AttendancePage() {
  id="attendance-title"
  icon={CalendarCheck}
  title="Attendance"
+ description="Check-ins, the live view and the visit log"
  variant="light"
  accent="cyan"
  actions={
@@ -257,14 +247,9 @@ export default function AttendancePage() {
 
  <LiveBoards />
 
- <section aria-labelledby="attendance-log" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
- <div className="flex items-center gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-cyan-950/40 dark:via-stone-950 dark:to-blue-950/20">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg shadow-cyan-500/25">
- <CalendarCheck className="size-5" aria-hidden="true" />
- </span>
- <div>
- <h2 id="attendance-log" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Visit log</h2>
- </div>
+ <section aria-labelledby="attendance-log" className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+ <h2 id="attendance-log" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Visit log</h2>
  </div>
  <div className="p-4 sm:p-5">
  <DataTable

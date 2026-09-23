@@ -56,7 +56,7 @@ function SelectField({
  <select
  value={value}
  onChange={(e) => onChange(e.target.value)}
- className="h-10 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-900 outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-white/10 dark:bg-stone-900 dark:text-white"
+ className="h-10 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-900 outline-none focus:ring-2 focus:ring-indigo-500/30 dark:bg-stone-900 dark:text-white"
  >
  <option value="">{placeholder}</option>
  {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -104,7 +104,7 @@ export function InventoryOperationsPanel() {
  <section className="grid gap-5" aria-labelledby="inventory-operations">
  <InventoryNav />
  <div>
- <h2 id="inventory-operations" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Operations</h2>
+ <h2 id="inventory-operations" className="text-base font-semibold tracking-tight text-foreground">Operations</h2>
  <p className="mt-1 text-sm font-medium text-stone-500">Procure, receive, transfer and sell without bypassing the stock ledger.</p>
  </div>
 
@@ -116,7 +116,7 @@ export function InventoryOperationsPanel() {
  ["Transfers", dashboard.data.transfersInTransit],
  ["Sales", dashboard.data.salesTotal.toFixed(2)],
  ].map(([label, value]) => (
- <div key={String(label)} className="rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/70">
+ <div key={String(label)} className="rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/70">
  <p className="text-[11px] font-black uppercase tracking-[.16em] text-stone-500">{label}</p>
  <p className="mt-2 text-xl font-black tabular-nums text-stone-950 dark:text-white">{value}</p>
  </div>
@@ -127,7 +127,7 @@ export function InventoryOperationsPanel() {
  {hasPermission("inventory.manage") && (
  <div className="grid gap-4 lg:grid-cols-4">
  <form
- className="grid gap-3 rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/75"
+ className="grid gap-3 rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/75"
  onSubmit={(e) => { e.preventDefault(); if (!supplierName.trim()) return; void run(() => createSupplier.mutateAsync({ name: supplierName.trim() }), "Supplier created").then(() => setSupplierName("")) }}
  >
  <div className="flex items-center gap-2"><Users className="size-4 text-indigo-600" /><h3 className="font-bold">Supplier</h3></div>
@@ -136,7 +136,7 @@ export function InventoryOperationsPanel() {
  </form>
 
  <form
- className="grid gap-3 rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/75"
+ className="grid gap-3 rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/75"
  onSubmit={(e) => {
  e.preventDefault()
  if (!po.supplierId || !po.productId) return
@@ -155,7 +155,7 @@ export function InventoryOperationsPanel() {
  </form>
 
  <form
- className="grid gap-3 rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/75"
+ className="grid gap-3 rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/75"
  onSubmit={(e) => {
  e.preventDefault()
  if (!transfer.from || !transfer.to || !transfer.productId) return
@@ -174,7 +174,7 @@ export function InventoryOperationsPanel() {
  </form>
 
  <form
- className="grid gap-3 rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/75"
+ className="grid gap-3 rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/75"
  onSubmit={(e) => {
  e.preventDefault()
  if (!sale.productId) return
@@ -195,7 +195,7 @@ export function InventoryOperationsPanel() {
  )}
 
  <div className="grid gap-4 xl:grid-cols-3">
- <div className="rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/70">
+ <div className="rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/70">
  <div className="mb-3 flex items-center justify-between"><h3 className="font-bold">Purchase orders</h3><Badge variant="secondary">{purchaseOrders.data?.length ?? 0}</Badge></div>
  <div className="grid gap-2">
  {(purchaseOrders.data ?? []).slice(0, 6).map((po) => (
@@ -209,7 +209,7 @@ export function InventoryOperationsPanel() {
  </div>
  </div>
 
- <div className="rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/70">
+ <div className="rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/70">
  <div className="mb-3 flex items-center justify-between"><h3 className="font-bold">Transfers</h3><Badge variant="secondary">{transfers.data?.length ?? 0}</Badge></div>
  <div className="grid gap-2">
  {(transfers.data ?? []).slice(0, 6).map((transfer) => (
@@ -222,7 +222,7 @@ export function InventoryOperationsPanel() {
  </div>
  </div>
 
- <div className="rounded-lg border border-white/80 bg-card p-4 shadow-sm dark:border-white/10 dark:bg-stone-950/70">
+ <div className="rounded-lg border border-border bg-card p-4 shadow-sm dark:bg-stone-950/70">
  <div className="mb-3 flex items-center justify-between"><h3 className="font-bold">Recent sales</h3><Badge variant="secondary">{sales.data?.length ?? 0}</Badge></div>
  <div className="grid gap-2">
  {(sales.data ?? []).slice(0, 6).map((sale) => (
