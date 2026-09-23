@@ -25,7 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
  if (isLoading || !isAuthenticated) {
  return (
  <div className="flex h-svh items-center justify-center bg-background px-4">
- <div role="status" aria-label="Loading application" className="relative flex w-full max-w-sm flex-col gap-3 overflow-hidden rounded-lg border border-border/60 bg-card/80 p-6 shadow-sm ">
+ <div role="status" aria-label="Loading application" className="relative flex w-full max-w-sm flex-col gap-3 overflow-hidden rounded-lg border border-sidebar-border bg-card/80 p-6 shadow-sm ">
  <span aria-hidden="true" className="absolute -right-8 -top-8 size-24 rounded-full bg-violet-500/10 blur-2xl" />
  <Skeleton className="h-10 w-40 rounded-xl" />
  <Skeleton className="h-4 w-full rounded-md" />
@@ -45,7 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
  return (
  <div className="flex h-svh overflow-hidden bg-background">
- <div className={"hidden shrink-0 border-r border-border/60 bg-sidebar/85 p-2 shadow-[8px_0_30px_rgba(0,0,0,0.035)] transition-[width] duration-300 md:block " + (sidebarCollapsed ? "w-[88px]" : "w-72")}>
+ <div className={"hidden shrink-0 border-r border-sidebar-border bg-sidebar p-2 transition-[width] duration-300 md:block " + (sidebarCollapsed ? "w-[88px]" : "w-72")}>
  <SidebarNav collapsed={sidebarCollapsed} className="rounded-lg" />
  </div>
  <MobileNav open={mobileNavOpen} onOpenChange={setMobileNavOpen} />

@@ -17,7 +17,7 @@ interface TabItem {
 }
 
 const leftTabs: TabItem[] = [
- { title: "Home", href: "/command-center", icon: LayoutDashboard },
+ { title: "Home", href: "/dashboard", icon: LayoutDashboard },
  { title: "Members", href: "/members", icon: Users, permission: ["members.read", "members.read_assigned"] },
 ];
 

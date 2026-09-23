@@ -57,6 +57,7 @@ import {
 } from "@/lib/hooks/use-analytics";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { PageHero } from "@/components/shared/page-hero";
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
 function formatMoney(value: string | number | undefined, currency = "INR") {
  const amount = Number(value ?? 0);
@@ -79,45 +80,8 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; ring: string
  blue: { bar: "bg-blue-600", tile: "bg-blue-600 shadow-blue-500/30", ring: "hover:border-blue-200 hover:shadow-blue-500/10" },
 };
 
-function MetricCard({
- label,
- value,
- detail,
- icon: Icon,
- tone,
- trend,
- href,
- loading,
-}: {
- label: string;
- value: string | number;
- detail?: string;
- icon: typeof Activity;
- tone: MetricTone;
- trend?: string;
- href?: string;
- loading?: boolean;
-}) {
- const t = METRIC_TONES[tone];
- const body = (
- <Card className={`group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 ${t.ring}`}>
- <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
- <CardContent className="relative p-5">
- <div className="flex items-start justify-between gap-4">
- <span className={`flex size-11 items-center justify-center rounded-lg text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
- <Icon className="size-5" aria-hidden="true" />
- </span>
- {trend ? <Badge variant="secondary" className="rounded-full bg-card px-2.5 py-1 text-xs font-bold ring-1 ring-stone-200/60">{trend}</Badge> : null}
- </div>
- <div className="mt-5">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
- {loading ? <Skeleton className="mt-2 h-9 w-32 rounded-xl" /> : <p className="mt-1 text-3xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>}
- {detail ? <p className="mt-1 text-xs font-medium text-stone-600">{detail}</p> : null}
- </div>
- </CardContent>
- </Card>
- );
- return href ? <Link href={href} className="block min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">{body}</Link> : body;
+function MetricCard({ label, value, detail, tone, loading }: { label: string; value: React.ReactNode; detail?: string; icon?: unknown; tone?: string; trend?: unknown; href?: string; loading?: boolean }) {
+ return <StatCard title={label} value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")} isLoading={Boolean(loading)} hint={detail} tone={toStatTone(tone)} />;
 }
 
 function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {

@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/shared/page-hero";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
 function money(value: string | undefined, currency: string) {
  const amount = Number(value ?? 0);
@@ -73,65 +74,11 @@ const STAT_TONES: Record<
  },
 };
 
-function Stat({
- icon: Icon,
- label,
- value,
- hint,
- loading,
- tone,
- delta,
-}: {
- icon: typeof Users;
- label: string;
- value: string;
- hint?: string;
- loading: boolean;
- tone: StatTone;
- delta?: string;
-}) {
- const t = STAT_TONES[tone];
- return (
- <Card
- className={`group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] ${t.cardRing}`}
- >
- <span
- className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`}
- aria-hidden="true"
- />
- <div
- className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`}
- aria-hidden="true"
- />
- <CardContent className="relative flex items-center gap-4 p-5 lg:p-6">
- <span
- className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg ${t.tile} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}
- >
- <Icon className="size-6" aria-hidden="true" />
- </span>
- <div className="min-w-0 flex-1">
- <div className="flex items-center justify-between gap-2">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">
- {label}
- </p>
- {delta && !loading && (
- <span
- className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-extrabold ${t.softBg}`}
- >
- {delta}
- </span>
- )}
- </div>
- <p
- className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums lg:text-2xl"
- aria-live="polite"
- >
- {loading ? <span className="text-stone-300">—</span> : value}
- </p>
- {hint ? <p className="mt-1 text-xs font-medium text-stone-600">{hint}</p> : null} </div>
- </CardContent>
- </Card>
- );
+function Stat({ label, value, hint, loading, tone, delta }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string; delta?: React.ReactNode }) {
+ // `delta` folds into the hint line rather than earning its own decorated
+ // slot; it is a qualifier on the number, not a second number.
+ const detail = [hint, typeof delta === "string" ? delta : undefined].filter(Boolean).join(" · ");
+ return <StatCard title={label} value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")} isLoading={Boolean(loading)} hint={detail || undefined} tone={toStatTone(tone)} />;
 }
 
 /* ------------------------------------------------------------------ */
