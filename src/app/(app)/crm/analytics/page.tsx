@@ -16,47 +16,47 @@ import { useSalesFunnel, useSalesSourcePerformance, useSalesLostReasons, useSale
 const statusLabels: Record<string, string> = { NEW: "New", CONTACTED: "Contacted", QUALIFIED: "Qualified", TRIAL: "Trial", PROPOSAL: "Proposal", WON: "Won", LOST: "Lost" }
 
 const STATUS_BARS: Record<string, string> = {
- NEW: "from-blue-500 to-indigo-500",
- CONTACTED: "from-cyan-400 to-blue-500",
- QUALIFIED: "from-violet-500 to-purple-500",
- TRIAL: "from-fuchsia-500 to-violet-500",
- PROPOSAL: "from-amber-400 to-orange-500",
- WON: "from-emerald-400 to-teal-500",
- LOST: "from-rose-500 to-orange-500",
+ NEW: "bg-blue-500",
+ CONTACTED: "bg-cyan-400",
+ QUALIFIED: "bg-violet-500",
+ TRIAL: "bg-fuchsia-500",
+ PROPOSAL: "bg-amber-400",
+ WON: "bg-emerald-400",
+ LOST: "bg-rose-500",
 }
 
 type MetricTone = "cyan" | "violet" | "blue" | "amber" | "emerald"
 
 const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string; ring: string }> = {
  cyan: {
-  bar: "from-cyan-400 via-sky-500 to-blue-600",
-  tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30",
-  orb: "bg-cyan-400/20",
-  ring: "hover:border-cyan-200 hover:shadow-cyan-500/10",
+ bar: "bg-cyan-400",
+ tile: "bg-cyan-500 shadow-cyan-500/30",
+ orb: "bg-cyan-400/20",
+ ring: "hover:border-cyan-200 hover:shadow-cyan-500/10",
  },
  violet: {
-  bar: "from-violet-600 via-purple-600 to-fuchsia-600",
-  tile: "from-violet-600 to-fuchsia-600 shadow-violet-500/30",
-  orb: "bg-fuchsia-400/20",
-  ring: "hover:border-violet-200 hover:shadow-violet-500/10",
+ bar: "bg-violet-600",
+ tile: "bg-violet-600 shadow-violet-500/30",
+ orb: "bg-fuchsia-400/20",
+ ring: "hover:border-violet-200 hover:shadow-violet-500/10",
  },
  blue: {
-  bar: "from-blue-500 via-indigo-500 to-violet-600",
-  tile: "from-blue-600 to-indigo-600 shadow-blue-500/30",
-  orb: "bg-blue-400/20",
-  ring: "hover:border-blue-200 hover:shadow-blue-500/10",
+ bar: "bg-blue-500",
+ tile: "bg-blue-600 shadow-blue-500/30",
+ orb: "bg-blue-400/20",
+ ring: "hover:border-blue-200 hover:shadow-blue-500/10",
  },
  amber: {
-  bar: "from-amber-400 via-orange-500 to-rose-500",
-  tile: "from-amber-500 to-orange-600 shadow-amber-500/30",
-  orb: "bg-amber-400/20",
-  ring: "hover:border-amber-200 hover:shadow-amber-500/10",
+ bar: "bg-amber-400",
+ tile: "bg-amber-500 shadow-amber-500/30",
+ orb: "bg-amber-400/20",
+ ring: "hover:border-amber-200 hover:shadow-amber-500/10",
  },
  emerald: {
-  bar: "from-emerald-400 via-teal-500 to-green-600",
-  tile: "from-emerald-500 to-teal-600 shadow-emerald-500/30",
-  orb: "bg-emerald-400/20",
-  ring: "hover:border-emerald-200 hover:shadow-emerald-500/10",
+ bar: "bg-emerald-400",
+ tile: "bg-emerald-500 shadow-emerald-500/30",
+ orb: "bg-emerald-400/20",
+ ring: "hover:border-emerald-200 hover:shadow-emerald-500/10",
  },
 }
 
@@ -75,255 +75,251 @@ export default function SalesAnalyticsPage() {
  const statusRows = data?.byStatus ?? []
 
  return (
-  <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
-   <div
-    className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]"
-    aria-hidden="true"
-   />
-   <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-    <PageHero
-     id="analytics-title"
-     icon={BarChart3}
-     title="Analytics"
-     variant="light"
-     accent="violet"
-     actions={
-      <>
-       <Button asChild variant="outline" className="min-h-11 rounded-2xl border-blue-200 bg-white/80 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-        <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Sales OS</Link>
-       </Button>
-       <Button asChild className="min-h-11 rounded-2xl bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-        <Link href="/crm/follow-ups">Follow-ups <ArrowRight className="size-4" aria-hidden="true" /></Link>
-       </Button>
-      </>
-     }
-    />
+ <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+ <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <PageHero
+ id="analytics-title"
+ icon={BarChart3}
+ title="Analytics"
+ variant="light"
+ accent="violet"
+ actions={
+ <>
+ <Button asChild variant="outline" className="min-h-11 rounded-lg border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Sales OS</Link>
+ </Button>
+ <Button asChild className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Link href="/crm/follow-ups">Follow-ups <ArrowRight className="size-4" aria-hidden="true" /></Link>
+ </Button>
+ </>
+ }
+ />
 
-    <section aria-labelledby="analytics-window" className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-     <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-       <h2 id="analytics-window" className="font-serif text-xl font-semibold tracking-tight text-stone-950">
-        Reporting window
-       </h2>
-      </div>
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:items-end">
-       <div>
-        <label htmlFor="sales-from" className="mb-1 block text-xs font-bold text-stone-600">From</label>
-        <Input id="sales-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
-       </div>
-       <div>
-        <label htmlFor="sales-to" className="mb-1 block text-xs font-bold text-stone-600">To</label>
-        <Input id="sales-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} />
-       </div>
-       <Button variant="ghost" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:mt-5" onClick={() => { setFrom(""); setTo("") }}>Reset</Button>
-      </div>
-     </div>
-    </section>
+ <section aria-labelledby="analytics-window" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+ <div>
+ <h2 id="analytics-window" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">
+ Reporting window
+ </h2>
+ </div>
+ <div className="grid grid-cols-2 gap-2 sm:flex sm:items-end">
+ <div>
+ <label htmlFor="sales-from" className="mb-1 block text-xs font-bold text-stone-600">From</label>
+ <Input id="sales-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+ </div>
+ <div>
+ <label htmlFor="sales-to" className="mb-1 block text-xs font-bold text-stone-600">To</label>
+ <Input id="sales-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} />
+ </div>
+ <Button variant="ghost" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:mt-5" onClick={() => { setFrom(""); setTo("") }}>Reset</Button>
+ </div>
+ </div>
+ </section>
 
-    <section aria-label="Funnel snapshot">
-     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} tone="cyan" />
-      <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} tone="emerald" />
-      <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} tone="violet" />
-      <Metric icon={Clock3} label="Avg. conversion" value={data?.averageDaysToConversion == null ? "—" : `${data.averageDaysToConversion}d`} tone="amber" />
-      <Metric icon={ListChecks} label="Follow-up completion" value={`${data?.followUps?.completionRatePct ?? 0}%`} tone="blue" />
-     </div>
-    </section>
+ <section aria-label="Funnel snapshot">
+ <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+ <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} tone="cyan" />
+ <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} tone="emerald" />
+ <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} tone="violet" />
+ <Metric icon={Clock3} label="Avg. conversion" value={data?.averageDaysToConversion == null ? "—" : `${data.averageDaysToConversion}d`} tone="amber" />
+ <Metric icon={ListChecks} label="Follow-up completion" value={`${data?.followUps?.completionRatePct ?? 0}%`} tone="blue" />
+ </div>
+ </section>
 
-    <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-     <div className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-cyan-50/60 px-5 py-5">
-       <div>
-        <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Pipeline distribution</h2>
-       </div>
-       <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/25">
-        <Flame className="size-5" aria-hidden="true" />
-       </span>
-      </div>
-      <div className="space-y-4 p-5 sm:p-6">
-       {statusRows.length === 0 && <p className="py-8 text-center text-sm font-medium text-stone-600">No sales data for this window.</p>}
-       {statusRows.map((row) => {
-        const percent = data?.totalLeads ? Math.round((row.count / data.totalLeads) * 100) : 0
-        const bar = STATUS_BARS[row.status] ?? "from-blue-500 to-cyan-500"
-        return (
-         <div key={row.status}>
-          <div className="mb-2 flex items-center justify-between text-sm">
-           <div className="flex items-center gap-2">
-            <Badge variant={row.status === "WON" ? "success" : row.status === "LOST" ? "destructive" : row.status === "TRIAL" || row.status === "QUALIFIED" ? "warning" : row.status === "PROPOSAL" ? "secondary" : "secondary"}>{statusLabels[row.status] ?? row.status}</Badge>
-            <span className="font-medium text-stone-600">{row.count} leads</span>
-           </div>
-           <span className="font-extrabold text-stone-950 tabular-nums">{percent}%</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-stone-100" role="presentation">
-           <div className={`h-full rounded-full bg-gradient-to-r transition-all ${bar}`} style={{ width: `${percent}%` }} />
-          </div>
-         </div>
-        )
-       })}
-      </div>
-     </div>
+ <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+ <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div>
+ <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Pipeline distribution</h2>
+ </div>
+ <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
+ <Flame className="size-5" aria-hidden="true" />
+ </span>
+ </div>
+ <div className="space-y-4 p-5 sm:p-6">
+ {statusRows.length === 0 && <p className="py-8 text-center text-sm font-medium text-stone-600">No sales data for this window.</p>}
+ {statusRows.map((row) => {
+ const percent = data?.totalLeads ? Math.round((row.count / data.totalLeads) * 100) : 0
+ const bar = STATUS_BARS[row.status] ?? "bg-blue-500"
+ return (
+ <div key={row.status}>
+ <div className="mb-2 flex items-center justify-between text-sm">
+ <div className="flex items-center gap-2">
+ <Badge variant={row.status === "WON" ? "success" : row.status === "LOST" ? "destructive" : row.status === "TRIAL" || row.status === "QUALIFIED" ? "warning" : row.status === "PROPOSAL" ? "secondary" : "secondary"}>{statusLabels[row.status] ?? row.status}</Badge>
+ <span className="font-medium text-stone-600">{row.count} leads</span>
+ </div>
+ <span className="font-extrabold text-stone-950 tabular-nums">{percent}%</span>
+ </div>
+ <div className="h-2 overflow-hidden rounded-full bg-stone-100" role="presentation">
+ <div className={`h-full rounded-full transition-all ${bar}`} style={{ width: `${percent}%` }} />
+ </div>
+ </div>
+ )
+ })}
+ </div>
+ </div>
 
-     <div className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-violet-50/90 via-white to-cyan-50/60 px-5 py-5">
-       <div>
-        <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Follow-up discipline</h2>
-       </div>
-       <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25">
-        <CalendarDays className="size-5" aria-hidden="true" />
-       </span>
-      </div>
-      <div className="grid gap-3 p-5 sm:grid-cols-3 xl:grid-cols-1">
-       <Mini label="Scheduled" value={data?.followUps?.total ?? 0} tint="from-blue-50/80 to-cyan-50/50" />
-       <Mini label="Completed" value={data?.followUps?.completed ?? 0} tint="from-emerald-50/80 to-teal-50/50" />
-       <Mini label="Completion rate" value={`${data?.followUps?.completionRatePct ?? 0}%`} tint="from-violet-50/80 to-fuchsia-50/50" />
-      </div>
-     </div>
-    </section>
+ <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div>
+ <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Follow-up discipline</h2>
+ </div>
+ <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-md shadow-violet-500/25">
+ <CalendarDays className="size-5" aria-hidden="true" />
+ </span>
+ </div>
+ <div className="grid gap-3 p-5 sm:grid-cols-3 xl:grid-cols-1">
+ <Mini label="Scheduled" value={data?.followUps?.total ?? 0} tint="bg-blue-50/80" />
+ <Mini label="Completed" value={data?.followUps?.completed ?? 0} tint="bg-emerald-50/80" />
+ <Mini label="Completion rate" value={`${data?.followUps?.completionRatePct ?? 0}%`} tint="bg-violet-50/80" />
+ </div>
+ </div>
+ </section>
 
-    <section aria-labelledby="analytics-sources" className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-     <div className="flex flex-col gap-3 border-b border-stone-100/80 bg-gradient-to-r from-cyan-50/90 via-white to-blue-50/60 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-      <div>
-       <h2 id="analytics-sources" className="font-serif text-xl font-semibold tracking-tight text-stone-950">Lead source performance</h2>
-      </div>
-      <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
-       <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
-      </Button>
-     </div>
-     <div className="p-4 sm:p-5">
-      {sourceRows.length === 0 ? (
-       <EmptyState title="No source data" description="No source data available for this window." />
-      ) : (
-       <div className="overflow-x-auto rounded-lg">
-        <Table>
-         <TableHeader>
-          <TableRow>
-           <TableHead>Source</TableHead>
-           <TableHead>Leads</TableHead>
-           <TableHead>Won</TableHead>
-           <TableHead>Lost</TableHead>
-           <TableHead>Conversion</TableHead>
-          </TableRow>
-         </TableHeader>
-         <TableBody>
-          {sourceRows.map((row) => (
-           <TableRow key={row.source}>
-            <TableCell className="text-sm font-semibold">{row.source}</TableCell>
-            <TableCell className="text-sm tabular-nums">{row.totalLeads}</TableCell>
-            <TableCell className="text-sm tabular-nums">{row.wonLeads}</TableCell>
-            <TableCell className="text-sm tabular-nums">{row.lostLeads}</TableCell>
-            <TableCell className="text-sm font-semibold tabular-nums">{row.conversionRatePct}%</TableCell>
-           </TableRow>
-          ))}
-         </TableBody>
-        </Table>
-       </div>
-      )}
-     </div>
-    </section>
+ <section aria-labelledby="analytics-sources" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <div className="flex flex-col gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+ <div>
+ <h2 id="analytics-sources" className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Lead source performance</h2>
+ </div>
+ <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
+ </Button>
+ </div>
+ <div className="p-4 sm:p-5">
+ {sourceRows.length === 0 ? (
+ <EmptyState title="No source data" description="No source data available for this window." />
+ ) : (
+ <div className="overflow-x-auto rounded-lg">
+ <Table>
+ <TableHeader>
+ <TableRow>
+ <TableHead>Source</TableHead>
+ <TableHead>Leads</TableHead>
+ <TableHead>Won</TableHead>
+ <TableHead>Lost</TableHead>
+ <TableHead>Conversion</TableHead>
+ </TableRow>
+ </TableHeader>
+ <TableBody>
+ {sourceRows.map((row) => (
+ <TableRow key={row.source}>
+ <TableCell className="text-sm font-semibold">{row.source}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.totalLeads}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.wonLeads}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.lostLeads}</TableCell>
+ <TableCell className="text-sm font-semibold tabular-nums">{row.conversionRatePct}%</TableCell>
+ </TableRow>
+ ))}
+ </TableBody>
+ </Table>
+ </div>
+ )}
+ </div>
+ </section>
 
-    <section className="grid gap-5 xl:grid-cols-2">
-     <div className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-rose-50/90 via-white to-orange-50/60 px-5 py-5">
-       <div>
-        <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Why leads are lost</h2>
-       </div>
-       <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25">
-        <Flame className="size-5" aria-hidden="true" />
-       </span>
-      </div>
-      <div className="space-y-3 p-5 sm:p-6">
-       {lostReasonRows.length === 0 && <p className="py-6 text-center text-sm font-medium text-stone-600">No lost leads recorded in this window.</p>}
-       {lostReasonRows.map((row) => {
-        const max = Math.max(...lostReasonRows.map((r) => r.lostLeads), 1)
-        const percent = Math.round((row.lostLeads / max) * 100)
-        return (
-         <div key={row.reason}>
-          <div className="mb-1 flex items-center justify-between text-sm">
-           <span className="pr-2 font-medium text-stone-800">{row.reason}</span>
-           <span className="font-extrabold tabular-nums text-stone-600">{row.lostLeads}</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-stone-100" role="presentation">
-           <div className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400" style={{ width: `${percent}%` }} />
-          </div>
-         </div>
-        )
-       })}
-      </div>
-     </div>
+ <section className="grid gap-5 xl:grid-cols-2">
+ <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div>
+ <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Why leads are lost</h2>
+ </div>
+ <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md shadow-rose-500/25">
+ <Flame className="size-5" aria-hidden="true" />
+ </span>
+ </div>
+ <div className="space-y-3 p-5 sm:p-6">
+ {lostReasonRows.length === 0 && <p className="py-6 text-center text-sm font-medium text-stone-600">No lost leads recorded in this window.</p>}
+ {lostReasonRows.map((row) => {
+ const max = Math.max(...lostReasonRows.map((r) => r.lostLeads), 1)
+ const percent = Math.round((row.lostLeads / max) * 100)
+ return (
+ <div key={row.reason}>
+ <div className="mb-1 flex items-center justify-between text-sm">
+ <span className="pr-2 font-medium text-stone-800">{row.reason}</span>
+ <span className="font-extrabold tabular-nums text-stone-600">{row.lostLeads}</span>
+ </div>
+ <div className="h-2 overflow-hidden rounded-full bg-stone-100" role="presentation">
+ <div className="h-full rounded-full bg-rose-500" style={{ width: `${percent}%` }} />
+ </div>
+ </div>
+ )
+ })}
+ </div>
+ </div>
 
-     <div className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-blue-50/90 via-white to-violet-50/60 px-5 py-5">
-       <div>
-        <h2 className="font-serif text-xl font-semibold tracking-tight text-stone-950">Rep performance</h2>
-       </div>
-       <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-md shadow-blue-500/25">
-        <Users className="size-5" aria-hidden="true" />
-       </span>
-      </div>
-      <div className="p-4 sm:p-5">
-       {assigneeRows.length === 0 ? (
-        <EmptyState title="No assignment data" description="No assignment data for this window." />
-       ) : (
-        <div className="overflow-x-auto rounded-lg">
-         <Table>
-          <TableHeader>
-           <TableRow>
-            <TableHead>Rep</TableHead>
-            <TableHead>Total</TableHead>
-            <TableHead>Open</TableHead>
-            <TableHead>Won</TableHead>
-            <TableHead>Lost</TableHead>
-            <TableHead>Conv.</TableHead>
-           </TableRow>
-          </TableHeader>
-          <TableBody>
-           {assigneeRows.map((row) => (
-            <TableRow key={row.assigneeId ?? "unassigned"}>
-             <TableCell className="text-sm font-semibold">{row.assigneeName}</TableCell>
-             <TableCell className="text-sm tabular-nums">{row.totalLeads}</TableCell>
-             <TableCell className="text-sm tabular-nums">{row.openLeads}</TableCell>
-             <TableCell className="text-sm tabular-nums">{row.wonLeads}</TableCell>
-             <TableCell className="text-sm tabular-nums">{row.lostLeads}</TableCell>
-             <TableCell className="text-sm font-semibold tabular-nums">{row.conversionRatePct}%</TableCell>
-            </TableRow>
-           ))}
-          </TableBody>
-         </Table>
-        </div>
-       )}
-      </div>
-     </div>
-    </section>
-   </div>
-  </div>
+ <div className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 ">
+ <div className="flex items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5">
+ <div>
+ <h2 className="font-semibold text-xl font-semibold tracking-tight text-stone-950">Rep performance</h2>
+ </div>
+ <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/25">
+ <Users className="size-5" aria-hidden="true" />
+ </span>
+ </div>
+ <div className="p-4 sm:p-5">
+ {assigneeRows.length === 0 ? (
+ <EmptyState title="No assignment data" description="No assignment data for this window." />
+ ) : (
+ <div className="overflow-x-auto rounded-lg">
+ <Table>
+ <TableHeader>
+ <TableRow>
+ <TableHead>Rep</TableHead>
+ <TableHead>Total</TableHead>
+ <TableHead>Open</TableHead>
+ <TableHead>Won</TableHead>
+ <TableHead>Lost</TableHead>
+ <TableHead>Conv.</TableHead>
+ </TableRow>
+ </TableHeader>
+ <TableBody>
+ {assigneeRows.map((row) => (
+ <TableRow key={row.assigneeId ?? "unassigned"}>
+ <TableCell className="text-sm font-semibold">{row.assigneeName}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.totalLeads}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.openLeads}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.wonLeads}</TableCell>
+ <TableCell className="text-sm tabular-nums">{row.lostLeads}</TableCell>
+ <TableCell className="text-sm font-semibold tabular-nums">{row.conversionRatePct}%</TableCell>
+ </TableRow>
+ ))}
+ </TableBody>
+ </Table>
+ </div>
+ )}
+ </div>
+ </div>
+ </section>
+ </div>
+ </div>
  )
 }
 
 function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: string | number; hint?: string; tone: MetricTone }) {
  const t = METRIC_TONES[tone]
  return (
-  <Card className={`group relative overflow-hidden border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${t.ring}`}>
-   <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} aria-hidden="true" />
-   <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
-   <CardContent className="relative flex items-center gap-4 p-5">
-    <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-lg ${t.tile} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
-     <Icon className="size-6" aria-hidden="true" />
-    </span>
-    <div className="min-w-0">
-     <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
-     <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-     {hint ? <p className="mt-1 text-xs font-medium text-stone-600">{hint}</p> : null}
-    </div>
-   </CardContent>
-  </Card>
+ <Card className={`group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 ${t.ring}`}>
+ <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
+ <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
+ <CardContent className="relative flex items-center gap-4 p-5">
+ <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg ${t.tile} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
+ <Icon className="size-6" aria-hidden="true" />
+ </span>
+ <div className="min-w-0">
+ <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
+ <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
+ {hint ? <p className="mt-1 text-xs font-medium text-stone-600">{hint}</p> : null}
+ </div>
+ </CardContent>
+ </Card>
  )
 }
 
 function Mini({ label, value, tint }: { label: string; value: string | number; tint: string }) {
  return (
-  <div className={`rounded-xl border border-white/80 bg-gradient-to-br p-4 shadow-sm ${tint}`}>
-   <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">{label}</p>
-   <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
-  </div>
+ <div className={`rounded-xl border border-white/80 p-4 shadow-sm ${tint}`}>
+ <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">{label}</p>
+ <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
+ </div>
  )
 }

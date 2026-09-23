@@ -39,111 +39,110 @@ export default function BillingPage() {
  const totalRefunded = items.flatMap((p) => p.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
  const currency = items[0]?.currency ?? "INR";
  return (
-  <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
-   <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_5%_2%,rgba(6,182,212,.13),transparent_19%),radial-gradient(circle_at_96%_4%,rgba(99,102,241,.15),transparent_22%),radial-gradient(circle_at_70%_38%,rgba(217,70,239,.10),transparent_25%),radial-gradient(circle_at_12%_72%,rgba(16,185,129,.08),transparent_24%)]" aria-hidden="true" />
-   <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
-    <PageHero
-     id="billing-title"
-     icon={Wallet}
-     title="Finance OS"
-     variant="light"
-     accent="emerald"
-     actions={
-      <>
-       {hasPermission("payments.create") && <RecordPaymentDialog />}
-       <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-emerald-200/80 bg-white/80 px-5 py-3 text-sm font-bold text-emerald-900 shadow-sm backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-        <Sparkles className="size-4" aria-hidden="true" /> Ask AI
-       </Link>
-      </>
-     }
-    />
+ <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+ <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <PageHero
+ id="billing-title"
+ icon={Wallet}
+ title="Finance OS"
+ variant="light"
+ accent="emerald"
+ actions={
+ <>
+ {hasPermission("payments.create") && <RecordPaymentDialog />}
+ <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-emerald-200/80 bg-card px-5 py-3 text-sm font-bold text-emerald-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+ <Sparkles className="size-4" aria-hidden="true" /> Ask AI
+ </Link>
+ </>
+ }
+ />
 
-    <section aria-labelledby="billing-stats" className="">
-     <div className="mb-4 flex items-end justify-between gap-4">
-      <div>
-       <h2 id="billing-stats" className="font-serif text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Collections snapshot</h2>
-      </div>
-     </div>
-     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <FinanceMetric icon={Wallet} label="Collected · current page" value={`₹ ${totalCollected.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="green" />
-      <FinanceMetric icon={Undo2} label="Refunded · current page" value={`₹ ${totalRefunded.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="amber" />
-      <FinanceMetric icon={CreditCard} label="Transactions" value={items.length} loading={paymentsQuery.isLoading} tone="violet" />
-      <FinanceMetric icon={TrendingUp} label="Payment activity" value="Live" loading={paymentsQuery.isLoading} tone="cyan" />
-     </div>
-    </section>
+ <section aria-labelledby="billing-stats" className="">
+ <div className="mb-4 flex items-end justify-between gap-4">
+ <div>
+ <h2 id="billing-stats" className="font-semibold text-2xl font-semibold tracking-tight text-stone-950 dark:text-white">Collections snapshot</h2>
+ </div>
+ </div>
+ <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+ <FinanceMetric icon={Wallet} label="Collected · current page" value={`₹ ${totalCollected.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="green" />
+ <FinanceMetric icon={Undo2} label="Refunded · current page" value={`₹ ${totalRefunded.toFixed(2)}`} loading={paymentsQuery.isLoading} tone="amber" />
+ <FinanceMetric icon={CreditCard} label="Transactions" value={items.length} loading={paymentsQuery.isLoading} tone="violet" />
+ <FinanceMetric icon={TrendingUp} label="Payment activity" value="Live" loading={paymentsQuery.isLoading} tone="cyan" />
+ </div>
+ </section>
 
-    <section aria-labelledby="billing-activity" className="overflow-hidden rounded-xl border border-white/90 bg-white/88 shadow-xl shadow-violet-900/5 backdrop-blur-xl dark:border-white/10 dark:bg-stone-950/80">
-     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100/80 bg-gradient-to-r from-emerald-50/90 via-white to-teal-50/60 px-5 py-5 sm:px-6 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
-      {tab === "payments" ? (
-       <div className="flex items-center gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
-         <CreditCard className="size-5" aria-hidden="true" />
-        </span>
-        <div>
-         <h2 id="billing-activity" className="font-serif text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Payment activity</h2>
-        </div>
-       </div>
-      ) : (
-       <InvoicesSectionHeader />
-      )}
-      <div className="flex flex-wrap items-center gap-2">
-       <div role="tablist" aria-label="Billing views" className="inline-flex items-center gap-1 rounded-2xl border border-emerald-200/70 bg-white/80 p-1 dark:border-white/10 dark:bg-white/5">
-        {(["payments", "invoices"] as const).map((t) => (
-          <Button
-           key={t}
-           role="tab"
-           aria-selected={tab === t}
-           type="button"
-           variant={tab === t ? "default" : "ghost"}
-           size="sm"
-           onClick={() => setTab(t)}
-           className="min-h-11 rounded-lg px-4 text-sm"
-          >
-           {t === "payments" ? "Payments" : "Invoices"}
-          </Button>
-         ))}
-       </div>
-       {tab === "payments" && (
-        <Badge variant="outline" className="rounded-full border-emerald-200 bg-emerald-50/70 font-mono text-xs font-bold text-emerald-800 tabular-nums">Page {page}</Badge>
-       )}
-      </div>
-     </div>
-     <div className="p-4 sm:p-5">
-      {tab === "payments" ? (
-       <DataTable columns={columns} data={items} isLoading={paymentsQuery.isLoading} isError={paymentsQuery.isError} onRetry={() => paymentsQuery.refetch()} page={page} onPageChange={setPage} emptyTitle="No payments recorded yet" emptyDescription="Record a payment to begin." />
-      ) : (
-       <InvoicesSection />
-      )}
-     </div>
-    </section>
+ <section aria-labelledby="billing-activity" className="overflow-hidden rounded-xl border border-white/90 bg-card shadow-sm shadow-violet-900/5 dark:border-white/10 dark:bg-stone-950/80">
+ <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100/80 bg-muted/40 px-5 py-5 sm:px-6 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
+ {tab === "payments" ? (
+ <div className="flex items-center gap-3">
+ <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25">
+ <CreditCard className="size-5" aria-hidden="true" />
+ </span>
+ <div>
+ <h2 id="billing-activity" className="font-semibold text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Payment activity</h2>
+ </div>
+ </div>
+ ) : (
+ <InvoicesSectionHeader />
+ )}
+ <div className="flex flex-wrap items-center gap-2">
+ <div role="tablist" aria-label="Billing views" className="inline-flex items-center gap-1 rounded-lg border border-emerald-200/70 bg-card p-1 dark:border-white/10 dark:bg-card">
+ {(["payments", "invoices"] as const).map((t) => (
+ <Button
+ key={t}
+ role="tab"
+ aria-selected={tab === t}
+ type="button"
+ variant={tab === t ? "default" : "ghost"}
+ size="sm"
+ onClick={() => setTab(t)}
+ className="min-h-11 rounded-lg px-4 text-sm"
+ >
+ {t === "payments" ? "Payments" : "Invoices"}
+ </Button>
+ ))}
+ </div>
+ {tab === "payments" && (
+ <Badge variant="outline" className="rounded-full border-emerald-200 bg-emerald-50/70 font-mono text-xs font-bold text-emerald-800 tabular-nums">Page {page}</Badge>
+ )}
+ </div>
+ </div>
+ <div className="p-4 sm:p-5">
+ {tab === "payments" ? (
+ <DataTable columns={columns} data={items} isLoading={paymentsQuery.isLoading} isError={paymentsQuery.isError} onRetry={() => paymentsQuery.refetch()} page={page} onPageChange={setPage} emptyTitle="No payments recorded yet" emptyDescription="Record a payment to begin." />
+ ) : (
+ <InvoicesSection />
+ )}
+ </div>
+ </section>
 
-    <ExpensesSection />
-   </div>
-  </div>
+ <ExpensesSection />
+ </div>
+ </div>
  );
 }
 
 function FinanceMetric({ icon: Icon, label, value, loading, tone }: { icon: typeof Wallet; label: string; value: string | number; loading: boolean; tone: "green" | "amber" | "violet" | "cyan" }) {
  const tones = {
-  green: { bar: "from-emerald-400 via-teal-500 to-green-600", tile: "from-emerald-500 to-teal-600 shadow-emerald-500/30", orb: "bg-emerald-400/20", ring: "hover:border-emerald-200 hover:shadow-emerald-500/10" },
-  amber: { bar: "from-amber-400 via-orange-500 to-amber-600", tile: "from-amber-500 to-orange-600 shadow-amber-500/30", orb: "bg-amber-400/20", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
-  violet: { bar: "from-violet-600 via-purple-600 to-fuchsia-600", tile: "from-violet-600 to-fuchsia-600 shadow-violet-500/30", orb: "bg-fuchsia-400/20", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
-  cyan: { bar: "from-cyan-400 via-sky-500 to-blue-600", tile: "from-cyan-500 to-blue-600 shadow-cyan-500/30", orb: "bg-cyan-400/20", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
+ green: { bar: "bg-emerald-400", tile: "bg-emerald-500 shadow-emerald-500/30", orb: "bg-emerald-400/20", ring: "hover:border-emerald-200 hover:shadow-emerald-500/10" },
+ amber: { bar: "bg-amber-400", tile: "bg-amber-500 shadow-amber-500/30", orb: "bg-amber-400/20", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
+ violet: { bar: "bg-violet-600", tile: "bg-violet-600 shadow-violet-500/30", orb: "bg-fuchsia-400/20", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
+ cyan: { bar: "bg-cyan-400", tile: "bg-cyan-500 shadow-cyan-500/30", orb: "bg-cyan-400/20", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
  };
  const t = tones[tone];
  return (
-  <div className={`group relative overflow-hidden rounded-xl border border-white/90 bg-white/85 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:border-white/10 dark:bg-stone-950/80 ${t.ring}`}>
-   <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} aria-hidden="true" />
-   <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
-   <div className="relative flex items-center gap-4 p-5 lg:p-6">
-    <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
-     <Icon className="size-6" aria-hidden="true" />
-    </span>
-    <div className="min-w-0 flex-1">
-     <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
-     {loading ? <div className="mt-2 h-7 w-24 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading metric" /> : <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{value}</p>}
-    </div>
-   </div>
-  </div>
+ <div className={`group relative overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:border-white/10 dark:bg-stone-950/80 ${t.ring}`}>
+ <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
+ <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
+ <div className="relative flex items-center gap-4 p-5 lg:p-6">
+ <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
+ <Icon className="size-6" aria-hidden="true" />
+ </span>
+ <div className="min-w-0 flex-1">
+ <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
+ {loading ? <div className="mt-2 h-7 w-24 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading metric" /> : <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{value}</p>}
+ </div>
+ </div>
+ </div>
  );
 }

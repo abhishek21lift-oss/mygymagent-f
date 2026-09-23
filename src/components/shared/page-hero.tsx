@@ -5,8 +5,8 @@ import type { LucideIcon } from "lucide-react";
  * tinted chip these used to drive is gone. Colour now means state, not
  * decoration, so a page's own title has no business carrying an accent. */
 type HeroAccent =
-  | "violet" | "emerald" | "cyan" | "amber"
-  | "rose" | "indigo" | "orange" | "blue";
+ | "violet" | "emerald" | "cyan" | "amber"
+ | "rose" | "indigo" | "orange" | "blue";
 
 /**
  * The page masthead.
@@ -22,73 +22,73 @@ type HeroAccent =
  * on one row, over a hairline rule.
  */
 export function PageHero({
-  id,
-  eyebrow,
-  icon: Icon,
-  title,
-  description,
-  actions,
-  children,
+ id,
+ eyebrow,
+ icon: Icon,
+ title,
+ description,
+ actions,
+ children,
 }: {
-  id?: string;
-  eyebrow?: string;
-  icon?: LucideIcon;
-  title: ReactNode;
-  description?: ReactNode;
-  actions?: ReactNode;
-  children?: ReactNode;
-  variant?: "light" | "dark";
-  accent?: HeroAccent;
-  align?: "left" | "center";
+ id?: string;
+ eyebrow?: string;
+ icon?: LucideIcon;
+ title: ReactNode;
+ description?: ReactNode;
+ actions?: ReactNode;
+ children?: ReactNode;
+ variant?: "light" | "dark";
+ accent?: HeroAccent;
+ align?: "left" | "center";
 }) {
-  const headingId =
-    id ??
-    `page-title-${
-      typeof title === "string"
-        ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-        : "header"
-    }`;
+ const headingId =
+ id ??
+ `page-title-${
+ typeof title === "string"
+ ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+ : "header"
+ }`;
 
-  return (
-    <header
-      aria-labelledby={headingId}
-      className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
-    >
-      <div className="flex min-w-0 items-center gap-2.5">
-        {/* The sidebar already says where you are; on phone width it is
-            hidden, so a small plain glyph still earns its place. */}
-        {Icon ? (
-          <Icon
-            className="size-5 shrink-0 text-muted-foreground sm:hidden"
-            aria-hidden="true"
-          />
-        ) : null}
-        <div className="min-w-0">
-          {eyebrow ? (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {eyebrow}
-            </p>
-          ) : null}
-          <h1
-            id={headingId}
-            className="truncate text-xl font-semibold tracking-tight text-foreground sm:text-[1.375rem]"
-            title={typeof title === "string" ? title : undefined}
-          >
-            {title}
-          </h1>
-          {description ? (
-            <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-              {description}
-            </p>
-          ) : null}
-        </div>
-      </div>
+ return (
+ <header
+ aria-labelledby={headingId}
+ className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
+ >
+ <div className="flex min-w-0 items-center gap-2.5">
+ {/* The sidebar already says where you are; on phone width it is
+ hidden, so a small plain glyph still earns its place. */}
+ {Icon ? (
+ <Icon
+ className="size-5 shrink-0 text-muted-foreground sm:hidden"
+ aria-hidden="true"
+ />
+ ) : null}
+ <div className="min-w-0">
+ {eyebrow ? (
+ <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+ {eyebrow}
+ </p>
+ ) : null}
+ <h1
+ id={headingId}
+ className="truncate text-xl font-semibold tracking-tight text-foreground sm:text-[1.375rem]"
+ title={typeof title === "string" ? title : undefined}
+ >
+ {title}
+ </h1>
+ {description ? (
+ <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+ {description}
+ </p>
+ ) : null}
+ </div>
+ </div>
 
-      {actions ? (
-        <div className="flex flex-wrap items-center gap-2">{actions}</div>
-      ) : null}
+ {actions ? (
+ <div className="flex flex-wrap items-center gap-2">{actions}</div>
+ ) : null}
 
-      {children ? <div className="w-full sm:w-auto">{children}</div> : null}
-    </header>
-  );
+ {children ? <div className="w-full sm:w-auto">{children}</div> : null}
+ </header>
+ );
 }

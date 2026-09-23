@@ -5,5 +5,5 @@ import { redirect } from "next/navigation";
  * The dashboard performs the real auth check after sign-in.
  */
 export default function RootPage() {
-  redirect("/login");
+ redirect("/login");
 }
