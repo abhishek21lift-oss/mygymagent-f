@@ -138,3 +138,47 @@ export function useEntryQrToken(memberId: string | undefined) {
     staleTime: 0,
   });
 }
+
+const ENROLMENT_KEY = "device-enrolments";
+
+/** A turnstile enrolment: the scanner's own id for a person, mapped to a
+ * member. Branch-scoped, because a branch's scanners share one enrolment
+ * database — enrol once and every turnstile on that branch admits them. */
+export interface DeviceEnrolment {
+  id: string;
+  branchId: string;
+  externalUserId: string;
+  memberId: string;
+  createdAt: string;
+  member: { id: string; firstName: string; lastName: string; memberCode: string | null };
+}
+
+export function useDeviceEnrolments(params: { memberId?: string; branchId?: string } = {}) {
+  return useQuery({
+    queryKey: [ENROLMENT_KEY, params],
+    queryFn: () =>
+      api.get<DeviceEnrolment[]>("/attendance/enrolments", {
+        query: {
+          memberId: params.memberId || undefined,
+          branchId: params.branchId || undefined,
+        },
+      }),
+  });
+}
+
+export function useCreateDeviceEnrolment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { branchId: string; memberId: string; externalUserId: string }) =>
+      api.post<DeviceEnrolment>("/attendance/enrolments", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [ENROLMENT_KEY] }),
+  });
+}
+
+export function useDeleteDeviceEnrolment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ deleted: boolean }>(`/attendance/enrolments/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [ENROLMENT_KEY] }),
+  });
+}

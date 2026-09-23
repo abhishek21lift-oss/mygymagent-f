@@ -79,7 +79,7 @@ import { useMemberGoals } from "@/lib/hooks/use-member-goals";
 import { useMemberScreenings } from "@/lib/hooks/use-member-screenings";
 import { Member360Tabs } from "./member-360-tabs";
 import { MemberAiProgress } from "./member-ai-progress";
-import { EntryQrCard } from "./entry-qr-card";
+import { EntryAccessCard } from "./entry-access-card";
 import {
  useCreateMembership,
  useFreezeMembership,
@@ -1598,8 +1598,8 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  {/* Quick Stats */}
  <QuickStatsRow memberId={memberId} />
 
- {/* Gate entry token */}
- <EntryQrCard memberId={memberId} />
+ {/* Every credential that opens the door, in one place */}
+ <EntryAccessCard memberId={memberId} branchId={member.primaryBranchId} />
 
  {/* AI Progress Card */}
  <Card className="overflow-hidden rounded-xl border-white/90 bg-card p-0 shadow-sm shadow-violet-900/5 ">
