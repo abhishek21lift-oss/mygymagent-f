@@ -205,3 +205,66 @@ describe("AuthProvider MFA login", () => {
     expect(getAccessToken()).toBe("tok-a")
   })
 })
+
+describe("AuthProvider MFA policy state", () => {
+  it("takes the enforced state straight from the login response", async () => {
+    mockGet.mockRejectedValueOnce(
+      new ApiError(401, { error: { code: "UNAUTHORIZED", message: "no session" } }),
+    )
+    const ctx = setup()
+    await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
+
+    mockPost.mockResolvedValueOnce({
+      mfaRequired: false,
+      accessToken: "tok-a",
+      user: userA,
+      mfaEnrolment: { state: "ENFORCED", deadline: null },
+    })
+    // The follow-up /auth/me agrees; the point of reading it from the login
+    // response is that the gate engages without waiting for this.
+    mockGet.mockImplementationOnce(async () => ({
+      user: userA,
+      permissions: [],
+      mfaEnrolment: { state: "ENFORCED", deadline: null },
+    }))
+    await act(async () => {
+      await ctx.latest().login({ email: "a@example.com", password: "password123" })
+    })
+
+    expect(ctx.latest().mfaEnrolment).toEqual({
+      state: "ENFORCED",
+      deadline: null,
+    })
+  })
+
+  it("carries the grace deadline through /auth/me, so a reload keeps it", async () => {
+    const deadline = "2026-10-07T00:00:00.000Z"
+    mockGet.mockImplementationOnce(async () => ({
+      user: userA,
+      permissions: ["members.read"],
+      mfaEnrolment: { state: "GRACE", deadline },
+    }))
+    const ctx = setup()
+
+    await waitFor(() => expect(ctx.latest().user?.id).toBe("user-a"))
+    expect(ctx.latest().mfaEnrolment).toEqual({ state: "GRACE", deadline })
+  })
+
+  it("clears the enrolment state on logout", async () => {
+    mockGet.mockImplementationOnce(async () => ({
+      user: userA,
+      permissions: [],
+      mfaEnrolment: { state: "GRACE", deadline: "2026-10-07T00:00:00.000Z" },
+    }))
+    const ctx = setup()
+    await waitFor(() => expect(ctx.latest().mfaEnrolment?.state).toBe("GRACE"))
+
+    mockPost.mockResolvedValueOnce(undefined)
+    await act(async () => {
+      await ctx.latest().logout()
+    })
+
+    // Left behind, it would gate or nag the next account to sign in here.
+    expect(ctx.latest().mfaEnrolment).toBeNull()
+  })
+})

@@ -10,6 +10,7 @@ import type {
   LoginResponse,
   LoginResult,
   MeResponse,
+  MfaEnrolmentInfo,
   RegisterResponse,
 } from "@/lib/types/auth"
 import type { LoginInput, RegisterInput } from "@/lib/validation/auth"
@@ -17,6 +18,9 @@ import type { LoginInput, RegisterInput } from "@/lib/validation/auth"
 interface AuthContextValue {
   user: AuthUser | null
   permissions: string[]
+  /** Null until /auth/me has answered. `ENFORCED` means the backend has
+   * confined this session to the enrolment screens. */
+  mfaEnrolment: MfaEnrolmentInfo | null
   isLoading: boolean
   isAuthenticated: boolean
   /** Resolves to `{ mfaRequired: true, ... }` when the password was
@@ -36,6 +40,8 @@ const AuthContext = React.createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<AuthUser | null>(null)
   const [permissions, setPermissions] = React.useState<string[]>([])
+  const [mfaEnrolment, setMfaEnrolment] =
+    React.useState<MfaEnrolmentInfo | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
   const queryClient = useQueryClient()
 
@@ -50,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null)
     setUser(null)
     setPermissions([])
+    setMfaEnrolment(null)
     setCurrentBranchId(null)
   }
 
@@ -64,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(me.user)
       setPermissions(me.permissions)
+      setMfaEnrolment(me.mfaEnrolment ?? null)
       setCurrentBranchId(me.user.primaryBranchId)
     } catch (error) {
       // A newer session started while this request was in flight -- never
@@ -95,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setAccessToken(null)
           setUser(null)
           setPermissions([])
+          setMfaEnrolment(null)
           setCurrentBranchId(null)
         }
       } finally {
@@ -114,6 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(res.accessToken)
       setUser(res.user)
       setPermissions([])
+      // Taken from the login response so an enrolment-scoped session is
+      // recognised immediately, rather than briefly rendering an app
+      // whose every request will 403.
+      setMfaEnrolment(res.mfaEnrolment ?? null)
       setCurrentBranchId(res.user.primaryBranchId)
       void loadMe()
     },
@@ -168,6 +181,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(res.accessToken)
       setUser(res.user)
       setPermissions([])
+      // A brand-new organization starts on the OPTIONAL policy, so no
+      // requirement can apply; the follow-up /auth/me confirms it anyway.
+      setMfaEnrolment(null)
       setCurrentBranchId(res.user.primaryBranchId)
       void loadMe()
     },
@@ -186,6 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null)
     setUser(null)
     setPermissions([])
+    setMfaEnrolment(null)
     setCurrentBranchId(null)
   }, [queryClient])
 
@@ -199,6 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       permissions,
+      mfaEnrolment,
       isLoading,
       isAuthenticated: user !== null,
       login,
@@ -211,6 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [
       user,
       permissions,
+      mfaEnrolment,
       isLoading,
       login,
       completeMfaLogin,

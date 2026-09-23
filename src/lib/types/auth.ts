@@ -22,9 +22,22 @@ export interface Organization {
   updatedAt: string
 }
 
+/**
+ * Where the signed-in user stands against their organization's second-factor
+ * policy. `ENFORCED` does not mean the session was refused -- it means the
+ * backend has confined it to the enrolment screens, so the UI must show
+ * enrolment instead of the app rather than surfacing 403s everywhere.
+ */
+export interface MfaEnrolmentInfo {
+  state: "NOT_REQUIRED" | "GRACE" | "ENFORCED"
+  /** ISO date enforcement begins. Only ever set in `GRACE`. */
+  deadline: string | null
+}
+
 export interface LoginResponse {
   user: AuthUser
   accessToken: string
+  mfaEnrolment: MfaEnrolmentInfo
 }
 
 export interface RegisterResponse {
@@ -36,6 +49,7 @@ export interface RegisterResponse {
 export interface MeResponse {
   user: AuthUser
   permissions: string[]
+  mfaEnrolment: MfaEnrolmentInfo
 }
 
 /**
@@ -67,4 +81,33 @@ export interface MfaSetupResponse {
 export interface MfaEnableResponse {
   enabled: true
   recoveryCodes: string[]
+}
+
+/** Organization-wide second-factor policy (`GET`/`PATCH /auth/mfa/policy`). */
+export interface MfaPolicySettings {
+  policy: "OPTIONAL" | "REQUIRED_FOR_PRIVILEGED"
+  graceUntil: string | null
+  /** True when unenrolled privileged users are being restricted right now,
+   * as opposed to merely warned. */
+  enforcementActive: boolean
+  privilegedRoles: string[]
+}
+
+export interface MfaPolicyReportUser {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  status: string
+  roles: string[]
+  mfaEnabled: boolean
+  mfaEnabledAt: string | null
+}
+
+export interface MfaPolicyReport {
+  policy: MfaPolicySettings["policy"]
+  graceUntil: string | null
+  enforcementActive: boolean
+  summary: { total: number; enrolled: number; pending: number }
+  users: MfaPolicyReportUser[]
 }
