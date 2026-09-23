@@ -70,3 +70,20 @@ export function StatCard({
  </div>
  );
 }
+
+/**
+ * Maps the ad-hoc tone vocabularies the pages grew — "green", "amber",
+ * "violet", "cyan", "rose" and friends — onto the four states a tile can
+ * actually be in. Fourteen pages each defined their own `Metric` with its
+ * own palette; this lets them all delegate here without touching a single
+ * call site.
+ */
+export function toStatTone(
+  tone: string | undefined,
+): "primary" | "success" | "warning" | "destructive" {
+  const t = (tone ?? "").toLowerCase();
+  if (/(rose|red|danger|destruct|critical|overdue)/.test(t)) return "destructive";
+  if (/(amber|orange|yellow|warn|risk|attention)/.test(t)) return "warning";
+  if (/(emerald|green|teal|success|paid|good)/.test(t)) return "success";
+  return "primary";
+}

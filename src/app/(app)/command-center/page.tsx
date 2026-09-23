@@ -464,9 +464,9 @@ export default function CommandCenterPage() {
  const conversionPct = data ? Number(data.salesFunnel.conversionRatePct) || 0 : 0;
 
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
+ <div className="pb-4">
  {/* Ambient canvas — matches PT OS / premium surfaces */}
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="flex flex-col gap-5">
  {/* ------------------------------------------ Hero: compact midnight */}
  <PageHero
  id="cc-title"

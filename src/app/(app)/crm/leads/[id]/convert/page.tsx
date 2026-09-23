@@ -67,8 +67,8 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  if (!lead) return <div className="p-6 text-sm font-medium text-stone-600">Lead not found.</div>
 
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="convert-title"
  icon={CheckCircle2}

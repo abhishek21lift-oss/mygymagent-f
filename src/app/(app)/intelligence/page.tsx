@@ -306,8 +306,8 @@ export default function IntelligencePage() {
  };
 
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="intel-title"
  variant="dark"

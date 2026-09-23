@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -39,8 +40,8 @@ export default function BillingPage() {
  const totalRefunded = items.flatMap((p) => p.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
  const currency = items[0]?.currency ?? "INR";
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="billing-title"
  icon={Wallet}
@@ -122,27 +123,18 @@ export default function BillingPage() {
  );
 }
 
-function FinanceMetric({ icon: Icon, label, value, loading, tone }: { icon: typeof Wallet; label: string; value: string | number; loading: boolean; tone: "green" | "amber" | "violet" | "cyan" }) {
- const tones = {
- green: { bar: "bg-emerald-400", tile: "bg-emerald-500 shadow-emerald-500/30", orb: "bg-emerald-400/20", ring: "hover:border-emerald-200 hover:shadow-emerald-500/10" },
- amber: { bar: "bg-amber-400", tile: "bg-amber-500 shadow-amber-500/30", orb: "bg-amber-400/20", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
- violet: { bar: "bg-violet-600", tile: "bg-violet-600 shadow-violet-500/30", orb: "bg-fuchsia-400/20", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
- cyan: { bar: "bg-cyan-400", tile: "bg-cyan-500 shadow-cyan-500/30", orb: "bg-cyan-400/20", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
- };
- const t = tones[tone];
+function FinanceMetric({ label, value, hint, loading, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string }) {
+ // Delegates to the shared tile. This page used to carry its own metric
+ // component with a coloured top bar, a blurred orb, a 56px white-on-colour
+ // icon tile that scaled and rotated on hover, and a two-tone shadow --
+ // five decorative devices on one number, reinvented on fourteen pages.
  return (
- <div className={`group relative overflow-hidden rounded-xl border border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:border-white/10 dark:bg-stone-950/80 ${t.ring}`}>
- <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
- <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
- <div className="relative flex items-center gap-4 p-5 lg:p-6">
- <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
- <Icon className="size-6" aria-hidden="true" />
- </span>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
- {loading ? <div className="mt-2 h-7 w-24 animate-pulse rounded-lg bg-stone-200/70" aria-label="Loading metric" /> : <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums dark:text-white">{value}</p>}
- </div>
- </div>
- </div>
+  <StatCard
+   title={label}
+   value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")}
+   isLoading={Boolean(loading)}
+   hint={hint}
+   tone={toStatTone(tone)}
+  />
  );
 }

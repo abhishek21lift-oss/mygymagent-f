@@ -83,7 +83,7 @@ export default function ClassesPage() {
 
  if(!hasPermission("classes.read")) return <div className="p-8"><Card><CardContent className="p-8">You do not have permission to view Group Training.</CardContent></Card></div>
 
- return <div className="mx-auto max-w-[1680px] space-y-6 p-4 sm:p-6">
+ return <div className="flex flex-col gap-4 pb-4">
  <PageHero id="classes-title" icon={CalendarDays} title="Group Training" variant="light" accent="violet" />
  <div className="flex flex-wrap items-center gap-3">
  <Label htmlFor="class-branch">Branch</Label>

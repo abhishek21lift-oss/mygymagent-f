@@ -22,6 +22,7 @@ import { useUpdateLeadStatus, useAddFollowUp, useCompleteFollowUp } from "@/lib/
 import { createLeadSchema, createFollowUpSchema, type CreateLeadInput, type CreateFollowUpInput } from "@/lib/validation/gym"
 import type { LeadStatus } from "@/lib/types/gym"
 import { ApiError } from "@/lib/api/client"
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
 const statuses: LeadStatus[] = ["NEW", "CONTACTED", "QUALIFIED", "TRIAL", "PROPOSAL", "WON", "LOST"]
 const scoreByStatus: Record<LeadStatus, number> = { NEW: 35, CONTACTED: 50, QUALIFIED: 72, TRIAL: 88, PROPOSAL: 92, WON: 100, LOST: 5 }
@@ -69,8 +70,8 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  }
 
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="lead-title"
  icon={UserRound}
@@ -242,28 +243,18 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  )
 }
 
-function Metric({ icon: Icon, label, value, tone, hint }: { icon: LucideIcon; label: string; value: string | number; tone: "violet" | "rose" | "amber" | "cyan"; hint?: string }) {
- const tones = {
- violet: { bar: "bg-violet-600", tile: "bg-violet-600 shadow-violet-500/30", orb: "bg-fuchsia-400/20", ring: "hover:border-violet-200 hover:shadow-violet-500/10" },
- rose: { bar: "bg-rose-500", tile: "bg-rose-500 shadow-rose-500/30", orb: "bg-rose-400/20", ring: "hover:border-rose-200 hover:shadow-rose-500/10" },
- amber: { bar: "bg-amber-400", tile: "bg-amber-500 shadow-amber-500/30", orb: "bg-amber-400/20", ring: "hover:border-amber-200 hover:shadow-amber-500/10" },
- cyan: { bar: "bg-cyan-400", tile: "bg-cyan-500 shadow-cyan-500/30", orb: "bg-cyan-400/20", ring: "hover:border-cyan-200 hover:shadow-cyan-500/10" },
- }
- const t = tones[tone]
+function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string }) {
+ // Delegates to the shared tile. This page used to carry its own metric
+ // component with a coloured top bar, a blurred orb, a 56px white-on-colour
+ // icon tile that scaled and rotated on hover, and a two-tone shadow --
+ // five decorative devices on one number, reinvented on fourteen pages.
  return (
- <Card className={`group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 ${t.ring}`}>
- <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
- <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
- <CardContent className="relative flex items-center gap-4 p-5">
- <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg ${t.tile} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
- <Icon className="size-6" aria-hidden="true" />
- </span>
- <div className="min-w-0">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
- <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
- {hint ? <p className="mt-1 text-xs font-medium text-stone-600">{hint}</p> : null}
- </div>
- </CardContent>
- </Card>
- )
+  <StatCard
+   title={label}
+   value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")}
+   isLoading={Boolean(loading)}
+   hint={hint}
+   tone={toStatTone(tone)}
+  />
+ );
 }

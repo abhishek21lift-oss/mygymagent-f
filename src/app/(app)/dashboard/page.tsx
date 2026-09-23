@@ -143,7 +143,7 @@ export default function DashboardPage() {
  }, [data, currency, revenue]);
 
  return (
- <div className="mx-auto flex w-full max-w-[100rem] flex-col gap-6 pb-8">
+ <div className="flex w-full flex-col gap-4 pb-8">
  <PageHero
  id="dashboard-title"
  accent="indigo"

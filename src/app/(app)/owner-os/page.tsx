@@ -25,10 +25,10 @@ export default function OwnerOsPage() {
  const [data, setData] = React.useState<OwnerBriefing | null>(null);
  const [error, setError] = React.useState<string | null>(null);
  React.useEffect(() => { let active = true; api.get<OwnerBriefing>("/owner-os/briefing").then(v => active && setData(v)).catch(e => active && setError(e instanceof ApiError ? e.message : "Unable to load owner briefing")); return () => { active = false; }; }, []);
- if (error) return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6"><Card className="border-rose-200 bg-muted/40"><CardContent className="p-6 text-sm font-bold text-rose-700" role="alert">{error}</CardContent></Card></div></div>;
- if (!data) return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto grid max-w-[1680px] gap-4 px-2 sm:grid-cols-2 sm:px-4 lg:grid-cols-3 lg:px-6"><Card className="h-32 animate-pulse border-white/90 bg-card" /><Card className="h-32 animate-pulse border-white/90 bg-card" /><Card className="h-32 animate-pulse border-white/90 bg-card" /></div></div>;
+ if (error) return <div className="pb-4">
+ <div className="flex flex-col gap-5"><Card className="border-rose-200 bg-muted/40"><CardContent className="p-6 text-sm font-bold text-rose-700" role="alert">{error}</CardContent></Card></div></div>;
+ if (!data) return <div className="pb-4">
+ <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:px-6"><Card className="h-32 animate-pulse border-white/90 bg-card" /><Card className="h-32 animate-pulse border-white/90 bg-card" /><Card className="h-32 animate-pulse border-white/90 bg-card" /></div></div>;
 
  const cards = [
  [Users, "Members", data.metrics.members.toLocaleString()],
@@ -39,8 +39,8 @@ export default function OwnerOsPage() {
  [CreditCard, "Outstanding payments", money(data.metrics.outstandingPayments)],
  ] as const;
 
- return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ return <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="owner-title"
  variant="dark"

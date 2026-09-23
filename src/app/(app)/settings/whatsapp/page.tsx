@@ -143,15 +143,15 @@ export default function WhatsAppSettingsPage() {
  }
 
  if (!canManage) {
- return <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6"><h1 className="font-semibold text-3xl font-semibold text-stone-950">WhatsApp</h1><ErrorState message="You need settings.manage permission to manage WhatsApp." /></div></div>
+ return <div className="pb-4">
+ <div className="flex flex-col gap-5"><h1 className="font-semibold text-3xl font-semibold text-stone-950">WhatsApp</h1><ErrorState message="You need settings.manage permission to manage WhatsApp." /></div></div>
  }
 
  return (
  <>
  {META_APP_ID && <Script src="https://connect.facebook.net/en_US/sdk.js" strategy="afterInteractive" onLoad={initMetaSdk} />}
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="wa-title"
  icon={MessageCircle}

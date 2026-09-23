@@ -15,6 +15,7 @@ import { useMembers } from "@/lib/hooks/use-members"
 import { useStaff } from "@/lib/hooks/use-staff"
 import { ApiError } from "@/lib/api/client"
 import { useBookPtSession, usePtSessionAction, usePtSessions, type PtSession, type PtSessionType } from "@/lib/hooks/use-pt-sessions"
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
 function statusVariant(status: string) {
  if (status === "COMPLETED") return "success" as const
@@ -77,21 +78,20 @@ function SessionRow({ session }: { session: PtSession }) {
 
 type MetricTone = "rose" | "emerald" | "amber" | "cyan"
 
-function Metric({ icon: Icon, label, value, hint }: { icon: typeof Users; label: string; value: React.ReactNode; hint?: string; tone: MetricTone }) {
+function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string }) {
+ // Delegates to the shared tile. This page used to carry its own metric
+ // component with a coloured top bar, a blurred orb, a 56px white-on-colour
+ // icon tile that scaled and rotated on hover, and a two-tone shadow --
+ // five decorative devices on one number, reinvented on fourteen pages.
  return (
- <Card className="rounded-lg">
- <CardContent className="flex items-center gap-4 p-5">
- <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
- <Icon className="size-5" aria-hidden="true" />
- </span>
- <div className="min-w-0">
- <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
- <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
- {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
- </div>
- </CardContent>
- </Card>
- )
+  <StatCard
+   title={label}
+   value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")}
+   isLoading={Boolean(loading)}
+   hint={hint}
+   tone={toStatTone(tone)}
+  />
+ );
 }
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
@@ -150,7 +150,7 @@ export default function PtSessionsPage() {
 
  return (
  <div className="pb-12">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8">
+ <div className="flex flex-col gap-4">
  <PageHero
  id="pt-sessions-title"
  icon={CalendarDays}

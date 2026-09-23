@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCompleteFollowUp, useLeadFollowUps } from "@/lib/hooks/use-leads"
 import { ApiError } from "@/lib/api/client"
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
 type StatTone = "cyan" | "rose" | "violet"
 
@@ -48,8 +49,8 @@ export default function SalesFollowUpsPage() {
  }
 
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="followups-title"
  icon={CalendarClock}
@@ -173,18 +174,18 @@ export default function SalesFollowUpsPage() {
  )
 }
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof ListChecks; label: string; value: number; hint?: string; tone: StatTone }) {
- const t = STAT_TONES[tone]
+function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string }) {
+ // Delegates to the shared tile. This page used to carry its own metric
+ // component with a coloured top bar, a blurred orb, a 56px white-on-colour
+ // icon tile that scaled and rotated on hover, and a two-tone shadow --
+ // five decorative devices on one number, reinvented on fourteen pages.
  return (
- <div className={`group relative overflow-hidden rounded-xl border border-white/90 bg-card p-5 shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 ${t.ring}`}>
- <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
- <div className={`pointer-events-none absolute -right-10 -top-10 size-28 rounded-full blur-2xl transition group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
- <span className={`relative flex size-14 items-center justify-center rounded-lg text-white shadow-lg ${t.tile}`}>
- <Icon className="size-6" aria-hidden="true" />
- </span>
- <p className="relative mt-3 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
- <p className="relative text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
- {hint ? <p className="relative mt-1 text-xs font-medium text-stone-600">{hint}</p> : null}
- </div>
- )
+  <StatCard
+   title={label}
+   value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")}
+   isLoading={Boolean(loading)}
+   hint={hint}
+   tone={toStatTone(tone)}
+  />
+ );
 }

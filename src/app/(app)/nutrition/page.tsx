@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { StatCard, toStatTone } from "@/components/shared/stat-card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -259,23 +260,19 @@ const METRIC_TONES: Record<MetricTone, { bar: string; tile: string; orb: string;
  },
 };
 
-function Metric({ icon: Icon, label, value, hint, tone }: { icon: typeof Users; label: string; value: React.ReactNode; hint?: string; tone: MetricTone }) {
- const t = METRIC_TONES[tone];
+function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string }) {
+ // Delegates to the shared tile. This page used to carry its own metric
+ // component with a coloured top bar, a blurred orb, a 56px white-on-colour
+ // icon tile that scaled and rotated on hover, and a two-tone shadow --
+ // five decorative devices on one number, reinvented on fourteen pages.
  return (
- <Card className={`group relative overflow-hidden border-white/90 bg-card shadow-[0_20px_60px_-38px_rgba(5,150,105,.28)] transition duration-300 hover:-translate-y-1 ${t.ring}`}>
- <span className={`absolute inset-x-0 top-0 h-1.5 ${t.bar}`} aria-hidden="true" />
- <div className={`pointer-events-none absolute -right-10 -top-10 size-32 rounded-full blur-2xl transition duration-300 group-hover:scale-125 ${t.orb}`} aria-hidden="true" />
- <CardContent className="relative flex items-center gap-4 p-5">
- <span className={`flex size-14 shrink-0 items-center justify-center rounded-lg text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${t.tile}`}>
- <Icon className="size-6" aria-hidden="true" />
- </span>
- <div className="min-w-0">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">{label}</p>
- <p className="mt-1 text-2xl font-black tracking-tight text-stone-950 tabular-nums">{value}</p>
- {hint ? <p className="mt-1 text-xs font-medium text-stone-600">{hint}</p> : null}
- </div>
- </CardContent>
- </Card>
+  <StatCard
+   title={label}
+   value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")}
+   isLoading={Boolean(loading)}
+   hint={hint}
+   tone={toStatTone(tone)}
+  />
  );
 }
 
@@ -287,8 +284,8 @@ export default function NutritionPage() {
  const items = assignments.data?.items ?? [];
  const active = items.filter((x) => x.status === "ACTIVE").length;
  return (
- <div className="relative -mx-2 min-h-full overflow-hidden pb-12 sm:-mx-3 lg:-mx-5">
- <div className="mx-auto flex max-w-[1680px] flex-col gap-8 px-2 sm:px-4 lg:px-6">
+ <div className="pb-4">
+ <div className="flex flex-col gap-5">
  <PageHero
  id="nutrition-title"
  icon={Apple}
