@@ -7,7 +7,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
-import { primaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
+import { primaryNav, secondaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_DATA_URI } from "@/lib/brand";
 
@@ -27,11 +27,11 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
         collapsed ? "justify-center px-2 py-2.5" : nested ? "ml-3 gap-2.5 px-3 py-2 text-[13px]" : "gap-3 px-2.5 py-2.5 text-sm",
         active
           ? isAi
-            ? "border-violet-300/70 bg-gradient-to-r from-violet-500/15 via-fuchsia-500/10 to-cyan-400/10 font-semibold text-violet-800 shadow-sm dark:text-violet-200"
-            : "border-sidebar-primary/20 bg-gradient-to-r from-sidebar-primary/15 via-sidebar-primary/8 to-transparent font-semibold text-sidebar-foreground shadow-sm"
+            ? "border-transparent bg-ai/15 font-semibold text-ai dark:text-violet-200"
+            : "border-transparent bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm"
           : isAi
-            ? "border-transparent text-sidebar-foreground/75 hover:border-violet-300/40 hover:bg-gradient-to-r hover:from-violet-500/10 hover:to-cyan-400/10 hover:text-sidebar-foreground"
-            : "border-transparent font-medium text-sidebar-foreground/70 hover:border-sidebar-border/60 hover:bg-white/60 hover:text-sidebar-foreground dark:hover:bg-white/5",
+            ? "border-transparent text-sidebar-foreground/75 hover:border-transparent hover:bg-sidebar-accent/60 hover:text-cyan-400/10 hover:text-sidebar-foreground"
+            : "border-transparent font-medium text-sidebar-foreground/70 hover:border-transparent hover:bg-sidebar-accent/60 hover:text-sidebar-foreground dark:hover:bg-white/5",
       )}
     >
       {active && (
@@ -39,7 +39,7 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
           aria-hidden="true"
           className={cn(
             "absolute inset-y-2 left-0 w-0.5 rounded-full",
-            isAi ? "bg-gradient-to-b from-violet-500 via-fuchsia-500 to-cyan-400" : "bg-sidebar-primary",
+            isAi ? "bg-ai" : "bg-sidebar-primary",
           )}
         />
       )}
@@ -50,10 +50,10 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
           nested ? "size-7" : "size-8",
           active
             ? isAi
-              ? "border-violet-300/50 bg-gradient-to-br from-violet-500/20 to-cyan-400/15 text-violet-700 dark:text-violet-200"
+              ? "border-transparent bg-ai/20 text-ai"
               : "border-sidebar-primary/15 bg-sidebar-primary/10 text-sidebar-primary"
             : isAi
-              ? "border-violet-200/50 bg-gradient-to-br from-violet-500/10 to-cyan-400/5 text-violet-600 dark:text-violet-300"
+              ? "border-transparent bg-ai/10 text-ai"
               : "border-sidebar-border/50 bg-sidebar-accent/60 text-sidebar-foreground/70 group-hover:text-sidebar-foreground",
         )}
       >
@@ -62,7 +62,7 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
       {!collapsed && (
         <>
           <span className="flex-1 truncate tracking-[-0.01em]">{item.title}</span>
-          {isAi && !nested && <span aria-hidden="true" className="size-1.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 shadow-[0_0_10px_rgba(139,92,246,0.45)]" />}
+          {isAi && !nested && <span aria-hidden="true" className="size-1.5 rounded-full bg-ai shadow-[0_0_10px_rgba(139,92,246,0.45)]" />}
           {item.comingSoon && <Badge variant="secondary" className="px-1.5 py-0 text-xs">Soon</Badge>}
         </>
       )}
@@ -88,8 +88,33 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
   const { hasPermission } = useAuth();
   const activeRef = React.useRef<HTMLAnchorElement | null>(null);
   const visiblePrimary = primaryNav.filter((item) => permissionVisible(item, hasPermission));
+  const visibleSecondary = secondaryNav.filter((item) => permissionVisible(item, hasPermission));
   const visibleComingSoon = comingSoonNav.filter((item) => permissionVisible(item, hasPermission));
   const showSettings = permissionVisible(settingsNav, hasPermission);
+
+  /** One renderer for both lists: the markup is identical, and the only
+   * thing that differed was which array it looped over. */
+  const renderGroup = (items: NavItem[]) =>
+    items.map((item, index) => {
+      const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
+      const active = isNavItemActive(pathname, item.href) || children.some((child) => isNavItemActive(pathname, child.href));
+      const isAi = item.accent === "ai";
+      // The rule heads the AI group, so it belongs to the first AI item
+      // only -- rendering it per item printed the label twice.
+      const startsAiGroup = isAi && items[index - 1]?.accent !== "ai";
+      return (
+        <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined} className={cn("shrink-0", startsAiGroup && !collapsed && "mt-1")}>
+          <NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} itemRef={mobile && !collapsed && active ? activeRef : undefined} />
+          {!collapsed && active && children.length > 0 && (
+            <ul aria-label={`${item.title} sub-pages`} className={cn("mt-1 mb-2 ml-4 space-y-0.5 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/30 p-1")}>
+              {children.map((child) => (
+                <li key={child.href}><NavLink item={child} active={isNavItemActive(pathname, child.href)} nested onNavigate={onNavigate} /></li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    });
 
   React.useEffect(() => {
     if (!mobile || !scrollToActive || collapsed) return;
@@ -100,18 +125,17 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
   }, [mobile, scrollToActive, collapsed, pathname]);
 
   return (
-    <nav aria-label="Primary" className={cn("relative flex h-full min-h-0 flex-col bg-gradient-to-b from-sidebar via-sidebar to-sidebar-accent/20 text-sidebar-foreground", className)}>
+    <nav aria-label="Primary" className={cn("relative flex h-full min-h-0 flex-col bg-sidebar text-sidebar-foreground", className)}>
       <Link
-        href="/command-center"
+        href="/dashboard"
         onClick={onNavigate}
         title={collapsed ? PRODUCT_LOGO_ALT : undefined}
         className={cn(
-          "group relative mb-4 flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-sidebar-border/60 bg-white/45 px-2.5 py-2.5 shadow-sm backdrop-blur-xl transition-all hover:border-sidebar-primary/20 hover:bg-white/70 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]",
+          "group relative mb-3 flex shrink-0 items-center justify-center overflow-hidden rounded-lg px-2 py-1.5 transition-all hover:border-sidebar-primary/20 hover:bg-white/70 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]",
           collapsed ? "justify-center px-1.5" : "gap-2.5",
         )}
       >
-        <span aria-hidden="true" className="absolute -right-5 -top-6 size-16 rounded-full bg-violet-400/15 blur-2xl" />
-        <span aria-hidden="true" className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-sidebar-primary/15 bg-white/70 shadow-sm dark:bg-white/[0.06]">
+        <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-lg">
           <Image
             src={PRODUCT_LOGO_DATA_URI}
             alt={PRODUCT_LOGO_ALT}
@@ -126,27 +150,14 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
 
       {!collapsed && <SectionLabel>Workspace</SectionLabel>}
       <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5 pb-2">
-        {visiblePrimary.map((item, index) => {
-          const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
-          const active = isNavItemActive(pathname, item.href) || children.some((child) => isNavItemActive(pathname, child.href));
-          const isAi = item.accent === "ai";
-          // The divider heads the AI group, so it belongs to the first AI
-          // item only -- rendering it per item printed "AI Layer" twice.
-          const startsAiGroup = isAi && visiblePrimary[index - 1]?.accent !== "ai";
-          return (
-            <div key={item.href} data-mobile-nav-section={mobile ? "true" : undefined} className={cn("shrink-0", startsAiGroup && !collapsed && "mt-1")}>
-              {!collapsed && startsAiGroup && <div className="mb-1 flex items-center gap-1.5 px-2.5 text-[9px] font-bold uppercase tracking-[0.16em] text-violet-600/70 dark:text-violet-300/70"><span className="size-1.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" />AI Layer</div>}
-              <NavLink item={item} active={active} collapsed={collapsed} onNavigate={onNavigate} itemRef={mobile && !collapsed && active ? activeRef : undefined} />
-              {!collapsed && active && children.length > 0 && (
-                <ul aria-label={`${item.title} sub-pages`} className={cn("mt-1 mb-2 ml-4 space-y-0.5 rounded-xl border p-1", isAi ? "border-violet-200/50 bg-gradient-to-br from-violet-500/[0.05] via-fuchsia-500/[0.03] to-cyan-400/[0.05]" : "border-sidebar-border/50 bg-sidebar-accent/30")}>
-                  {children.map((child) => (
-                    <li key={child.href}><NavLink item={child} active={isNavItemActive(pathname, child.href)} nested onNavigate={onNavigate} /></li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })}
+        {renderGroup(visiblePrimary)}
+
+        {visibleSecondary.length > 0 && (
+          <div className="mt-3 shrink-0 border-t border-sidebar-border/60 pt-3">
+            {!collapsed && <SectionLabel>Tools</SectionLabel>}
+            {renderGroup(visibleSecondary)}
+          </div>
+        )}
         {!collapsed && visibleComingSoon.length > 0 && (
           <div className="mt-4 shrink-0">
             <SectionLabel>Coming soon</SectionLabel>
@@ -156,7 +167,7 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
         {collapsed && visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} collapsed onNavigate={onNavigate} />)}
       </div>
 
-      <div className="mt-3 shrink-0 rounded-2xl border border-sidebar-border/60 bg-white/45 p-1.5 shadow-sm backdrop-blur-xl dark:bg-white/[0.03]">
+      <div className="mt-3 shrink-0 border-t border-sidebar-border/60 pt-3">
         {showSettings && <NavLink item={settingsNav} active={isNavItemActive(pathname, settingsNav.href)} collapsed={collapsed} onNavigate={onNavigate} />}
       </div>
     </nav>
