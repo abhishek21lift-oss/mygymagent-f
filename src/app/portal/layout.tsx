@@ -3,7 +3,15 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarCheck, Dumbbell, LogOut, Salad, User } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarDays,
+  Dumbbell,
+  LogOut,
+  Salad,
+  Settings,
+  User,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/portal", label: "Home", icon: User },
+  { href: "/portal/classes", label: "Classes", icon: CalendarDays },
   { href: "/portal/plan", label: "Training", icon: Dumbbell },
   { href: "/portal/nutrition", label: "Nutrition", icon: Salad },
   { href: "/portal/visits", label: "Visits", icon: CalendarCheck },
@@ -84,15 +93,30 @@ export default function PortalLayout({
               {member?.firstName} {member?.lastName}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => void logout()}
-            className="min-h-11 shrink-0 rounded-lg"
-          >
-            <LogOut className="size-4" aria-hidden="true" />
-            <span className="sr-only sm:not-sr-only">Sign out</span>
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            {/* Beside sign-out rather than a sixth tab: six do not fit a
+                phone, and settings are not somewhere you go often. */}
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="min-h-11 rounded-lg"
+            >
+              <Link href="/portal/account">
+                <Settings className="size-4" aria-hidden="true" />
+                <span className="sr-only">Account settings</span>
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void logout()}
+              className="min-h-11 rounded-lg"
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">Sign out</span>
+            </Button>
+          </div>
         </div>
 
         <nav

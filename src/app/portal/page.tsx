@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarCheck, Dumbbell, Salad } from "lucide-react";
+import { CalendarCheck, Dumbbell, Salad, Wallet } from "lucide-react";
 
 import { DataState } from "@/components/shared/data-state";
 import { Badge } from "@/components/ui/badge";
@@ -48,9 +48,22 @@ export default function PortalHome() {
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No active membership. Speak to the front desk to renew.
+            No active membership.
           </p>
         )}
+        {/* The renewal route is offered from here whatever the standing:
+            an expiring member is the one who needs it, and a lapsed one
+            was previously told to "speak to the front desk" with no way
+            to act on it from the app. */}
+        <Link
+          href="/portal/renew"
+          className="mt-3 flex min-h-11 items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+        >
+          <Wallet className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          {membership && remaining !== null && remaining <= 14
+            ? "Renew my membership"
+            : "Plans and renewal"}
+        </Link>
       </Panel>
 
       <div className="grid gap-3 sm:grid-cols-2">

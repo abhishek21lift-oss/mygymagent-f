@@ -19,6 +19,13 @@ export interface PortalMe {
     phone: string | null;
     memberCode: string | null;
     status: string;
+    emergencyContactName: string | null;
+    emergencyContactPhone: string | null;
+    addressLine1: string | null;
+    addressLine2: string | null;
+    city: string | null;
+    state: string | null;
+    postalCode: string | null;
     primaryBranch: { id: string; name: string } | null;
     assignedTrainer: { firstName: string; lastName: string | null } | null;
   };
@@ -141,5 +148,150 @@ export function useEnablePortalLogin() {
     onSuccess: (_result, memberId) => {
       void queryClient.invalidateQueries({ queryKey: ["members", memberId] });
     },
+  });
+}
+
+// -- The write half (F-P0-1 slice 3) --------------------------------
+// Same shape as the reads: no call names a member. The server resolves
+// it from the session, so there is no id here to get wrong.
+
+export interface PortalNotificationPreference {
+  key: string;
+  label: string;
+  description: string;
+  inApp: boolean;
+  email: boolean;
+  whatsapp: boolean;
+  sms: boolean;
+  push: boolean;
+}
+
+export interface PortalClassSession {
+  id: string;
+  className: string;
+  startTime: string;
+  endTime: string;
+  branchName: string;
+  effectiveCapacity: number;
+  bookedCount: number;
+  waitlistCount: number;
+  instructorFirstName: string | null;
+  instructorLastName: string | null;
+  myBookingId: string | null;
+  myBookingStatus: "BOOKED" | "WAITLISTED" | null;
+  myWaitlistPosition: number | null;
+}
+
+export interface PortalRenewalOption {
+  id: string;
+  name: string;
+  description: string | null;
+  durationDays: number;
+  price: string | number;
+  currency: string;
+  benefits: string[];
+}
+
+export interface PortalProfileUpdate {
+  phone?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+}
+
+export function useUpdatePortalProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: PortalProfileUpdate) =>
+      api.patch<PortalMe>("/portal/me", input),
+    onSuccess: (data) => {
+      // The server answers with the updated `me`, so seed the cache with
+      // it rather than refetching what we were just handed.
+      queryClient.setQueryData([KEY, "me"], data);
+    },
+  });
+}
+
+export function usePortalNotificationPreferences() {
+  return useQuery({
+    queryKey: [KEY, "notification-preferences"],
+    queryFn: () =>
+      api.get<{ items: PortalNotificationPreference[] }>(
+        "/portal/notification-preferences",
+      ),
+  });
+}
+
+export function useUpdatePortalNotificationPreference() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      category,
+      ...channels
+    }: { category: string } & Partial<
+      Pick<
+        PortalNotificationPreference,
+        "inApp" | "email" | "whatsapp" | "sms" | "push"
+      >
+    >) =>
+      api.patch<{ items: PortalNotificationPreference[] }>(
+        `/portal/notification-preferences/${category}`,
+        channels,
+      ),
+    onSuccess: (data) => {
+      queryClient.setQueryData([KEY, "notification-preferences"], data);
+    },
+  });
+}
+
+export function usePortalClasses() {
+  return useQuery({
+    queryKey: [KEY, "classes"],
+    queryFn: () => api.get<{ items: PortalClassSession[] }>("/portal/classes"),
+  });
+}
+
+export function useBookPortalClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionId: string) =>
+      api.post<{ status: string }>(`/portal/classes/${sessionId}/book`, {}),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [KEY, "classes"] });
+    },
+  });
+}
+
+export function useCancelPortalClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (bookingId: string) =>
+      api.delete(`/portal/classes/bookings/${bookingId}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [KEY, "classes"] });
+    },
+  });
+}
+
+export function usePortalRenewalOptions() {
+  return useQuery({
+    queryKey: [KEY, "renewal-options"],
+    queryFn: () =>
+      api.get<{ items: PortalRenewalOption[] }>("/portal/renewal-options"),
+  });
+}
+
+export function useRequestPortalRenewal() {
+  return useMutation({
+    mutationFn: (input: { membershipPlanId: string; note?: string }) =>
+      api.post<{
+        requestId: string;
+        plan: { name: string };
+        alreadyRequested: boolean;
+      }>("/portal/renewal-requests", input),
   });
 }
