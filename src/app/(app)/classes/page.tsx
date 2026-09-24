@@ -7,6 +7,7 @@ import { api } from "@/lib/api/client"
 import { useAuth } from "@/lib/auth/auth-context"
 import { useBranches } from "@/lib/hooks/use-branches"
 import { PageHero } from "@/components/shared/page-hero"
+import { DataState } from "@/components/shared/data-state"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +23,11 @@ export default function ClassesPage() {
  const [programs,setPrograms]=React.useState<Program[]>([])
  const [sessions,setSessions]=React.useState<Session[]>([])
  const [loading,setLoading]=React.useState(true)
+ // Without this, a failed fetch leaves `sessions` empty and the view
+ // states "No sessions scheduled for the current window" -- which is not
+ // what happened, and the toast that said so has already gone.
+ const [loadError,setLoadError]=React.useState(false)
+ const [reloadKey,setReloadKey]=React.useState(0)
  const [branchId,setBranchId]=React.useState("")
  const [name,setName]=React.useState("")
  const [capacity,setCapacity]=React.useState("20")
@@ -111,11 +117,21 @@ export default function ClassesPage() {
  </div>
 
  <Card><CardHeader><CardTitle>Upcoming sessions</CardTitle></CardHeader><CardContent>
- {loading?<div className="py-8 text-sm text-muted-foreground">Loading…</div>:sessions.length===0?<div className="py-8 text-sm text-muted-foreground">No sessions scheduled for the current window.</div>:
+ <DataState
+ isLoading={loading}
+ isError={loadError}
+ onRetry={()=>{setLoading(true);setReloadKey(k=>k+1)}}
+ errorMessage="Class sessions could not be loaded."
+ isEmpty={sessions.length===0}
+ emptyIcon={CalendarDays}
+ emptyTitle="No sessions scheduled"
+ emptyDescription="Nothing is on the timetable for the current window."
+ >
  <div className="grid gap-3">{sessions.map(s=><div key={s.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
  <div><div className="font-semibold">{s.className}</div><div className="text-sm text-muted-foreground">{new Date(s.startTime).toLocaleString()} · {s.branchName}</div><div className="text-xs text-muted-foreground">{s.instructorFirstName||"Unassigned"} {s.instructorLastName||""}</div></div>
  <div className="flex items-center gap-3"><Badge variant="outline"><Users className="mr-1 size-3"/> {s.bookedCount}/{s.effectiveCapacity}</Badge>{s.waitlistCount>0&&<Badge variant="secondary">{s.waitlistCount} waitlisted</Badge>}{hasPermission("classes.book")&&<Button size="sm" onClick={()=>void book(s.id)} disabled={busy}>Book member</Button>}</div>
- </div>)}</div>}
+ </div>)}</div>
+ </DataState>
  </CardContent></Card>
  </div>
 }

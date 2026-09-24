@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api/client"
+import { ErrorState } from "@/components/shared/error-state"
 import { StaffPayrollSection } from "./staff-payroll-section";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,10 @@ export default function PayrollPage() {
  const [runs, setRuns] = React.useState<PayrollRun[]>([]);
  const [adjustments, setAdjustments] = React.useState<Record<string, Adjustment>>({});
  const [loading, setLoading] = React.useState(true);
+ // A failed fetch used to leave both lists empty, so the page said "No
+ // leave requests." and "No payroll runs yet. Create one above." -- two
+ // confident statements about data it had never received.
+ const [loadError, setLoadError] = React.useState(false);
  const [creating, setCreating] = React.useState(false);
  const [savingItem, setSavingItem] = React.useState<string | null>(null);
 
@@ -111,6 +116,7 @@ export default function PayrollPage() {
  setLeaveTypes(lt);
  setRequests(lr);
  setRuns(pr);
+ setLoadError(false);
  setAdjustments(
  Object.fromEntries(
  (pr[0]?.items ?? []).map((item) => [
@@ -120,6 +126,7 @@ export default function PayrollPage() {
  ),
  );
  } catch (e) {
+ setLoadError(true);
  toast.error(
  e instanceof Error ? e.message : "HR & payroll data could not be loaded",
  );
@@ -353,7 +360,17 @@ export default function PayrollPage() {
  </td>
  </tr>
  ))}
- {!loading && requests.length === 0 && (
+ {!loading && loadError && (
+ <tr>
+ <td colSpan={6} className="py-10 text-center text-sm text-destructive">
+ Leave requests could not be loaded.{" "}
+ <button type="button" onClick={() => void load()} className="underline underline-offset-2">
+ Try again
+ </button>
+ </td>
+ </tr>
+ )}
+ {!loading && !loadError && requests.length === 0 && (
  <tr>
  <td colSpan={6} className="py-10 text-center text-stone-500">
  No leave requests.
@@ -475,7 +492,15 @@ export default function PayrollPage() {
  )}
  </div>
  ))}
- {!loading && runs.length === 0 && (
+ {!loading && loadError && (
+ <div className="py-6">
+ <ErrorState
+ message="Payroll runs could not be loaded."
+ onRetry={() => void load()}
+ />
+ </div>
+ )}
+ {!loading && !loadError && runs.length === 0 && (
  <p className="py-10 text-center text-stone-500">
  No payroll runs yet. Create one above.
  </p>

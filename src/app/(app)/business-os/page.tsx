@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageHero } from "@/components/shared/page-hero"
+import { DataState } from "@/components/shared/data-state"
 import { toast } from "sonner"
 import { Brain, Gift, Headphones, Megaphone, ReceiptIndianRupee, RefreshCw, ShieldCheck, Sparkles, Star, Tablet, Users } from "lucide-react"
 
@@ -31,7 +32,13 @@ export default function BusinessOsPage(){
  const [surveys,setSurveys]=React.useState<Survey[]>([])
  const [accounts,setAccounts]=React.useState<Account[]>([])
  const [output,setOutput]=React.useState<unknown>(null)
- const [loading,setLoading]=React.useState(false)
+ // Starts true: before B-P0-3 the first paint showed four zeroes while
+ // the fetch was still in flight, which reads as "you have none of
+ // anything" rather than "not loaded yet".
+ const [loading,setLoading]=React.useState(true)
+ // And a *failed* fetch left those same four zeroes on screen, saying
+ // the same untrue thing after the toast had gone.
+ const [loadError,setLoadError]=React.useState(false)
 
  const refresh=React.useCallback(async()=>{
  setLoading(true)
@@ -46,7 +53,8 @@ export default function BusinessOsPage(){
  setTickets(Array.isArray(ts)?ts as Ticket[]:[])
  setSurveys(Array.isArray(ss)?ss as Survey[]:[])
  setAccounts(Array.isArray(as)?as as Account[]:[])
- }catch(e){toast.error(e instanceof Error?e.message:"Could not refresh Business OS")}
+ setLoadError(false)
+ }catch(e){setLoadError(true);toast.error(e instanceof Error?e.message:"Could not refresh Business OS")}
  finally{setLoading(false)}
  },[hasPermission])
 
@@ -67,11 +75,22 @@ export default function BusinessOsPage(){
  return <div className="space-y-6">
  <PageHero id="business-os" icon={Sparkles} title="Business OS" description="Operational controls for loyalty, support, feedback, marketing, accounting and AI." variant="light" accent="violet"/>
  <div className="flex flex-wrap items-center justify-between gap-3">
+ <div className="min-w-0 flex-1">
+ <DataState
+ isLoading={loading}
+ isError={loadError}
+ onRetry={()=>void refresh()}
+ errorMessage="Business OS counts could not be loaded."
+ emptyTitle="Business OS"
+ skeletonRows={1}
+ >
  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
  <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Campaigns</div><div className="text-2xl font-semibold">{campaigns.length}</div></CardContent></Card>
  <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Open tickets</div><div className="text-2xl font-semibold">{tickets.filter(t=>!["RESOLVED","CLOSED"].includes(t.status)).length}</div></CardContent></Card>
  <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Surveys</div><div className="text-2xl font-semibold">{surveys.length}</div></CardContent></Card>
  <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Accounts</div><div className="text-2xl font-semibold">{accounts.length}</div></CardContent></Card>
+ </div>
+ </DataState>
  </div>
  <Button variant="outline" onClick={()=>void refresh()} disabled={loading}><RefreshCw className={`mr-2 size-4 ${loading?"animate-spin":""}`}/>Refresh</Button>
  </div>

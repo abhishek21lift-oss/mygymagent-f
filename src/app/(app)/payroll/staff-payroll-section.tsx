@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
 
+import { ErrorState } from "@/components/shared/error-state";
 import { Panel } from "@/components/shared/panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,9 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
 
   const [staff, setStaff] = React.useState<StaffPayroll[]>([]);
   const [loading, setLoading] = React.useState(true);
+  // Without this a failed load rendered "No staff records yet. Invite
+  // staff first" -- advice to fix a problem the reader does not have.
+  const [loadError, setLoadError] = React.useState(false);
   const [saving, setSaving] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<Record<string, { salaryType: SalaryType; amount: string }>>({});
 
@@ -59,6 +63,7 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
     try {
       const res = await api.get<{ items: StaffPayroll[] }>("/hr-payroll/staff");
       setStaff(res.items);
+      setLoadError(false);
       setDraft(
         Object.fromEntries(
           res.items.map((s) => [
@@ -72,6 +77,7 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
         ),
       );
     } catch (error) {
+      setLoadError(true);
       toast.error(
         error instanceof ApiError ? error.message : "Staff payroll terms could not be loaded",
       );
@@ -126,6 +132,13 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
     >
       {loading ? (
         <div className="p-4 text-sm text-muted-foreground sm:p-5">Loading…</div>
+      ) : loadError ? (
+        <div className="p-4 sm:p-5">
+          <ErrorState
+            message="Staff payroll terms could not be loaded."
+            onRetry={() => void load()}
+          />
+        </div>
       ) : staff.length === 0 ? (
         <div className="p-4 text-sm text-muted-foreground sm:p-5">
           No staff records yet. Invite staff first, then set their terms here.

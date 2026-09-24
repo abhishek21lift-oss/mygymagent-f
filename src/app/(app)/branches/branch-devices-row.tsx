@@ -97,9 +97,11 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
             <p className="truncate text-sm font-bold text-stone-700 dark:text-stone-300">
               {devices.isPending
                 ? "Loading…"
-                : active.length === 0
-                  ? "None registered"
-                  : `${active.length} active`}
+                : devices.isError
+                  ? "Could not load"
+                  : active.length === 0
+                    ? "None registered"
+                    : `${active.length} active`}
             </p>
           </div>
         </div>
@@ -143,7 +145,14 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
           ) : (
             <>
               <ul className="divide-y divide-stone-100 dark:divide-white/10">
-                {items.length === 0 ? (
+                {devices.isError ? (
+                  <li className="py-3 text-sm text-destructive">
+                    Devices could not be loaded.{" "}
+                    <button type="button" onClick={() => void devices.refetch()} className="underline underline-offset-2">
+                      Try again
+                    </button>
+                  </li>
+                ) : items.length === 0 ? (
                   <li className="py-3 text-sm text-muted-foreground">
                     No devices registered for this branch yet.
                   </li>
