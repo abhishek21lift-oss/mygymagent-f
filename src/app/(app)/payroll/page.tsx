@@ -10,7 +10,8 @@ import {
  Save,
 } from "lucide-react";
 import { toast } from "sonner";
-import { api } from "@/lib/api/client";
+import { api } from "@/lib/api/client"
+import { StaffPayrollSection } from "./staff-payroll-section";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 
@@ -263,11 +264,17 @@ export default function PayrollPage() {
  </div>
  </section>
 
- <section className="rounded-xl border bg-card p-6 shadow-sm">
- <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
- <div>
- <h2 className="text-xl font-black">Create payroll run</h2>
- <p className="text-sm text-stone-500">
+ {/* Directly above "Create payroll run": a run only includes staff who
+ are payroll-enabled and have a rate, so when it reports "No
+ payroll-enabled staff found for this scope", the fix is one row up.
+ Until B-P1-7 those columns had no write path at all. */}
+ <StaffPayrollSection onChanged={() => void load()} />
+
+ <section className="overflow-hidden rounded-lg border border-border bg-card">
+ <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+ <div className="min-w-0">
+ <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Create payroll run</h2>
+ <p className="mt-0.5 text-xs text-muted-foreground">
  Staff is selected server-side from the active organization and branch scope.
  </p>
  </div>
@@ -276,7 +283,7 @@ export default function PayrollPage() {
  {creating ? "Creating..." : "Create run"}
  </Button>
  </div>
- <div className="grid gap-4 sm:grid-cols-2">
+ <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
  <label className="text-sm font-semibold">
  Period start
  <input
