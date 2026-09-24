@@ -123,7 +123,7 @@ export default function WorkoutSessionsPage() {
 
  <section aria-labelledby="ws-stats" className="">
  <h2 id="ws-stats" className="sr-only">Execution numbers</h2>
- <div className="grid gap-4 sm:grid-cols-3">
+ <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
  <Metric icon={Target} label="Ready to start" value={activeAssignments.length} tone="rose" />
  <Metric icon={Users} label="Started today" value={sessions.data?.length ?? 0} tone="cyan" />
  <Metric icon={CheckCircle2} label="Completed" value={sessions.data?.filter((x) => x.status === "COMPLETED").length ?? 0} tone="emerald" />

@@ -179,7 +179,7 @@ export default function DashboardPage() {
  </Link>
  </Button>
  </div>
- <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+ <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
  <StatCard icon={CalendarCheck} title="Today's check-ins" value={data?.today.checkIns} isLoading={briefing.isLoading} isError={briefing.isError} tone="primary" />
  <StatCard icon={Wallet} title="Net revenue" value={data ? displayCurrencyAmount(revenue, currencyCode) : undefined} isLoading={briefing.isLoading} isError={briefing.isError} tone="success" />
  <StatCard icon={Users} title="Members at risk" value={data?.atRiskMembers.count} isLoading={briefing.isLoading} isError={briefing.isError} tone="warning" />

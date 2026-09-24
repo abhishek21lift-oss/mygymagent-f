@@ -119,7 +119,7 @@ export default function SalesAnalyticsPage() {
  </section>
 
  <section aria-label="Funnel snapshot">
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+ <div className="grid gap-4 grid-cols-2 xl:grid-cols-5">
  <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} loading={funnel.isPending} error={funnel.isError} tone="cyan" />
  <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} loading={funnel.isPending} error={funnel.isError} tone="emerald" />
  <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} loading={funnel.isPending} error={funnel.isError} tone="violet" />

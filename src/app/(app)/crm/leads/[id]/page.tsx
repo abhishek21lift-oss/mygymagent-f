@@ -97,7 +97,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  />
 
  <section aria-label="Lead snapshot">
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+ <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
  <Metric icon={Sparkles} label="Sales priority score" value={score} tone="violet" />
  <Metric icon={Flame} label="Pipeline stage" value={currentLead.status} tone="rose" />
  <Metric icon={CalendarClock} label="Open follow-ups" value={openFollowUps} tone="amber" />

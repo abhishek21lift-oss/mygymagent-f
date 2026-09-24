@@ -70,7 +70,7 @@ export default function SalesFollowUpsPage() {
  />
 
  <section aria-label="Follow-up snapshot">
- <div className="grid gap-4 sm:grid-cols-3">
+ <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
  <Metric icon={ListChecks} label="Visible actions" value={rows.length} tone="cyan" />
  <Metric icon={Flame} label="Overdue" value={overdue} tone="rose" />
  <Metric icon={CalendarClock} label="Open" value={status === "OPEN" ? rows.length : rows.filter((row) => !row.completedAt).length} tone="violet" />

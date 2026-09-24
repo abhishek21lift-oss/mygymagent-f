@@ -107,11 +107,17 @@ export function MetricStrip({
   className?: string;
   children: ReactNode;
 }) {
+  // `grid-cols-2` is the base, not `sm:grid-cols-2`. Every entry here
+  // used to start at the `sm` breakpoint, so below 640px the grid fell
+  // back to its one-column default -- the exact single column of tiles
+  // the comment above says this avoids. On a 390px screen that turned a
+  // five-tile strip into five full-width cards, four of them reading 0,
+  // and pushed the table they belong to most of a screen further down.
   const cols = {
-    2: "sm:grid-cols-2",
-    3: "sm:grid-cols-2 lg:grid-cols-3",
-    4: "sm:grid-cols-2 xl:grid-cols-4",
-    5: "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+    2: "grid-cols-2",
+    3: "grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-2 xl:grid-cols-4",
+    5: "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
   }[columns];
 
   return (

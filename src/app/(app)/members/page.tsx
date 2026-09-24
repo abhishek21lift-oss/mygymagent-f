@@ -216,7 +216,7 @@ export default function MembersPage() {
 
  {/* Four numbers do not need a section heading telling you they are
  numbers; the old "Overview" title cost a line and said nothing. */}
- <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+ <div className="grid gap-2.5 grid-cols-2 xl:grid-cols-4">
  <Metric icon={Users} label="Total members" value={metrics.isLoading ? "\u2014" : metrics.data?.total ?? 0} tone="primary" />
  <Metric icon={CheckCircle2} label="Active" value={metrics.isLoading ? "\u2014" : metrics.data?.active ?? 0} tone="success" />
  <Metric icon={AlertTriangle} label="Needs attention" value={metrics.isLoading ? "\u2014" : (metrics.data?.inactive ?? 0) + (metrics.data?.frozen ?? 0) + (metrics.data?.expired ?? 0)} tone="warning" />

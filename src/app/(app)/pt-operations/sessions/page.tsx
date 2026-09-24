@@ -163,7 +163,7 @@ export default function PtSessionsPage() {
 
  <section aria-labelledby="pt-sessions-stats" className="">
  <h2 id="pt-sessions-stats" className="sr-only">Today&apos;s session numbers</h2>
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+ <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
  <Metric icon={CalendarDays} label="Scheduled" value={scheduled.length} tone="rose" />
  <Metric icon={CheckCircle2} label="Completed" value={completed.length} tone="emerald" />
  <Metric icon={XCircle} label="No-shows" value={noShows.length} tone="amber" />

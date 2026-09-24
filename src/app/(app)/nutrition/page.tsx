@@ -299,7 +299,7 @@ export default function NutritionPage() {
 
  <section aria-labelledby="nutrition-stats" className="">
  <h2 id="nutrition-stats" className="sr-only">Nutrition numbers</h2>
- <div className="grid gap-4 sm:grid-cols-3">
+ <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
  <Metric icon={Apple} label="Food library" value={foods.isLoading ? "—" : foods.data?.length ?? 0} tone="emerald" />
  <Metric icon={Leaf} label="Diet plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} tone="lime" />
  <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} tone="cyan" />

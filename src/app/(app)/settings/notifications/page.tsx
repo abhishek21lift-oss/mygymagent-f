@@ -17,12 +17,31 @@ import {
  type NotificationPreference,
 } from "@/lib/notifications"
 import { ApiError } from "@/lib/api/client"
+/**
+ * Only the channels the server actually delivers on get a switch.
+ *
+ * This table used to offer five per category -- fifty switches, of which
+ * forty wrote a column nothing reads: `NotificationsService` selects
+ * `inApp` and nothing else, and `src/notifications/README.md` says so
+ * outright ("WhatsApp/SMS/push have typed provider interfaces but no
+ * implementation wired in yet"). A switch that saves a value no sender
+ * consults is worse than an absent one: it is a promise the product does
+ * not keep, and the footnote admitting as much sat below fifty controls
+ * that looked live.
+ *
+ * They are named below the table instead, so the capability stays
+ * visible as planned rather than pretended. When a sender starts reading
+ * one of those columns, move it up here.
+ */
 const channels = [
  { key: "inApp", label: "In-app", icon: Bell },
- { key: "email", label: "Email", icon: Mail },
- { key: "whatsapp", label: "WhatsApp", icon: MessageCircle },
- { key: "sms", label: "SMS", icon: Smartphone },
- { key: "push", label: "Push", icon: Zap },
+] as const
+
+const PENDING_CHANNELS = [
+ { label: "Email", icon: Mail },
+ { label: "WhatsApp", icon: MessageCircle },
+ { label: "SMS", icon: Smartphone },
+ { label: "Push", icon: Zap },
 ] as const
 
 type ChannelKey = (typeof channels)[number]["key"]
@@ -64,10 +83,13 @@ export default function NotificationSettingsPage() {
  userId: "",
  category,
  inApp: channel === "inApp" ? value : true,
- email: channel === "email" ? value : true,
- whatsapp: channel === "whatsapp" ? value : false,
- sms: channel === "sms" ? value : false,
- push: channel === "push" ? value : false,
+ // The row the server stores still carries these columns; they
+ // are simply not offered as switches while nothing sends on
+ // them, so the optimistic copy just mirrors the defaults.
+ email: true,
+ whatsapp: false,
+ sms: false,
+ push: false,
  updatedAt: new Date().toISOString(),
  createdAt: new Date().toISOString(),
  },
@@ -107,9 +129,9 @@ export default function NotificationSettingsPage() {
  />
 
  <Card className="overflow-hidden border-border bg-card">
- <CardContent className="overflow-x-auto p-0">
- <div className="min-w-[760px]">
- <div className="grid grid-cols-[minmax(18rem,1fr)_repeat(5,6rem)] items-center border-b border-border bg-stone-50/80 px-5 py-3">
+ <CardContent className="p-0">
+ <div>
+ <div className="grid grid-cols-[1fr_5rem] items-center border-b border-border bg-stone-50/80 px-5 py-3">
  <div className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">Activity</div>
  {channels.map(({ key, label, icon: Icon }) => (
  <div key={key} className="flex flex-col items-center gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-stone-500">
@@ -134,7 +156,7 @@ export default function NotificationSettingsPage() {
  {(categories.data ?? []).map((category) => {
  const preference = preferenceMap.get(category.key)
  return (
- <div key={category.key} className="grid grid-cols-[minmax(18rem,1fr)_repeat(5,6rem)] items-center gap-0 border-b border-stone-100 px-5 py-4 last:border-b-0">
+ <div key={category.key} className="grid grid-cols-[1fr_5rem] items-center gap-0 border-b border-stone-100 px-5 py-4 last:border-b-0">
  <div className="pr-5">
  <div className="text-sm font-bold text-stone-900">{category.label}</div>
  <div className="mt-1 text-xs leading-5 text-stone-500">{category.description}</div>
@@ -158,9 +180,18 @@ export default function NotificationSettingsPage() {
  </CardContent>
  </Card>
 
- <div className="rounded-lg border border-amber-200/80 bg-amber-50/70 px-4 py-3 text-xs leading-5 text-amber-900">
- Email, WhatsApp, SMS, and Push switches store your communication preferences. Delivery for channels that are not implemented is not simulated.
- </div>
+ <section aria-labelledby="pending-channels" className="rounded-lg border border-border bg-muted/40 p-4">
+ <h2 id="pending-channels" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Not delivering yet</h2>
+ <p className="mt-1.5 text-xs leading-5 text-muted-foreground">These channels are built but not yet connected to a sender, so there is nothing here to switch on. They will appear in the table above once messages actually go out through them.</p>
+ <ul className="mt-3 flex flex-wrap gap-2">
+ {PENDING_CHANNELS.map(({ label, icon: Icon }) => (
+ <li key={label} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+ <Icon className="size-3.5" aria-hidden="true" />
+ {label}
+ </li>
+ ))}
+ </ul>
+ </section>
  </div>
  </div>
  )

@@ -296,7 +296,7 @@ export default function IntelligencePage() {
 
  <section aria-labelledby="intel-pulse">
  <SectionHeader title="Executive signal layer" />
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+ <div className="grid gap-4 grid-cols-2 xl:grid-cols-6">
  <MetricCard label="Net revenue" value={formatMoney(revenueRow?.netRevenue)} detail={`${revenueRow?.paymentCount ?? 0} recorded payments`} icon={DollarSign} tone="violet" loading={revenue.isLoading} error={revenue.isError} />
  <MetricCard label="Outstanding" value={formatMoney(outstanding?.outstandingBalance)} detail={`${outstanding?.membershipsWithBalance ?? 0} memberships with balance`} icon={WalletCards} tone="rose" loading={revenue.isLoading} error={revenue.isError} href="/billing" />
  <MetricCard label="Members" value={totalMembers} detail={`${activeMembers} currently active`} icon={Users} tone="cyan" loading={status.isLoading} error={status.isError} href="/members" />

@@ -282,7 +282,7 @@ export default function WorkoutsPage() {
 
  <section aria-labelledby="workouts-stats" className="">
  <h2 id="workouts-stats" className="sr-only">Studio numbers</h2>
- <div className="grid gap-4 sm:grid-cols-3">
+ <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
  <Metric icon={Dumbbell} label="Exercises" value={ex.isLoading ? "—" : ex.data?.length ?? 0} tone="rose" />
  <Metric icon={Layers3} label="Workout plans" value={plans.isLoading ? "—" : plans.data?.total ?? 0} tone="orange" />
  <Metric icon={Users} label="Active assignments" value={assignments.isLoading ? "—" : active} tone="cyan" />

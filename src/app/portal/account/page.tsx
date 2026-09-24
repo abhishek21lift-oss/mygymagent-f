@@ -168,28 +168,26 @@ export default function PortalAccountPage() {
                       {row.description}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-4">
-                    {(["email", "whatsapp", "inApp"] as const).map((channel) => (
-                      <div key={channel} className="flex items-center gap-2">
-                        <Switch
-                          id={`${row.key}-${channel}`}
-                          checked={row[channel]}
-                          onCheckedChange={(next) =>
-                            void togglePreference(row.key, channel, next)
-                          }
-                        />
-                        <Label
-                          htmlFor={`${row.key}-${channel}`}
-                          className="text-xs font-normal text-muted-foreground"
-                        >
-                          {channel === "inApp"
-                            ? "In app"
-                            : channel === "whatsapp"
-                              ? "WhatsApp"
-                              : "Email"}
-                        </Label>
-                      </div>
-                    ))}
+                  {/* In-app only. The email and WhatsApp switches that
+                      used to sit beside this one wrote columns no sender
+                      reads -- see the note in the staff settings page --
+                      so a member could mute a channel that was never
+                      going to message them, or unmute one that still
+                      will not. */}
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`${row.key}-inApp`}
+                      checked={row.inApp}
+                      onCheckedChange={(next) =>
+                        void togglePreference(row.key, "inApp", next)
+                      }
+                    />
+                    <Label
+                      htmlFor={`${row.key}-inApp`}
+                      className="text-xs font-normal text-muted-foreground"
+                    >
+                      Notify me in the app
+                    </Label>
                   </div>
                 </li>
               ))}
