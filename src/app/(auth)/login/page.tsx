@@ -170,7 +170,13 @@ export default function LoginPage() {
  <section aria-labelledby="login-title" className="overflow-hidden rounded-xl">
  <div className="border-b px-6 py-5">
  <h1 id="login-title" className="text-xl font-semibold tracking-tight">Welcome back</h1>
- <p className="mt-1 text-sm text-muted-foreground">Sign in to manage members, billing and operations.</p>
+ {/* One form for both. The old copy ("manage members, billing and
+ operations") told a gym member they were in the wrong place, which
+ was the only thing standing between them and their own portal --
+ the server already knows which app the session opens. */}
+<p className="mt-1 text-sm text-muted-foreground">
+ Members and staff sign in here. You will land in the right place automatically.
+</p>
  </div>
  <div className="p-6">
  <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
