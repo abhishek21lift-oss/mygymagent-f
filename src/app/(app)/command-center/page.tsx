@@ -138,7 +138,7 @@ function PriorityRow({
  return (
  <Link
  href={href}
- className={`group/pri relative flex items-center gap-4 overflow-hidden rounded-xl border border-transparent px-3 py-3.5 transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${s.hover}`}
+ className={`group/pri relative flex items-center gap-4 overflow-hidden rounded-xl border border-transparent px-3 py-3.5 transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${s.hover}`}
  >
  <span
  className={`absolute inset-y-3 left-0 w-1 rounded-full ${s.tick}`}
@@ -283,7 +283,7 @@ function WatchlistCard({
  <Link
  href={href}
  aria-label={actionLabel}
- className="group/wl mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-extrabold text-stone-700 transition hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950"
+ className="group/wl mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-extrabold text-stone-700 transition hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  {actionLabel}
  <ArrowUpRight
@@ -318,7 +318,7 @@ function Shortcut({
  return (
  <Link
  href={href}
- className={`group/sc flex min-h-11 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${hoverRing}`}
+ className={`group/sc flex min-h-11 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-[0_16px_45px_-30px_rgba(79,70,229,.4)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(79,70,229,.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${hoverRing}`}
  >
  <span
  className={`flex size-11 items-center justify-center rounded-lg text-white shadow-md transition-transform duration-300 group-hover/sc:scale-110 group-hover/sc:-rotate-3 ${tile}`}
@@ -423,7 +423,7 @@ export default function CommandCenterPage() {
  <>
  <Link
  href="/ai"
- className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="btn-sheen inline-flex min-h-10 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition duration-300 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <Sparkles className="size-4" aria-hidden="true" />
  Ask THE CULT CLIENT
@@ -431,7 +431,7 @@ export default function CommandCenterPage() {
  </Link>
  <Link
  href="/owner-os"
- className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/25 bg-card px-4 py-2.5 text-sm font-bold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition duration-300 hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <BarChart3 className="size-4" aria-hidden="true" />
  Owner Insights
@@ -485,7 +485,7 @@ export default function CommandCenterPage() {
  </div>
  <Link
  href="/intelligence"
- className="mt-2 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-xs font-extrabold text-white ring-1 ring-white/20 transition hover:bg-white hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="mt-2 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-xs font-semibold text-foreground ring-1 ring-border transition hover:bg-accent hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  Intelligence
  <ArrowUpRight className="size-4" aria-hidden="true" />
@@ -581,7 +581,7 @@ export default function CommandCenterPage() {
  className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]"
  >
  <Card className="overflow-hidden border-border bg-card">
- <div className="flex items-center justify-between gap-3 border-b border-border bg-white px-6 py-5">
+ <div className="flex items-center justify-between gap-3 border-b border-border bg-card px-6 py-5">
  <div className="flex items-center gap-3">
  <span className="flex size-11 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/25">
  <Zap className="size-5" aria-hidden="true" />
@@ -661,7 +661,7 @@ export default function CommandCenterPage() {
  </div>
  <Link
  href="/crm"
- className="group/ink relative mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="group/ink relative mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  Open Sales OS
  <ArrowRight
@@ -755,7 +755,7 @@ export default function CommandCenterPage() {
  </div>
  <Link
  href="/billing"
- className="group/collect mt-4 flex items-center gap-4 rounded-xl border border-amber-200/80 bg-muted/40 px-5 py-4 shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 lg:px-6"
+ className="group/collect mt-4 flex items-center gap-4 rounded-xl border border-amber-200/80 bg-muted/40 px-5 py-4 shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring lg:px-6"
  >
  <span className="min-w-0 flex-1">
  <span className="block text-sm font-extrabold text-stone-900">

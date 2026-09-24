@@ -20,6 +20,12 @@ import { cn } from "@/lib/utils";
  * `flush` is for sections whose body is a table or a list that should
  * meet the border — padding around a table just pushes it away from the
  * frame that defines it.
+ *
+ * The header wears the section wash and the label the section ink. Six
+ * of these stacked down a page were six identical grey strips, and the
+ * eye had nothing to catch on; given the page's own hue they read as
+ * divisions of one thing. The label is still 11px uppercase, still not
+ * competing with the masthead — it just stopped being invisible.
  */
 export function Panel({
   title,
@@ -47,16 +53,20 @@ export function Panel({
     <section
       aria-labelledby={title && titleId ? titleId : undefined}
       className={cn(
-        "overflow-hidden rounded-lg border border-border bg-card",
+        "panel-premium overflow-hidden rounded-lg border border-border bg-card",
         className,
       )}
     >
       {title ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+        <div
+          data-slot="panel-header"
+          className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5"
+        >
           <div className="min-w-0">
             <h2
               id={titleId}
-              className="truncate text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground"
+              data-slot="panel-title"
+              className="truncate text-[11px] font-semibold uppercase tracking-[0.1em]"
             >
               {title}
             </h2>

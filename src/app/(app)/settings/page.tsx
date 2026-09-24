@@ -70,9 +70,9 @@ export default function SettingsPage() {
  // two-step verification is the signed-in user's own account setting,
  // so every role has to be able to reach it.
  <div className="flex flex-wrap gap-2">
- <Link href="/settings/security" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> <ShieldCheck className="size-4" aria-hidden="true" /> Security </Link>
+ <Link href="/settings/security" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> <ShieldCheck className="size-4" aria-hidden="true" /> Security </Link>
  {canManageSettings ? (
- <><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+ <><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp setup <ArrowRight className="size-4" aria-hidden="true" />
  </Link></>
  ) : null}
@@ -139,7 +139,7 @@ export default function SettingsPage() {
  </div>
  {canEdit && (
  <div className="flex justify-end">
- <Button type="submit" disabled={updateOrg.isPending} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#6d28d9)] shadow-lg shadow-indigo-500/20">{updateOrg.isPending ? "Saving..." : "Save changes"}</Button>
+ <Button type="submit" disabled={updateOrg.isPending} className="btn-sheen min-h-11 rounded-lg bg-primary">{updateOrg.isPending ? "Saving..." : "Save changes"}</Button>
  </div>
  )}
  </form>
@@ -155,12 +155,12 @@ export default function SettingsPage() {
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-card blur-3xl" aria-hidden="true" />
  <CardContent className="relative flex items-center justify-between gap-4 p-5 sm:p-6">
  <div className="flex min-w-0 items-center gap-3">
- <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-white/25"><MessageCircle className="size-6" aria-hidden="true" /></span>
+ <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-border"><MessageCircle className="size-6" aria-hidden="true" /></span>
  <div className="min-w-0">
  <div className="font-semibold text-lg font-semibold tracking-tight">WhatsApp Business</div>
  </div>
  </div>
- <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-lg border-white/30 bg-white font-extrabold text-emerald-900 hover:bg-card"><Link href="/settings/whatsapp">Manage</Link></Button>
+ <Button asChild variant="outline" className="min-h-11 shrink-0 rounded-lg"><Link href="/settings/whatsapp">Manage</Link></Button>
  </CardContent>
  </Card>
  )}

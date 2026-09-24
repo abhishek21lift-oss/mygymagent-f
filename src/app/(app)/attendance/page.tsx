@@ -62,7 +62,7 @@ function CheckInForm() {
  <p className="mb-1.5 text-sm font-bold text-stone-700 dark:text-stone-300">Member</p>
  <MemberPicker value={member} onChange={setMember} />
  </div>
- <Button onClick={handleCheckIn} disabled={checkIn.isPending} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#0891b2,#0d9488_55%,#059669)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-cyan-500/25 transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <Button onClick={handleCheckIn} disabled={checkIn.isPending} className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <LogIn className="size-4" aria-hidden="true" />
  {checkIn.isPending ? "Checking in..." : "Check in"}
  </Button>
@@ -201,7 +201,7 @@ function CheckOutCell({ attendance }: { attendance: Attendance }) {
  <Button
  variant="ghost"
  size="sm"
- className="min-h-11 rounded-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+ className="min-h-11 rounded-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  disabled={checkOut.isPending}
  onClick={() =>
  checkOut
@@ -231,10 +231,10 @@ export default function AttendancePage() {
  description="Check-ins, the live view and the visit log"
  actions={
  <>
- <Link href="/members" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#0891b2,#0d9488_55%,#059669)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-cyan-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <Link href="/members" className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <CalendarCheck className="size-4" aria-hidden="true" /> Members
  </Link>
- <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-cyan-200/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
  </Link>
  </>

@@ -105,7 +105,7 @@ function ResetPasswordForm() {
  </FormItem>
  )}
  />
- <Button type="submit" className="min-h-11 w-full rounded-lg bg-[linear-gradient(105deg,#059669,#06b6d4)] shadow-lg shadow-emerald-500/25" disabled={isSubmitting}>
+ <Button type="submit" className="btn-sheen min-h-11 w-full rounded-lg bg-primary" disabled={isSubmitting}>
  {isSubmitting ? "Updating..." : "Update password"}
  </Button>
  </form>

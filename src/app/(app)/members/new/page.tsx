@@ -16,7 +16,7 @@ export default function NewMemberPage() {
  actions={
  <Link
  href="/members"
- className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <ArrowLeft className="size-4" aria-hidden="true" />
  Back

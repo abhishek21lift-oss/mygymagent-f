@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
  </FormItem>
  )}
  />
- <Button type="submit" className="min-h-11 w-full rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/25" disabled={isSubmitting}>
+ <Button type="submit" className="btn-sheen min-h-11 w-full rounded-lg bg-primary" disabled={isSubmitting}>
  {isSubmitting ? "Sending..." : "Send reset link"}
  {!isSubmitting && <Send className="ml-2 size-4" aria-hidden="true" />}
  </Button>

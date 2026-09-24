@@ -39,7 +39,7 @@ function AddExerciseDialog() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button variant="outline" className="min-h-11 rounded-lg border-stone-200 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+ <Button variant="outline" className="min-h-11 rounded-lg border-stone-200 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-4" aria-hidden="true" />Add exercise
  </Button>
  </DialogTrigger>
@@ -88,7 +88,7 @@ function CreatePlanDialog() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#e11d48,#f97316_55%,#0891b2)] text-white shadow-lg shadow-rose-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+ <Button className="btn-sheen min-h-11 rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-4" aria-hidden="true" />New plan
  </Button>
  </DialogTrigger>
@@ -167,7 +167,7 @@ function AssignDialog({ planId, planName }: { planId: string; planName: string }
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button variant="outline" size="sm" className="min-h-11 rounded-xl border-rose-200 bg-rose-50/60 text-rose-800 hover:bg-rose-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+ <Button variant="outline" size="sm" className="min-h-11 rounded-xl border-rose-200 bg-rose-50/60 text-rose-800 hover:bg-rose-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <UserPlus className="size-3.5" aria-hidden="true" />Assign
  </Button>
  </DialogTrigger>
@@ -202,7 +202,7 @@ function AssignmentRow({ assignment }: { assignment: WorkoutAssignment }) {
  }
  }
  return (
- <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-white hover:shadow-[0_20px_50px_-30px_rgba(244,63,94,.4)] sm:flex-row sm:items-center">
+ <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-accent hover:shadow-[0_20px_50px_-30px_rgba(244,63,94,.4)] sm:flex-row sm:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
  <div className="min-w-0">
  <p className="truncate text-sm font-extrabold text-stone-900">{member ? `${member.firstName} ${member.lastName}` : "Member unavailable"}</p>
@@ -211,7 +211,7 @@ function AssignmentRow({ assignment }: { assignment: WorkoutAssignment }) {
  </div>
  <Badge variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "success" : "secondary"}>{assignment.status}</Badge>
  {assignment.status === "ACTIVE" && hasPermission("workouts.assign") && (
- <Button size="sm" variant="ghost" disabled={update.isPending} onClick={complete} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">Complete</Button>
+ <Button size="sm" variant="ghost" disabled={update.isPending} onClick={complete} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Complete</Button>
  )}
  </div>
  );

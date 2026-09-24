@@ -56,7 +56,7 @@ function SelectField({
  <select
  value={value}
  onChange={(e) => onChange(e.target.value)}
- className="h-10 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-stone-900 outline-none focus:ring-2 focus:ring-indigo-500/30 dark:bg-stone-900 dark:text-white"
+ className="h-10 rounded-xl border border-stone-200 bg-card px-3 text-sm font-semibold text-stone-900 outline-none focus:ring-2 focus:ring-indigo-500/30 dark:bg-stone-900 dark:text-white"
  >
  <option value="">{placeholder}</option>
  {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}

@@ -118,7 +118,7 @@ export function GymSetupStep({ data, onUpdate, onContinue, onBack }: GymSetupSte
  updateField("memberType", type.value as GymSetupData["memberType"])
  }
  }}
- className={`cursor-pointer transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 ${
+ className={`cursor-pointer transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
  selected
  ? "border-violet-300 bg-muted/40 shadow-md"
  : "border-stone-200/70 bg-card hover:border-violet-200 hover:shadow-md"
@@ -182,7 +182,7 @@ export function GymSetupStep({ data, onUpdate, onContinue, onBack }: GymSetupSte
 
  <div className="flex justify-between border-t border-stone-100 pt-5">
  <Button variant="outline" onClick={onBack} className="min-h-11 rounded-lg px-5">Back</Button>
- <Button onClick={onContinue} disabled={!isValid} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 font-extrabold shadow-lg shadow-violet-500/25 disabled:opacity-50">Continue</Button>
+ <Button onClick={onContinue} disabled={!isValid} className="btn-sheen min-h-11 rounded-lg bg-primary px-6 font-extrabold disabled:opacity-50">Continue</Button>
  </div>
  </div>
  )

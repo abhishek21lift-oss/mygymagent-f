@@ -78,15 +78,15 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  title={`${currentLead.firstName} ${currentLead.lastName}`}
  actions={
  <>
- <Button asChild variant="outline" className="min-h-11 rounded-lg border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button asChild variant="outline" className="min-h-11 rounded-lg border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href="/crm"><ArrowLeft className="size-4" aria-hidden="true" /> Back to Sales</Link>
  </Button>
  {currentLead.status !== "WON" ? (
- <Button asChild className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button asChild className="btn-sheen min-h-11 rounded-lg bg-primary transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href={`/crm/leads/${currentLead.id}/convert`}><ArrowRightCircle className="size-4" aria-hidden="true" /> Convert to member</Link>
  </Button>
  ) : (
- <Button asChild variant="outline" className="min-h-11 rounded-lg border-emerald-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+ <Button asChild variant="outline" className="min-h-11 rounded-lg border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href={`/members/${currentLead.convertedMemberId}`}><UserRound className="size-4" aria-hidden="true" /> Open member</Link>
  </Button>
  )}
@@ -139,7 +139,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  )}
  />
  <div className="flex justify-end sm:col-span-2">
- <Button type="submit" disabled={update.isPending} className="min-h-11 rounded-lg bg-stone-950 text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+ <Button type="submit" disabled={update.isPending} className="min-h-11 rounded-lg bg-stone-950 text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Save className="size-4" aria-hidden="true" /> {update.isPending ? "Saving..." : "Save profile"}
  </Button>
  </div>
@@ -199,7 +199,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  <FormField control={followUpForm.control} name="dueAt" render={({ field }) => <FormItem><FormLabel>Due date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>} />
  <FormField control={followUpForm.control} name="note" render={({ field }) => <FormItem><FormLabel>Next action</FormLabel><FormControl><Input placeholder="Call, WhatsApp, trial reminder..." {...field} /></FormControl><FormMessage /></FormItem>} />
  <div className="flex items-end">
- <Button type="submit" disabled={addFollowUp.isPending} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button type="submit" disabled={addFollowUp.isPending} className="btn-sheen min-h-11 rounded-lg bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  {addFollowUp.isPending ? "Scheduling..." : "Schedule"}
  </Button>
  </div>
@@ -216,7 +216,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  <p className={followUp.completedAt ? "mt-2 text-sm font-medium text-stone-600 line-through" : "mt-2 text-sm font-medium text-stone-900"}>{followUp.note}</p>
  </div>
  {!followUp.completedAt && (
- <Button size="sm" variant="outline" onClick={() => finishFollowUp(followUp.id)} disabled={completeFollowUp.isPending} className="min-h-11 shrink-0 rounded-xl border-blue-200 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button size="sm" variant="outline" onClick={() => finishFollowUp(followUp.id)} disabled={completeFollowUp.isPending} className="min-h-11 shrink-0 rounded-xl border-blue-200 hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Check className="size-3.5" aria-hidden="true" /> Done
  </Button>
  )}

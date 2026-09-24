@@ -110,7 +110,7 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
             variant="outline"
             size="sm"
             onClick={() => setOpen(true)}
-            className="min-h-11 shrink-0 rounded-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+            className="min-h-11 shrink-0 rounded-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             Manage
           </Button>

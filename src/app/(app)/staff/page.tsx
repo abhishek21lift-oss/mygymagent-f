@@ -83,7 +83,7 @@ function InviteStaffDialog() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#0891b2,#2563eb_55%,#4f46e5)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-cyan-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <Button className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-4" aria-hidden="true" />
  Invite staff
  </Button>
@@ -247,7 +247,7 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
  <Button
  variant="ghost"
  size="sm"
- className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+ className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  disabled={deactivate.isPending}
  onClick={() =>
  deactivate
@@ -283,7 +283,7 @@ export default function StaffPage() {
  actions={
  <>
  {hasPermission("users.create") && <InviteStaffDialog />}
- <Link href="/attendance" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-cyan-200/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <Link href="/attendance" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Sparkles className="size-4" aria-hidden="true" /> Attendance
  </Link>
  </>

@@ -134,7 +134,7 @@ export default function RegisterPage() {
  </FormItem>
  )}
  />
- <Button type="submit" className="min-h-11 w-full rounded-lg bg-[linear-gradient(105deg,#059669,#06b6d4_55%,#7c3aed)] shadow-lg shadow-emerald-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600" disabled={isSubmitting}>
+ <Button type="submit" className="btn-sheen min-h-11 w-full rounded-lg bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={isSubmitting}>
  {isSubmitting ? "Creating account..." : "Create account"}
  {!isSubmitting && <ArrowRight className="ml-2 size-4" aria-hidden="true" />}
  </Button>

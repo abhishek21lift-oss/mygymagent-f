@@ -142,7 +142,7 @@ function SellMembershipDialog({ memberId }: { memberId: string }) {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] text-white shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" className="btn-sheen min-h-11 rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" aria-hidden="true" />
  Sell Membership
  </Button>
@@ -265,7 +265,7 @@ function CollectPaymentDialog({
  }}
  >
  <DialogTrigger asChild>
- <Button size="sm" className="min-h-11 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+ <Button size="sm" className="min-h-11 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <IndianRupee className="size-3.5" aria-hidden="true" />
  Collect Payment
  </Button>
@@ -1358,14 +1358,14 @@ function MemberHeader({
  memberships={allMemberships}
  />
  <EditMemberDialog member={member}>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Pencil className="size-3.5" aria-hidden="true" />
  Edit
  </Button>
  </EditMemberDialog>
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <MoreHorizontal className="size-3.5" aria-hidden="true" />
  More
  </Button>
@@ -1585,7 +1585,7 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  <Button
  variant="ghost"
  size="sm"
- className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-2 font-bold text-stone-600 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-2 font-bold text-stone-600 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  onClick={() => router.push("/members")}
  >
  <ArrowLeft className="size-4" aria-hidden="true" />

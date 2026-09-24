@@ -176,9 +176,9 @@ export default function CalendarPage() {
  </div>
  </div>
  <div className="flex flex-wrap items-center gap-2">
- <Button variant="outline" size="icon" onClick={() => shift(-1)} aria-label="Previous" className="min-h-11 min-w-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"><ChevronLeft className="size-4" aria-hidden="true" /></Button>
- <Button variant="outline" size="sm" onClick={() => setAnchor(startOfDayUTC(new Date()))} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">Today</Button>
- <Button variant="outline" size="icon" onClick={() => shift(1)} aria-label="Next" className="min-h-11 min-w-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"><ChevronRight className="size-4" aria-hidden="true" /></Button>
+ <Button variant="outline" size="icon" onClick={() => shift(-1)} aria-label="Previous" className="min-h-11 min-w-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"><ChevronLeft className="size-4" aria-hidden="true" /></Button>
+ <Button variant="outline" size="sm" onClick={() => setAnchor(startOfDayUTC(new Date()))} className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Today</Button>
+ <Button variant="outline" size="icon" onClick={() => shift(1)} aria-label="Next" className="min-h-11 min-w-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"><ChevronRight className="size-4" aria-hidden="true" /></Button>
  <div className="ml-2 flex items-center gap-1 rounded-lg border p-1" role="group" aria-label="Calendar view">
  {(["day", "week", "month"] as const).map((v) => (
  <Button
@@ -316,7 +316,7 @@ function SlotRow({ slot, showDate }: { slot: CalendarSlot; showDate: boolean }) 
  ) : null}
  {!isAppt ? (
  <p className="mt-3 rounded-xl border border-orange-200 bg-muted/40 p-3 text-xs font-medium text-orange-900">
- This is a PT session — manage it from <a className="font-bold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600" href="/pt-operations/sessions">PT Sessions</a> so package credits stay in sync.
+ This is a PT session — manage it from <a className="font-bold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href="/pt-operations/sessions">PT Sessions</a> so package credits stay in sync.
  </p>
  ) : null}
  </DialogContent>
@@ -495,7 +495,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
  <Label className="text-sm font-bold text-stone-700">Notes</Label>
  <Textarea className="mt-1.5" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional context for the staff member" />
  </div>
- <Button type="submit" className="min-h-11 w-full rounded-lg bg-[linear-gradient(105deg,#e11d48,#f97316_55%,#0891b2)] text-white shadow-lg shadow-rose-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600" disabled={create.isPending || !branchId}>
+ <Button type="submit" className="btn-sheen min-h-11 w-full rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={create.isPending || !branchId}>
  {create.isPending ? "Booking…" : "Book appointment"}
  </Button>
  <div className="rounded-xl border border-cyan-100 bg-muted/40 p-3 text-xs text-cyan-900">
@@ -580,7 +580,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  <SelectContent>{[...Array(24).keys()].map((h) => <SelectItem key={(h + 1) * 60} value={String((h + 1) * 60)}>{minuteToLabel((h + 1) * 60)}</SelectItem>)}</SelectContent>
  </Select>
  </div>
- <Button size="sm" variant="outline" disabled={!staffId || setRule.isPending} className="min-h-11 rounded-xl border-cyan-200 bg-cyan-50/60 text-cyan-900 hover:bg-cyan-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+ <Button size="sm" variant="outline" disabled={!staffId || setRule.isPending} className="min-h-11 rounded-xl border-cyan-200 bg-cyan-50/60 text-cyan-900 hover:bg-cyan-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  onClick={() => guard(() => setRule.mutateAsync({ staffId, branchId: branchId || undefined, dayOfWeek: Number(dayOfWeek), startMinute: Number(startMin), endMinute: Number(endMin) }), "Availability rule saved")}>
  {setRule.isPending ? "Saving…" : "Add weekly rule"}
  </Button>
@@ -605,7 +605,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  <Input type="datetime-local" value={offEnd} onChange={(e) => setOffEnd(e.target.value)} className="min-h-11" aria-label="Time off end" />
  </div>
  <Input value={offReason} onChange={(e) => setOffReason(e.target.value)} placeholder="Reason (optional)" className="min-h-11" aria-label="Time off reason" />
- <Button size="sm" variant="outline" disabled={!staffId || addOff.isPending} className="min-h-11 rounded-xl border-amber-200 bg-amber-50/60 text-amber-900 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+ <Button size="sm" variant="outline" disabled={!staffId || addOff.isPending} className="min-h-11 rounded-xl border-amber-200 bg-amber-50/60 text-amber-900 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  onClick={() => guard(() => addOff.mutateAsync({ staffId, branchId: branchId || undefined, startAt: new Date(offStart).toISOString(), endAt: new Date(offEnd).toISOString(), reason: offReason.trim() || undefined }), "Time off added")}>
  <CalendarX2 className="size-4" aria-hidden="true" /> Add time off
  </Button>

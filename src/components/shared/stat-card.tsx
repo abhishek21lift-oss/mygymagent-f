@@ -20,6 +20,13 @@ const TONE_RULE = {
  * and the chrome meant four tiles filled a third of the viewport on an
  * operations screen. This is the figure, its label, and a state rule down
  * the leading edge when (and only when) the figure needs acting on.
+ *
+ * `stat-tile` adds the finish: a diagonal wash off the section hue, 2px
+ * of that hue across the top, real elevation and a 1px lift on hover.
+ * All of it is background and shadow, so the tile is the same height it
+ * was. The leading edge stays bare because the state rule lives there —
+ * a tile that is merely a number must not be wearing anything a tile
+ * that needs acting on wears.
  */
 export function StatCard({
  title,
@@ -58,12 +65,15 @@ export function StatCard({
 
  return (
  <div
- className={cn( "relative min-w-0 rounded-lg border border-border bg-card px-4 py-3",
+ className={cn( "stat-tile min-w-0 overflow-hidden rounded-lg border border-border px-4 py-3",
  flagged && "before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:content-['']",
  TONE_RULE[effectiveTone],
  )}
  >
- <p className="truncate text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <p
+ className="truncate text-[11px] font-semibold uppercase tracking-[0.1em]"
+ style={{ color: "var(--section-ink)" }}
+ >
  {title}
  </p>
  {isLoading ? (

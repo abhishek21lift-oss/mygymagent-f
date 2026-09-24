@@ -75,10 +75,10 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  title="Convert lead"
  actions={
  <>
- <Button variant="ghost" size="sm" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={() => router.back()}>
+ <Button variant="ghost" size="sm" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" onClick={() => router.back()}>
  <ArrowLeft className="size-4" aria-hidden="true" /> Back to Sales
  </Button>
- <Button asChild variant="outline" className="min-h-11 rounded-lg border-violet-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button asChild variant="outline" className="min-h-11 rounded-lg border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href={`/crm/leads/${lead.id}`}><Sparkles className="size-4" aria-hidden="true" /> Lead 360</Link>
  </Button>
  </>
@@ -133,11 +133,11 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  />
 
  <div className="flex flex-col-reverse justify-end gap-2 sm:flex-row">
- <Button type="button" variant="outline" onClick={() => router.back()} className="min-h-11 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">Cancel</Button>
+ <Button type="button" variant="outline" onClick={() => router.back()} className="min-h-11 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Cancel</Button>
  <Button
  type="submit"
  disabled={convertMutation.isPending}
- className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#059669,#0d9488_50%,#4f46e5)] shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+ className="btn-sheen min-h-11 rounded-lg bg-primary transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  {convertMutation.isPending ? "Converting..." : "Convert to Member"}
  </Button>

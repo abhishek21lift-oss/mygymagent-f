@@ -155,7 +155,7 @@ export function ReviewStep({ data, onEdit, onSubmit, isSubmitting }: ReviewStepP
 
  <div className="flex justify-between border-t border-stone-100 pt-5">
  <Button variant="outline" onClick={() => onEdit(4)} className="min-h-11 rounded-lg px-5">Back</Button>
- <Button onClick={onSubmit} disabled={isSubmitting} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 font-extrabold shadow-lg shadow-violet-500/25 disabled:opacity-60">
+ <Button onClick={onSubmit} disabled={isSubmitting} className="btn-sheen min-h-11 rounded-lg bg-primary px-6 font-extrabold disabled:opacity-60">
  {isSubmitting ? (
  <>Creating Member...</>
  ) : (

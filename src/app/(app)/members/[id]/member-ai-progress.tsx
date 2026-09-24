@@ -57,7 +57,7 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
  The assistant will inspect available workout history before making recommendations.
  </p>
  </div>
- <Button onClick={() => void analyze()} disabled={ai.isPending} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-5 font-extrabold text-white shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button onClick={() => void analyze()} disabled={ai.isPending} className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-extrabold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <TrendingUp className="size-4" aria-hidden="true" />
  {ai.isPending ? "Analyzing..." : "Analyze progress"}
  </Button>

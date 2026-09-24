@@ -118,7 +118,7 @@ function ProgressIndicator({ currentStep }: { currentStep: number }) {
  ? "border-transparent bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
  : index === currentStep
  ? "border-transparent bg-violet-600 text-white shadow-lg shadow-violet-500/30"
- : "border-stone-200 bg-white text-stone-500"
+ : "border-stone-200 bg-card text-stone-500"
  }`}
  aria-current={index === currentStep ? "step" : undefined}
  >
@@ -191,7 +191,7 @@ function WelcomeStep({ onUpdate }: { onUpdate: (data: Partial<OnboardingData>) =
 
  <Button
  size="lg"
- className="mt-8 min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-8 shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="btn-sheen mt-8 min-h-11 rounded-lg bg-primary px-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  onClick={() => onUpdate({})}
  >
  Let&apos;s Get Started
@@ -674,7 +674,7 @@ function CompleteStep() {
 
  <Button
  size="lg"
- className="mt-8 min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-8 shadow-lg shadow-violet-500/25"
+ className="btn-sheen mt-8 min-h-11 rounded-lg bg-primary px-8"
  onClick={() => router.push("/dashboard")}
  >
  Go to Dashboard
@@ -748,7 +748,7 @@ function ReviewStep({
  <ChevronLeft className="mr-2 size-4" aria-hidden="true" />
  Back
  </Button>
- <Button className="min-h-11 flex-1 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/25" onClick={onComplete} disabled={isSubmitting}>
+ <Button className="btn-sheen min-h-11 flex-1 rounded-lg bg-primary" onClick={onComplete} disabled={isSubmitting}>
  {isSubmitting ? (
  <>
  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
@@ -962,7 +962,7 @@ export function BusinessOnboardingWizard() {
  <ChevronLeft className="mr-2 size-4" aria-hidden="true" />
  Back
  </Button>
- <Button onClick={goNext} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/25">
+ <Button onClick={goNext} className="btn-sheen min-h-11 rounded-lg bg-primary">
  Continue
  <ChevronRight className="ml-2 size-4" aria-hidden="true" />
  </Button>

@@ -157,7 +157,7 @@ export default function WhatsAppSettingsPage() {
  icon={MessageCircle}
  title="WhatsApp"
  actions={
- <Link href="/settings" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+ <Link href="/settings" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <ArrowLeft className="size-4" aria-hidden="true" /> Back
  </Link>
  }
@@ -185,7 +185,7 @@ export default function WhatsAppSettingsPage() {
  ) : (
  <div className="space-y-5">
  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3"><Step n="1" text="Click Connect WhatsApp" /><Step n="2" text="Complete Meta onboarding" /><Step n="3" text="Confirm the business number" /></div>
- <Button onClick={launchSignup} disabled={!sdkReady || !configured || signupBusy} size="lg" className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#059669,#0d9488_55%,#0891b2)] shadow-lg shadow-emerald-500/25">{signupBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />}{configured ? "Connect WhatsApp" : "Meta setup required"}</Button>
+ <Button onClick={launchSignup} disabled={!sdkReady || !configured || signupBusy} size="lg" className="btn-sheen min-h-11 rounded-lg bg-primary">{signupBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />}{configured ? "Connect WhatsApp" : "Meta setup required"}</Button>
  {!configured && <p className="text-xs font-medium text-stone-600 dark:text-stone-400">Set NEXT_PUBLIC_META_APP_ID and NEXT_PUBLIC_META_WHATSAPP_CONFIG_ID in the frontend deployment.</p>}
  </div>
  )}
@@ -260,7 +260,7 @@ function TestSendCard({ canManage, orgCountry }: { canManage: boolean; orgCountr
  <Button
  onClick={handleSend}
  disabled={!canManage || testSend.isPending || phone.trim().length === 0}
- className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#059669,#0d9488_55%,#0891b2)] shadow-lg shadow-emerald-500/25"
+ className="btn-sheen min-h-11 rounded-lg bg-primary"
  >
  {testSend.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : <Send className="mr-2 h-4 w-4" aria-hidden="true" />}
  {testSend.isPending ? "Sending..." : "Send test"}

@@ -6,17 +6,34 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { accentForPath } from "@/lib/section-accent";
 import { useAuth } from "@/lib/auth/auth-context";
 import { primaryNav, secondaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
 
+/**
+ * One destination in the rail.
+ *
+ * The icon tile carries the hue of the section the link goes to -- the
+ * same hue that page's masthead, canvas and tables will wear once you
+ * are there. That turns the sidebar into the legend for the colour
+ * system rather than a second place it is merely applied: twenty-odd
+ * grey glyphs become eight colour families, and you learn where Finance
+ * is by its warmth before you learn where it is in the list.
+ *
+ * `--nav-accent` is its own set of tokens, not `--a-*`, because the rail
+ * is the one surface that stays dark in both themes -- the theme-aware
+ * accents invert, and in light mode they would paint near-black glyphs
+ * on near-black leather.
+ */
 function NavLink({ item, active, nested = false, collapsed = false, onNavigate, itemRef }: { item: NavItem; active: boolean; nested?: boolean; collapsed?: boolean; onNavigate?: () => void; itemRef?: React.RefObject<HTMLAnchorElement | null> }) {
  const Icon = item.icon;
  const isAi = item.accent === "ai";
  return (
  <Link
  ref={itemRef}
+ data-nav-accent={isAi ? undefined : accentForPath(item.href)}
  href={item.href}
  onClick={onNavigate}
  title={collapsed ? item.title : undefined}
@@ -36,23 +53,35 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
  {active && (
  <span
  aria-hidden="true"
- className={cn( "absolute inset-y-2 left-0 w-0.5 rounded-full",
- isAi ? "bg-ai" : "bg-sidebar-primary",
- )}
+ className={cn("absolute inset-y-2 left-0 w-0.5 rounded-full", isAi && "bg-ai")}
+ style={isAi ? undefined : { background: "var(--nav-accent)" }}
  />
  )}
  <span
  aria-hidden="true"
  className={cn( "relative flex shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
  nested ? "size-7" : "size-8",
- active
- ? isAi
+ isAi
+ ? active
  ? "border-transparent bg-ai/20 text-ai"
- : "border-sidebar-primary/15 bg-sidebar-primary/10 text-sidebar-primary"
- : isAi
- ? "border-transparent bg-ai/10 text-ai"
- : "border-sidebar-border/50 bg-sidebar-accent/60 text-sidebar-foreground/70 group-hover:text-sidebar-foreground",
+ : "border-transparent bg-ai/10 text-ai"
+ : "border-transparent",
  )}
+ style={
+ isAi
+ ? undefined
+ : {
+ // Selected: the hue at full strength on a stronger ground.
+ // Resting: the same hue held back, so the rail reads as a
+ // palette rather than as twenty competing signals.
+ background: active
+ ? "color-mix(in oklab, var(--nav-accent) 22%, transparent)"
+ : "color-mix(in oklab, var(--nav-accent) 11%, transparent)",
+ color: active
+ ? "var(--nav-accent)"
+ : "color-mix(in oklab, var(--nav-accent) 72%, var(--sidebar))",
+ }
+ }
  >
  <Icon className={cn(nested ? "size-3.5" : "size-4", "shrink-0")} aria-hidden="true" />
  </span>

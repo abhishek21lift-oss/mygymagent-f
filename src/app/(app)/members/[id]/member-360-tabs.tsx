@@ -376,7 +376,7 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Add address
  </Button>
@@ -483,7 +483,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Add contact
  </Button>
@@ -659,7 +659,7 @@ function ConsentsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Record consent
  </Button>
@@ -847,7 +847,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end gap-2">
  <Dialog open={measurementOpen} onOpenChange={setMeasurementOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Log measurement
  </Button>
@@ -880,7 +880,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
 
  <Dialog open={fitnessOpen} onOpenChange={setFitnessOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Log fitness test
  </Button>
@@ -1052,7 +1052,7 @@ function GoalsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Add goal
  </Button>
@@ -1229,7 +1229,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Upload document
  </Button>
@@ -1559,7 +1559,7 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
  <Button
  size="sm"
  variant="outline"
- className="min-h-11 rounded-lg border-amber-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 dark:bg-card"
+ className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-card"
  onClick={() => setExpanded((v) => !v)}
  >
  {expanded ? "Hide" : "View"}
@@ -1567,7 +1567,7 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
  {hasPermission("payments.create") && oldestOverdue && (
  <Button
  size="sm"
- className="min-h-11 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+ className="min-h-11 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  disabled={retryCollection.isPending}
  onClick={handleRemind}
  >
@@ -1705,7 +1705,7 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  {canRenew && (
  <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <RefreshCw className="size-3.5" />
  Renew Membership
  </Button>
@@ -2001,7 +2001,7 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  New PAR-Q
  </Button>
@@ -2264,7 +2264,7 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Add follow-up
  </Button>
@@ -2480,7 +2480,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Manage tags
  </Button>
@@ -2609,7 +2609,7 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  <div className="flex justify-end">
  <Dialog open={sendOpen} onOpenChange={setSendOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-violet-200/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Mail className="size-3.5" />
  Send message
  </Button>
@@ -3069,127 +3069,127 @@ export function Member360Tabs({ memberId }: { memberId: string }) {
  <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-xl border border-violet-100/70 bg-muted/40 p-1.5 shadow-sm">
  <TabsTrigger
  value="overview"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Overview
  </TabsTrigger>
  <TabsTrigger
  value="tags"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Tags
  </TabsTrigger>
  <TabsTrigger
  value="addresses"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Addresses
  </TabsTrigger>
  <TabsTrigger
  value="emergency"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Emergency
  </TabsTrigger>
  <TabsTrigger
  value="notes"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Notes
  </TabsTrigger>
  <TabsTrigger
  value="consents"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Consents
  </TabsTrigger>
  <TabsTrigger
  value="assessments"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Assessments
  </TabsTrigger>
  <TabsTrigger
  value="goals"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Goals
  </TabsTrigger>
  <TabsTrigger
  value="documents"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Documents
  </TabsTrigger>
  <TabsTrigger
  value="history"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  History
  </TabsTrigger>
  <TabsTrigger
  value="attendance"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Attendance
  </TabsTrigger>
  <TabsTrigger
  value="payments"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Payments
  </TabsTrigger>
  <TabsTrigger
  value="screening"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  PAR-Q
  </TabsTrigger>
  <TabsTrigger
  value="pt-sessions"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  PT Sessions
  </TabsTrigger>
  <TabsTrigger
  value="workouts"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Workouts
  </TabsTrigger>
  <TabsTrigger
  value="nutrition"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Nutrition
  </TabsTrigger>
  <TabsTrigger
  value="follow-ups"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Follow-ups
  </TabsTrigger>
  <TabsTrigger
  value="communications"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Messages
  </TabsTrigger>
  <TabsTrigger
  value="timeline"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Timeline
  </TabsTrigger>
  <TabsTrigger
  value="duplicates"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Duplicates
  </TabsTrigger>
  <TabsTrigger
  value="membership-history"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
  >
  Membership History
  </TabsTrigger>

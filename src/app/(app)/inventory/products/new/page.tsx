@@ -423,7 +423,7 @@ export default function NewInventoryProductPage() {
  <div className="mt-5 flex flex-col gap-2">
  <Button
  type="submit"
- className="h-12 rounded-xl bg-[linear-gradient(105deg,#f59e0b,#f97316_55%,#ea580c)] font-extrabold text-white shadow-lg shadow-amber-500/25 hover:-translate-y-0.5 hover:shadow-sm"
+ className="btn-sheen h-12 rounded-xl bg-primary font-semibold text-primary-foreground hover:-translate-y-0.5"
  disabled={createProduct.isPending}
  >
  <PackagePlus className="size-4" aria-hidden="true" />

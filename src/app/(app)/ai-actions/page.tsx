@@ -29,7 +29,7 @@ export default function AiActionsPage() {
  </span>
  <Link
  href="/ai"
- className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-card px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <Sparkles className="size-4" aria-hidden="true" />
  Ask AI
@@ -59,7 +59,7 @@ export default function AiActionsPage() {
  <Check className="size-7" aria-hidden="true" />
  </span>
  <p className="mt-2 text-base font-semibold text-foreground">No pending AI actions</p>
- <Link href="/ai" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg bg-stone-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+ <Link href="/ai" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg bg-stone-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  Ask AI <ArrowRight className="size-4" aria-hidden="true" />
  </Link>
  </CardContent>
@@ -88,8 +88,8 @@ export default function AiActionsPage() {
  <Badge variant="secondary" className="shrink-0 rounded-full bg-amber-500/15 text-amber-800 ring-1 ring-amber-200/60"><Clock3 className="mr-1 size-3" aria-hidden="true" /> Pending</Badge>
  </CardHeader>
  <CardContent className="flex flex-col gap-2 sm:flex-row">
- <Button disabled={approve.isPending} onClick={() => approve.mutate(action.id)} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#059669,#0d9488)] shadow-lg shadow-emerald-500/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"><Check className="mr-2 size-4" aria-hidden="true" /> Approve &amp; execute</Button>
- <Button variant="outline" disabled={reject.isPending} onClick={() => reject.mutate({ id: action.id })} className="min-h-11 rounded-lg border-stone-200 bg-card hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"><X className="mr-2 size-4" aria-hidden="true" /> Reject</Button>
+ <Button disabled={approve.isPending} onClick={() => approve.mutate(action.id)} className="btn-sheen min-h-11 rounded-lg bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"><Check className="mr-2 size-4" aria-hidden="true" /> Approve &amp; execute</Button>
+ <Button variant="outline" disabled={reject.isPending} onClick={() => reject.mutate({ id: action.id })} className="min-h-11 rounded-lg border-stone-200 bg-card hover:border-border hover:bg-rose-50 hover:text-foreground"><X className="mr-2 size-4" aria-hidden="true" /> Reject</Button>
  </CardContent>
  </Card>
  ))}

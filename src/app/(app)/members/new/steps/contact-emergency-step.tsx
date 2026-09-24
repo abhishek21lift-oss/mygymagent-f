@@ -181,7 +181,7 @@ export function ContactEmergencyStep({ data, onUpdate, onContinue, onBack }: Con
 
  <div className="flex justify-between border-t border-stone-100 pt-5">
  <Button variant="outline" onClick={onBack} className="min-h-11 rounded-lg px-5">Back</Button>
- <Button onClick={onContinue} disabled={!isValid} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 font-extrabold shadow-lg shadow-violet-500/25 disabled:opacity-50">Continue</Button>
+ <Button onClick={onContinue} disabled={!isValid} className="btn-sheen min-h-11 rounded-lg bg-primary px-6 font-extrabold disabled:opacity-50">Continue</Button>
  </div>
  </div>
  )

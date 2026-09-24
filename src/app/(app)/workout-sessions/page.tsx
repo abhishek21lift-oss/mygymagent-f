@@ -146,7 +146,7 @@ export default function WorkoutSessionsPage() {
  <p className="truncate text-sm font-bold text-stone-900">{a.member ? `${a.member.firstName} ${a.member.lastName}` : "Member"}</p>
  <p className="truncate text-xs font-medium text-stone-600">{a.workoutPlan?.name ?? "Workout plan"}</p>
  </div>
- <Button size="sm" className="min-h-11 rounded-xl bg-[linear-gradient(105deg,#e11d48,#f97316_60%,#0891b2)] text-white shadow-md shadow-rose-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600" onClick={() => startSession(a.id)} disabled={start.isPending}>
+ <Button size="sm" className="btn-sheen min-h-11 rounded-xl bg-primary text-primary-foreground shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" onClick={() => startSession(a.id)} disabled={start.isPending}>
  <Play className="size-3.5" aria-hidden="true" />{start.isPending ? "Starting" : "Start"}
  </Button>
  </div>
@@ -252,7 +252,7 @@ export default function WorkoutSessionsPage() {
  <Input aria-label={`${exercise.exerciseName} weight`} inputMode="decimal" placeholder="kg" value={draft.weightKg} onChange={(e) => setDrafts((c) => ({ ...c, [exercise.id]: { ...draft, weightKg: e.target.value } }))} className="min-h-11 rounded-lg text-sm" />
  <Input aria-label={`${exercise.exerciseName} reps`} inputMode="numeric" placeholder="reps" value={draft.reps} onChange={(e) => setDrafts((c) => ({ ...c, [exercise.id]: { ...draft, reps: e.target.value } }))} className="min-h-11 rounded-lg text-sm" />
  <Input aria-label={`${exercise.exerciseName} RPE`} inputMode="decimal" placeholder="RPE" value={draft.rpe} onChange={(e) => setDrafts((c) => ({ ...c, [exercise.id]: { ...draft, rpe: e.target.value } }))} className="min-h-11 rounded-lg text-sm" />
- <Button size="sm" className="min-h-11 rounded-xl bg-stone-950 text-white hover:bg-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950" onClick={() => saveSet(exercise.id, next)} disabled={logSet.isPending}>
+ <Button size="sm" className="min-h-11 rounded-xl bg-stone-950 text-white hover:bg-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" onClick={() => saveSet(exercise.id, next)} disabled={logSet.isPending}>
  <Plus className="size-3.5" aria-hidden="true" />Set {next}
  </Button>
  </div>
@@ -262,7 +262,7 @@ export default function WorkoutSessionsPage() {
  })}
  <div className="flex justify-end pt-2">
  {selected.data.status === "IN_PROGRESS" && (
- <Button onClick={completeSession} disabled={complete.isPending} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#e11d48,#f97316_55%,#0891b2)] text-white shadow-lg shadow-rose-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+ <Button onClick={completeSession} disabled={complete.isPending} className="btn-sheen min-h-11 rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <CheckCircle2 className="size-4" aria-hidden="true" />{complete.isPending ? "Completing..." : "Complete session"}
  </Button>
  )}

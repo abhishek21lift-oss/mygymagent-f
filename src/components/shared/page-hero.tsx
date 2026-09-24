@@ -1,10 +1,10 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 
-import { accentForPath, sectionForPath, type Accent } from "@/lib/section-accent";
+import { sectionForPath, type Accent } from "@/lib/section-accent";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,24 +26,14 @@ import { cn } from "@/lib/utils";
  * touches nothing else, so no card is introduced and no row is pushed
  * down.
  *
- * The accent is derived from the route, not decided here, so every page
- * in a section shares a hue and the six sections are told apart at a
- * glance. `accent` still overrides it -- and now actually does
- * something. It had been accepted and ignored for 32 call sites, which
- * is how a prop becomes a lie.
+ * The hue itself is no longer resolved here. `AppLayout` publishes it on
+ * the shell as `--section*`, and this reads the inherited variables like
+ * every other surface does -- which is what lets a server-rendered table
+ * on the same page wear the same colour without becoming a client
+ * component. `accent` overrides it by setting those variables locally,
+ * for the handful of screens that sit outside the route map.
  */
 type HeroAccent = Accent;
-
-const ACCENT_STYLES: Record<Accent, { wash: string; tint: string; solid: string }> = {
-  indigo: { wash: "var(--a-indigo-wash)", tint: "var(--a-indigo-tint)", solid: "var(--a-indigo)" },
-  violet: { wash: "var(--a-violet-wash)", tint: "var(--a-violet-tint)", solid: "var(--a-violet)" },
-  rose: { wash: "var(--a-rose-wash)", tint: "var(--a-rose-tint)", solid: "var(--a-rose)" },
-  emerald: { wash: "var(--a-emerald-wash)", tint: "var(--a-emerald-tint)", solid: "var(--a-emerald)" },
-  amber: { wash: "var(--a-amber-wash)", tint: "var(--a-amber-tint)", solid: "var(--a-amber)" },
-  cyan: { wash: "var(--a-cyan-wash)", tint: "var(--a-cyan-tint)", solid: "var(--a-cyan)" },
-  blue: { wash: "var(--a-blue-wash)", tint: "var(--a-blue-tint)", solid: "var(--a-blue)" },
-  orange: { wash: "var(--a-orange-wash)", tint: "var(--a-orange-tint)", solid: "var(--a-orange)" },
-};
 
 export function PageHero({
   id,
@@ -63,7 +53,7 @@ export function PageHero({
   actions?: ReactNode;
   children?: ReactNode;
   /** Retained: some pages predate the route map and a few sit outside
-   * it. Unset, the route decides. */
+   * it. Unset, the shell decides. */
   accent?: HeroAccent;
   /** Accepted and ignored. Kept only so the call sites that still pass
    * it type-check; the masthead has one treatment now. */
@@ -71,13 +61,22 @@ export function PageHero({
   align?: "left" | "center";
 }) {
   const pathname = usePathname();
-  const resolved = accent ?? accentForPath(pathname);
   // Unset, the eyebrow says which section you are in. It is the line
   // that makes the hue mean something rather than just be present --
   // "MEMBERS" in violet above "Members" reads as one place, where the
   // colour alone reads as styling.
   const resolvedEyebrow = eyebrow ?? sectionForPath(pathname);
-  const a = ACCENT_STYLES[resolved] ?? ACCENT_STYLES.indigo;
+
+  // An override re-points the same four variables for this subtree, so
+  // the rules below stay identical either way.
+  const override = accent
+    ? ({
+        "--section": `var(--a-${accent})`,
+        "--section-ink": `var(--a-${accent}-ink)`,
+        "--section-tint": `var(--a-${accent}-tint)`,
+        "--section-wash": `var(--a-${accent}-wash)`,
+      } as CSSProperties)
+    : undefined;
 
   const headingId =
     id ??
@@ -90,18 +89,19 @@ export function PageHero({
   return (
     <header
       aria-labelledby={headingId}
+      style={override}
       className="relative isolate -mx-4 mb-1 overflow-hidden px-4 pb-3 pt-3 sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6"
     >
       {/* The wash. Absolutely positioned and behind everything, so it
-          adds colour without adding height. It stops at 62% because a
-          gradient that reaches the right edge reads as a filled banner,
-          which is the bulky thing this replaced. */}
+          adds colour without adding height. It stops before the right
+          edge because a gradient that reaches it reads as a filled
+          banner, which is the bulky thing this replaced. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background: `linear-gradient(100deg, ${a.wash} 0%, ${a.wash} 18%, transparent 72%),
-             radial-gradient(28rem 12rem at 0% 0%, ${a.tint} 0%, transparent 70%)`,
+          background: `linear-gradient(100deg, var(--section-wash) 0%, var(--section-wash) 18%, transparent 72%),
+             radial-gradient(28rem 12rem at 0% 0%, var(--section-tint) 0%, transparent 70%)`,
         }}
       />
       {/* 2px of accent instead of the flat hairline: the page's own
@@ -110,7 +110,8 @@ export function PageHero({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 -z-10"
         style={{
-          background: `linear-gradient(90deg, ${a.solid} 0%, transparent 70%)`,
+          background:
+            "linear-gradient(90deg, var(--section) 0%, transparent 70%)",
         }}
       />
 
@@ -118,17 +119,26 @@ export function PageHero({
         <div className="flex min-w-0 items-center gap-3">
           {Icon ? (
             <span
-              className="flex size-9 shrink-0 items-center justify-center rounded-lg"
-              style={{ background: a.tint, color: a.solid }}
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg shadow-[0_1px_2px_rgb(15_23_42_/_0.08)]"
+              style={{
+                background: "var(--section-tint)",
+                color: "var(--section)",
+              }}
             >
               <Icon className="size-[1.125rem]" aria-hidden="true" />
             </span>
           ) : null}
           <div className="min-w-0">
             {resolvedEyebrow ? (
+              // `--section-ink`, not `--section`. The solid step is a
+              // paint, and measured as type on its own wash it scores
+              // 3.21:1 for amber and 3.49:1 for orange against a 4.5:1
+              // requirement -- this line is 10px, so it was failing AA
+              // on half the app. The ink step is 6.5:1 or better on
+              // every hue.
               <p
                 className="text-[10px] font-semibold uppercase tracking-[0.14em]"
-                style={{ color: a.solid }}
+                style={{ color: "var(--section-ink)" }}
               >
                 {resolvedEyebrow}
               </p>

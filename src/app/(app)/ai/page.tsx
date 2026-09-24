@@ -29,7 +29,7 @@ function ToolCallChips({ toolCalls }: { toolCalls: ChatToolCall[] }) {
  return (
  <div className="mt-2 flex flex-wrap gap-1.5">
  {toolCalls.map((tc, i) => (
- <Badge key={i} variant="outline" className="gap-1 rounded-full border-white/20 bg-card font-normal text-white/80">
+ <Badge key={i} variant="outline" className="gap-1 rounded-full border-border bg-card font-normal text-muted-foreground">
  <Wrench className="size-3" aria-hidden="true" />
  {tc.name}
  </Badge>
@@ -92,7 +92,7 @@ export default function AiPage() {
  actions={
  <Link
  href="/ai-actions"
- className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-[0_16px_40px_-16px_rgba(255,255,255,.5)] transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="btn-sheen inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition duration-300 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <Zap className="size-4" aria-hidden="true" />
  Review AI actions
@@ -194,12 +194,12 @@ export default function AiPage() {
  }}
  placeholder="Ask the assistant..."
  rows={2}
- className="min-h-11 resize-none rounded-lg border-stone-200 bg-white focus-visible:ring-violet-600"
+ className="min-h-11 resize-none rounded-lg border-stone-200 bg-card focus-visible:ring-violet-600"
  />
  <Button
  onClick={() => void handleSend()}
  disabled={chat.isPending || !input.trim()}
- className="min-h-11 min-w-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="btn-sheen min-h-11 min-w-11 rounded-lg bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  aria-label="Send message"
  >
  <Send className="size-4" aria-hidden="true" />
@@ -216,7 +216,7 @@ export default function AiPage() {
  <h2 className="relative text-sm font-semibold tracking-tight">Grounded answers</h2>
  <Link
  href="/ai-actions"
- className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+ className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  Open approval queue <ArrowRight className="size-4" aria-hidden="true" />
  </Link>

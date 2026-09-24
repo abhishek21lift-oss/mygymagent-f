@@ -227,7 +227,7 @@ export function OnboardingWizard() {
  ? "bg-violet-600 text-white shadow-violet-500/30"
  : idx === currentStep
  ? "bg-violet-600 text-white shadow-lg shadow-violet-500/30 ring-4 ring-violet-500/15"
- : "border border-stone-200 bg-white text-stone-400"
+ : "border border-stone-200 bg-card text-stone-400"
  }`}
  aria-hidden="true"
  >

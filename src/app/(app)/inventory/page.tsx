@@ -76,7 +76,7 @@ function StockMovementDialog({ product }: { product: Product }) {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button variant="outline" size="sm" className="min-h-11 rounded-xl border-amber-200/70 bg-amber-50/60 font-bold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+ <Button variant="outline" size="sm" className="min-h-11 rounded-xl border-amber-200/70 bg-amber-50/60 font-bold text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <PackagePlus className="size-3.5" aria-hidden="true" />
  Adjust stock
  </Button>
@@ -268,7 +268,7 @@ export default function InventoryPage() {
  {hasPermission("inventory.manage") && (
  <Link
  href="/inventory/products/new"
- className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#f59e0b,#f97316_55%,#ea580c)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-amber-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+ className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <PackagePlus className="size-4" aria-hidden="true" />
  New product
@@ -319,7 +319,7 @@ export default function InventoryPage() {
  <h2 id="inventory-movements" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Stock movements</h2>
  </div>
  </div>
- <Link href="/command-center" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+ <Link href="/command-center" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  Watchlist <ArrowRight className="size-3.5" aria-hidden="true" />
  </Link>
  </div>

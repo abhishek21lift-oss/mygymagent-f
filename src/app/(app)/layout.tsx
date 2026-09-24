@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
+import { accentForPath } from "@/lib/section-accent";
+import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
 import { MfaRequiredGate } from "@/components/security/mfa-required-gate";
@@ -16,6 +18,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
  const { isAuthenticated, isLoading, mfaEnrolment, user } = useAuth();
  const router = useRouter();
+ const pathname = usePathname();
+ // Also on <html>, so portalled dialogs and toasts wear the same hue.
+ useSectionAttribute(pathname);
  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
@@ -55,7 +60,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
  }
 
  return (
- <div className="flex h-svh overflow-hidden bg-background">
+ // The section hue is published here, once, as a CSS variable the whole
+ // subtree inherits. Everything below -- tiles, tables, panels, the
+ // canvas itself -- reads `var(--section)` and never has to know what
+ // route it is on, which is what keeps them all server-renderable.
+ <div
+ data-section={accentForPath(pathname)}
+ className="flex h-svh overflow-hidden bg-background"
+ >
  <div className={"hidden shrink-0 border-r border-sidebar-border bg-sidebar p-2 transition-[width] duration-300 md:block " + (sidebarCollapsed ? "w-[88px]" : "w-72")}>
  <SidebarNav collapsed={sidebarCollapsed} className="rounded-lg" />
  </div>

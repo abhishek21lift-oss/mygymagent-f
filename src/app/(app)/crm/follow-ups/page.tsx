@@ -57,10 +57,10 @@ export default function SalesFollowUpsPage() {
  title="Follow-ups"
  actions={
  <>
- <Button asChild variant="outline" className="min-h-11 rounded-lg border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button asChild variant="outline" className="min-h-11 rounded-lg border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Sales OS</Link>
  </Button>
- <Button asChild className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button asChild className="btn-sheen min-h-11 rounded-lg bg-primary transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href="/crm/analytics">Analytics <ArrowRight className="size-4" aria-hidden="true" /></Link>
  </Button>
  </>
@@ -92,7 +92,7 @@ export default function SalesFollowUpsPage() {
  <TabsTrigger value="ALL" className="min-h-11">All</TabsTrigger>
  </TabsList>
  </Tabs>
- <Button variant="ghost" size="sm" onClick={() => query.refetch()} disabled={query.isFetching} className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button variant="ghost" size="sm" onClick={() => query.refetch()} disabled={query.isFetching} className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <RefreshCw className={query.isFetching ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
  </Button>
  </div>
@@ -130,7 +130,7 @@ export default function SalesFollowUpsPage() {
  </div>
  <Link
  href={`/crm/leads/${row.lead.id}`}
- className="mt-2 block truncate text-sm font-extrabold text-stone-900 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 hover:underline"
+ className="mt-2 block truncate text-sm font-extrabold text-stone-900 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:underline"
  >
  {row.lead.firstName} {row.lead.lastName}
  </Link>
@@ -146,7 +146,7 @@ export default function SalesFollowUpsPage() {
  variant="outline"
  onClick={() => markDone(row.lead.id, row.id)}
  disabled={complete.isPending}
- className="min-h-11 shrink-0 rounded-xl border-blue-200 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+ className="min-h-11 shrink-0 rounded-xl border-blue-200 hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <Check className="size-3.5" aria-hidden="true" /> Done
  </Button>

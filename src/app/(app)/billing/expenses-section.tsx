@@ -64,7 +64,7 @@ function RecordExpenseDialog() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#059669,#0d9488_55%,#0ea5e9)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-emerald-500/25 transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"><Plus className="size-4" aria-hidden="true" /> Record expense</Button>
+ <Button className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"><Plus className="size-4" aria-hidden="true" /> Record expense</Button>
  </DialogTrigger>
  <DialogContent>
  <DialogHeader><DialogTitle>Record an expense</DialogTitle></DialogHeader>
@@ -94,15 +94,15 @@ function ExpenseActions({ expense }: { expense: Expense }) {
  <div className="flex flex-wrap gap-1">
  {expense.status === "PENDING" && (
  <>
- <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600" disabled={busy} onClick={() => approve.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Approve failed") })}>Approve</Button>
- <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600" disabled={busy} onClick={() => reject.mutate({ id: expense.id }, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Reject failed") })}>Reject</Button>
+ <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={busy} onClick={() => approve.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Approve failed") })}>Approve</Button>
+ <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={busy} onClick={() => reject.mutate({ id: expense.id }, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Reject failed") })}>Reject</Button>
  </>
  )}
  {(expense.status === "PENDING" || expense.status === "APPROVED") && (
- <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600" disabled={busy} onClick={() => markPaid.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Mark-paid failed") })}>Mark paid</Button>
+ <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={busy} onClick={() => markPaid.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Mark-paid failed") })}>Mark paid</Button>
  )}
  {expense.status !== "PAID" && hasPermission("expenses.delete") && (
- <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600" disabled={busy} onClick={() => remove.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Delete failed") })}>Delete</Button>
+ <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={busy} onClick={() => remove.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Delete failed") })}>Delete</Button>
  )}
  </div>
  )

@@ -85,10 +85,10 @@ export default function SalesAnalyticsPage() {
  title="Sales analytics"
  actions={
  <>
- <Button asChild variant="outline" className="min-h-11 rounded-lg border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button asChild variant="outline" className="min-h-11 rounded-lg border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href="/crm"><Sparkles className="size-4" aria-hidden="true" /> Sales OS</Link>
  </Button>
- <Button asChild className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button asChild className="btn-sheen min-h-11 rounded-lg bg-primary transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Link href="/crm/follow-ups">Follow-ups <ArrowRight className="size-4" aria-hidden="true" /></Link>
  </Button>
  </>
@@ -111,7 +111,7 @@ export default function SalesAnalyticsPage() {
  <label htmlFor="sales-to" className="mb-1 block text-xs font-bold text-stone-600">To</label>
  <Input id="sales-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} />
  </div>
- <Button variant="ghost" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:mt-5" onClick={() => { setFrom(""); setTo("") }}>Reset</Button>
+ <Button variant="ghost" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:mt-5" onClick={() => { setFrom(""); setTo("") }}>Reset</Button>
  </div>
  </div>
  </section>
@@ -175,7 +175,7 @@ export default function SalesAnalyticsPage() {
  <div>
  <h2 id="analytics-sources" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Lead source performance</h2>
  </div>
- <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">
+ <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
  </Button>
  </div>

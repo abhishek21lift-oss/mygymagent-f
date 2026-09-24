@@ -88,7 +88,7 @@ export function PtPackagesSection() {
 
  return (
  <Card className="overflow-hidden border-border bg-card">
- <CardHeader className="border-b border-border bg-white px-5 py-5">
+ <CardHeader className="border-b border-border bg-card px-5 py-5">
  <div className="flex flex-wrap items-center justify-between gap-3">
  <div>
  <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground flex items-center gap-3 text-stone-950">

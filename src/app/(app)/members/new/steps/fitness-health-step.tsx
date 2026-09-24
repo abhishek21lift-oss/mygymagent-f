@@ -178,7 +178,7 @@ export function FitnessHealthStep({ data, onUpdate, onContinue, onBack }: Fitnes
 
  <div className="mt-4 space-y-2">
  {PARQ_QUESTIONS.map((q) => (
- <div key={q.key} className="flex min-h-11 items-start gap-3 rounded-lg border border-stone-200/60 bg-card px-3 py-2.5 transition hover:border-violet-200">
+ <div key={q.key} className="flex min-h-11 items-start gap-3 rounded-lg border border-stone-200/60 bg-card px-3 py-2.5 transition hover:border-border">
  <Checkbox
  id={q.key}
  checked={form[q.key as keyof FitnessHealthData] as boolean}
@@ -220,7 +220,7 @@ export function FitnessHealthStep({ data, onUpdate, onContinue, onBack }: Fitnes
 
  <div className="flex justify-between border-t border-stone-100 pt-5">
  <Button variant="outline" onClick={onBack} className="min-h-11 rounded-lg px-5">Back</Button>
- <Button onClick={onContinue} disabled={!isValid} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 font-extrabold shadow-lg shadow-violet-500/25 disabled:opacity-50">Continue</Button>
+ <Button onClick={onContinue} disabled={!isValid} className="btn-sheen min-h-11 rounded-lg bg-primary px-6 font-extrabold disabled:opacity-50">Continue</Button>
  </div>
  </div>
  )

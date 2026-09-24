@@ -160,7 +160,7 @@ function NewLeadDialog() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#2563eb,#4f46e5_55%,#7c3aed)] shadow-lg shadow-blue-500/25 transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+ <Button className="btn-sheen min-h-11 rounded-lg bg-primary transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-4" aria-hidden="true" /> New lead
  </Button>
  </DialogTrigger>
@@ -285,7 +285,7 @@ function AddFollowUp({ leadId }: { leadId: string }) {
  size="sm"
  variant="outline"
  disabled={m.isPending}
- className="min-h-11 rounded-xl border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+ className="min-h-11 rounded-xl border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  {m.isPending ? "Adding..." : "Add"}
  </Button>
@@ -447,7 +447,7 @@ function LeadDetail({ leadId, onClose }: { leadId: string; onClose: () => void }
  variant="outline"
  disabled={convert.isPending || (!lead.branchId && !branch)}
  onClick={doConvert}
- className="min-h-11 rounded-xl border-blue-200 hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+ className="min-h-11 rounded-xl border-blue-200 hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <ArrowRightCircle className="size-4" aria-hidden="true" /> Convert
  </Button>
@@ -513,7 +513,7 @@ function LeadDetail({ leadId, onClose }: { leadId: string; onClose: () => void }
  .mutateAsync({ leadId: lead.id, followUpId: f.id })
  .then(() => toast.success("Follow-up completed"))
  }
- className="min-h-11 shrink-0 rounded-xl hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+ className="min-h-11 shrink-0 rounded-xl hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <Check className="size-3.5" aria-hidden="true" /> Done
  </Button>
@@ -555,7 +555,7 @@ function LeadDetail({ leadId, onClose }: { leadId: string; onClose: () => void }
  variant="outline"
  disabled={send.isPending}
  onClick={doSend}
- className="min-h-11 rounded-xl hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="min-h-11 rounded-xl hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  Send
  </Button>
@@ -666,7 +666,7 @@ export default function CrmPage() {
  <Button
  asChild
  variant="outline"
- className="min-h-11 rounded-lg border-violet-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="min-h-11 rounded-lg border-border bg-card hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <a href="/ai">
  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
@@ -679,13 +679,13 @@ export default function CrmPage() {
  <div className="flex flex-wrap gap-2">
  <Link
  href="/crm/follow-ups"
- className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-blue-500/10 px-3 py-2 text-xs font-extrabold text-blue-700 ring-1 ring-blue-200/60 transition hover:bg-stone-950 hover:text-white hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+ className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-blue-500/10 px-3 py-2 text-xs font-extrabold text-blue-700 ring-1 ring-blue-200/60 transition hover:bg-foreground hover:text-background hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <CalendarClock className="size-3.5" aria-hidden="true" /> Follow-ups
  </Link>
  <Link
  href="/crm/analytics"
- className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-violet-500/10 px-3 py-2 text-xs font-extrabold text-violet-700 ring-1 ring-violet-200/60 transition hover:bg-stone-950 hover:text-white hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+ className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-violet-500/10 px-3 py-2 text-xs font-extrabold text-violet-700 ring-1 ring-violet-200/60 transition hover:bg-foreground hover:text-background hover:ring-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  <TrendingUp className="size-3.5" aria-hidden="true" /> Analytics
  </Link>

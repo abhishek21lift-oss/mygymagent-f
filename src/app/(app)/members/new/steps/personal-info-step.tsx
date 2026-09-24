@@ -198,7 +198,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  </div>
 
  <div className="flex flex-wrap items-center justify-center gap-2">
- <Button type="button" size="sm" className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)]" onClick={() => void startCamera()} disabled={cameraLoading}>
+ <Button type="button" size="sm" className="btn-sheen min-h-11 rounded-lg bg-primary" onClick={() => void startCamera()} disabled={cameraLoading}>
  <Camera className="mr-2 size-4" aria-hidden="true" />
  {cameraLoading ? "Opening camera..." : "Take Photo"}
  </Button>
@@ -229,7 +229,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  aria-modal="true"
  aria-label="Take member profile photo"
  >
- <div className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-sm">
+ <div className="w-full max-w-lg overflow-hidden rounded-xl bg-card shadow-sm">
  <div className="flex items-center justify-between border-b border-stone-100 bg-muted/40 px-4 py-3">
  <div>
  <h2 className="font-semibold font-semibold text-stone-950">Take Profile Photo</h2>
@@ -346,7 +346,7 @@ export function PersonalInfoStep({ defaultValues, onUpdate, onContinue }: Person
  </div>
 
  <div className="flex justify-end border-t border-stone-100 pt-5">
- <Button onClick={onContinue} disabled={!isValid} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-6 font-extrabold shadow-lg shadow-violet-500/25 disabled:opacity-50">Continue</Button>
+ <Button onClick={onContinue} disabled={!isValid} className="btn-sheen min-h-11 rounded-lg bg-primary px-6 font-extrabold disabled:opacity-50">Continue</Button>
  </div>
  </div>
  )

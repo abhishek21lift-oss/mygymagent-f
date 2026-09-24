@@ -48,7 +48,7 @@ function AddFood() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button variant="outline" className="min-h-11 rounded-lg border-stone-200 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+ <Button variant="outline" className="min-h-11 rounded-lg border-stone-200 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-4" aria-hidden="true" />Add food
  </Button>
  </DialogTrigger>
@@ -102,7 +102,7 @@ function CreatePlan() {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#059669,#65a30d_55%,#0891b2)] text-white shadow-lg shadow-emerald-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+ <Button className="btn-sheen min-h-11 rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-4" aria-hidden="true" />New diet plan
  </Button>
  </DialogTrigger>
@@ -185,7 +185,7 @@ function AssignPlan({ id, name }: { id: string; name: string }) {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-xl border-emerald-200 bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+ <Button size="sm" variant="outline" className="min-h-11 rounded-xl border-emerald-200 bg-emerald-50/70 text-emerald-800 hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <UserPlus className="size-3.5" aria-hidden="true" />Assign
  </Button>
  </DialogTrigger>
@@ -211,7 +211,7 @@ function Assignment({ item }: { item: DietAssignment }) {
  const { hasPermission } = useAuth();
  const update = useUpdateDietAssignmentStatus();
  return (
- <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-white hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)] sm:flex-row sm:items-center">
+ <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-accent hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)] sm:flex-row sm:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
  <div className="min-w-0">
  <p className="truncate text-sm font-extrabold text-stone-900">{item.member ? `${item.member.firstName} ${item.member.lastName}` : "Member unavailable"}</p>
@@ -225,7 +225,7 @@ function Assignment({ item }: { item: DietAssignment }) {
  variant="ghost"
  disabled={update.isPending}
  onClick={() => update.mutateAsync({ id: item.id, status: "COMPLETED" }).then(() => toast.success("Marked complete")).catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to update"))}
- className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+ className="min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  Complete
  </Button>

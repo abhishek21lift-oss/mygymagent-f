@@ -149,7 +149,7 @@
 
   /* — Semantic status. Deliberately separate from the accent hue:
        "needs attention" must never be confused with "actionable". — */
-  --success: oklch(0.556 0.136 155);
+  --success: oklch(0.505 0.130 155);
   --success-foreground: oklch(0.99 0.002 155);
   --success-tint: oklch(0.955 0.030 155);
   --warning: oklch(0.648 0.141 75);
@@ -244,7 +244,7 @@
   --a-emerald:      oklch(0.545 0.140 158);
   --a-emerald-tint: oklch(0.950 0.040 158);
   --a-emerald-wash: oklch(0.975 0.020 158);
-  --a-amber:        oklch(0.640 0.145 75);
+  --a-amber:        oklch(0.615 0.150 75);
   --a-amber-tint:   oklch(0.958 0.048 75);
   --a-amber-wash:   oklch(0.980 0.024 75);
   --a-cyan:         oklch(0.560 0.120 225);
@@ -253,9 +253,27 @@
   --a-blue:         oklch(0.535 0.170 250);
   --a-blue-tint:    oklch(0.950 0.038 250);
   --a-blue-wash:    oklch(0.976 0.019 250);
-  --a-orange:       oklch(0.625 0.160 50);
+  --a-orange:       oklch(0.600 0.165 50);
   --a-orange-tint:  oklch(0.955 0.045 50);
   --a-orange-wash:  oklch(0.979 0.022 50);
+
+  /* `ink` is the fourth value, and it exists because `solid` cannot be
+     written with. Measured against the wash it sits on, `solid` scores
+     3.21:1 for amber and 3.49:1 for orange -- AA for small text is
+     4.5:1, and the masthead eyebrow is 10px. Four of the eight hues
+     failed. Rather than desaturate every accent to rescue two, the
+     palette gains a darker step used wherever the hue becomes type: all
+     eight land between 6.5:1 and 7.7:1 on their own wash.
+
+     So: solid paints (rules, gradients, glyphs on tint), ink writes. */
+  --a-indigo-ink:   oklch(0.445 0.175 264);
+  --a-violet-ink:   oklch(0.445 0.185 295);
+  --a-rose-ink:     oklch(0.445 0.175 15);
+  --a-emerald-ink:  oklch(0.445 0.125 158);
+  --a-amber-ink:    oklch(0.445 0.115 75);
+  --a-cyan-ink:     oklch(0.445 0.105 225);
+  --a-blue-ink:     oklch(0.445 0.160 250);
+  --a-orange-ink:   oklch(0.445 0.140 50);
 }
 
 .dark {
@@ -450,7 +468,101 @@
   --a-orange:       oklch(0.765 0.140 50);
   --a-orange-tint:  oklch(0.298 0.055 50);
   --a-orange-wash:  oklch(0.237 0.028 50);
+  /* Same job, lifted: 7.4:1 to 8.2:1 on the dark tint. */
+  --a-indigo-ink:   oklch(0.815 0.120 264);
+  --a-violet-ink:   oklch(0.815 0.125 295);
+  --a-rose-ink:     oklch(0.815 0.120 15);
+  --a-emerald-ink:  oklch(0.815 0.110 158);
+  --a-amber-ink:    oklch(0.825 0.115 75);
+  --a-cyan-ink:     oklch(0.815 0.100 225);
+  --a-blue-ink:     oklch(0.815 0.115 250);
+  --a-orange-ink:   oklch(0.820 0.115 50);
 }
+
+/* ============================================================
+   WHICH HUE THIS SCREEN IS WEARING
+   ------------------------------------------------------------
+   Stage one put the section hue on the masthead only, by reading
+   the route inside `PageHero`. That does not scale past one
+   component: every card, table and tile below the masthead would
+   have to become a client component and call `usePathname()` too,
+   and the first time a Server Component passed an icon down to
+   one of them the build broke. The hue is a property of the
+   screen, not of each component on it -- so it is published once,
+   as CSS, on the shell.
+
+   `AppLayout` and `PortalLayout` set `data-section` from the same
+   route map the masthead uses. Everything inside then reads four
+   inherited variables and needs to know nothing about routing:
+   a server-rendered table header and a client-side stat tile pick
+   up the same hue by the same mechanism, in both themes, with no
+   JavaScript and no re-render.
+
+     --section       paints: rules, gradients, glyphs on tint
+     --section-ink   writes: any text or icon that must be legible
+     --section-tint  the surface a glyph or chip sits on
+     --section-wash  the faintest step, for large gradient fills
+   ============================================================ */
+:root {
+  --section:      var(--a-indigo);
+  --section-ink:  var(--a-indigo-ink);
+  --section-tint: var(--a-indigo-tint);
+  --section-wash: var(--a-indigo-wash);
+}
+[data-section="indigo"]  { --section: var(--a-indigo);  --section-ink: var(--a-indigo-ink);  --section-tint: var(--a-indigo-tint);  --section-wash: var(--a-indigo-wash); }
+[data-section="violet"]  { --section: var(--a-violet);  --section-ink: var(--a-violet-ink);  --section-tint: var(--a-violet-tint);  --section-wash: var(--a-violet-wash); }
+[data-section="rose"]    { --section: var(--a-rose);    --section-ink: var(--a-rose-ink);    --section-tint: var(--a-rose-tint);    --section-wash: var(--a-rose-wash); }
+[data-section="emerald"] { --section: var(--a-emerald); --section-ink: var(--a-emerald-ink); --section-tint: var(--a-emerald-tint); --section-wash: var(--a-emerald-wash); }
+[data-section="amber"]   { --section: var(--a-amber);   --section-ink: var(--a-amber-ink);   --section-tint: var(--a-amber-tint);   --section-wash: var(--a-amber-wash); }
+[data-section="cyan"]    { --section: var(--a-cyan);    --section-ink: var(--a-cyan-ink);    --section-tint: var(--a-cyan-tint);    --section-wash: var(--a-cyan-wash); }
+[data-section="blue"]    { --section: var(--a-blue);    --section-ink: var(--a-blue-ink);    --section-tint: var(--a-blue-tint);    --section-wash: var(--a-blue-wash); }
+[data-section="orange"]  { --section: var(--a-orange);  --section-ink: var(--a-orange-ink);  --section-tint: var(--a-orange-tint);  --section-wash: var(--a-orange-wash); }
+
+/* --- Sidebar accents -------------------------------------------------
+   The sidebar is the one surface that stays dark in both themes, so it
+   cannot use `--a-*`: those invert, and in light mode they would put
+   near-black glyphs on near-black leather. These do not invert. One
+   lightness for all eight (7.5:1 to 8.4:1 on the sidebar ground,
+   6.2:1 on a selected row), because a nav rail is a legend -- the hues
+   must differ from each other, not from each other's brightness. */
+:root {
+  --sa-indigo:  oklch(0.745 0.130 264);
+  --sa-violet:  oklch(0.745 0.130 295);
+  --sa-rose:    oklch(0.745 0.130 15);
+  --sa-emerald: oklch(0.745 0.130 158);
+  --sa-amber:   oklch(0.745 0.130 75);
+  --sa-cyan:    oklch(0.745 0.130 225);
+  --sa-blue:    oklch(0.745 0.130 250);
+  --sa-orange:  oklch(0.745 0.130 50);
+  --nav-accent: var(--sa-indigo);
+}
+/* The call to action follows the page too.
+   `--primary` is re-pointed at `--section-ink` rather than at `--section`
+   because the filled button carries `--primary-foreground` on top of it,
+   and the solid step does not have the contrast for that: white on the
+   amber solid is 3.7:1 against a 4.5:1 requirement. Ink is 7.7:1 in the
+   light theme, and in the dark theme -- where the pattern inverts to a
+   light fill with dark type -- it is higher still, so one value is
+   correct in both.
+
+   `--primary-hover` mixes toward `--foreground`, which darkens the fill
+   in the light theme and lightens it in the dark one, for the same
+   reason: one expression, no branch. */
+[data-section] {
+  --primary: var(--section-ink);
+  --primary-hover: color-mix(in oklab, var(--section-ink) 88%, var(--foreground));
+  --primary-tint: color-mix(in oklab, var(--section) 14%, var(--card));
+  --ring: color-mix(in oklab, var(--section) 50%, transparent);
+}
+
+[data-nav-accent="indigo"]  { --nav-accent: var(--sa-indigo); }
+[data-nav-accent="violet"]  { --nav-accent: var(--sa-violet); }
+[data-nav-accent="rose"]    { --nav-accent: var(--sa-rose); }
+[data-nav-accent="emerald"] { --nav-accent: var(--sa-emerald); }
+[data-nav-accent="amber"]   { --nav-accent: var(--sa-amber); }
+[data-nav-accent="cyan"]    { --nav-accent: var(--sa-cyan); }
+[data-nav-accent="blue"]    { --nav-accent: var(--sa-blue); }
+[data-nav-accent="orange"]  { --nav-accent: var(--sa-orange); }
 
 @theme inline {
   /* Literal scales → tokens, so hardcoded utilities follow the theme. */
@@ -811,15 +923,26 @@
 }
 
 @layer utilities {
-  /* Product canvas */
+  /* Product canvas.
+     Three fixed radials -- indigo, cyan, fuchsia -- used to sit here
+     whatever page you were on, which made every screen the same
+     faintly-purple grey and meant the ambience said nothing. It now
+     takes the section hue, so the ground under Finance is warm and the
+     ground under Training is green, and the white cards on top read as
+     placed on a surface rather than floating on the same one forever. */
   .page-ambient {
     position: relative;
     isolation: isolate;
+    /* `color-mix` against `--background` rather than the `--wash` token
+       directly, because wash is a light-theme surface: in dark mode it
+       sits at L 0.232 against a card at L 0.207, so using it as the
+       ground would have put the canvas *above* the cards and inverted
+       the depth of every page. Mixing into whichever background is
+       current keeps the hue and keeps the order. */
     background:
-      radial-gradient(circle at 0% 0%, rgb(99 102 241 / 0.075), transparent 26rem),
-      radial-gradient(circle at 100% 15%, rgb(34 211 238 / 0.055), transparent 24rem),
-      radial-gradient(circle at 80% 100%, rgb(217 70 239 / 0.045), transparent 28rem),
-      var(--background);
+      radial-gradient(76rem 38rem at 0% -6%, color-mix(in oklab, var(--section) 17%, var(--background)), transparent 64%),
+      radial-gradient(62rem 34rem at 100% 6%, color-mix(in oklab, var(--section) 11%, var(--background)), transparent 66%),
+      color-mix(in oklab, var(--section) 5%, var(--background));
   }
 
   /* --- Brand mark, sign-in --------------------------------------
@@ -1055,5 +1178,225 @@
     [data-slot="select-trigger"] {
       transition: none;
     }
+  }
+}
+
+/* ============================================================
+   STAGE TWO — THE SURFACES UNDER THE MASTHEAD
+   ------------------------------------------------------------
+   Stage one coloured the masthead and stopped. Below it the app
+   was still one flat grey card after another: every tile, panel
+   and table drawn with the same 1px border and no elevation, so
+   a screen read as a wireframe of itself.
+
+   The rules below spend the section hue on the surfaces, and
+   spend elevation by role rather than stamping one shadow on
+   everything. Three things are deliberately NOT touched:
+
+   - Status colour. `warning`, `destructive` and `success` keep
+     the whole semantic palette to themselves. A tile that needs
+     acting on must still be the only red thing on the screen, so
+     the section hue never appears as a fill on a figure or a
+     badge -- only as ground, rule and label.
+   - Density. Every rule here is background, border, shadow or
+     colour. Nothing adds padding or height, because the reason
+     the last redesign stripped the colour out was that it had
+     cost ~90px per page.
+   - Contrast. Type on a tinted ground uses `--section-ink`,
+     measured at 6.1:1 or better on every hue in both themes.
+   ============================================================ */
+@layer utilities {
+  /* --- The figure tile ---------------------------------------
+     A wash that falls away diagonally, and 2px of the hue across
+     the top. The leading edge is left free: that is where the
+     state rule goes, and a tile that is merely a number must not
+     be wearing anything there. */
+  .stat-tile {
+    position: relative;
+    background: linear-gradient(
+      152deg,
+      color-mix(in oklab, var(--section) 13%, var(--card)) 0%,
+      var(--card) 64%
+    );
+    box-shadow: var(--shadow-card);
+    transition:
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+  .stat-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--section) 0%, transparent 72%);
+  }
+  .stat-tile:hover {
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-1px);
+  }
+
+  /* --- The section container ---------------------------------
+     The header takes the wash and the label takes the ink, which
+     is what turns 11px of grey uppercase into something you can
+     find by colour when six panels are stacked. */
+  .panel-premium {
+    box-shadow: var(--shadow-card);
+  }
+  .panel-premium [data-slot="panel-header"] {
+    background: linear-gradient(180deg, var(--section-wash) 0%, transparent 100%);
+  }
+  .panel-premium [data-slot="panel-title"] {
+    color: var(--section-ink);
+  }
+
+  /* --- Tables ------------------------------------------------
+     The header row was `--muted`: the same grey as a disabled
+     control and as a skeleton. Given the hue it reads as the top
+     of this table rather than as an absence. Row hover moves to
+     the wash for the same reason -- `--muted` on hover was the
+     identical grey, so the row you were pointing at looked
+     switched off. */
+  [data-slot="table-container"] {
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+  [data-slot="table-header"] tr {
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--section) 18%, var(--card)) 0%,
+      color-mix(in oklab, var(--section) 9%, var(--card)) 100%
+    );
+  }
+  [data-slot="table-head"] {
+    color: var(--section-ink);
+  }
+  [data-slot="table-row"]:hover {
+    background: color-mix(in oklab, var(--section) 9%, var(--card));
+  }
+
+  /* --- Buttons -----------------------------------------------
+     A top-edge sheen and real elevation on the filled variants
+     only. Ghost and outline buttons stay flat: if every button
+     is raised, none of them is the one to press. */
+  /* The bevel is drawn entirely with inset shadow, and deliberately
+     NOT with `background-image`. The first version used a gradient,
+     which cost /attendance its "Check in" button: that call site paints
+     itself with `bg-[linear-gradient(105deg,#0891b2,...)]`, this rule is
+     later in the same layer, and so it replaced the teal with nothing --
+     white text on a transparent button, 1.74:1. Shadow composites over
+     whatever the call site painted instead of competing for the same
+     property, so the ~40 buttons carrying their own background survive. */
+  .btn-sheen {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      inset 0 -1px 0 rgb(15 23 42 / 0.10),
+      0 1px 2px rgb(15 23 42 / 0.18);
+  }
+  .btn-sheen:hover:not(:disabled) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.26),
+      inset 0 -1px 0 rgb(15 23 42 / 0.10),
+      0 3px 10px -2px rgb(15 23 42 / 0.26);
+  }
+
+  /* --- Empty states ------------------------------------------
+     Nothing here yet is not the same as something went wrong, and
+     a dashed grey box said the second. */
+  .empty-premium {
+    background:
+      radial-gradient(28rem 12rem at 50% 0%, color-mix(in oklab, var(--section) 12%, var(--card)), transparent 70%),
+      var(--card);
+  }
+  .empty-premium [data-slot="empty-glyph"] {
+    background: var(--section-tint);
+    color: var(--section-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stat-tile:hover {
+      transform: none;
+    }
+  }
+}
+
+/* ============================================================
+   REACHING THE PAGES THAT NEVER ADOPTED THE PRIMITIVES
+   ------------------------------------------------------------
+   `Panel` is used by eight files. `Card` is used by most of the
+   rest, and a large number of sections are still the hand-rolled
+   shell that predates both. Styling only the primitives would
+   have left the dashboard -- the first screen anyone sees --
+   entirely untouched, which is how the last two redesigns ended
+   up half-applied.
+
+   So the hue is attached to the slots and to one idiom instead
+   of to the components. This is the same bridge the file already
+   uses for the literal colour scales (rule 2 at the top): reach
+   every call site at once rather than wait on 45 files. It is a
+   bridge, not the destination -- new work should use `Panel`.
+   ============================================================ */
+@layer utilities {
+  /* Every shadcn Card, on every page. The wash falls off inside
+     the first 96px, so a tall card is not a block of colour --
+     it is a white card with a coloured head. */
+  [data-slot="card"] {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--section) 10%, var(--card)) 0%,
+        var(--card) 96px
+      ),
+      var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* --- The section-label idiom -------------------------------
+     `text-[11px] font-semibold uppercase tracking-[0.1em]
+     text-muted-foreground` is how this app writes the label above
+     a section. It appears in 20+ files, as a `CardTitle`, as a
+     bare `<p>`, and inside `Panel`. Matched on the class
+     attribute because that is the only thing those call sites
+     have in common -- there is no component to edit.
+
+     Scoped to `main` deliberately: the sidebar uses the same
+     tracking on a permanently dark ground, where `--section-ink`
+     is a near-black in light mode and would disappear. */
+  main [class*="uppercase"][class*="tracking-[0.1em]"] {
+    color: var(--section-ink);
+  }
+
+  /* An explicit opt-out, for a label that must stay neutral. */
+  main [class*="uppercase"][class*="tracking-[0.1em]"][data-plain-label] {
+    color: var(--muted-foreground);
+  }
+}
+
+@layer utilities {
+  /* --- Secondary text that was never dark enough ---------------
+     `text-stone-400/500/600` is how most of this app writes its
+     secondary line, 432 times. Measured on white those scales
+     give 2.7:1, 3.9:1 and 4.9:1 -- two of the three fail AA for
+     small text before anything is done to them, and the card
+     tints above push the third under as well.
+
+     Re-pointing only the `color` of those three utilities fixes
+     every one at once, and leaves `bg-stone-500`, `border-stone-400`
+     and the rest of the scale alone: the tokens are shared, the
+     rule is not. `--muted-foreground` is 5.9:1 on white and 5.1:1
+     on the most tinted card head, in both themes.
+
+     It does collapse three steps into one. They were not being
+     used as three steps -- the same secondary caption is written
+     with all three across neighbouring files -- and a distinction
+     nobody can see is not one worth keeping at the cost of
+     readable type.
+
+     Excluded inside `.bg-sidebar`, the one block in `main` that
+     stays dark in both themes, where a theme-following ink would
+     go dark-on-dark in the light theme. */
+  main :is(.text-stone-400, .text-stone-500, .text-stone-600):not(.bg-sidebar *),
+  main :is(.text-slate-400, .text-slate-500, .text-slate-600):not(.bg-sidebar *) {
+    color: var(--muted-foreground);
   }
 }

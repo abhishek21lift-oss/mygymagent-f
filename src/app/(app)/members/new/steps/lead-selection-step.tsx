@@ -110,7 +110,7 @@ export function LeadSelectionStep({ onSelectLead, onSkip }: LeadSelectionStepPro
 
  {selectedLeadId && (
  <div className="flex justify-end">
- <Button onClick={handleContinue} disabled={selectedLead.isLoading} className="min-h-11 rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] px-5 font-extrabold shadow-lg shadow-violet-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+ <Button onClick={handleContinue} disabled={selectedLead.isLoading} className="btn-sheen min-h-11 rounded-lg bg-primary px-5 font-extrabold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  {selectedLead.isLoading ? "Loading lead..." : <>Continue with selected lead <ChevronRight className="size-4" aria-hidden="true" /></>}
  </Button>
  </div>

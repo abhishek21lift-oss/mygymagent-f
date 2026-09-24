@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC } from "@/lib/brand";
+import { accentForPath } from "@/lib/section-accent";
+import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
 import { usePortalMe } from "@/lib/hooks/use-portal";
 import { cn } from "@/lib/utils";
@@ -51,6 +53,8 @@ export default function PortalLayout({
   const router = useRouter();
   const pathname = usePathname();
   const me = usePortalMe();
+  // Also on <html>, so portalled dialogs and toasts wear the same hue.
+  useSectionAttribute(pathname);
 
   React.useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/login");
@@ -84,7 +88,10 @@ export default function PortalLayout({
   const member = me.data?.member;
 
   return (
-    <div className="flex min-h-svh flex-col bg-muted/30">
+    <div
+      data-section={accentForPath(pathname)}
+      className="page-ambient flex min-h-svh flex-col"
+    >
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2.5">
