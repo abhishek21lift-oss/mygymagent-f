@@ -156,7 +156,13 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
  href="/dashboard"
  onClick={onNavigate}
  title={collapsed ? PRODUCT_LOGO_ALT : undefined}
- className={cn( "group relative mb-3 flex shrink-0 items-center justify-center overflow-hidden rounded-lg px-2 py-1.5 transition-all hover:border-sidebar-primary/20 hover:bg-card dark:hover:bg-white/[0.06]",
+ className={cn( // `hover:bg-card`, which this was, paints white: the rail is dark in
+ // both themes but `--card` follows the theme, so hovering the brand
+ // in light mode turned the top of the sidebar into a white block --
+ // and on a phone, where a tap leaves the hover stuck, it stayed
+ // there. `--sidebar-accent` is the rail's own raised surface and is
+ // correct whichever theme is on.
+ "group relative mb-3 flex shrink-0 items-center justify-center overflow-hidden rounded-lg px-2 py-1.5 transition-all hover:border-sidebar-primary/20 hover:bg-sidebar-accent",
  collapsed ? "justify-center px-1.5" : "gap-2.5",
  )}
  >

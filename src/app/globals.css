@@ -555,6 +555,15 @@
   --ring: color-mix(in oklab, var(--section) 50%, transparent);
 }
 
+[data-section="indigo"]  { --nav-accent-page: var(--sa-indigo); }
+[data-section="violet"]  { --nav-accent-page: var(--sa-violet); }
+[data-section="rose"]    { --nav-accent-page: var(--sa-rose); }
+[data-section="emerald"] { --nav-accent-page: var(--sa-emerald); }
+[data-section="amber"]   { --nav-accent-page: var(--sa-amber); }
+[data-section="cyan"]    { --nav-accent-page: var(--sa-cyan); }
+[data-section="blue"]    { --nav-accent-page: var(--sa-blue); }
+[data-section="orange"]  { --nav-accent-page: var(--sa-orange); }
+
 [data-nav-accent="indigo"]  { --nav-accent: var(--sa-indigo); }
 [data-nav-accent="violet"]  { --nav-accent: var(--sa-violet); }
 [data-nav-accent="rose"]    { --nav-accent: var(--sa-rose); }
@@ -1398,5 +1407,45 @@
   main :is(.text-stone-400, .text-stone-500, .text-stone-600):not(.bg-sidebar *),
   main :is(.text-slate-400, .text-slate-500, .text-slate-600):not(.bg-sidebar *) {
     color: var(--muted-foreground);
+  }
+}
+
+/* ============================================================
+   THE NAVIGATION DRAWER
+   ------------------------------------------------------------
+   On a phone the nav is a dialog, and two earlier rules in this
+   file claim every `[data-slot="dialog-content"]`: one paints it
+   `--card`, a later one a white glass gradient. Both sit after
+   Tailwind's utilities in the same layer, so the `bg-sidebar/95`
+   the drawer asked for never applied. It rendered as a white
+   sheet with `--sidebar-foreground` type on it -- a near-white
+   built for dark leather -- and every label but the selected one
+   was invisible.
+
+   Restoring the rail is most of the fix. The rest is that a
+   drawer is the one surface a phone user sees full-screen, and
+   it was the flattest thing in the app: a list of labels with no
+   depth and no colour. It now carries the section's own hue at
+   the top, the same glow the page behind it is wearing, and the
+   coloured glyph tiles read against the dark ground the way they
+   do on the desktop rail.
+   ============================================================ */
+@layer utilities {
+  [data-slot="dialog-content"][data-surface="rail"] {
+    background:
+      radial-gradient(34rem 18rem at 0% 0%, color-mix(in oklab, var(--nav-accent-page, var(--sa-indigo)) 16%, transparent), transparent 70%),
+      var(--sidebar);
+    color: var(--sidebar-foreground);
+    border: 1px solid var(--sidebar-border);
+    border-left: none;
+    box-shadow: 0 24px 70px -20px rgb(2 6 23 / 0.55);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* The drawer sits over a dimmed page, so the overlay needs to be
+     darker than the sheet or the sheet reads as the background. */
+  [data-slot="dialog-overlay"] {
+    background: rgb(2 6 23 / 0.62);
   }
 }
