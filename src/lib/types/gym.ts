@@ -82,6 +82,15 @@ export interface Member {
   primaryBranch?: { id: string; name: string }
   assignedTrainer?: { id: string; firstName: string; lastName: string } | null
   memberships?: Membership[]
+  /** The portal login granted to this member, if any. Only ever set on
+   * the detail payload. `INVITED` means the invitation was sent but the
+   * password was never set, which is a resend rather than a fresh
+   * grant. */
+  user?: {
+    id: string
+    email: string
+    status: "INVITED" | "ACTIVE" | "SUSPENDED" | "DISABLED"
+  } | null
 }
 
 export type MemberAddressType = "HOME" | "WORK" | "BILLING" | "OTHER"

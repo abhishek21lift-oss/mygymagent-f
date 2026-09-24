@@ -7,6 +7,11 @@ export interface AuthUser {
   status: "INVITED" | "ACTIVE" | "SUSPENDED" | "DISABLED"
   primaryBranchId: string | null
   emailVerified: boolean
+  /** The gym member this login belongs to, when it is one. Decides
+   * which app the session opens: a member in the staff app would have
+   * every request 403, so the server answers this at sign-in rather than
+   * leaving the client to probe for it. */
+  memberId: string | null
 }
 
 export interface Organization {

@@ -80,6 +80,7 @@ import { useMemberScreenings } from "@/lib/hooks/use-member-screenings";
 import { Member360Tabs } from "./member-360-tabs";
 import { MemberAiProgress } from "./member-ai-progress";
 import { EntryAccessCard } from "./entry-access-card";
+import { PortalAccessCard } from "./portal-access-card";
 import {
  useCreateMembership,
  useFreezeMembership,
@@ -1287,6 +1288,12 @@ interface MemberWithMemberships {
  endDate: string;
  membershipPlan?: { id: string; name: string; price: string };
  }>;
+ /** The member's portal login, when one has been granted. */
+ user?: {
+ id: string;
+ email: string;
+ status: "INVITED" | "ACTIVE" | "SUSPENDED" | "DISABLED";
+ } | null;
 }
 
 function MemberHeader({
@@ -1600,6 +1607,9 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
 
  {/* Every credential that opens the door, in one place */}
  <EntryAccessCard memberId={memberId} branchId={member.primaryBranchId} />
+
+ {/* Whether this member can sign in to the app at all */}
+ <PortalAccessCard member={member} />
 
  {/* AI Progress Card */}
  <Card className="overflow-hidden rounded-xl border-border bg-card p-0">

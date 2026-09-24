@@ -28,7 +28,9 @@ interface AuthContextValue {
  * been established -- the caller must collect a code and pass the
  * returned `mfaToken` to `completeMfaLogin`. */
  login: (input: LoginInput) => Promise<LoginResult>
- completeMfaLogin: (mfaToken: string, code: string) => Promise<void>
+ /** Resolves to the session it established, so the caller can route
+  * on it -- a member and a staff account open different apps. */
+ completeMfaLogin: (mfaToken: string, code: string) => Promise<LoginResponse>
  register: (input: RegisterInput) => Promise<void>
  logout: () => Promise<void>
  hasPermission: (key: string | string[]) => boolean
@@ -168,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  code,
  })
  adoptSession(res)
+ return res
  },
  [adoptSession, queryClient],
  )

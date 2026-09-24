@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/lib/auth/auth-context";
+import { homeRouteFor } from "@/lib/auth/home-route";
 import { MfaRequiredGate } from "@/components/security/mfa-required-gate";
 import { MfaGraceBanner } from "@/components/security/mfa-grace-banner";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
@@ -13,16 +14,26 @@ import { BottomTabBar } from "@/components/app-shell/bottom-tab-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
- const { isAuthenticated, isLoading, mfaEnrolment } = useAuth();
+ const { isAuthenticated, isLoading, mfaEnrolment, user } = useAuth();
  const router = useRouter();
  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
- React.useEffect(() => {
- if (!isLoading && !isAuthenticated) router.replace("/login");
- }, [isLoading, isAuthenticated, router]);
+ // A gym member has no staff permissions at all, so this shell would
+ // render a sidebar of pages that would all 403. Send them to the portal
+ // instead -- the mirror of what /portal does to a staff account.
+ const isMember = Boolean(user?.memberId);
 
- if (isLoading || !isAuthenticated) {
+ React.useEffect(() => {
+ if (isLoading) return;
+ if (!isAuthenticated) {
+ router.replace("/login");
+ return;
+ }
+ if (isMember) router.replace(homeRouteFor(user));
+ }, [isLoading, isAuthenticated, isMember, user, router]);
+
+ if (isLoading || !isAuthenticated || isMember) {
  return (
  <div className="flex h-svh items-center justify-center bg-background px-4">
  <div role="status" aria-label="Loading application" className="relative flex w-full max-w-sm flex-col gap-3 overflow-hidden rounded-lg border border-sidebar-border bg-card/80 p-6 shadow-sm">

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 
 /**
@@ -112,5 +112,34 @@ export function usePortalNutrition() {
   return useQuery({
     queryKey: [KEY, "nutrition"],
     queryFn: () => api.get<{ items: PortalDiet[] }>("/portal/nutrition"),
+  });
+}
+
+export interface PortalEnableResult {
+  memberId: string;
+  userId: string;
+  email: string;
+  invited: true;
+}
+
+/**
+ * Staff-side: grant a member a portal login.
+ *
+ * The one call in this file that names a member, and the one behind a
+ * permission (`portal.manage`). It is idempotent on the server, so
+ * calling it again on an already-linked member re-sends the invitation
+ * rather than creating a second account.
+ *
+ * Invalidates the member detail query because the answer changes what
+ * that page shows: `Member.user` goes from absent to INVITED.
+ */
+export function useEnablePortalLogin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId: string) =>
+      api.post<PortalEnableResult>(`/portal/enable/${memberId}`, {}),
+    onSuccess: (_result, memberId) => {
+      void queryClient.invalidateQueries({ queryKey: ["members", memberId] });
+    },
   });
 }

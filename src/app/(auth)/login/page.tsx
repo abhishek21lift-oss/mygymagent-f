@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, KeyRound, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
+import { homeRouteFor } from "@/lib/auth/home-route";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +54,10 @@ export default function LoginPage() {
  setPassword("");
  return;
  }
- router.replace("/dashboard");
+ // Gym members and staff sign in through this same form; the server
+ // says which app the session belongs to, so a member is never
+ // dropped into the staff app where every request would 403.
+ router.replace(homeRouteFor(result.user));
  } catch (err) {
  setError(
  describe(err, "Unable to sign in. Please check your credentials and try again."),
@@ -75,8 +79,8 @@ export default function LoginPage() {
 
  setIsSubmitting(true);
  try {
- await completeMfaLogin(mfaToken, trimmed);
- router.replace("/dashboard");
+ const session = await completeMfaLogin(mfaToken, trimmed);
+ router.replace(homeRouteFor(session.user));
  } catch (err) {
  // The challenge is single-use on success only, so a wrong code can be
  // retried against the same token until it expires. An expired or
