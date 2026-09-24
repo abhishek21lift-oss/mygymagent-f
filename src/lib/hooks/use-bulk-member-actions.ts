@@ -2,6 +2,35 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 import type { MemberStatus } from '@/lib/types/gym';
 
+export type BulkMembershipSkipReason =
+  | 'alreadyHasActiveMembership'
+  | 'outsideYourScope'
+  | 'branchMismatch';
+
+export interface BulkAssignMembershipReport {
+  dryRun: boolean;
+  plan: {
+    id: string;
+    name: string;
+    durationDays: number;
+    price: string;
+    currency: string;
+  };
+  startDate: string;
+  endDate: string;
+  requested: number;
+  toCreate: number;
+  created: number;
+  skipped: Record<BulkMembershipSkipReason, number>;
+  skippedMembers: Array<{
+    memberId: string;
+    memberCode: string;
+    name: string;
+    reason: BulkMembershipSkipReason;
+  }>;
+  totalValue: string;
+}
+
 interface BulkResult {
   updated?: number;
   assigned?: number;
@@ -100,6 +129,39 @@ export function useBulkExport() {
     mutationFn: async (payload: { memberIds: string[]; format?: 'csv' | 'xlsx' }) => {
       const csv = await api.post<string>('/members/bulk/export', payload);
       return parseBulkExport(csv);
+    },
+    onError: (error: Error) => error,
+  });
+}
+
+/**
+ * Give many members the same membership.
+ *
+ * The caller is expected to run this once with `dryRun` and show the
+ * report before running it again without -- see the dialog in
+ * `members/page.tsx`. The dry run is not a nicety here: this is the one
+ * bulk action that creates billable rows with expiry dates, and the
+ * import it exists to finish left 290 members eligible for it at once.
+ */
+export function useBulkAssignMembership() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: {
+      memberIds: string[];
+      membershipPlanId: string;
+      startDate?: string;
+      dryRun?: boolean;
+    }) =>
+      api.post<BulkAssignMembershipReport>(
+        '/members/bulk/memberships',
+        payload,
+      ),
+    onSuccess: (report) => {
+      // A dry run wrote nothing, so nothing downstream is stale.
+      if (report.dryRun) return;
+      void queryClient.invalidateQueries({ queryKey: MEMBERS_KEY });
+      void queryClient.invalidateQueries({ queryKey: ['memberships'] });
+      void queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onError: (error: Error) => error,
   });

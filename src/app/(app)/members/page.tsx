@@ -18,6 +18,7 @@ import {
  Users,
  Wallet,
  X,
+  CreditCard,
 } from "lucide-react";
 import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
@@ -36,9 +37,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { StatCard } from "@/components/shared/stat-card";
-import { useMemberMetrics, useMembers, type MemberFilters } from "@/lib/hooks/use-members";
+import { fetchAllMemberIds, useMemberMetrics, useMembers, type MemberFilters } from "@/lib/hooks/use-members";
 import { useMemberTags } from "@/lib/hooks/use-member-tags";
 import { useBulkStatusChange, useBulkTagAssignment, useBulkExport } from "@/lib/hooks/use-bulk-member-actions";
+import { AssignMembershipDialog } from "./assign-membership-dialog";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/api/client";
 import type { Member, MemberStatus, MemberType } from "@/lib/types/gym";
@@ -136,7 +138,8 @@ function Filters({ filters, onChange }: { filters: MemberFilters; onChange: (nex
  );
 }
 
-function BulkBar({ selected, clear }: { selected: string[]; clear: () => void }) {
+function BulkBar({ selected, clear, matchingTotal, onSelectAllMatching, selectingAll }: { selected: string[]; clear: () => void; matchingTotal: number; onSelectAllMatching: () => void; selectingAll: boolean }) {
+ const [membershipOpen, setMembershipOpen] = React.useState(false);
  const [statusOpen, setStatusOpen] = React.useState(false);
  const [tagOpen, setTagOpen] = React.useState(false);
  const [status, setStatus] = React.useState<MemberStatus | null>(null);
@@ -151,7 +154,17 @@ function BulkBar({ selected, clear }: { selected: string[]; clear: () => void })
  return (
  <div className="sticky top-3 z-20 flex flex-wrap items-center gap-2 rounded-xl border bg-card p-3 shadow-md" role="toolbar" aria-label={`${selected.length} members selected`}>
  <Badge className="tabular-nums">{selected.length} selected</Badge>
+ {/* The table pages at 25, so without this the only way to act on the
+     290 members the enquiry import left without a membership would be
+     twelve passes through the pager. */}
+ {matchingTotal > selected.length && (
+ <Button size="sm" variant="ghost" className="min-h-10 px-2 text-xs font-medium" onClick={onSelectAllMatching} disabled={selectingAll} aria-busy={selectingAll}>
+ {selectingAll ? "Selecting..." : `Select all ${matchingTotal} matching`}
+ </Button>
+ )}
  <div className="ml-auto flex flex-wrap gap-2">
+ <Button size="sm" variant="outline" className="min-h-10" onClick={() => setMembershipOpen(true)}><CreditCard className="mr-1.5 size-3.5" aria-hidden="true" /> Membership</Button>
+ <AssignMembershipDialog open={membershipOpen} onOpenChange={setMembershipOpen} memberIds={selected} onApplied={clear} />
  <Dialog open={statusOpen} onOpenChange={setStatusOpen}>
  <DialogTrigger asChild><Button size="sm" variant="outline" className="min-h-10"><SquareCheckBig className="mr-1.5 size-3.5" aria-hidden="true" /> Status</Button></DialogTrigger>
  <DialogContent><DialogHeader><DialogTitle>Change status</DialogTitle><DialogDescription>Apply a new status to all selected members.</DialogDescription></DialogHeader><div className="flex flex-wrap gap-2">{STATUS_OPTIONS.map((s) => <Button key={s} variant={status === s ? "default" : "outline"} size="sm" className="min-h-10" onClick={() => setStatus(s)}>{s}</Button>)}</div><DialogFooter><Button variant="outline" className="min-h-10" onClick={() => setStatusOpen(false)}>Cancel</Button><Button className="min-h-10" disabled={!status || bulkStatus.isPending} aria-busy={bulkStatus.isPending} onClick={applyStatus}>{bulkStatus.isPending ? "Applying..." : "Apply"}</Button></DialogFooter></DialogContent>
@@ -186,7 +199,32 @@ export default function MembersPage() {
  const members = useMembers(filters);
  const metrics = useMemberMetrics();
  const items = members.data?.items ?? [];
- const selectedIds = Object.entries(selection).filter(([, value]) => value).map(([id]) => items[Number(id)]?.id).filter((id): id is string => Boolean(id));
+ const pageSelectedIds = Object.entries(selection).filter(([, value]) => value).map(([id]) => items[Number(id)]?.id).filter((id): id is string => Boolean(id));
+ // A selection that outlives the current page. Row checkboxes are keyed
+ // by row index, so they can only ever describe the 25 rows in view;
+ // "select all matching" fetches the ids the filter actually covers and
+ // holds them here instead.
+ // Held with the filters it was gathered under, so a cross-page
+ // selection expires by derivation rather than by an effect racing the
+ // render that changed the filter: `filters` is replaced on every
+ // change, so an identity check is enough to know the ids describe rows
+ // the table no longer shows.
+ const [allMatching, setAllMatching] = React.useState<{ filters: MemberFilters; ids: string[] } | null>(null);
+ const [selectingAll, setSelectingAll] = React.useState(false);
+ const allMatchingIds = allMatching?.filters === filters ? allMatching.ids : null;
+ const selectedIds = allMatchingIds ?? pageSelectedIds;
+ const matchingTotal = members.data?.total ?? 0;
+ async function selectAllMatching() {
+ setSelectingAll(true);
+ try {
+ const ids = await fetchAllMemberIds(filters, matchingTotal);
+ setAllMatching({ filters, ids });
+ } catch (e) {
+ toast.error(e instanceof ApiError ? e.message : "Could not select every matching member");
+ } finally {
+ setSelectingAll(false);
+ }
+ }
  const setSearch = (search: string) => setFilters((f) => ({ ...f, search: search || undefined, page: 1 }));
  // The chip row needs to show which segment is on, so the choice is held
  // here rather than inferred back out of the filter object.
@@ -257,7 +295,7 @@ export default function MembersPage() {
  </div>
  </div>
 
- {selectedIds.length ? <BulkBar selected={selectedIds} clear={() => setSelection({})} /> : null}
+ {selectedIds.length ? <BulkBar selected={selectedIds} clear={() => { setSelection({}); setAllMatching(null); }} matchingTotal={matchingTotal} onSelectAllMatching={() => void selectAllMatching()} selectingAll={selectingAll} /> : null}
 
  <DataTable
  columns={columns}

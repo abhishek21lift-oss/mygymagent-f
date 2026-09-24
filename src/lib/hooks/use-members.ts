@@ -59,6 +59,53 @@ export function useMembers(params: MemberFilters = {}) {
   });
 }
 
+/**
+ * Every member id the given filter covers, not just the page in view.
+ *
+ * The directory's row checkboxes are keyed by row index, so a selection
+ * can only ever describe the 25 rows on screen. Acting on the 290
+ * members the enquiry import left without a membership needs the ids the
+ * filter actually matches, so this walks the pages once and collects
+ * them. Capped at the 500 the bulk routes accept, which is also the
+ * point past which a single bulk write stops being the right tool.
+ */
+export const BULK_SELECTION_CAP = 500;
+
+export async function fetchAllMemberIds(
+  filters: MemberFilters,
+  total: number,
+): Promise<string[]> {
+  const pageSize = 100;
+  const pages = Math.min(
+    Math.ceil(Math.min(total, BULK_SELECTION_CAP) / pageSize),
+    Math.ceil(BULK_SELECTION_CAP / pageSize),
+  );
+  const ids: string[] = [];
+  for (let page = 1; page <= pages; page += 1) {
+    const query: Record<string, string | number | boolean | string[] | undefined> = {
+      page,
+      pageSize,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.order && { order: filters.order }),
+      ...(filters.orderBy && { orderBy: filters.orderBy }),
+      ...(filters.status && filters.status.length > 0 && { status: filters.status }),
+      ...(filters.memberType && filters.memberType.length > 0 && { memberType: filters.memberType }),
+      ...(filters.trainerId && filters.trainerId.length > 0 && { trainerId: filters.trainerId }),
+      ...(filters.tagIds && filters.tagIds.length > 0 && { tagIds: filters.tagIds }),
+      ...(filters.joinedFrom && { joinedFrom: filters.joinedFrom }),
+      ...(filters.joinedTo && { joinedTo: filters.joinedTo }),
+    };
+    const res = await api.get<Paginated<Member>>("/members", {
+      query,
+      branchId: filters.branchId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    ids.push(...res.items.map((m) => m.id));
+    if (res.items.length < pageSize) break;
+  }
+  return ids.slice(0, BULK_SELECTION_CAP);
+}
+
 export function useMemberMetrics() {
   return useQuery({
     queryKey: [KEY, "metrics"],
