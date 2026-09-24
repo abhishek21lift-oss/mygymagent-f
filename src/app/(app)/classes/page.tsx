@@ -91,7 +91,7 @@ export default function ClassesPage() {
 
  return <div className="flex flex-col gap-4 pb-4">
  <PageHero id="classes-title" icon={CalendarDays} title="Classes"
- description="Programmes, schedule and bookings" variant="light" accent="violet" />
+ description="Programmes, schedule and bookings" />
  <div className="flex flex-wrap items-center gap-3">
  <Label htmlFor="class-branch">Branch</Label>
  <select id="class-branch" value={branchId} onChange={e=>setBranchId(e.target.value)} className="h-10 rounded-xl border bg-background px-3 text-sm">

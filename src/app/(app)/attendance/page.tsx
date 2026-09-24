@@ -229,8 +229,6 @@ export default function AttendancePage() {
  icon={CalendarCheck}
  title="Attendance"
  description="Check-ins, the live view and the visit log"
- variant="light"
- accent="cyan"
  actions={
  <>
  <Link href="/members" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[linear-gradient(105deg,#0891b2,#0d9488_55%,#059669)] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-cyan-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600">

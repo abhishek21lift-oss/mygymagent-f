@@ -215,6 +215,47 @@
   --duration-fast: 110ms;
   --duration-base: 170ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* --- Section accents -------------------------------------------
+     One hue per workspace section, so colour carries where you are
+     rather than decorating what you are looking at. Moving from
+     Members to Finance should be visible before you read a word.
+
+     Three values each, because a hue used at one lightness can only
+     ever be a block of paint: `solid` for the rule and the glyph,
+     `tint` for the surface a glyph sits on, `wash` for the gradient
+     that bleeds off the masthead. Chroma stays low on wash and tint --
+     a page's own title is not a state, and must never shout louder
+     than the one badge on it that is.
+
+     The eight names match the `accent` prop 32 call sites already
+     pass; that prop had been accepted and ignored since the density
+     pass removed the tinted chip, so the information was sitting
+     there unused. */
+  --a-indigo:       oklch(0.520 0.190 264);
+  --a-indigo-tint:  oklch(0.948 0.038 264);
+  --a-indigo-wash:  oklch(0.975 0.020 264);
+  --a-violet:       oklch(0.530 0.205 295);
+  --a-violet-tint:  oklch(0.950 0.040 295);
+  --a-violet-wash:  oklch(0.976 0.021 295);
+  --a-rose:         oklch(0.570 0.195 15);
+  --a-rose-tint:    oklch(0.955 0.036 15);
+  --a-rose-wash:    oklch(0.978 0.018 15);
+  --a-emerald:      oklch(0.545 0.140 158);
+  --a-emerald-tint: oklch(0.950 0.040 158);
+  --a-emerald-wash: oklch(0.975 0.020 158);
+  --a-amber:        oklch(0.640 0.145 75);
+  --a-amber-tint:   oklch(0.958 0.048 75);
+  --a-amber-wash:   oklch(0.980 0.024 75);
+  --a-cyan:         oklch(0.560 0.120 225);
+  --a-cyan-tint:    oklch(0.950 0.040 225);
+  --a-cyan-wash:    oklch(0.975 0.020 225);
+  --a-blue:         oklch(0.535 0.170 250);
+  --a-blue-tint:    oklch(0.950 0.038 250);
+  --a-blue-wash:    oklch(0.976 0.019 250);
+  --a-orange:       oklch(0.625 0.160 50);
+  --a-orange-tint:  oklch(0.955 0.045 50);
+  --a-orange-wash:  oklch(0.979 0.022 50);
 }
 
 .dark {
@@ -378,6 +419,37 @@
   --shadow-card: 0 1px 2px oklch(0 0 0 / 0.36), 0 1px 3px oklch(0 0 0 / 0.28);
   --shadow-raised: 0 2px 6px oklch(0 0 0 / 0.40), 0 10px 26px -8px oklch(0 0 0 / 0.50);
   --shadow-popover: 0 10px 36px -8px oklch(0 0 0 / 0.60), 0 3px 10px oklch(0 0 0 / 0.40);
+
+  /* --- Section accents, dark ---------------------------------------
+     Lifted, not inverted: a hue that reads rich on white goes muddy on
+     near-black, so `solid` gains lightness while `tint` and `wash`
+     become dark surfaces carrying a trace of the hue instead of pale
+     ones. Keeping the same three names means no component branches on
+     the theme. */
+  --a-indigo:       oklch(0.720 0.150 264);
+  --a-indigo-tint:  oklch(0.290 0.055 264);
+  --a-indigo-wash:  oklch(0.232 0.028 264);
+  --a-violet:       oklch(0.730 0.155 295);
+  --a-violet-tint:  oklch(0.292 0.058 295);
+  --a-violet-wash:  oklch(0.234 0.030 295);
+  --a-rose:         oklch(0.725 0.150 15);
+  --a-rose-tint:    oklch(0.296 0.055 15);
+  --a-rose-wash:    oklch(0.236 0.028 15);
+  --a-emerald:      oklch(0.730 0.135 158);
+  --a-emerald-tint: oklch(0.288 0.050 158);
+  --a-emerald-wash: oklch(0.232 0.026 158);
+  --a-amber:        oklch(0.780 0.135 75);
+  --a-amber-tint:   oklch(0.300 0.052 75);
+  --a-amber-wash:   oklch(0.238 0.028 75);
+  --a-cyan:         oklch(0.740 0.115 225);
+  --a-cyan-tint:    oklch(0.290 0.048 225);
+  --a-cyan-wash:    oklch(0.233 0.025 225);
+  --a-blue:         oklch(0.725 0.140 250);
+  --a-blue-tint:    oklch(0.290 0.052 250);
+  --a-blue-wash:    oklch(0.233 0.027 250);
+  --a-orange:       oklch(0.765 0.140 50);
+  --a-orange-tint:  oklch(0.298 0.055 50);
+  --a-orange-wash:  oklch(0.237 0.028 50);
 }
 
 @theme inline {

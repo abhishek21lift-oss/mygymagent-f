@@ -73,7 +73,7 @@ export default function BusinessOsPage(){
  }
 
  return <div className="space-y-6">
- <PageHero id="business-os" icon={Sparkles} title="Business OS" description="Operational controls for loyalty, support, feedback, marketing, accounting and AI." variant="light" accent="violet"/>
+ <PageHero id="business-os" icon={Sparkles} title="Business OS" description="Operational controls for loyalty, support, feedback, marketing, accounting and AI."/>
  <div className="flex flex-wrap items-center justify-between gap-3">
  <div className="min-w-0 flex-1">
  <DataState

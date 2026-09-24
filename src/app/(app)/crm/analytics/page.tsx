@@ -83,8 +83,6 @@ export default function SalesAnalyticsPage() {
  id="analytics-title"
  icon={BarChart3}
  title="Sales analytics"
- variant="light"
- accent="violet"
  actions={
  <>
  <Button asChild variant="outline" className="min-h-11 rounded-lg border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">

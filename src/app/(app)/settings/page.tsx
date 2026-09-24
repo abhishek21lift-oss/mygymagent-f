@@ -65,8 +65,6 @@ export default function SettingsPage() {
  id="settings-title"
  icon={Settings2}
  title="Settings"
- variant="light"
- accent="indigo"
  actions={
  // The Security link is outside the `settings.manage` gate on purpose:
  // two-step verification is the signed-in user's own account setting,

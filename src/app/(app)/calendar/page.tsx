@@ -157,8 +157,6 @@ export default function CalendarPage() {
  id="calendar-title"
  icon={CalendarDays}
  title="Calendar"
- variant="light"
- accent="orange"
  actions={
  <Select value={effectiveBranchId} onValueChange={setBranchId}>
  <SelectTrigger className="min-h-11 w-44"><SelectValue placeholder="Branch" /></SelectTrigger>

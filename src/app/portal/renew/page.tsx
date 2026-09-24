@@ -4,6 +4,7 @@ import * as React from "react";
 import { CheckCircle2, Loader2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Panel } from "@/components/shared/panel";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ export default function PortalRenewPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageHero icon={Wallet} title="Renew" description="Choose a plan and ask the gym to renew" />
       <Panel title="Your membership" titleId="portal-renew-current">
         {membership ? (
           <p className="text-sm">

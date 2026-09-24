@@ -19,6 +19,18 @@ const AUTH_PROXY_PATHS = new Set([
   // Second half of an MFA login: sets the refresh cookie just like
   // /auth/login, so it has to go through the same BFF.
   "/auth/mfa/verify",
+  // Same reason again, for the SMS code. Posting this straight at the
+  // API sets the refresh cookie on the API's own origin, where the
+  // browser will never send it back to /api/auth/refresh -- the session
+  // then survives until the first full page load and no longer. Across
+  // the two origins this actually deploys on it would not be stored at
+  // all.
+  "/auth/otp/verify",
+  // Not cookie-related, but kept on the same origin as its sibling so
+  // every auth call a browser makes leaves from one place. The proxy
+  // forwards x-forwarded-for, so the backend still throttles the real
+  // caller rather than the Next server.
+  "/auth/otp/request",
 ])
 const REQUEST_TIMEOUT_MS = 20_000
 

@@ -43,8 +43,6 @@ export default function OwnerOsPage() {
  <div className="flex flex-col gap-5">
  <PageHero
  id="owner-title"
- variant="dark"
- accent="violet"
  icon={Sparkles}
  title="Business health"
  actions={

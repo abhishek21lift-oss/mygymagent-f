@@ -380,8 +380,6 @@ export default function SecuritySettingsPage() {
  icon={ShieldCheck}
  title="Security"
  description="Protect your account with a second factor at sign-in."
- variant="light"
- accent="indigo"
  actions={
  <Button asChild variant="outline" className="min-h-11 rounded-lg bg-card">
  <Link href="/settings">

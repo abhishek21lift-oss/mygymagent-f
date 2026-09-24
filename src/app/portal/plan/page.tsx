@@ -2,6 +2,7 @@
 
 import { Dumbbell } from "lucide-react";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/shared/panel";
@@ -35,6 +36,7 @@ export default function PortalPlan() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageHero icon={Dumbbell} title="Training" description="The plan your trainer assigned" />
       <DataState
         isLoading={workouts.isPending}
         isError={workouts.isError}

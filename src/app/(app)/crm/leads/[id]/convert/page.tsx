@@ -73,8 +73,6 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  id="convert-title"
  icon={CheckCircle2}
  title="Convert lead"
- variant="light"
- accent="emerald"
  actions={
  <>
  <Button variant="ghost" size="sm" className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" onClick={() => router.back()}>

@@ -65,8 +65,6 @@ export default function MembershipLifecyclePage() {
  icon={CreditCard}
  title="Memberships"
  description="Starts, freezes, renewals and expiries"
- variant="light"
- accent="emerald"
  actions={
  <>
  <Button asChild size="sm" className="min-h-10 rounded-lg focus-visible:ring-ring">

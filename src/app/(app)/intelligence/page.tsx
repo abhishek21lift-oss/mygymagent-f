@@ -283,8 +283,6 @@ export default function IntelligencePage() {
  <div className="flex flex-col gap-5">
  <PageHero
  id="intel-title"
- variant="dark"
- accent="violet"
  icon={Sparkles}
  title="Member intelligence"
  >

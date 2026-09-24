@@ -661,8 +661,6 @@ export default function CrmPage() {
  icon={Megaphone}
  title="Leads"
  description="Pipeline, follow-ups and conversion"
- variant="light"
- accent="blue"
  actions={
  <>
  <Button

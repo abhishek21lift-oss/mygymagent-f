@@ -152,8 +152,6 @@ export default function PtSessionsPage() {
  id="pt-sessions-title"
  icon={CalendarDays}
  title="PT sessions"
- variant="light"
- accent="rose"
  actions={
  <Button variant="outline" asChild className="min-h-11 rounded-lg text-sm">
  <a href="/pt-operations"><Dumbbell className="size-4" aria-hidden="true" /> PT OS</a>

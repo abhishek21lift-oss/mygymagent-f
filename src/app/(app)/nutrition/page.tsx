@@ -287,8 +287,6 @@ export default function NutritionPage() {
  id="nutrition-title"
  icon={Apple}
  title="Nutrition"
- variant="light"
- accent="emerald"
  actions={
  <>
  {hasPermission("nutrition.create") && <AddFood />}

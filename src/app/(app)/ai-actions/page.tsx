@@ -19,8 +19,6 @@ export default function AiActionsPage() {
  <div className="flex flex-col gap-5">
  <PageHero
  id="aia-title"
- variant="dark"
- accent="violet"
  icon={ShieldCheck}
  title="AI actions"
  actions={

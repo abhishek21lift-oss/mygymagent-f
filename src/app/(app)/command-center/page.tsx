@@ -417,8 +417,6 @@ export default function CommandCenterPage() {
  {/* ------------------------------------------ Hero: compact midnight */}
  <PageHero
  id="cc-title"
- variant="dark"
- accent="violet"
  icon={Zap}
  title="Command centre"
  actions={

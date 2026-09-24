@@ -166,8 +166,6 @@ export default function MembershipPlansPage() {
  id="plans-title"
  icon={Sparkles}
  title="Plans"
- variant="light"
- accent="emerald"
  actions={
  <>
  {hasPermission("membership_plans.create") && <CreatePlanDialog />}

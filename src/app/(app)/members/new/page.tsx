@@ -13,8 +13,6 @@ export default function NewMemberPage() {
  id="new-member-title"
  icon={UserRound}
  title="New member"
- variant="light"
- accent="violet"
  actions={
  <Link
  href="/members"

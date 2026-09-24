@@ -270,8 +270,6 @@ export default function WorkoutsPage() {
  id="workouts-title"
  icon={Dumbbell}
  title="Workout plans"
- variant="light"
- accent="rose"
  actions={
  <>
  {hasPermission("workouts.create") && <AddExerciseDialog />}

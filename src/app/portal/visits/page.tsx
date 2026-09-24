@@ -2,6 +2,7 @@
 
 import { CalendarCheck } from "lucide-react";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/shared/panel";
@@ -12,7 +13,9 @@ export default function PortalVisits() {
   const items = visits.data?.items ?? [];
 
   return (
-    <Panel title="Your visits" titleId="portal-visits" flush>
+    <div className="flex flex-col gap-4">
+      <PageHero icon={CalendarCheck} title="Visits" description="Your recent check-ins" />
+      <Panel title="Your visits" titleId="portal-visits" flush>
       <div className="p-4 sm:p-5">
         <DataState
           isLoading={visits.isPending}
@@ -57,5 +60,6 @@ export default function PortalVisits() {
         </DataState>
       </div>
     </Panel>
+    </div>
   );
 }

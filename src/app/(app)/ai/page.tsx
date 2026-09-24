@@ -87,8 +87,6 @@ export default function AiPage() {
  <div className="flex flex-col gap-5">
  <PageHero
  id="ai-title"
- variant="dark"
- accent="violet"
  icon={Sparkles}
  title="AI agent"
  actions={

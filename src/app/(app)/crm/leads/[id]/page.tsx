@@ -76,8 +76,6 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  id="lead-title"
  icon={UserRound}
  title={`${currentLead.firstName} ${currentLead.lastName}`}
- variant="light"
- accent="violet"
  actions={
  <>
  <Button asChild variant="outline" className="min-h-11 rounded-lg border-blue-200 bg-card hover:bg-stone-950 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">

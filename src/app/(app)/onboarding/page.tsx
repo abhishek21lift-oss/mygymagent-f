@@ -1,3 +1,11 @@
+"use client";
+
+// A client component only because it hands `PageHero` an icon.
+// The masthead reads the route to pick its accent, so it runs on
+// the client, and a component passed from a server page would cross
+// that boundary as a function. This page is a static shell around
+// the wizard, which is a client component already, so nothing is
+// lost by rendering it there.
 import { Sparkles } from "lucide-react";
 import { BusinessOnboardingWizard } from "./business-onboarding-wizard";
 import { PageHero } from "@/components/shared/page-hero";
@@ -8,8 +16,6 @@ export default function OnboardingPage() {
  <div className="flex flex-col gap-5">
  <PageHero
  id="onboarding-title"
- variant="dark"
- accent="violet"
  icon={Sparkles}
  title="THE CULT CLIENT"
  align="center"

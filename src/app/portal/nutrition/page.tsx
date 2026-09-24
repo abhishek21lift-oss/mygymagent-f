@@ -2,6 +2,7 @@
 
 import { Salad } from "lucide-react";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/shared/panel";
@@ -19,6 +20,7 @@ export default function PortalNutrition() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageHero icon={Salad} title="Nutrition" description="The diet plan your trainer assigned" />
       <DataState
         isLoading={diets.isPending}
         isError={diets.isError}

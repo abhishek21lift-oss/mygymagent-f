@@ -109,8 +109,6 @@ export default function WorkoutSessionsPage() {
  id="ws-title"
  icon={Dumbbell}
  title="Today's sessions"
- variant="light"
- accent="rose"
  actions={
  <div className="flex items-center gap-3 rounded-lg border border-orange-100 bg-muted/40 px-4 py-3 text-xs font-bold text-stone-700">
  <span className="flex size-11 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">

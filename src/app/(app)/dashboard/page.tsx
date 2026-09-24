@@ -147,7 +147,6 @@ export default function DashboardPage() {
  <div className="flex w-full flex-col gap-4 pb-8">
  <PageHero
  id="dashboard-title"
- accent="indigo"
  icon={Sparkles}
  title={gymName}
  actions={

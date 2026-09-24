@@ -197,8 +197,6 @@ export default function BranchesPage() {
  id="branches-title"
  icon={Building2}
  title="Branches"
- variant="light"
- accent="violet"
  actions={
  <>
  {hasPermission("branches.create") && <CreateBranchDialog />}

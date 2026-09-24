@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarCheck, Dumbbell, Salad, Wallet } from "lucide-react";
+import { CalendarCheck, Dumbbell, Salad, User, Wallet } from "lucide-react";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/shared/panel";
@@ -22,6 +23,7 @@ export default function PortalHome() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageHero icon={User} title="Home" description="Your membership at a glance" />
       {/* The one thing a member opens this to check: am I still a member,
           and for how long. Everything else is secondary to that. */}
       <Panel title="Membership" titleId="portal-membership">

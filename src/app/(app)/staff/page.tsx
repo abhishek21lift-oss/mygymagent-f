@@ -280,8 +280,6 @@ export default function StaffPage() {
  id="staff-title"
  icon={Users}
  title="Staff"
- variant="light"
- accent="blue"
  actions={
  <>
  {hasPermission("users.create") && <InviteStaffDialog />}

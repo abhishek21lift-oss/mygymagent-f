@@ -262,8 +262,6 @@ export default function InventoryPage() {
  icon={Package}
  title="Inventory"
  description="Products, stock and suppliers"
- variant="light"
- accent="amber"
  actions={
  <>
  {hasPermission("inventory.read") && <ScanStockDialog />}

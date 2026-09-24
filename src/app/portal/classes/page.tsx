@@ -4,6 +4,7 @@ import * as React from "react";
 import { CalendarDays, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Panel } from "@/components/shared/panel";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +68,9 @@ export default function PortalClassesPage() {
   const items = classes.data?.items ?? [];
 
   return (
-    <Panel title="Classes" titleId="portal-classes" flush>
+    <div className="flex flex-col gap-4">
+      <PageHero icon={CalendarDays} title="Classes" description="Book a spot or cancel a booking" />
+      <Panel title="Classes" titleId="portal-classes" flush>
       <div className="p-4 sm:p-5">
         <DataState
           isLoading={classes.isPending}
@@ -164,5 +167,6 @@ export default function PortalClassesPage() {
         </DataState>
       </div>
     </Panel>
+    </div>
   );
 }

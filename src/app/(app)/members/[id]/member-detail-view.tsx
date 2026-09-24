@@ -1344,8 +1344,6 @@ function MemberHeader({
  {member?.firstName} {member?.lastName}
  </>
  }
- variant="light"
- accent="violet"
  actions={
  <>
  {activeMembership && (

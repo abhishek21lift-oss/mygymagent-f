@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 import { toast } from "sonner";
 
+import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Panel } from "@/components/shared/panel";
 import { Button } from "@/components/ui/button";
@@ -104,6 +105,7 @@ export default function PortalAccountPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageHero icon={Settings} title="Account" description="Your details and how we contact you" />
       <Panel title="Your details" titleId="portal-account-details">
         <form onSubmit={handleSave} className="flex flex-col gap-3" noValidate>
           <div className="grid gap-3 sm:grid-cols-2">
