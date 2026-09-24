@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, KeyRound, Lock, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, KeyRound, Lock, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
 import { ApiError } from "@/lib/api/client";
@@ -17,7 +17,7 @@ const MIN_SECOND_FACTOR_LENGTH = 6;
 
 export default function LoginPage() {
  const router = useRouter();
- const { login, completeMfaLogin } = useAuth();
+ const { login, completeMfaLogin, requestOtp, loginWithOtp } = useAuth();
  const [email, setEmail] = React.useState("");
  const [password, setPassword] = React.useState("");
  const [error, setError] = React.useState("");
@@ -27,6 +27,14 @@ export default function LoginPage() {
  // single tab that started the login, and it dies with a reload.
  const [mfaToken, setMfaToken] = React.useState<string | null>(null);
  const [code, setCode] = React.useState("");
+ // Members sign in by phone, not email: 947 of this deployment's 954
+ // were imported with a number and no address, and none has a password.
+ // The two are genuinely different credentials, so they get their own
+ // field rather than one box that guesses what was typed into it.
+ const [mode, setMode] = React.useState<"password" | "sms">("password");
+ const [phone, setPhone] = React.useState("");
+ const [otpSent, setOtpSent] = React.useState(false);
+ const [otpCode, setOtpCode] = React.useState("");
  const codeInputRef = React.useRef<HTMLInputElement>(null);
 
  React.useEffect(() => {
@@ -62,6 +70,47 @@ export default function LoginPage() {
  setError(
  describe(err, "Unable to sign in. Please check your credentials and try again."),
  );
+ } finally {
+ setIsSubmitting(false);
+ }
+ }
+
+ async function onRequestOtp(event: React.FormEvent<HTMLFormElement>) {
+ event.preventDefault();
+ setError("");
+ if (phone.replace(/\D/g, "").length < 10) {
+ setError("Please enter the mobile number registered with your gym.");
+ return;
+ }
+ setIsSubmitting(true);
+ try {
+ await requestOtp(phone.trim());
+ // Advances whatever the server found. It answers a number that
+ // belongs to nobody exactly like one that does, so this screen
+ // must not claim a code is on its way to a known member -- the
+ // wording says what was attempted, not what exists.
+ setOtpSent(true);
+ } catch (err) {
+ setError(describe(err, "Could not send a code. Please try again."));
+ } finally {
+ setIsSubmitting(false);
+ }
+ }
+
+ async function onSubmitOtp(event: React.FormEvent<HTMLFormElement>) {
+ event.preventDefault();
+ setError("");
+ if (otpCode.trim().length !== 6) {
+ setError("Enter the 6-digit code from the SMS.");
+ return;
+ }
+ setIsSubmitting(true);
+ try {
+ const session = await loginWithOtp(phone.trim(), otpCode.trim());
+ router.replace(homeRouteFor(session.user));
+ } catch (err) {
+ setError(describe(err, "That code is not valid. Please try again."));
+ setOtpCode("");
  } finally {
  setIsSubmitting(false);
  }
@@ -179,6 +228,56 @@ export default function LoginPage() {
 </p>
  </div>
  <div className="p-6">
+ <div role="tablist" aria-label="How to sign in" className="mb-5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+ {([["password", "Password"], ["sms", "SMS code"]] as const).map(([value, label]) => (
+ <button
+ key={value}
+ type="button"
+ role="tab"
+ aria-selected={mode === value}
+ onClick={() => { setMode(value); setError(""); setOtpSent(false); setOtpCode(""); }}
+ className={"min-h-10 rounded-md px-3 text-sm font-medium transition-colors " + (mode === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+ >
+ {label}
+ </button>
+ ))}
+ </div>
+
+ {mode === "sms" ? (
+ <form onSubmit={otpSent ? onSubmitOtp : onRequestOtp} className="flex flex-col gap-4" noValidate>
+ <div className="flex flex-col gap-1.5">
+ <label htmlFor="login-phone" className="text-sm font-medium">Mobile number</label>
+ <div className="relative">
+ <Smartphone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+ <Input id="login-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="9876543210" value={phone} onChange={(e) => { setPhone(e.target.value); setOtpSent(false); }} className="h-11 pl-10" required />
+ </div>
+ <p className="text-xs text-muted-foreground">The number your gym has on file.</p>
+ </div>
+
+ {otpSent ? (
+ <div className="flex flex-col gap-1.5">
+ <label htmlFor="login-otp" className="text-sm font-medium">6-digit code</label>
+ <Input id="login-otp" name="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="123456" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))} className="h-11 text-center font-mono text-lg tracking-[0.4em]" required />
+ <p className="text-xs text-muted-foreground">
+ If that number is registered, a code is on its way. It expires in 5 minutes.
+ </p>
+ </div>
+ ) : null}
+
+ {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
+
+ <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-11 w-full">
+ {isSubmitting ? (otpSent ? "Signing in..." : "Sending...") : otpSent ? "Sign in" : "Send code"}
+ {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
+ </Button>
+
+ {otpSent ? (
+ <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); setError(""); }} className="min-h-10 text-center text-sm font-medium text-primary hover:underline">
+ Use a different number
+ </button>
+ ) : null}
+ </form>
+ ) : (
  <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
  <div className="flex flex-col gap-1.5">
  <label htmlFor="login-email" className="text-sm font-medium">Email</label>
@@ -203,6 +302,7 @@ export default function LoginPage() {
  {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
  </Button>
  </form>
+ )}
  <p className="mt-5 text-center text-sm text-muted-foreground">
  Setting up a new gym?{" "}
  <Link href="/register" className="font-medium text-primary hover:underline">Create an account</Link>

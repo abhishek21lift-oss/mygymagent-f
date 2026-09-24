@@ -31,6 +31,13 @@ interface AuthContextValue {
  /** Resolves to the session it established, so the caller can route
   * on it -- a member and a staff account open different apps. */
  completeMfaLogin: (mfaToken: string, code: string) => Promise<LoginResponse>
+ /** Ask for a login code by SMS. Resolves the same way whether or not
+  * the number is known -- the server will not say which, and neither
+  * can this. */
+ requestOtp: (phone: string) => Promise<void>
+ /** Spend an SMS code. Resolves to the session it established, like
+  * `completeMfaLogin`, so the caller can route on it. */
+ loginWithOtp: (phone: string, code: string) => Promise<LoginResponse>
  register: (input: RegisterInput) => Promise<void>
  logout: () => Promise<void>
  hasPermission: (key: string | string[]) => boolean
@@ -175,6 +182,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  [adoptSession, queryClient],
  )
 
+ const requestOtp = React.useCallback(async (phone: string) => {
+ await api.post("/auth/otp/request", { phone })
+ }, [])
+
+ const loginWithOtp = React.useCallback(
+ async (phone: string, code: string) => {
+ // Same session hygiene as the MFA second half: this establishes a
+ // session from a request that carried none, so anything already in
+ // flight must not land on it.
+ sessionGen.current += 1
+ await queryClient.cancelQueries().catch(() => undefined)
+ queryClient.clear()
+ const res = await api.post<LoginResponse>("/auth/otp/verify", {
+ phone,
+ code,
+ })
+ adoptSession(res)
+ return res
+ },
+ [adoptSession, queryClient],
+ )
+
  const register = React.useCallback(
  async (input: RegisterInput) => {
  sessionGen.current += 1
@@ -224,6 +253,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  isAuthenticated: user !== null,
  login,
  completeMfaLogin,
+ requestOtp,
+ loginWithOtp,
  register,
  logout,
  hasPermission,
