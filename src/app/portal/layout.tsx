@@ -15,6 +15,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
+import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC } from "@/lib/brand";
 import { useAuth } from "@/lib/auth/auth-context";
 import { usePortalMe } from "@/lib/hooks/use-portal";
 import { cn } from "@/lib/utils";
@@ -85,13 +87,26 @@ export default function PortalLayout({
     <div className="flex min-h-svh flex-col bg-muted/30">
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              {member?.primaryBranch?.name ?? "Your gym"}
-            </p>
-            <p className="truncate text-sm font-semibold">
-              {member?.firstName} {member?.lastName}
-            </p>
+          <div className="flex min-w-0 items-center gap-2.5">
+            {/* The member's half of the product is still the product.
+                Small and quiet here -- this header belongs to them, not
+                to the brand. */}
+            <Image
+              src={PRODUCT_LOGO_SRC}
+              alt={PRODUCT_LOGO_ALT}
+              width={96}
+              height={96}
+              className="size-9 shrink-0 rounded-full object-contain"
+              priority
+            />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                {member?.primaryBranch?.name ?? "Your gym"}
+              </p>
+              <p className="truncate text-sm font-semibold">
+                {member?.firstName} {member?.lastName}
+              </p>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             {/* Beside sign-out rather than a sixth tab: six do not fit a

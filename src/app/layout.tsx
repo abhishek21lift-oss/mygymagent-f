@@ -6,7 +6,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
-import { PRODUCT_LOGO_DATA_URI, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
 
 const geistSans = Geist({
  variable: "--font-geist-sans",
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
  title: PRODUCT_NAME,
  description: "AI-driven gym management and personal training platform",
  icons: {
- icon: PRODUCT_LOGO_DATA_URI,
- apple: PRODUCT_LOGO_DATA_URI,
+ icon: PRODUCT_LOGO_ICON_SRC,
+ apple: PRODUCT_LOGO_ICON_SRC,
  },
 };
 

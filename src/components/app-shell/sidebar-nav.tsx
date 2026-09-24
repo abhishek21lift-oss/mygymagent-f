@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import { primaryNav, secondaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_DATA_URI } from "@/lib/brand";
+import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
 
 function NavLink({ item, active, nested = false, collapsed = false, onNavigate, itemRef }: { item: NavItem; active: boolean; nested?: boolean; collapsed?: boolean; onNavigate?: () => void; itemRef?: React.RefObject<HTMLAnchorElement | null> }) {
  const Icon = item.icon;
@@ -133,15 +133,22 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
  >
  <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-lg">
  <Image
- src={PRODUCT_LOGO_DATA_URI}
+ src={PRODUCT_LOGO_SRC}
  alt={PRODUCT_LOGO_ALT}
- width={64}
- height={64}
- unoptimized
- className="size-12 shrink-0 object-contain"
+ width={96}
+ height={96}
+ className="size-11 shrink-0 rounded-full object-contain"
  priority
  />
  </span>
+ {/* The mark carries its own wordmark, but not legibly at 44px --
+ the old square logo was mostly type, this one is mostly art. So
+ the name is set beside it whenever there is room for it. */}
+ {!collapsed && (
+ <span className="truncate font-mono text-[13px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground">
+ {PRODUCT_NAME}
+ </span>
+ )}
  </Link>
 
  {!collapsed && <SectionLabel>Workspace</SectionLabel>}

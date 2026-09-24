@@ -743,6 +743,105 @@
       var(--background);
   }
 
+  /* --- Brand mark, sign-in --------------------------------------
+     The logo is a circle with a transparent surround, so the glow is
+     drawn behind it rather than clipped by a round wrapper. The three
+     hues are the mark's own -- cyan, indigo, magenta -- and the same
+     three .page-ambient already washes the product canvas with, so the
+     sign-in screen is louder than the app without being different.
+
+     Light mode stays restrained: neon on white reads as a rendering
+     fault. Dark mode is where it belongs, so it gets the brighter
+     values. */
+  .brand-neon {
+    position: relative;
+    isolation: isolate;
+    border-radius: 9999px;
+    --brand-neon-bloom: 0.42;
+    --brand-neon-rim: 0.55;
+  }
+
+  /* Soft bloom, well outside the mark. */
+  .brand-neon::before {
+    content: "";
+    position: absolute;
+    inset: -22%;
+    z-index: -2;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 32% 28%, rgb(34 211 238 / var(--brand-neon-bloom)), transparent 62%),
+      radial-gradient(circle at 70% 74%, rgb(217 70 239 / var(--brand-neon-bloom)), transparent 62%),
+      radial-gradient(circle at 50% 50%, rgb(99 102 241 / calc(var(--brand-neon-bloom) * 0.7)), transparent 68%);
+    filter: blur(26px);
+    animation: brand-neon-breathe 7s ease-in-out infinite;
+  }
+
+  /* The lit rim itself: a conic sweep masked down to a hairline ring,
+     turning slowly. A border cannot do a gradient that goes all the way
+     round. */
+  .brand-neon::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 210deg,
+      rgb(34 211 238 / var(--brand-neon-rim)),
+      rgb(99 102 241 / var(--brand-neon-rim)),
+      rgb(217 70 239 / var(--brand-neon-rim)),
+      rgb(34 211 238 / var(--brand-neon-rim))
+    );
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    animation: brand-neon-turn 14s linear infinite;
+  }
+
+  :root:not([data-theme="light"]) .brand-neon,
+  :root[data-theme="dark"] .brand-neon {
+    --brand-neon-bloom: 0.72;
+    --brand-neon-rim: 0.9;
+  }
+
+  /* The canvas behind the sign-in card: the same three hues, much
+     larger and much softer, so the mark reads as the bright thing. */
+  .auth-neon-canvas {
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(60rem 40rem at 12% -10%, rgb(34 211 238 / 0.14), transparent 70%),
+      radial-gradient(52rem 38rem at 92% 8%, rgb(217 70 239 / 0.13), transparent 70%),
+      radial-gradient(56rem 44rem at 50% 112%, rgb(99 102 241 / 0.15), transparent 70%),
+      var(--background);
+  }
+
+  :root:not([data-theme="light"]) .auth-neon-canvas,
+  :root[data-theme="dark"] .auth-neon-canvas {
+    background:
+      radial-gradient(60rem 40rem at 12% -10%, rgb(34 211 238 / 0.22), transparent 70%),
+      radial-gradient(52rem 38rem at 92% 8%, rgb(217 70 239 / 0.2), transparent 70%),
+      radial-gradient(56rem 44rem at 50% 112%, rgb(99 102 241 / 0.24), transparent 70%),
+      var(--background);
+  }
+
+  @keyframes brand-neon-breathe {
+    0%, 100% { opacity: 0.75; transform: scale(0.97); }
+    50%      { opacity: 1;    transform: scale(1.04); }
+  }
+
+  @keyframes brand-neon-turn {
+    to { transform: rotate(1turn); }
+  }
+
+  /* A glow that breathes and turns is decoration. Hold it still rather
+     than removing it -- the rim is part of how the mark is framed. */
+  @media (prefers-reduced-motion: reduce) {
+    .brand-neon::before,
+    .brand-neon::after {
+      animation: none;
+    }
+  }
+
   /* Shared surfaces: works across legacy and new pages */
   [data-slot="card"] {
     position: relative;
