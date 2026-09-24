@@ -25,6 +25,7 @@ export function StatCard({
  title,
  value,
  isLoading,
+ isError,
  hint,
  tone = "primary",
 }: {
@@ -34,6 +35,12 @@ export function StatCard({
  icon?: LucideIcon;
  value: number | string | undefined;
  isLoading: boolean;
+ /** The figure could not be fetched. Renders an em dash instead of the
+  * `value ?? 0` below, because a tile that cannot reach the server was
+  * otherwise indistinguishable from one reporting a true zero -- on the
+  * dashboard that turned an outage into "0 check-ins, 0 revenue, 0
+  * members at risk", which reads as a quiet day rather than a fault. */
+ isError?: boolean;
  hint?: string;
  tone?: "primary" | "success" | "warning" | "destructive";
 }) {
@@ -64,6 +71,14 @@ export function StatCard({
  className="mt-1.5 h-7 w-20 rounded"
  aria-label={`Loading ${title}`}
  />
+ ) : isError ? (
+ <p
+ className="mt-0.5 truncate text-[1.625rem] font-semibold leading-tight tracking-tight text-muted-foreground"
+ title={`${title} could not be loaded`}
+ >
+ <span aria-hidden="true">&mdash;</span>
+ <span className="sr-only">Could not be loaded</span>
+ </p>
  ) : (
  <p
  className={cn( "mt-0.5 truncate text-[1.625rem] font-semibold leading-tight tracking-tight tabular-nums",

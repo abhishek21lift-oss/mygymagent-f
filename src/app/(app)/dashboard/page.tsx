@@ -32,6 +32,7 @@ import { PageHero } from "@/components/shared/page-hero";
 import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorState } from "@/components/shared/error-state";
 
 const QUICK_ACTIONS = [
  ["Add a member", "Register a new client", "/members/new", UserPlus, "members.create"],
@@ -179,10 +180,10 @@ export default function DashboardPage() {
  </Button>
  </div>
  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
- <StatCard icon={CalendarCheck} title="Today's check-ins" value={data?.today.checkIns} isLoading={briefing.isLoading} tone="primary" />
- <StatCard icon={Wallet} title="Net revenue" value={data ? displayCurrencyAmount(revenue, currencyCode) : undefined} isLoading={briefing.isLoading} tone="success" />
- <StatCard icon={Users} title="Members at risk" value={data?.atRiskMembers.count} isLoading={briefing.isLoading} tone="warning" />
- <StatCard icon={Sparkles} title="AI actions" value={data?.pendingAiActions} isLoading={briefing.isLoading} tone="primary" />
+ <StatCard icon={CalendarCheck} title="Today's check-ins" value={data?.today.checkIns} isLoading={briefing.isLoading} isError={briefing.isError} tone="primary" />
+ <StatCard icon={Wallet} title="Net revenue" value={data ? displayCurrencyAmount(revenue, currencyCode) : undefined} isLoading={briefing.isLoading} isError={briefing.isError} tone="success" />
+ <StatCard icon={Users} title="Members at risk" value={data?.atRiskMembers.count} isLoading={briefing.isLoading} isError={briefing.isError} tone="warning" />
+ <StatCard icon={Sparkles} title="AI actions" value={data?.pendingAiActions} isLoading={briefing.isLoading} isError={briefing.isError} tone="primary" />
  </div>
  </section>
 
@@ -203,6 +204,8 @@ export default function DashboardPage() {
  <div className="space-y-2" role="status" aria-label="Loading revenue trend">
  <Skeleton className="h-32 w-full rounded-lg" />
  </div>
+ ) : revenueTrend.isError ? (
+ <ErrorState message="Could not load the revenue trend." onRetry={() => void revenueTrend.refetch()} />
  ) : !hasRevenue ? (
  <EmptyState title="No revenue yet" description="Revenue will appear here once payments are recorded." />
  ) : (
@@ -266,6 +269,8 @@ export default function DashboardPage() {
  <Skeleton className="h-8 w-full rounded-lg" />
  <Skeleton className="h-8 w-2/3 rounded-lg" />
  </div>
+ ) : statusBreakdown.isError ? (
+ <ErrorState message="Could not load the member breakdown." onRetry={() => void statusBreakdown.refetch()} />
  ) : membershipData.length === 0 ? (
  <EmptyState title="No members yet" description="Add your first member to see the breakdown." />
  ) : (
@@ -320,6 +325,8 @@ export default function DashboardPage() {
  <Skeleton className="h-12 w-full rounded-lg" />
  <Skeleton className="h-12 w-full rounded-lg" />
  </div>
+ ) : briefing.isError ? (
+ <ErrorState message="Could not load today's activity." onRetry={() => void briefing.refetch()} />
  ) : activityTimeline.length === 0 ? (
  <EmptyState title="No activity yet" description="Check-ins and sales will appear here." />
  ) : (
@@ -357,6 +364,8 @@ export default function DashboardPage() {
  <CardContent className="pt-3">
  {briefing.isLoading ? (
  <div className="space-y-2" role="status" aria-label="Loading priorities">{[1, 2, 3].map((item) => <Skeleton key={item} className="h-16 w-full rounded-lg" />)}</div>
+ ) : briefing.isError ? (
+ <ErrorState message="Could not load today's priorities." onRetry={() => void briefing.refetch()} />
  ) : priorities.length ? (
  <ul className="flex flex-col gap-1">
  {priorities.map((item) => {
@@ -393,7 +402,7 @@ export default function DashboardPage() {
  </div>
  <div className="mt-4 grid grid-cols-2 gap-3">
  <MiniInsight icon={TrendingUp} label="Conversion" value={data ? `${data.salesFunnel.conversionRatePct}%` : "—"} />
- <MiniInsight icon={Clock3} label="Follow-ups" value={data?.salesFunnel.followUps.total ?? 0} />
+ <MiniInsight icon={Clock3} label="Follow-ups" value={data ? data.salesFunnel.followUps.total : "\u2014"} />
  </div>
  <Button asChild className="mt-4 w-full" variant="secondary">
  <Link href="/ai">Open AI <ArrowRight className="size-4" aria-hidden="true" /></Link>

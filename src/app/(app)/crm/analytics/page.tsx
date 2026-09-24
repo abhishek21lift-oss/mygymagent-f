@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/shared/empty-state"
+import { ErrorState } from "@/components/shared/error-state"
 import { useSalesFunnel, useSalesSourcePerformance, useSalesLostReasons, useSalesAssigneePerformance } from "@/lib/hooks/use-analytics"
 import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
@@ -119,11 +120,11 @@ export default function SalesAnalyticsPage() {
 
  <section aria-label="Funnel snapshot">
  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
- <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} tone="cyan" />
- <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} tone="emerald" />
- <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} tone="violet" />
- <Metric icon={Clock3} label="Avg. conversion" value={data?.averageDaysToConversion == null ? "—" : `${data.averageDaysToConversion}d`} tone="amber" />
- <Metric icon={ListChecks} label="Follow-up completion" value={`${data?.followUps?.completionRatePct ?? 0}%`} tone="blue" />
+ <Metric icon={Users} label="Total leads" value={data?.totalLeads ?? 0} loading={funnel.isPending} error={funnel.isError} tone="cyan" />
+ <Metric icon={TrendingUp} label="Won" value={data?.wonLeads ?? 0} loading={funnel.isPending} error={funnel.isError} tone="emerald" />
+ <Metric icon={Target} label="Conversion" value={`${data?.conversionRatePct ?? 0}%`} loading={funnel.isPending} error={funnel.isError} tone="violet" />
+ <Metric icon={Clock3} label="Avg. conversion" value={data?.averageDaysToConversion == null ? "—" : `${data.averageDaysToConversion}d`} loading={funnel.isPending} error={funnel.isError} tone="amber" />
+ <Metric icon={ListChecks} label="Follow-up completion" value={`${data?.followUps?.completionRatePct ?? 0}%`} loading={funnel.isPending} error={funnel.isError} tone="blue" />
  </div>
  </section>
 
@@ -135,7 +136,7 @@ export default function SalesAnalyticsPage() {
  </div>
  </div>
  <div className="space-y-4 p-5 sm:p-6">
- {statusRows.length === 0 && <p className="py-8 text-center text-sm font-medium text-stone-600">No sales data for this window.</p>}
+ {funnel.isError ? <ErrorState message="Could not load the pipeline." onRetry={() => void funnel.refetch()} /> : statusRows.length === 0 && <p className="py-8 text-center text-sm font-medium text-stone-600">No sales data for this window.</p>}
  {statusRows.map((row) => {
  const percent = data?.totalLeads ? Math.round((row.count / data.totalLeads) * 100) : 0
  const bar = STATUS_BARS[row.status] ?? "bg-blue-500"
@@ -164,9 +165,9 @@ export default function SalesAnalyticsPage() {
  </div>
  </div>
  <div className="grid gap-3 p-5 sm:grid-cols-3 xl:grid-cols-1">
- <Mini label="Scheduled" value={data?.followUps?.total ?? 0} tint="bg-blue-50/80" />
- <Mini label="Completed" value={data?.followUps?.completed ?? 0} tint="bg-emerald-50/80" />
- <Mini label="Completion rate" value={`${data?.followUps?.completionRatePct ?? 0}%`} tint="bg-violet-50/80" />
+ <Mini label="Scheduled" value={funnel.isError ? "\u2014" : (data?.followUps?.total ?? 0)} tint="bg-blue-50/80" />
+ <Mini label="Completed" value={funnel.isError ? "\u2014" : (data?.followUps?.completed ?? 0)} tint="bg-emerald-50/80" />
+ <Mini label="Completion rate" value={funnel.isError ? "\u2014" : `${data?.followUps?.completionRatePct ?? 0}%`} tint="bg-violet-50/80" />
  </div>
  </div>
  </section>
@@ -181,7 +182,9 @@ export default function SalesAnalyticsPage() {
  </Button>
  </div>
  <div className="p-4 sm:p-5">
- {sourceRows.length === 0 ? (
+ {sources.isError ? (
+ <ErrorState message="Could not load source performance." onRetry={() => void sources.refetch()} />
+ ) : sourceRows.length === 0 ? (
  <EmptyState title="No source data" description="No source data available for this window." />
  ) : (
  <div className="overflow-x-auto rounded-lg">
@@ -220,7 +223,7 @@ export default function SalesAnalyticsPage() {
  </div>
  </div>
  <div className="space-y-3 p-5 sm:p-6">
- {lostReasonRows.length === 0 && <p className="py-6 text-center text-sm font-medium text-stone-600">No lost leads recorded in this window.</p>}
+ {lostReasons.isError ? <ErrorState message="Could not load lost reasons." onRetry={() => void lostReasons.refetch()} /> : lostReasonRows.length === 0 && <p className="py-6 text-center text-sm font-medium text-stone-600">No lost leads recorded in this window.</p>}
  {lostReasonRows.map((row) => {
  const max = Math.max(...lostReasonRows.map((r) => r.lostLeads), 1)
  const percent = Math.round((row.lostLeads / max) * 100)
@@ -246,7 +249,9 @@ export default function SalesAnalyticsPage() {
  </div>
  </div>
  <div className="p-4 sm:p-5">
- {assigneeRows.length === 0 ? (
+ {assignees.isError ? (
+ <ErrorState message="Could not load assignee performance." onRetry={() => void assignees.refetch()} />
+ ) : assigneeRows.length === 0 ? (
  <EmptyState title="No assignment data" description="No assignment data for this window." />
  ) : (
  <div className="overflow-x-auto rounded-lg">
@@ -284,7 +289,7 @@ export default function SalesAnalyticsPage() {
  )
 }
 
-function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; tone?: string }) {
+function Metric({ label, value, hint, loading, error, tone }: { icon?: unknown; label: string; value: React.ReactNode; hint?: string; loading?: boolean; error?: boolean; tone?: string }) {
  // Delegates to the shared tile. This page used to carry its own metric
  // component with a coloured top bar, a blurred orb, a 56px white-on-colour
  // icon tile that scaled and rotated on hover, and a two-tone shadow --
@@ -294,6 +299,7 @@ function Metric({ label, value, hint, loading, tone }: { icon?: unknown; label: 
    title={label}
    value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")}
    isLoading={Boolean(loading)}
+   isError={Boolean(error)}
    hint={hint}
    tone={toStatTone(tone)}
   />
