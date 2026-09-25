@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHero } from "@/components/shared/page-hero";
 import { ExerciseHistoryPanel } from "./exercise-history-panel";
+import { RiskRecommendationsPanel } from "./risk-recommendations-panel";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
@@ -1499,6 +1500,10 @@ function QuickStatsRow({ memberId }: { memberId: string }) {
  done, this says whether it is getting heavier -- which is the
  question logging sets exists to answer, and had no surface. */}
  <div className="mt-4"><ExerciseHistoryPanel memberId={memberId} /></div>
+ {/* The engine scored this member, explained the score and proposed
+ actions, and none of it was reachable -- no recompute, no reason,
+ and no way to execute or dismiss a single proposed action. */}
+ <div className="mt-4"><RiskRecommendationsPanel memberId={memberId} /></div>
  </div>
  </CardContent>
  </Card>

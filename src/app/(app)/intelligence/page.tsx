@@ -57,6 +57,7 @@ import {
 } from "@/lib/hooks/use-analytics";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { PageHero } from "@/components/shared/page-hero";
+import { RiskSection } from "./risk-section";
 import { StatCard, toStatTone } from "@/components/shared/stat-card";
 import { ErrorState } from "@/components/shared/error-state";
 
@@ -291,6 +292,11 @@ export default function IntelligencePage() {
  <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card p-1.5"><BarChart3 className="ml-2 size-4 shrink-0 text-muted-foreground" aria-hidden="true" /><Select value={months} onValueChange={setMonths}><SelectTrigger aria-label="Select month range" className="h-9 border-0 bg-transparent text-foreground shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select><Button size="icon" variant="ghost" onClick={refresh} className="min-h-10 min-w-10 text-white hover:bg-card hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" title="Refresh intelligence" aria-label="Refresh intelligence"><RefreshCw className="size-4" aria-hidden="true" /></Button></div>
  </div>
  </PageHero>
+
+ {/* The risk roll-ups, directly under the masthead: this page could
+ already list who was at risk and had no way to say how much of it
+ there was, what it was worth, or whether it was getting worse. */}
+ <RiskSection />
 
  <section aria-labelledby="intel-pulse">
  <SectionHeader title="Executive signal layer" />
