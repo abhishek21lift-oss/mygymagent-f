@@ -38,6 +38,7 @@ import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHero } from "@/components/shared/page-hero";
+import { ExerciseHistoryPanel } from "./exercise-history-panel";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
@@ -1494,6 +1495,10 @@ function QuickStatsRow({ memberId }: { memberId: string }) {
  <div className="min-w-0 flex-1">
  <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Workout</p>
  <div className="mt-2"><WorkoutProgress memberId={memberId} /></div>
+ {/* Directly under the session totals: those say how much work was
+ done, this says whether it is getting heavier -- which is the
+ question logging sets exists to answer, and had no surface. */}
+ <div className="mt-4"><ExerciseHistoryPanel memberId={memberId} /></div>
  </div>
  </CardContent>
  </Card>

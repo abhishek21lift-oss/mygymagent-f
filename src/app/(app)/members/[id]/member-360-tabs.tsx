@@ -92,7 +92,6 @@ import {
  useReviewMemberDocument,
  useUploadMemberDocumentVersion,
 } from "@/lib/hooks/use-member-documents";
-import { useMember } from "@/lib/hooks/use-members";
 import {
  useMemberAddresses,
  useCreateMemberAddress,
@@ -109,6 +108,7 @@ import {
  useMemberBranchHistory,
  useMemberTrainerHistory,
 } from "@/lib/hooks/use-member-details";
+import { useClient360 } from "@/lib/hooks/use-client-360";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
 import { useRefundPayment } from "@/lib/hooks/use-payments";
@@ -165,15 +165,23 @@ function InfoRow({ icon: Icon, label, value }: { icon: typeof User; label: strin
 }
 
 function MemberOverviewPanel({ memberId }: { memberId: string }) {
- const { data: member, isLoading: memberLoading } = useMember(memberId);
- const { data: addresses } = useMemberAddresses(memberId);
- const { data: emergencyContacts } = useMemberEmergencyContacts(memberId);
+ // One call for the profile and the three detail lists this panel reads.
+ // It fetched them as four separate queries, which is the exact set
+ // `/client-360/:memberId` exists to collapse -- the endpoint is throttled
+ // at 40/min precisely because it is meant to be the one call a profile
+ // screen makes. The editable sub-tabs below keep their own hooks: they
+ // mutate, and a list you can add to wants its own cache entry.
+ const client360 = useClient360(memberId);
+ const member = client360.data?.profile;
+ const memberLoading = client360.isPending;
+ const addresses = client360.data?.details.addresses;
+ const emergencyContacts = client360.data?.details.emergencyContacts;
  const { data: goals } = useMemberGoals(memberId);
  const { data: measurements } = useMemberMeasurements(memberId);
  const { data: screenings } = useMemberScreenings(memberId);
  const { data: payments } = useMemberPayments(memberId);
  const { data: attendance } = useMemberAttendance(memberId);
- const { data: consents } = useMemberConsents(memberId);
+ const consents = client360.data?.details.consents;
 
  if (memberLoading) {
  return (
