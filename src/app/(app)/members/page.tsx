@@ -19,6 +19,7 @@ import {
  Wallet,
  X,
   CreditCard,
+  ArrowUpDown,
 } from "lucide-react";
 import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
@@ -41,6 +42,8 @@ import { fetchAllMemberIds, useMemberMetrics, useMembers, type MemberFilters } f
 import { useMemberTags } from "@/lib/hooks/use-member-tags";
 import { useBulkStatusChange, useBulkTagAssignment, useBulkExport } from "@/lib/hooks/use-bulk-member-actions";
 import { AssignMembershipDialog } from "./assign-membership-dialog";
+import { DataTransferDialog } from "./data-transfer-dialog";
+import { useAuth } from "@/lib/auth/auth-context";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/api/client";
 import type { Member, MemberStatus, MemberType } from "@/lib/types/gym";
@@ -192,6 +195,8 @@ const columns: ColumnDef<Member>[] = [
 ];
 
 export default function MembersPage() {
+ const { hasPermission } = useAuth();
+ const [dataOpen, setDataOpen] = React.useState(false);
  const router = useRouter();
  const [filters, setFilters] = React.useState<MemberFilters>({ page: 1, pageSize: 25, orderBy: "createdAt", order: "desc" });
  const [selection, setSelection] = React.useState<RowSelectionState>({});
@@ -246,9 +251,24 @@ export default function MembersPage() {
  title="Members"
  description={metrics.data ? `${metrics.data.total} on the roll \u00b7 ${metrics.data.active} active` : undefined}
  actions={
+ <>
+ {/* The bulk door, beside the single-record one. `/data/*` had four
+ endpoints and no screen, so the only way in was a token and a
+ terminal. Offered only to a reader holding one of its grants. */}
+ {(hasPermission("data.import") || hasPermission("data.export")) && (
+ <Button
+ variant="outline"
+ className="min-h-9"
+ onClick={() => setDataOpen(true)}
+ >
+ <ArrowUpDown className="mr-2 size-4" aria-hidden="true" />
+ <DataTransferDialog open={dataOpen} onOpenChange={setDataOpen} /> Import / export
+ </Button>
+ )}
  <Button className="min-h-9" onClick={() => router.push("/members/new")}>
  <Plus className="mr-2 size-4" aria-hidden="true" /> Add member
  </Button>
+ </>
  }
  />
 

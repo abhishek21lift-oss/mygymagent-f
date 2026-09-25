@@ -19,7 +19,10 @@ export interface MemberFilters {
   joinedTo?: string;
 }
 
-const KEY = "members";
+/** Exported so the bulk-data screens can invalidate the same cache the
+ * directory reads, rather than inventing a second key that never matches. */
+export const MEMBERS_QUERY_KEY = "members";
+const KEY = MEMBERS_QUERY_KEY;
 
 export interface MemberMetrics {
   total: number;

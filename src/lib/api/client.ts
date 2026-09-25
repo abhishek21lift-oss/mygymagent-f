@@ -64,6 +64,9 @@ export interface RequestOptions {
   body?: unknown
   query?: Record<string, string | number | boolean | (string | number | boolean)[] | undefined>
   branchId?: string
+  /** `"text"` for endpoints answering `text/csv` rather than the JSON
+   * envelope. Auth, refresh-on-401 and error handling are unchanged. */
+  parse?: "json" | "text"
   /** Internal: prevents infinite retry loops around a 401 refresh attempt. */
   _isRetry?: boolean
 }
@@ -151,7 +154,7 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
  * through a silent refresh on 401, and always sends credentials so the
  * httpOnly refresh cookie is included on auth endpoints. */
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, branchId, _isRetry } = options
+  const { method = "GET", body, query, branchId, parse = "json", _isRetry } = options
   const isFormData = body instanceof FormData
 
   const headers: Record<string, string> = {}
@@ -183,9 +186,16 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   if (res.status === 204) return undefined as T
 
+  // Read the body once, as text, then try to parse it. `/data/members/export`
+  // and `/data/members/template` answer `text/csv`, and reading straight to
+  // JSON threw on them -- which this function swallowed, so a download
+  // resolved successfully with the CSV thrown away. Parsing from the text
+  // keeps every existing JSON path identical and gives the text ones
+  // something to return.
+  const bodyText = await res.text().catch(() => "")
   let raw: unknown = null
   try {
-    raw = await res.json()
+    raw = bodyText ? JSON.parse(bodyText) : null
   } catch {}
 
   if (!res.ok) {
@@ -217,6 +227,8 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     )
   }
 
+  if (parse === "text") return bodyText as T
+
   if (typeof raw === "object" && raw !== null && "data" in raw && raw.data !== null && raw.data !== undefined) {
     return (raw as { data: T }).data
   }
@@ -226,6 +238,9 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 export const api = {
   get: <T>(path: string, options?: Omit<RequestOptions, "method" | "body">) =>
     apiFetch<T>(path, { ...options, method: "GET" }),
+  /** For endpoints that answer `text/csv` rather than the JSON envelope. */
+  getText: (path: string, options?: Omit<RequestOptions, "method" | "body" | "parse">) =>
+    apiFetch<string>(path, { ...options, method: "GET", parse: "text" }),
   post: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
     apiFetch<T>(path, { ...options, method: "POST", body }),
   patch: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
