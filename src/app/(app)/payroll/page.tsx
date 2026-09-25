@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { api } from "@/lib/api/client"
 import { ErrorState } from "@/components/shared/error-state"
 import { StaffPayrollSection } from "./staff-payroll-section";
+import { CommissionsSection } from "./commissions-section";
+import { useAuth } from "@/lib/auth/auth-context";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 
@@ -93,6 +95,10 @@ export default function PayrollPage() {
  toInputDate(new Date(today.getFullYear(), today.getMonth(), 1)),
  );
  const [periodEnd, setPeriodEnd] = React.useState(toInputDate(today));
+ const { hasPermission } = useAuth();
+ const canReadHr = hasPermission("hr.read");
+ const canReadPayroll = hasPermission("payroll.read");
+
  const [leaveTypes, setLeaveTypes] = React.useState<LeaveType[]>([]);
  const [requests, setRequests] = React.useState<LeaveRequest[]>([]);
  const [runs, setRuns] = React.useState<PayrollRun[]>([]);
@@ -105,13 +111,19 @@ export default function PayrollPage() {
  const [creating, setCreating] = React.useState(false);
  const [savingItem, setSavingItem] = React.useState<string | null>(null);
 
+ // `/hr-payroll` is two grants, not one: leave types and leave requests
+ // are `hr.read`, payroll runs are `payroll.read`. Fetching all three
+ // unconditionally meant a reader holding only one of them -- the seeded
+ // BRANCH_MANAGER holds `hr.read` and no `payroll.*` -- got a 403 inside
+ // `Promise.all`, which rejected the lot and blanked a page that was
+ // three-quarters visible to them.
  const load = React.useCallback(async () => {
  setLoading(true);
  try {
  const [lt, lr, pr] = await Promise.all([
- api.get<LeaveType[]>("/hr-payroll/leave-types"),
- api.get<LeaveRequest[]>("/hr-payroll/leave-requests"),
- api.get<PayrollRun[]>("/hr-payroll/payroll-runs"),
+ canReadHr ? api.get<LeaveType[]>("/hr-payroll/leave-types") : Promise.resolve<LeaveType[]>([]),
+ canReadHr ? api.get<LeaveRequest[]>("/hr-payroll/leave-requests") : Promise.resolve<LeaveRequest[]>([]),
+ canReadPayroll ? api.get<PayrollRun[]>("/hr-payroll/payroll-runs") : Promise.resolve<PayrollRun[]>([]),
  ]);
  setLeaveTypes(lt);
  setRequests(lr);
@@ -133,7 +145,7 @@ export default function PayrollPage() {
  } finally {
  setLoading(false);
  }
- }, []);
+ }, [canReadHr, canReadPayroll]);
 
  React.useEffect(() => {
  const timer = window.setTimeout(() => {
@@ -254,259 +266,282 @@ export default function PayrollPage() {
  }
  />
 
- <section className="grid gap-6 md:grid-cols-3">
- <div className="rounded-xl border bg-card p-6 shadow-sm">
- <p className="text-sm text-stone-500">Leave types</p>
- <p className="mt-2 text-3xl font-black">{leaveTypes.length}</p>
- </div>
- <div className="rounded-xl border bg-card p-6 shadow-sm">
- <p className="text-sm text-stone-500">Pending leave</p>
- <p className="mt-2 text-3xl font-black">
- {requests.filter((r) => r.status === "PENDING").length}
- </p>
- </div>
- <div className="rounded-xl border bg-card p-6 shadow-sm">
- <p className="text-sm text-stone-500">Latest net payroll</p>
- <p className="mt-2 text-3xl font-black">₹{money(netPayable)}</p>
- </div>
- </section>
+        <section className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {/* A tile per grant. Rendering all three regardless showed a
+              confident "0" for figures the reader was never sent, which
+              is the outage-looks-like-a-quiet-day problem again. */}
+          {canReadHr && (
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <p className="text-sm text-stone-500">Leave types</p>
+              <p className="mt-2 text-3xl font-black">{leaveTypes.length}</p>
+            </div>
+          )}
+          {canReadHr && (
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <p className="text-sm text-stone-500">Pending leave</p>
+              <p className="mt-2 text-3xl font-black">
+                {requests.filter((r) => r.status === "PENDING").length}
+              </p>
+            </div>
+          )}
+          {canReadPayroll && (
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <p className="text-sm text-stone-500">Latest net payroll</p>
+              <p className="mt-2 text-3xl font-black">₹{money(netPayable)}</p>
+            </div>
+          )}
+        </section>
 
  {/* Directly above "Create payroll run": a run only includes staff who
  are payroll-enabled and have a rate, so when it reports "No
  payroll-enabled staff found for this scope", the fix is one row up.
  Until B-P1-7 those columns had no write path at all. */}
- <StaffPayrollSection onChanged={() => void load()} />
+ {canReadHr && <StaffPayrollSection onChanged={() => void load()} />}
 
- <section className="overflow-hidden rounded-lg border border-border bg-card">
- <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
- <div className="min-w-0">
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Create payroll run</h2>
- <p className="mt-0.5 text-xs text-muted-foreground">
- Staff is selected server-side from the active organization and branch scope.
- </p>
- </div>
- <Button onClick={() => void createRun()} disabled={creating}>
- <Plus className="mr-2 size-4" />
- {creating ? "Creating..." : "Create run"}
- </Button>
- </div>
- <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
- <label className="text-sm font-semibold">
- Period start
- <input
- className="mt-2 w-full rounded-xl border px-3 py-2"
- type="date"
- value={periodStart}
- onChange={(event) => setPeriodStart(event.target.value)}
- />
- </label>
- <label className="text-sm font-semibold">
- Period end
- <input
- className="mt-2 w-full rounded-xl border px-3 py-2"
- type="date"
- value={periodEnd}
- onChange={(event) => setPeriodEnd(event.target.value)}
- />
- </label>
- </div>
- </section>
+        {canReadPayroll && (
+   <section className="overflow-hidden rounded-lg border border-border bg-card">
+   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
+   <div className="min-w-0">
+   <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Create payroll run</h2>
+   <p className="mt-0.5 text-xs text-muted-foreground">
+   Staff is selected server-side from the active organization and branch scope.
+   </p>
+   </div>
+   <Button onClick={() => void createRun()} disabled={creating}>
+   <Plus className="mr-2 size-4" />
+   {creating ? "Creating..." : "Create run"}
+   </Button>
+   </div>
+   <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+   <label className="text-sm font-semibold">
+   Period start
+   <input
+   className="mt-2 w-full rounded-xl border px-3 py-2"
+   type="date"
+   value={periodStart}
+   onChange={(event) => setPeriodStart(event.target.value)}
+   />
+   </label>
+   <label className="text-sm font-semibold">
+   Period end
+   <input
+   className="mt-2 w-full rounded-xl border px-3 py-2"
+   type="date"
+   value={periodEnd}
+   onChange={(event) => setPeriodEnd(event.target.value)}
+   />
+   </label>
+   </div>
+   </section>
+        )}
 
- <section className="rounded-xl border bg-card p-6 shadow-sm">
- <div className="mb-5 flex items-center justify-between">
- <h2 className="text-xl font-black">Leave requests</h2>
- <CalendarDays className="size-5 text-stone-400" />
- </div>
- <div className="overflow-x-auto">
- <table className="w-full text-left text-sm">
- <thead>
- <tr className="border-b text-stone-500">
- <th className="py-3">Staff</th>
- <th>Leave</th>
- <th>Dates</th>
- <th>Days</th>
- <th>Status</th>
- <th />
- </tr>
- </thead>
- <tbody>
- {requests.map((r) => (
- <tr key={r.id} className="border-b last:border-0">
- <td className="py-3 font-bold">
- {r.staffProfile.user.firstName} {r.staffProfile.user.lastName}
- </td>
- <td>{r.leaveType.name}</td>
- <td>
- {new Date(r.startDate).toLocaleDateString()} –{" "}
- {new Date(r.endDate).toLocaleDateString()}
- </td>
- <td>{Number(r.days)}</td>
- <td>{r.status}</td>
- <td className="text-right">
- {r.status === "PENDING" && (
- <span className="inline-flex gap-2">
- <Button size="sm" onClick={() => void review(r.id, "APPROVED")}>
- Approve
- </Button>
- <Button
- size="sm"
- variant="outline"
- onClick={() => void review(r.id, "REJECTED")}
- >
- Reject
- </Button>
- </span>
- )}
- </td>
- </tr>
- ))}
- {!loading && loadError && (
- <tr>
- <td colSpan={6} className="py-10 text-center text-sm text-destructive">
- Leave requests could not be loaded.{" "}
- <button type="button" onClick={() => void load()} className="underline underline-offset-2">
- Try again
- </button>
- </td>
- </tr>
- )}
- {!loading && !loadError && requests.length === 0 && (
- <tr>
- <td colSpan={6} className="py-10 text-center text-stone-500">
- No leave requests.
- </td>
- </tr>
- )}
- </tbody>
- </table>
- </div>
- </section>
+        {canReadHr && (
+   <section className="rounded-xl border bg-card p-6 shadow-sm">
+   <div className="mb-5 flex items-center justify-between">
+   <h2 className="text-xl font-black">Leave requests</h2>
+   <CalendarDays className="size-5 text-stone-400" />
+   </div>
+   <div className="overflow-x-auto">
+   <table className="w-full text-left text-sm">
+   <thead>
+   <tr className="border-b text-stone-500">
+   <th className="py-3">Staff</th>
+   <th>Leave</th>
+   <th>Dates</th>
+   <th>Days</th>
+   <th>Status</th>
+   <th />
+   </tr>
+   </thead>
+   <tbody>
+   {requests.map((r) => (
+   <tr key={r.id} className="border-b last:border-0">
+   <td className="py-3 font-bold">
+   {r.staffProfile.user.firstName} {r.staffProfile.user.lastName}
+   </td>
+   <td>{r.leaveType.name}</td>
+   <td>
+   {new Date(r.startDate).toLocaleDateString()} –{" "}
+   {new Date(r.endDate).toLocaleDateString()}
+   </td>
+   <td>{Number(r.days)}</td>
+   <td>{r.status}</td>
+   <td className="text-right">
+   {r.status === "PENDING" && (
+   <span className="inline-flex gap-2">
+   <Button size="sm" onClick={() => void review(r.id, "APPROVED")}>
+   Approve
+   </Button>
+   <Button
+   size="sm"
+   variant="outline"
+   onClick={() => void review(r.id, "REJECTED")}
+   >
+   Reject
+   </Button>
+   </span>
+   )}
+   </td>
+   </tr>
+   ))}
+   {!loading && loadError && (
+   <tr>
+   <td colSpan={6} className="py-10 text-center text-sm text-destructive">
+   Leave requests could not be loaded.{" "}
+   <button type="button" onClick={() => void load()} className="underline underline-offset-2">
+   Try again
+   </button>
+   </td>
+   </tr>
+   )}
+   {!loading && !loadError && requests.length === 0 && (
+   <tr>
+   <td colSpan={6} className="py-10 text-center text-stone-500">
+   No leave requests.
+   </td>
+   </tr>
+   )}
+   </tbody>
+   </table>
+   </div>
+   </section>
+        )}
 
- <section className="rounded-xl border bg-card p-6 shadow-sm">
- <div className="mb-5 flex items-center justify-between">
- <h2 className="text-xl font-black">Payroll runs</h2>
- <HandCoins className="size-5 text-stone-400" />
- </div>
- <div className="space-y-6">
- {runs.map((run) => (
- <div key={run.id} className="rounded-lg border p-4">
- <div className="flex flex-wrap items-center justify-between gap-4">
- <div>
- <p className="font-bold">
- {new Date(run.periodStart).toLocaleDateString()} –{" "}
- {new Date(run.periodEnd).toLocaleDateString()}
- </p>
- <p className="text-sm text-stone-500">
- {run.items.length} staff · {run.status}
- </p>
- </div>
- <div className="flex items-center gap-3">
- <span className="font-black">
- ₹
- {money(
- run.items.reduce((sum, item) => sum + Number(item.net || 0), 0),
- )}
- </span>
- {run.status === "DRAFT" && (
- <Button size="sm" onClick={() => void approve(run.id)}>
- <CheckCircle2 className="mr-1 size-4" />
- Approve
- </Button>
- )}
- {run.status === "APPROVED" && (
- <Button size="sm" onClick={() => void process(run.id)}>
- Process
- </Button>
- )}
- </div>
- </div>
+        {canReadPayroll && (
+   <section className="rounded-xl border bg-card p-6 shadow-sm">
+   <div className="mb-5 flex items-center justify-between">
+   <h2 className="text-xl font-black">Payroll runs</h2>
+   <HandCoins className="size-5 text-stone-400" />
+   </div>
+   <div className="space-y-6">
+   {runs.map((run) => (
+   <div key={run.id} className="rounded-lg border p-4">
+   <div className="flex flex-wrap items-center justify-between gap-4">
+   <div>
+   <p className="font-bold">
+   {new Date(run.periodStart).toLocaleDateString()} –{" "}
+   {new Date(run.periodEnd).toLocaleDateString()}
+   </p>
+   <p className="text-sm text-stone-500">
+   {run.items.length} staff · {run.status}
+   </p>
+   </div>
+   <div className="flex items-center gap-3">
+   <span className="font-black">
+   ₹
+   {money(
+   run.items.reduce((sum, item) => sum + Number(item.net || 0), 0),
+   )}
+   </span>
+   {run.status === "DRAFT" && (
+   <Button size="sm" onClick={() => void approve(run.id)}>
+   <CheckCircle2 className="mr-1 size-4" />
+   Approve
+   </Button>
+   )}
+   {run.status === "APPROVED" && (
+   <Button size="sm" onClick={() => void process(run.id)}>
+   Process
+   </Button>
+   )}
+   </div>
+   </div>
+  
+   {run.status === "DRAFT" && (
+   <div className="mt-5 overflow-x-auto">
+   <table className="w-full min-w-[900px] text-left text-xs">
+   <thead className="border-b text-stone-500">
+   <tr>
+   <th className="py-2">Staff</th>
+   <th>Regular hours</th>
+   <th>Overtime</th>
+   <th>Incentives</th>
+   <th>Deductions</th>
+   <th>Unpaid leave</th>
+   <th>Gross / Net</th>
+   <th />
+   </tr>
+   </thead>
+   <tbody>
+   {run.items.map((item) => {
+   const adjustment =
+   adjustments[item.staffProfileId] ?? adjustmentFromItem(item);
+   return (
+   <tr key={item.id} className="border-b last:border-0">
+   <td className="py-3 font-semibold">
+   {item.staffProfile.user.firstName}{" "}
+   {item.staffProfile.user.lastName}
+   </td>
+   {(
+   [ "regularHours", "overtime", "incentives", "deductions", "unpaidLeave",
+   ] as const
+   ).map((field) => (
+   <td key={field} className="pr-2">
+   <input
+   className="w-28 rounded-lg border px-2 py-1"
+   type="number"
+   min="0"
+   step="0.01"
+   value={adjustment[field]}
+   onChange={(event) =>
+   updateAdjustment(
+   item.staffProfileId,
+   field,
+   event.target.value,
+   )
+   }
+   />
+   </td>
+   ))}
+   <td className="font-semibold">
+   ₹{money(item.gross)} / ₹{money(item.net)}
+   </td>
+   <td className="text-right">
+   <Button
+   size="sm"
+   variant="outline"
+   disabled={savingItem === item.staffProfileId}
+   onClick={() =>
+   void saveAdjustment(run, item.staffProfileId)
+   }
+   >
+   <Save className="mr-1 size-3" />
+   {savingItem === item.staffProfileId ? "Saving..." : "Save"}
+   </Button>
+   </td>
+   </tr>
+   );
+   })}
+   </tbody>
+   </table>
+   </div>
+   )}
+   </div>
+   ))}
+   {!loading && loadError && (
+   <div className="py-6">
+   <ErrorState
+   message="Payroll runs could not be loaded."
+   onRetry={() => void load()}
+   />
+   </div>
+   )}
+   {!loading && !loadError && runs.length === 0 && (
+   <p className="py-10 text-center text-stone-500">
+   No payroll runs yet. Create one above.
+   </p>
+   )}
+   </div>
+   </section>
+        )}
 
- {run.status === "DRAFT" && (
- <div className="mt-5 overflow-x-auto">
- <table className="w-full min-w-[900px] text-left text-xs">
- <thead className="border-b text-stone-500">
- <tr>
- <th className="py-2">Staff</th>
- <th>Regular hours</th>
- <th>Overtime</th>
- <th>Incentives</th>
- <th>Deductions</th>
- <th>Unpaid leave</th>
- <th>Gross / Net</th>
- <th />
- </tr>
- </thead>
- <tbody>
- {run.items.map((item) => {
- const adjustment =
- adjustments[item.staffProfileId] ?? adjustmentFromItem(item);
- return (
- <tr key={item.id} className="border-b last:border-0">
- <td className="py-3 font-semibold">
- {item.staffProfile.user.firstName}{" "}
- {item.staffProfile.user.lastName}
- </td>
- {(
- [ "regularHours", "overtime", "incentives", "deductions", "unpaidLeave",
- ] as const
- ).map((field) => (
- <td key={field} className="pr-2">
- <input
- className="w-28 rounded-lg border px-2 py-1"
- type="number"
- min="0"
- step="0.01"
- value={adjustment[field]}
- onChange={(event) =>
- updateAdjustment(
- item.staffProfileId,
- field,
- event.target.value,
- )
- }
- />
- </td>
- ))}
- <td className="font-semibold">
- ₹{money(item.gross)} / ₹{money(item.net)}
- </td>
- <td className="text-right">
- <Button
- size="sm"
- variant="outline"
- disabled={savingItem === item.staffProfileId}
- onClick={() =>
- void saveAdjustment(run, item.staffProfileId)
- }
- >
- <Save className="mr-1 size-3" />
- {savingItem === item.staffProfileId ? "Saving..." : "Save"}
- </Button>
- </td>
- </tr>
- );
- })}
- </tbody>
- </table>
- </div>
- )}
- </div>
- ))}
- {!loading && loadError && (
- <div className="py-6">
- <ErrorState
- message="Payroll runs could not be loaded."
- onRetry={() => void load()}
- />
- </div>
- )}
- {!loading && !loadError && runs.length === 0 && (
- <p className="py-10 text-center text-stone-500">
- No payroll runs yet. Create one above.
- </p>
- )}
- </div>
- </section>
+        {canReadPayroll && <CommissionsSection />}
+
+        {!canReadHr && !canReadPayroll && (
+          <p className="text-sm text-muted-foreground">
+            You do not have access to payroll on this organization.
+          </p>
+        )}
  </main>
  );
 }

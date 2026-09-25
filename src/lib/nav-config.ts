@@ -52,7 +52,14 @@ export const primaryNav: NavItem[] = [
     { title: "Payments", href: "/billing", icon: Wallet, permission: "payments.read" },
     { title: "Memberships", href: "/memberships", icon: CreditCard, permission: "memberships.read" },
     { title: "Plans", href: "/membership-plans", icon: CreditCard, permission: "membership_plans.read" },
-    { title: "Payroll", href: "/payroll", icon: HandCoins, permission: "payroll.read" },
+    // Two grants, one page. `/payroll` carries staff salary and leave
+    // (`hr.read`) alongside trainer commissions (`payroll.read`), and
+    // gating the item on `payroll.read` alone hid it from the seeded
+    // BRANCH_MANAGER -- which holds `hr.read` and `hr.manage` and no
+    // `payroll.*` at all, so the one role whose job this is could not
+    // reach it. Either grant opens the page; the page renders the half
+    // the reader is entitled to.
+    { title: "Payroll", href: "/payroll", icon: HandCoins, permission: ["hr.read", "payroll.read"] },
   ] },
 
   { title: "Operations", href: "/attendance", icon: CalendarCheck, permission: "attendance.read", children: [
