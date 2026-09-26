@@ -10,6 +10,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
 import { InventoryOperationsPanel } from "@/components/inventory/inventory-operations";
+import { ProductEditDialog } from "./product-edit-dialog";
 import { PageHero } from "@/components/shared/page-hero";
 import { MetricStrip } from "@/components/shared/panel";
 import { StatCard } from "@/components/shared/stat-card";
@@ -246,7 +247,12 @@ export default function InventoryPage() {
  id: "actions",
  header: "",
  cell: ({ row }) =>
- hasPermission("inventory.manage") && <StockMovementDialog product={row.original} />,
+ hasPermission("inventory.manage") && (
+ <div className="flex items-center justify-end gap-1">
+ <ProductEditDialog product={row.original} />
+ <StockMovementDialog product={row.original} />
+ </div>
+ ),
  },
  ];
 

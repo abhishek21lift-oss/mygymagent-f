@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import type { Product, StockMovement } from "@/lib/types/gym";
 import type { Paginated, PaginationParams } from "@/lib/types/pagination";
-import type { CreateProductInput, CreateStockMovementInput } from "@/lib/validation/gym";
+import type { CreateProductInput, CreateStockMovementInput, UpdateProductInput } from "@/lib/validation/gym";
 
 const PRODUCTS_KEY = "products";
 const STOCK_MOVEMENTS_KEY = "stock-movements";
@@ -19,6 +19,31 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (input: CreateProductInput) => api.post<Product>("/products", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [PRODUCTS_KEY] }),
+  });
+}
+
+/** The single product, for the edit form. */
+export function useProduct(id: string | undefined) {
+  return useQuery({
+    queryKey: [PRODUCTS_KEY, "detail", id],
+    queryFn: () => api.get<Product>(`/products/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateProductInput }) =>
+      api.patch<Product>(`/products/${id}`, input),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: [PRODUCTS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PRODUCTS_KEY, "detail", id] });
+      // Price and reorder level both feed the dashboard's valuation and
+      // low-stock counts.
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-reorder"] });
+    },
   });
 }
 

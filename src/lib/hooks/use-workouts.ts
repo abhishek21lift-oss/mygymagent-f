@@ -6,6 +6,7 @@ import type {
   AssignWorkoutPlanInput,
   CreateExerciseInput,
   CreateWorkoutPlanInput,
+  UpdateWorkoutPlanInput,
 } from "@/lib/validation/gym";
 
 const EXERCISES_KEY = "exercises";
@@ -39,6 +40,30 @@ export function useCreateWorkoutPlan() {
   return useMutation({
     mutationFn: (input: CreateWorkoutPlanInput) => api.post<WorkoutPlan>("/workout-plans", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [PLANS_KEY] }),
+  });
+}
+
+/** The single plan, for the edit form. The list row carries the same shape,
+ * but the form must not save a plan that moved since the page loaded. */
+export function useWorkoutPlan(id: string | undefined) {
+  return useQuery({
+    queryKey: [PLANS_KEY, "detail", id],
+    queryFn: () => api.get<WorkoutPlan>(`/workout-plans/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useUpdateWorkoutPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateWorkoutPlanInput }) =>
+      api.patch<WorkoutPlan>(`/workout-plans/${id}`, input),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, "detail", id] });
+      // An assignment renders its plan's name, so a rename has to reach it.
+      queryClient.invalidateQueries({ queryKey: [ASSIGNMENTS_KEY] });
+    },
   });
 }
 

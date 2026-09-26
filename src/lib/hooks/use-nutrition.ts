@@ -6,6 +6,7 @@ import type {
   AssignDietPlanInput,
   CreateDietPlanInput,
   CreateFoodItemInput,
+  UpdateDietPlanInput,
 } from "@/lib/validation/gym";
 
 const FOOD_ITEMS_KEY = "food-items";
@@ -39,6 +40,30 @@ export function useCreateDietPlan() {
   return useMutation({
     mutationFn: (input: CreateDietPlanInput) => api.post<DietPlan>("/diet-plans", input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [PLANS_KEY] }),
+  });
+}
+
+/** The single plan, for the edit form -- so a save is built on the plan as
+ * it is now, not on a list row that may have aged. */
+export function useDietPlan(id: string | undefined) {
+  return useQuery({
+    queryKey: [PLANS_KEY, "detail", id],
+    queryFn: () => api.get<DietPlan>(`/diet-plans/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useUpdateDietPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateDietPlanInput }) =>
+      api.patch<DietPlan>(`/diet-plans/${id}`, input),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [PLANS_KEY, "detail", id] });
+      // An assignment renders its plan's name, so a rename has to reach it.
+      queryClient.invalidateQueries({ queryKey: [ASSIGNMENTS_KEY] });
+    },
   });
 }
 

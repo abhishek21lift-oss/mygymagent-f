@@ -154,6 +154,12 @@ export const createWorkoutPlanSchema = z.object({
 })
 export type CreateWorkoutPlanInput = z.infer<typeof createWorkoutPlanSchema>
 
+/** PATCH /workout-plans/:id takes the same shape: the edit form loads the
+ * whole plan and sends the whole plan back, so a removed exercise is
+ * actually removed rather than merged. */
+export const updateWorkoutPlanSchema = createWorkoutPlanSchema
+export type UpdateWorkoutPlanInput = z.infer<typeof updateWorkoutPlanSchema>
+
 export const assignWorkoutPlanSchema = z.object({
   memberId: z.string().min(1, "Member is required"),
   notes: z.string().optional().or(z.literal("")),
@@ -201,6 +207,15 @@ export const createDietPlanSchema = z.object({
 })
 export type CreateDietPlanInput = z.infer<typeof createDietPlanSchema>
 
+/** The three macro targets the API has always accepted but the create form
+ * never offered. The edit form exposes all four. */
+export const updateDietPlanSchema = createDietPlanSchema.extend({
+  targetProteinG: z.coerce.number().min(0).optional(),
+  targetCarbsG: z.coerce.number().min(0).optional(),
+  targetFatG: z.coerce.number().min(0).optional(),
+})
+export type UpdateDietPlanInput = z.infer<typeof updateDietPlanSchema>
+
 export const assignDietPlanSchema = z.object({
   memberId: z.string().min(1, "Member is required"),
   notes: z.string().optional().or(z.literal("")),
@@ -221,6 +236,13 @@ export const createProductSchema = z.object({
   reorderQuantity: z.coerce.number().int().min(0).optional(),
 })
 export type CreateProductInput = z.infer<typeof createProductSchema>
+
+/** quantityOnHand is absent on purpose: once a product exists, stock only
+ * moves through the movement ledger, and PATCH /products/:id rejects it. */
+export const updateProductSchema = createProductSchema
+  .omit({ quantityOnHand: true })
+  .extend({ isActive: z.boolean() })
+export type UpdateProductInput = z.infer<typeof updateProductSchema>
 
 export const createStockMovementSchema = z.object({
   type: z.enum(["RESTOCK", "SALE", "ADJUSTMENT", "DAMAGED"]),

@@ -21,6 +21,7 @@ import { useAssignDietPlan, useCreateDietPlan, useCreateFoodItem, useDietAssignm
 import { ApiError } from "@/lib/api/client";
 import { assignDietPlanSchema, createDietPlanSchema, createFoodItemSchema, type AssignDietPlanInput, type CreateDietPlanInput, type CreateFoodItemInput } from "@/lib/validation/gym";
 import type { DietAssignment, MealSlot } from "@/lib/types/gym";
+import { DietPlanEditDialog } from "./plan-edit-dialog";
 
 const MEALS: MealSlot[] = ["BREAKFAST", "LUNCH", "DINNER", "SNACK"];
 
@@ -333,7 +334,10 @@ export default function NutritionPage() {
  </div>
  <div className="mt-4 flex items-center justify-between gap-2">
  <span className="text-xs font-black uppercase tracking-[.16em] text-stone-500 tabular-nums">{plan.items.length} meal items</span>
+ <div className="flex items-center gap-1">
+ {hasPermission("nutrition.create") && <DietPlanEditDialog planId={plan.id} planName={plan.name} />}
  {hasPermission("nutrition.assign") && <AssignPlan id={plan.id} name={plan.name} />}
+ </div>
  </div>
  </div>
  ))}

@@ -21,6 +21,7 @@ import { useCreateExercise, useCreateWorkoutPlan, useExercises, useAssignWorkout
 import { ApiError } from "@/lib/api/client";
 import { assignWorkoutPlanSchema, createExerciseSchema, createWorkoutPlanSchema, type AssignWorkoutPlanInput, type CreateExerciseInput, type CreateWorkoutPlanInput } from "@/lib/validation/gym";
 import type { WorkoutAssignment } from "@/lib/types/gym";
+import { WorkoutPlanEditDialog } from "./plan-edit-dialog";
 
 function AddExerciseDialog() {
  const [open, setOpen] = React.useState(false);
@@ -310,6 +311,7 @@ export default function WorkoutsPage() {
  <h3 className="mt-4 text-sm font-extrabold tracking-tight text-stone-950">{plan.name}</h3>
  <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-stone-600">{plan.description || "Structured training program"}</p>
  <div className="mt-4 flex items-center justify-end gap-2">
+ {hasPermission("workouts.create") && <WorkoutPlanEditDialog planId={plan.id} planName={plan.name} />}
  {hasPermission("workouts.assign") && <AssignDialog planId={plan.id} planName={plan.name} />}
  </div>
  </div>
