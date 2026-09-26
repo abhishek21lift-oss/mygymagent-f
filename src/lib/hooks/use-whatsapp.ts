@@ -92,3 +92,34 @@ export function useDisconnectWhatsapp() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   })
 }
+
+export interface InboundWhatsAppMessage {
+  id: string
+  organizationId: string
+  fromPhone: string
+  body: string | null
+  matchedMemberId: string | null
+  providerMessageId: string | null
+  createdAt: string
+}
+
+/**
+ * Messages members have sent in.
+ *
+ * The integration screen could send and could list templates, and had no
+ * way to show a single reply -- so a member answering a reminder reached
+ * nobody. `matched: false` is the queue that matters: a number the system
+ * could not tie to a member is a person nobody will follow up.
+ */
+export function useInboundWhatsApp(params: { matched?: boolean; limit?: number } = {}) {
+  return useQuery({
+    queryKey: [KEY, "inbound", params],
+    queryFn: () =>
+      api.get<InboundWhatsAppMessage[]>("/whatsapp/inbound", {
+        query: {
+          ...(params.matched === undefined ? {} : { matched: String(params.matched) }),
+          ...(params.limit ? { limit: params.limit } : {}),
+        },
+      }),
+  })
+}

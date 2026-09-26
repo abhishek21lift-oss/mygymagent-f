@@ -120,3 +120,29 @@ export function useCrmSla() {
     staleTime: 60_000,
   })
 }
+
+export interface ImportLeadRow {
+  firstName: string
+  lastName: string
+  phone?: string
+  email?: string
+  source?: string
+  branchId?: string
+  notes?: string
+}
+
+/**
+ * Bulk lead creation from a CSV.
+ *
+ * The endpoint existed with nothing calling it, so a list bought from an
+ * expo or exported from a landing page had to be typed in one lead at a
+ * time. The API caps a run at 500 rows.
+ */
+export function useImportLeads() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (leads: ImportLeadRow[]) =>
+      api.post<{ created: number; leads?: Array<{ id: string }> }>("/leads/import", { leads }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  })
+}

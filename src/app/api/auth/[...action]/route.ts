@@ -9,7 +9,7 @@ const BACKEND_URL =
 // `mfa/verify` is two segments, which is why this route is a catch-all:
 // it completes a login and sets the same refresh cookie /auth/login does,
 // so it has to come back through this BFF rather than go direct.
-const ALLOWED_ACTIONS = new Set(["login", "register", "refresh", "logout", "mfa/verify", "otp/request", "otp/verify"])
+const ALLOWED_ACTIONS = new Set(["login", "register", "refresh", "logout", "logout-all", "mfa/verify", "otp/request", "otp/verify"])
 const REFRESH_COOKIE_PATH = "/api/auth"
 
 function extractRefreshToken(setCookie: string | null): string | null {

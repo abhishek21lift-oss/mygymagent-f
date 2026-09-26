@@ -5,12 +5,12 @@ import { ArrowRight, Check, Clock3, ShieldCheck, X, Sparkles, Zap } from "lucide
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAiActions, useApproveAiAction, useRejectAiAction } from "@/lib/hooks/use-ai-actions";
+import { useAiActions, useRejectAiAction } from "@/lib/hooks/use-ai-actions";
+import { AiActionReviewDialog } from "./review-dialog";
 import { PageHero } from "@/components/shared/page-hero";
 
 export default function AiActionsPage() {
  const actions = useAiActions("PENDING_APPROVAL");
- const approve = useApproveAiAction();
  const reject = useRejectAiAction();
  const count = actions.data?.items.length ?? 0;
 
@@ -88,7 +88,7 @@ export default function AiActionsPage() {
  <Badge variant="secondary" className="shrink-0 rounded-full bg-amber-500/15 text-amber-800 ring-1 ring-amber-200/60"><Clock3 className="mr-1 size-3" aria-hidden="true" /> Pending</Badge>
  </CardHeader>
  <CardContent className="flex flex-col gap-2 sm:flex-row">
- <Button disabled={approve.isPending} onClick={() => approve.mutate(action.id)} className="btn-sheen min-h-11 rounded-lg bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"><Check className="mr-2 size-4" aria-hidden="true" /> Approve &amp; execute</Button>
+ <AiActionReviewDialog action={action} />
  <Button variant="outline" disabled={reject.isPending} onClick={() => reject.mutate({ id: action.id })} className="min-h-11 rounded-lg border-stone-200 bg-card hover:border-border hover:bg-rose-50 hover:text-foreground"><X className="mr-2 size-4" aria-hidden="true" /> Reject</Button>
  </CardContent>
  </Card>

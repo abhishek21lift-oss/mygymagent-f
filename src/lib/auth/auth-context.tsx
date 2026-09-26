@@ -40,6 +40,9 @@ interface AuthContextValue {
  loginWithOtp: (phone: string, code: string) => Promise<LoginResponse>
  register: (input: RegisterInput) => Promise<void>
  logout: () => Promise<void>
+ /** Ends every session for this account, not just this browser's.
+  * What you reach for when a device is lost or a password was shared. */
+ logoutEverywhere: () => Promise<void>
  hasPermission: (key: string | string[]) => boolean
  refetchMe: () => Promise<void>
 }
@@ -238,6 +241,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  setCurrentBranchId(null)
  }, [queryClient])
 
+ /** Revokes every refresh token this account holds, then clears local
+  * state exactly as `logout` does -- this browser is one of the sessions
+  * being ended. Unlike `logout`, a failure here is surfaced rather than
+  * swallowed: "signed out everywhere" that silently did not is worse
+  * than an error, because the user stops looking for the lost device. */
+ const logoutEverywhere = React.useCallback(async () => {
+ await api.post("/auth/logout-all")
+ sessionGen.current += 1
+ await queryClient.cancelQueries().catch(() => undefined)
+ queryClient.clear()
+ setAccessToken(null)
+ setUser(null)
+ setPermissions([])
+ setMfaEnrolment(null)
+ setCurrentBranchId(null)
+ }, [queryClient])
+
  const hasPermission = React.useCallback(
  (key: string | string[]) =>
  Array.isArray(key) ? key.some((k) => permissions.includes(k)) : permissions.includes(key),
@@ -257,6 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  loginWithOtp,
  register,
  logout,
+ logoutEverywhere,
  hasPermission,
  refetchMe: loadMe,
  }),
@@ -269,6 +290,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  completeMfaLogin,
  register,
  logout,
+ logoutEverywhere,
  hasPermission,
  loadMe,
  ],

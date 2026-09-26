@@ -34,6 +34,7 @@ import {
   useRespondFeedback,
   useSupportTickets,
   useSurveys,
+  useTaxSummary,
   useTrialBalance,
   useUpdateTicketStatus,
   type JournalLineInput,
@@ -507,6 +508,7 @@ export function AccountingSection() {
   const canManage = hasPermission("accounting.manage");
   const accounts = useAccountingAccounts(canRead);
   const trial = useTrialBalance(canRead);
+  const tax = useTaxSummary({}, canRead);
   const createAccount = useCreateAccount();
   const journal = usePostJournal();
 
@@ -541,6 +543,27 @@ export function AccountingSection() {
         emptyDescription="Create the chart of accounts before posting."
       >
         <div className="flex flex-col gap-3">
+          {/* The ledger's totals, which the trial balance only gives
+              account by account. A non-zero net is what a return is
+              filed against. */}
+          {tax.data?.[0] && (
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                ["Debits", tax.data[0].totalDebit],
+                ["Credits", tax.data[0].totalCredit],
+                ["Net", tax.data[0].net],
+              ] as const).map(([label, value]) => (
+                <div key={label} className="rounded-lg border border-border px-3 py-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                    {label}
+                  </p>
+                  <p className="text-sm font-bold tabular-nums">
+                    {value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
           {(trial.data ?? []).length > 0 && (
             <div className="overflow-hidden rounded-lg border border-border">
               <Table>

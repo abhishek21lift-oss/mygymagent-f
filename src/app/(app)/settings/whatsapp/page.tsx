@@ -3,9 +3,10 @@
 import * as React from "react"
 import Script from "next/script"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle2, FileText, History, Loader2, MessageCircle, Send, TriangleAlert } from "lucide-react"
+import { ArrowLeft, CheckCircle2, FileText, History, Loader2, MessageCircle, MessageSquare, Send, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
+import { DataState } from "@/components/shared/data-state"
 import { ErrorState } from "@/components/shared/error-state"
 import { PageHero } from "@/components/shared/page-hero"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,7 @@ import { isAllowedMetaMessageOrigin } from "@/lib/meta-message-origins"
 import { useCompleteWhatsAppSignup, useWhatsAppIntegration } from "@/lib/hooks/use-whatsapp"
 import {
  useDisconnectWhatsapp,
+ useInboundWhatsApp,
  useTestSend,
  useWhatsappLogs,
  useWhatsappTemplates,
@@ -196,6 +198,7 @@ export default function WhatsAppSettingsPage() {
  <div className="flex w-full max-w-3xl flex-col gap-5">
  <TestSendCard canManage={canManage} orgCountry={orgCountry} />
  <TemplatesCard />
+ <InboundCard />
  <DeliveryLogCard />
  <DangerZoneCard canManage={canManage} />
  </div>
@@ -275,6 +278,66 @@ function TestSendCard({ canManage, orgCountry }: { canManage: boolean; orgCountr
  {error && (
  <p role="alert" className="text-sm font-semibold text-rose-600 dark:text-rose-400">{error}</p>
  )}
+ </CardContent>
+ </Card>
+ )
+}
+
+/**
+ * Replies members have sent in.
+ *
+ * The screen could send messages and list templates, and had no way to
+ * show a single reply -- so a member answering a reminder reached nobody.
+ * Unmatched first: a number the system could not tie to a member is a
+ * person no follow-up will ever reach.
+ */
+function InboundCard() {
+ const [unmatchedOnly, setUnmatchedOnly] = React.useState(false)
+ const inbound = useInboundWhatsApp({ limit: 50, ...(unmatchedOnly ? { matched: false } : {}) })
+
+ return (
+ <Card className="overflow-hidden border-border bg-card dark:bg-card">
+ <CardHeader className="border-b border-border bg-muted/40">
+ <div className="flex flex-wrap items-start justify-between gap-3">
+ <div className="flex items-start gap-3">
+ <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><MessageSquare className="size-5" aria-hidden="true" /></span>
+ <div>
+ <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">Inbox</CardTitle>
+ <p className="mt-1 text-xs font-medium text-stone-600 dark:text-stone-400">What members have sent you.</p>
+ </div>
+ </div>
+ <Button type="button" size="sm" variant={unmatchedOnly ? "default" : "outline"} onClick={() => setUnmatchedOnly((v) => !v)}>
+ Unmatched only
+ </Button>
+ </div>
+ </CardHeader>
+ <CardContent className="p-5 sm:p-6">
+ <DataState
+  isLoading={inbound.isPending}
+  isError={inbound.isError}
+  onRetry={() => void inbound.refetch()}
+  errorMessage="Could not load inbound messages."
+  isEmpty={(inbound.data ?? []).length === 0}
+  emptyIcon={MessageSquare}
+  emptyTitle={unmatchedOnly ? "Nothing unmatched" : "No messages yet"}
+  emptyDescription={unmatchedOnly ? "Every message so far was matched to a member." : "Replies from members will appear here."}
+  skeletonRows={3}
+ >
+  <div className="flex max-h-96 flex-col gap-2 overflow-y-auto pr-1">
+  {(inbound.data ?? []).map((message) => (
+   <div key={message.id} className="rounded-lg border border-border p-3">
+   <div className="flex items-baseline justify-between gap-3">
+    <span className="font-mono text-xs font-bold">{message.fromPhone}</span>
+    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{new Date(message.createdAt).toLocaleString()}</span>
+   </div>
+   <p className="mt-1 text-sm">{message.body || "(no text)"}</p>
+   {!message.matchedMemberId && (
+    <p className="mt-1 text-xs font-semibold text-amber-700 dark:text-amber-400">Not matched to a member</p>
+   )}
+   </div>
+  ))}
+  </div>
+ </DataState>
  </CardContent>
  </Card>
  )

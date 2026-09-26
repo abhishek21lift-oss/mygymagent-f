@@ -259,6 +259,22 @@ export function useTrialBalance(enabled = true) {
   })
 }
 
+export interface TaxSummaryRow {
+  totalDebit: number
+  totalCredit: number
+  net: number
+}
+
+/** Totals across the accounting ledger for a period. Answers "what did we
+ * book" without reading the trial balance account by account. */
+export function useTaxSummary(range: { from?: string; to?: string } = {}, enabled = true) {
+  return useQuery({
+    queryKey: ["accounting-tax-summary", range],
+    queryFn: () => api.get<TaxSummaryRow[]>("/accounting/tax-summary", { query: range }),
+    enabled,
+  })
+}
+
 /* ----------------------------------------------------------- portal invites */
 
 const PORTAL_INVITES = "portal-invites"

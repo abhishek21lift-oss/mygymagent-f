@@ -18,6 +18,7 @@ import {
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
 import { PageHero } from "@/components/shared/page-hero";
+import { ImportLeadsDialog } from "./import-leads-dialog";
 import { MetricStrip } from "@/components/shared/panel";
 import { BranchSelect } from "@/components/shared/branch-select";
 import { Badge } from "@/components/ui/badge";
@@ -672,6 +673,7 @@ export default function CrmPage() {
  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
  </a>
  </Button>
+ {hasPermission("leads.manage") && <ImportLeadsDialog />}
  {hasPermission("leads.manage") && <NewLeadDialog />}
  </>
  }

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
  ArrowLeft,
  ShieldAlert,
@@ -12,6 +13,7 @@ import {
 import { toast } from "sonner"
 
 import { MfaEnrolment } from "@/components/security/mfa-enrolment"
+import { ConfirmAction } from "@/components/shared/confirm-action"
 import { ErrorState } from "@/components/shared/error-state"
 import { PageHero } from "@/components/shared/page-hero"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -195,6 +197,35 @@ function MyTwoStepSection() {
  * without first seeing who is unenrolled is how an organization finds out
  * its accountant is on holiday the hard way.
  */
+/**
+ * POST /auth/logout-all, which existed with nothing calling it.
+ *
+ * Behind a confirmation because it signs this browser out too: the
+ * person clicking it will have to sign back in, and should know that
+ * before they do rather than after.
+ */
+function SignOutEverywhere() {
+ const { logoutEverywhere } = useAuth()
+ const router = useRouter()
+ return (
+ <ConfirmAction
+  label="Sign out everywhere"
+  variant="destructive"
+  size="default"
+  title="Sign out of every device?"
+  description="Every session for this account ends immediately, including this one. You will be asked to sign in again."
+  confirmLabel="Sign out everywhere"
+  pendingLabel="Signing out..."
+  successMessage="Signed out on every device"
+  errorMessage="Could not end your other sessions."
+  onConfirm={async () => {
+   await logoutEverywhere()
+   router.push("/login")
+  }}
+ />
+ )
+}
+
 function PolicySection() {
  const policy = useMfaPolicy()
  const report = useMfaPolicyReport()
@@ -399,6 +430,22 @@ export default function SecuritySettingsPage() {
  </p>
  </div>
  <MyTwoStepSection />
+ </CardContent>
+ </Card>
+
+ <Card className="overflow-hidden border-border bg-card">
+ <CardContent className="flex flex-col gap-4 p-6">
+ <div>
+ <h2 className="text-lg font-semibold tracking-tight">Active sessions</h2>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Signing out everywhere ends every session this account holds, on every
+ device, including this one. Use it if a phone is lost or a password
+ has been shared.
+ </p>
+ </div>
+ <div className="flex">
+ <SignOutEverywhere />
+ </div>
  </CardContent>
  </Card>
 

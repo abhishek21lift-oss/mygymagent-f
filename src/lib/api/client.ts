@@ -16,6 +16,9 @@ const AUTH_PROXY_PATHS = new Set([
   "/auth/register",
   "/auth/refresh",
   "/auth/logout",
+  // Same reason as /auth/logout: it clears the refresh cookie, and the
+  // handler checks the request origin, so it has to leave from this one.
+  "/auth/logout-all",
   // Second half of an MFA login: sets the refresh cookie just like
   // /auth/login, so it has to go through the same BFF.
   "/auth/mfa/verify",
