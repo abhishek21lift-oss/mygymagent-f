@@ -811,7 +811,7 @@ export interface InventoryTransfer {
   fromBranch?: { id: string; name: string }
   toBranch?: { id: string; name: string }
 }
-export type InventorySaleStatus = "COMPLETED" | "CANCELLED" | "RETURNED"
+export type InventorySaleStatus = "COMPLETED" | "CANCELLED" | "RETURNED" | "PARTIALLY_RETURNED"
 export interface InventorySaleItem {
   id: string
   saleId: string

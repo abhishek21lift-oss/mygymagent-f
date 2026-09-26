@@ -92,6 +92,27 @@ export function useCreateInventorySupplier() {
   })
 }
 
+export function useUpdateInventorySupplier() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    // Nullable fields take `null` to be cleared: class-validator's
+    // @IsOptional() skips null, so it reaches Prisma and empties the column,
+    // where "" would fail @IsEmail and undefined would keep the old value.
+    mutationFn: ({ id, input }: {
+      id: string
+      input: {
+        name?: string
+        phone?: string | null
+        email?: string | null
+        address?: string | null
+        taxId?: string | null
+        isActive?: boolean
+      }
+    }) => api.patch(`/inventory/suppliers/${id}`, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] }),
+  })
+}
+
 export function useInventoryPurchaseOrders(status?: string) {
   return useQuery({
     queryKey: ["inventory-purchase-orders", status],
@@ -125,6 +146,19 @@ export function useReceiveInventoryPurchaseOrder() {
       queryClient.invalidateQueries({ queryKey: ["inventory-purchase-orders"] })
       queryClient.invalidateQueries({ queryKey: ["products"] })
       queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
+    },
+  })
+}
+
+export function useCancelInventoryPurchaseOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/inventory/purchase-orders/${id}/cancel`),
+    // A cancel never touches stock -- nothing was received -- so only the
+    // order list and the dashboard's open-order count move.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-purchase-orders"] })
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
     },
   })
@@ -174,6 +208,20 @@ export function useReceiveInventoryTransfer() {
   })
 }
 
+export function useCancelInventoryTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/inventory/transfers/${id}/cancel`),
+    // Cancelling in transit returns the units to the source branch, so the
+    // per-branch stock and the product totals both move.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    },
+  })
+}
+
 export function useInventorySales(status?: string) {
   return useQuery({
     queryKey: ["inventory-sales", status],
@@ -203,6 +251,21 @@ export function useReturnInventorySale() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.post(`/inventory/sales/${id}/return`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-sales"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      queryClient.invalidateQueries({ queryKey: ["inventory-branch-stock"] })
+    },
+  })
+}
+
+export function useCancelInventorySale() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/inventory/sales/${id}/cancel`),
+    // Unlike a return, a cancel reverses every remaining line at once and
+    // puts all of it back on hand.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-sales"] })
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] })
