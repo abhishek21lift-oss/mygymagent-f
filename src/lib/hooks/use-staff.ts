@@ -29,3 +29,49 @@ export function useDeactivateStaff() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   });
 }
+
+export interface AssignableRole {
+  id: string
+  key: string
+  name: string
+  description: string | null
+  isSystem: boolean
+  isOrganizationSpecific: boolean
+  permissions: string[]
+}
+
+/**
+ * The roles this organization can actually hand out, from GET /roles.
+ *
+ * The invite form used to carry its own hardcoded list, which could drift
+ * from the catalogue the server validates against -- a key missing from
+ * one side is a 400 the operator cannot explain.
+ */
+export function useAssignableRoles(enabled = true) {
+  return useQuery({
+    queryKey: ["roles"],
+    queryFn: () => api.get<AssignableRole[]>("/roles"),
+    // The seeded catalogue changes on deploy, not during a session.
+    staleTime: 10 * 60 * 1000,
+    enabled,
+  })
+}
+
+export function useAssignStaffRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, roleKey, branchId }: {
+      userId: string; roleKey: string; branchId?: string
+    }) => api.post<{ id: string }>(`/users/${userId}/roles`, { roleKey, branchId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  })
+}
+
+export function useRevokeStaffRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, userRoleId }: { userId: string; userRoleId: string }) =>
+      api.delete(`/users/${userId}/roles/${userRoleId}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  })
+}

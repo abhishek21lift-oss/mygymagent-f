@@ -33,27 +33,20 @@ import {
  FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth/auth-context";
-import { useStaff, useInviteStaff, useDeactivateStaff } from "@/lib/hooks/use-staff";
+import { useAssignableRoles, useStaff, useInviteStaff, useDeactivateStaff } from "@/lib/hooks/use-staff";
+import { ManageRolesDialog } from "./manage-roles-dialog";
 import { ApiError } from "@/lib/api/client";
 import { inviteStaffSchema, type InviteStaffInput } from "@/lib/validation/gym";
 import type { StaffUser } from "@/lib/types/gym";
 
-const ROLE_OPTIONS = [
- { key: "ORG_ADMIN", label: "Organization Admin" },
- { key: "BRANCH_MANAGER", label: "Branch Manager" },
- { key: "HEAD_TRAINER", label: "Head Trainer" },
- { key: "TRAINER", label: "Trainer" },
- { key: "NUTRITIONIST", label: "Nutritionist" },
- { key: "RECEPTIONIST", label: "Receptionist" },
- { key: "SALES_EXECUTIVE", label: "Sales Executive" },
- { key: "ACCOUNTANT", label: "Accountant" },
- { key: "INVENTORY_MANAGER", label: "Inventory Manager" },
- { key: "STAFF", label: "Staff" },
-];
 
 function InviteStaffDialog() {
  const [open, setOpen] = React.useState(false);
  const inviteStaff = useInviteStaff();
+ // Was a hardcoded list in this file, which could drift from the catalogue
+ // the server validates `roleKey` against -- a key on one side and not the
+ // other is a 400 the operator has no way to explain.
+ const roles = useAssignableRoles(open);
 
  const form = useForm<InviteStaffInput>({
  resolver: zodResolver(inviteStaffSchema),
@@ -161,9 +154,9 @@ function InviteStaffDialog() {
  </SelectTrigger>
  </FormControl>
  <SelectContent>
- {ROLE_OPTIONS.map((role) => (
+ {(roles.data ?? []).map((role) => (
  <SelectItem key={role.key} value={role.key}>
- {role.label}
+ {role.name}
  </SelectItem>
  ))}
  </SelectContent>
@@ -196,7 +189,7 @@ function InviteStaffDialog() {
  );
 }
 
-function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
+function useColumns(canManage: boolean, canManageRoles: boolean): ColumnDef<StaffUser>[] {
  const deactivate = useDeactivateStaff();
 
  const base: ColumnDef<StaffUser>[] = [
@@ -238,12 +231,16 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
  },
  ];
 
- if (canManage) {
+ // Deactivating is users.delete; changing a grant is users.manage_roles.
+ // The column shows if either applies, and each control gates itself.
+ if (canManage || canManageRoles) {
  base.push({
  id: "actions",
  header: "",
- cell: ({ row }) =>
- row.original.status !== "DISABLED" ? (
+ cell: ({ row }) => (
+ <div className="flex items-center justify-end gap-1">
+ {canManageRoles && <ManageRolesDialog user={row.original} />}
+ {canManage && row.original.status !== "DISABLED" && (
  <Button
  variant="ghost"
  size="sm"
@@ -259,7 +256,9 @@ function useColumns(canManage: boolean): ColumnDef<StaffUser>[] {
  <UserX className="size-3.5" aria-hidden="true" />
  Deactivate
  </Button>
- ) : null,
+ )}
+ </div>
+ ),
  });
  }
 
@@ -271,7 +270,8 @@ export default function StaffPage() {
  const [page, setPage] = React.useState(1);
  const staffQuery = useStaff({ page, pageSize: 20 });
  const canManage = hasPermission("users.delete");
- const columns = useColumns(canManage);
+ const canManageRoles = hasPermission("users.manage_roles");
+ const columns = useColumns(canManage, canManageRoles);
 
  return (
  <div className="pb-4">
