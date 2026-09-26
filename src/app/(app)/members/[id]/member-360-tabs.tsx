@@ -114,6 +114,7 @@ import { useMemberPayments } from "@/lib/hooks/use-member-payments";
 import { useRefundPayment } from "@/lib/hooks/use-payments";
 import { OPEN_INVOICE_STATUSES, useInvoices, useRetryCollection } from "@/lib/hooks/use-invoices";
 import { useMemberships, useRenewMembership, useMembershipHistory } from "@/lib/hooks/use-memberships";
+import { useMembershipBilling } from "@/lib/hooks/use-members";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
@@ -1628,6 +1629,7 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
 function PaymentsPanel({ memberId }: { memberId: string }) {
  const paymentsQuery = useMemberPayments(memberId);
  const membershipsQuery = useMemberships({ memberId });
+ const billingQuery = useMembershipBilling(memberId);
  const refundPayment = useRefundPayment();
  const [refundOpen, setRefundOpen] = React.useState(false);
  const [selectedPayment, setSelectedPayment] = React.useState<Payment | null>(null);
@@ -1637,23 +1639,23 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  const renewMembership = useRenewMembership();
  const plansQuery = useMembershipPlans({ pageSize: 100 });
 
- if (paymentsQuery.isLoading || membershipsQuery.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (paymentsQuery.isLoading || membershipsQuery.isLoading || billingQuery.isLoading)
+  return <Skeleton className="h-24 w-full" />;
 
  const payments = paymentsQuery.data ?? [];
  const memberships = membershipsQuery.data?.items ?? [];
 
- const totalFromMemberships = memberships.reduce((sum, m) => sum + Number(m.price), 0);
- const totalDiscounts = memberships.reduce((sum, m) => {
- const planPrice = Number(m.membershipPlan?.price ?? m.price);
- return sum + Math.max(0, planPrice - Number(m.price));
- }, 0);
- const finalAmount = totalFromMemberships - totalDiscounts;
-
- const totalPaid = payments
- .filter((p) => p.status === "COMPLETED")
- .reduce((sum, p) => sum + Number(p.amount), 0);
- const totalRefunded = payments.flatMap((p) => p.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
- const outstandingBalance = finalAmount - totalPaid + totalRefunded;
+ // GET /members/:id/membership-billing, not a sum over the payment list.
+ // The browser version counted every completed payment the member ever
+ // made, so a PT package or a counter sale read as money against their
+ // membership, and it only saw the memberships on the current page.
+ const billing = billingQuery.data;
+ const billingLines = billing?.memberships ?? [];
+ const totalFromMemberships = billingLines.reduce((sum, line) => sum + Number(line.price), 0);
+ const totalDiscounts = billingLines.reduce((sum, line) => sum + Number(line.discount ?? 0), 0);
+ const finalAmount = Number(billing?.totalDue ?? 0);
+ const totalPaid = Number(billing?.totalPaid ?? 0);
+ const outstandingBalance = Number(billing?.outstandingBalance ?? 0);
 
  const currency = payments[0]?.currency ?? memberships[0]?.currency ?? "USD";
 
@@ -1793,6 +1795,12 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  <p className="font-mono text-lg font-black tabular-nums text-emerald-700">
  {currency} {totalPaid.toLocaleString()}
  </p>
+ {/* Named, because it is why Outstanding is not simply Final minus Paid. */}
+ {Number(billing?.totalRefunded ?? 0) > 0 && (
+ <p className="mt-0.5 font-mono text-xs font-bold tabular-nums text-stone-600">
+ {currency} {Number(billing?.totalRefunded ?? 0).toLocaleString()} refunded
+ </p>
+ )}
  </div>
  <div className="rounded-xl border border-amber-200/60 bg-muted/40 p-3">
  <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">Outstanding</p>

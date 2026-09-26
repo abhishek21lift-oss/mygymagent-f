@@ -125,6 +125,52 @@ export function useChurnReason(memberId: string | undefined) {
   })
 }
 
+export interface ContributingFactor {
+  factor: string
+  weight: number
+  rawValue: number
+  normalizedValue: number
+  contribution: number
+  threshold: number
+  direction: "NEGATIVE" | "POSITIVE"
+  explanation: string
+}
+
+export interface MemberIntelligence {
+  memberId: string
+  riskProfile: {
+    memberId: string
+    overallScore: number
+    riskLevel: RiskLevel
+    trend: string
+    contributingFactors: ContributingFactor[]
+    protectiveFactors: string[]
+    computedAt: string
+  } | null
+  attendanceVelocity: number
+  paymentReliability: number
+  engagementScore: number
+  membershipStatus: string
+  daysUntilExpiry: number | null
+}
+
+/**
+ * The whole scored picture for one member: the four signals behind the
+ * risk level and the factors the engine says moved it.
+ *
+ * Gated on members.read rather than reports.view, so a trainer who can
+ * open a member can see why they are flagged -- the roll-up endpoints
+ * next to it are reports, and most trainers cannot read those. Returns
+ * null for a member who has never been scored.
+ */
+export function useMemberIntelligence(memberId: string | undefined) {
+  return useQuery({
+    queryKey: [RISK, "intelligence", memberId],
+    queryFn: () => api.get<MemberIntelligence | null>(`/members/${memberId}/intelligence`),
+    enabled: Boolean(memberId),
+  })
+}
+
 export function useComputeMemberIntelligence() {
   const qc = useQueryClient()
   return useMutation({
@@ -193,18 +239,99 @@ export function useDismissRecommendation(memberId: string) {
 
 /* --------------------------------------------------------------- segments */
 
+/** `name`, not `key`: that is what GET /members/segments/fields serves,
+ * and it is the value a rule's `field` has to match. */
 export interface SegmentField {
-  key: string
-  label?: string
-  type?: string
-  [k: string]: unknown
+  name: string
+  label: string
+  type: "string" | "number" | "boolean" | "date" | "enum"
+  enumValues?: string[]
 }
+
+export type SegmentOperator =
+  | "eq" | "ne" | "gt" | "gte" | "lt" | "lte" | "in" | "contains"
+
+export interface SegmentRule {
+  field: string
+  operator: SegmentOperator
+  value: string | number | boolean | string[] | number[]
+  logicalOp?: "AND" | "OR"
+}
+
+export interface MemberSegment {
+  id: string
+  organizationId: string
+  name: string
+  description: string | null
+  rules: SegmentRule[]
+  isSystem: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SegmentSummary {
+  segment: MemberSegment
+  memberCount: number
+}
+
+export interface SegmentMember {
+  memberId: string
+  firstName: string
+  lastName: string
+  email: string | null
+  status: string
+  riskLevel: RiskLevel | null
+}
+
+const SEGMENTS = "member-segments"
 
 export function useSegmentFields(enabled = true) {
   return useQuery({
     queryKey: ["segment-fields"],
     queryFn: () => api.get<SegmentField[]>("/members/segments/fields"),
     enabled,
+  })
+}
+
+/** Every saved segment with the number of members it currently resolves
+ * to. The first call also seeds this organization's system segments. */
+export function useSegments(enabled = true) {
+  return useQuery({
+    queryKey: [SEGMENTS],
+    queryFn: () => api.get<SegmentSummary[]>("/members/segments"),
+    enabled,
+  })
+}
+
+export function useSegmentMembers(
+  segmentId: string | undefined,
+  params: { limit?: number; offset?: number } = {},
+) {
+  return useQuery({
+    queryKey: [SEGMENTS, segmentId, "members", params],
+    queryFn: () =>
+      api.get<{ members: SegmentMember[]; totalCount: number }>(
+        `/members/segments/${segmentId}/members`,
+        { query: params },
+      ),
+    enabled: Boolean(segmentId),
+  })
+}
+
+export function useCreateSegment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { name: string; description?: string; rules: SegmentRule[] }) =>
+      api.post<MemberSegment>("/members/segments", input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [SEGMENTS] }),
+  })
+}
+
+export function useDeleteSegment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (segmentId: string) => api.delete(`/members/segments/${segmentId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [SEGMENTS] }),
   })
 }
 

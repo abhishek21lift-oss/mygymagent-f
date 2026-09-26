@@ -58,6 +58,7 @@ import {
 import { useBranches } from "@/lib/hooks/use-branches";
 import { PageHero } from "@/components/shared/page-hero";
 import { RiskSection } from "./risk-section";
+import { SegmentsSection } from "./segments-section";
 import { StatCard, toStatTone } from "@/components/shared/stat-card";
 import { ErrorState } from "@/components/shared/error-state";
 
@@ -297,6 +298,10 @@ export default function IntelligencePage() {
  already list who was at risk and had no way to say how much of it
  there was, what it was worth, or whether it was getting worse. */}
  <RiskSection />
+
+ {/* Saved segments sit under the risk roll-ups because that is where an
+     operator decides who to act on next. */}
+ <SegmentsSection />
 
  <section aria-labelledby="intel-pulse">
  <SectionHeader title="Executive signal layer" />

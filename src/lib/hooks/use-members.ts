@@ -117,6 +117,42 @@ export function useMemberMetrics() {
   });
 }
 
+export interface MembershipBillingLine {
+  id: string
+  planName: string
+  price: string
+  discount: string | null
+  finalPrice: string
+  startDate: string
+  endDate: string
+  status: string
+}
+
+export interface MembershipBilling {
+  memberships: MembershipBillingLine[]
+  totalDue: string
+  totalPaid: string
+  totalRefunded: string
+  outstandingBalance: string
+}
+
+/**
+ * The member's membership account, totalled server-side.
+ *
+ * Worth an extra request rather than adding up the payment list in the
+ * browser: the server counts only payments actually tied to one of this
+ * member's memberships, so a PT package or a counter sale does not read as
+ * having settled a membership, and it totals in Decimal rather than in
+ * floating point.
+ */
+export function useMembershipBilling(memberId: string | undefined) {
+  return useQuery({
+    queryKey: [KEY, memberId, "membership-billing"],
+    queryFn: () => api.get<MembershipBilling>(`/members/${memberId}/membership-billing`),
+    enabled: Boolean(memberId),
+  })
+}
+
 export function useMember(id: string | undefined) {
   return useQuery({
     queryKey: [KEY, id],

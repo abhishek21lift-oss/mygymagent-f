@@ -17,11 +17,33 @@ import {
   useDismissRecommendation,
   useExecuteRecommendation,
   useGenerateRecommendations,
+  useMemberIntelligence,
   useMemberRecommendations,
 } from "@/lib/hooks/use-member-intelligence";
 
 function fail(error: unknown, fallback: string) {
   toast.error(error instanceof ApiError ? error.message : fallback);
+}
+
+/** A 0-100 signal from the risk engine, shown as the number and a bar so
+ * the four read against each other at a glance. */
+function SignalTile({ label, value }: { label: string; value: number }) {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  return (
+    <div className="rounded-lg border border-border px-3 py-2">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="text-sm font-bold tabular-nums">{clamped}</p>
+      <div
+        className="mt-1 h-1 overflow-hidden rounded-full bg-muted"
+        role="img"
+        aria-label={`${label}: ${clamped} out of 100`}
+      >
+        <div className="h-full rounded-full bg-primary" style={{ width: `${clamped}%` }} />
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -44,6 +66,7 @@ export function RiskRecommendationsPanel({ memberId }: { memberId: string }) {
   const assessment = useChurnAssessment(canViewReports ? memberId : undefined);
   const reason = useChurnReason(canRead ? memberId : undefined);
   const recommendations = useMemberRecommendations(canRead ? memberId : undefined);
+  const intelligence = useMemberIntelligence(canRead ? memberId : undefined);
   const compute = useComputeMemberIntelligence();
   const generate = useGenerateRecommendations(memberId);
   const execute = useExecuteRecommendation(memberId);
@@ -133,6 +156,49 @@ export function RiskRecommendationsPanel({ memberId }: { memberId: string }) {
               </>
             )}
           </div>
+        )}
+
+        {/* The signals behind the level. A bare "HIGH" tells a trainer to
+            worry; these tell them what to do about it. members.read, so
+            this shows for staff who cannot open the risk reports. */}
+        {intelligence.data && (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <SignalTile label="Attendance velocity" value={intelligence.data.attendanceVelocity} />
+            <SignalTile label="Payment reliability" value={intelligence.data.paymentReliability} />
+            <SignalTile label="Engagement" value={intelligence.data.engagementScore} />
+            <div className="rounded-lg border border-border px-3 py-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                Membership
+              </p>
+              <p className="text-sm font-bold">{intelligence.data.membershipStatus}</p>
+              {intelligence.data.daysUntilExpiry !== null && (
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  {intelligence.data.daysUntilExpiry < 0
+                    ? `expired ${Math.abs(intelligence.data.daysUntilExpiry)}d ago`
+                    : `${intelligence.data.daysUntilExpiry}d left`}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {(intelligence.data?.riskProfile?.contributingFactors?.length ?? 0) > 0 && (
+          <ul className="flex flex-col gap-1.5 rounded-lg border border-border p-3">
+            {intelligence.data!.riskProfile!.contributingFactors
+              // Biggest mover first: the top line is the one worth acting on.
+              .slice()
+              .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
+              .slice(0, 5)
+              .map((factor) => (
+                <li key={factor.factor} className="flex items-start gap-2 text-sm">
+                  <Badge variant={factor.direction === "NEGATIVE" ? "destructive" : "success"}>
+                    {factor.contribution > 0 ? "+" : ""}
+                    {Math.round(factor.contribution)}
+                  </Badge>
+                  <span className="min-w-0 text-muted-foreground">{factor.explanation}</span>
+                </li>
+              ))}
+          </ul>
         )}
 
         <DataState
