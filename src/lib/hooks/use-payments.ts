@@ -13,6 +13,21 @@ export function usePayments(params: PaginationParams & { memberId?: string } = {
   });
 }
 
+/**
+ * One payment with everything the list leaves out: which membership it
+ * settled and the refunds taken against it.
+ *
+ * A PARTIALLY_REFUNDED row in the table says only that -- not how much
+ * came back, when, or why. That is the question the badge provokes.
+ */
+export function usePayment(id: string | undefined) {
+  return useQuery({
+    queryKey: [KEY, "detail", id],
+    queryFn: () => api.get<Payment>(`/payments/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
 export function useCreatePayment() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -26,6 +41,7 @@ export function useRefundPayment() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: RefundPaymentInput }) =>
       api.post<Refund>(`/payments/${id}/refund`, input),
+    // [KEY] covers the list and the detail alike.
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   });
 }

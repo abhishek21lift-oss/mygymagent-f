@@ -75,3 +75,21 @@ export function useRevokeStaffRole() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   })
 }
+
+export interface PermissionDefinition {
+  key: string
+  resource: string
+  action: string
+  description: string
+}
+
+/** The permission catalogue, so a role's grants can be shown as what they
+ * let someone do rather than as a list of dotted keys. */
+export function usePermissionCatalog(enabled = true) {
+  return useQuery({
+    queryKey: ["roles", "permissions"],
+    queryFn: () => api.get<PermissionDefinition[]>("/roles/permissions"),
+    staleTime: 10 * 60 * 1000,
+    enabled,
+  })
+}

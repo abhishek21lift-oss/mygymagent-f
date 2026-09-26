@@ -9,6 +9,7 @@ import { useBranches } from "@/lib/hooks/use-branches";
 import {
  useAssignableRoles,
  useAssignStaffRole,
+ usePermissionCatalog,
  useRevokeStaffRole,
 } from "@/lib/hooks/use-staff";
 import type { StaffUser } from "@/lib/types/gym";
@@ -35,6 +36,7 @@ const ORG_WIDE = "__org_wide__";
 
 function RolesBody({ user }: { user: StaffUser }) {
  const roles = useAssignableRoles();
+ const catalogue = usePermissionCatalog();
  const branches = useBranches({ page: 1, pageSize: 100 });
  const assign = useAssignStaffRole();
  const revoke = useRevokeStaffRole();
@@ -55,6 +57,9 @@ function RolesBody({ user }: { user: StaffUser }) {
    toast.error(error instanceof ApiError ? error.message : "Could not grant this role.");
   }
  }
+
+ const selected = (roles.data ?? []).find((role) => role.key === roleKey);
+ const describe = new Map((catalogue.data ?? []).map((p) => [p.key, p.description]));
 
  const branchName = (id: string | null) =>
   id ? branches.data?.items?.find((b: { id: string }) => b.id === id)?.name ?? "A branch" : null;
@@ -122,11 +127,26 @@ function RolesBody({ user }: { user: StaffUser }) {
       </Select>
      </div>
     </div>
-    {roleKey && (
-     <p className="text-xs text-muted-foreground">
-      {(roles.data ?? []).find((role) => role.key === roleKey)?.description ??
-       `${(roles.data ?? []).find((role) => role.key === roleKey)?.permissions.length ?? 0} permissions`}
-     </p>
+    {selected && (
+     <div className="grid gap-1.5">
+      {selected.description && (
+       <p className="text-xs text-muted-foreground">{selected.description}</p>
+      )}
+      {/* What the role actually lets someone do, in the catalogue's own
+          words. "accounting.manage" tells an owner nothing. */}
+      <details className="text-xs">
+       <summary className="cursor-pointer font-semibold text-muted-foreground">
+        {selected.permissions.length} permission{selected.permissions.length === 1 ? "" : "s"}
+       </summary>
+       <ul className="mt-1.5 grid max-h-40 gap-0.5 overflow-y-auto pl-4">
+        {selected.permissions.map((key) => (
+         <li key={key} className="list-disc text-muted-foreground">
+          {describe.get(key) ?? key}
+         </li>
+        ))}
+       </ul>
+      </details>
+     </div>
     )}
     <div className="flex justify-end">
      <Button type="button" disabled={!roleKey || assign.isPending} aria-busy={assign.isPending} onClick={() => void submit()}>
