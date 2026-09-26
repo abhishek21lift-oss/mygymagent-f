@@ -8,7 +8,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { accentForPath } from "@/lib/section-accent";
 import { useAuth } from "@/lib/auth/auth-context";
-import { primaryNav, secondaryNav, comingSoonNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
+import { primaryNav, secondaryNav, comingSoonNav, platformNav, settingsNav, isNavItemActive, type NavItem } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
 
@@ -96,7 +96,14 @@ function NavLink({ item, active, nested = false, collapsed = false, onNavigate, 
  );
 }
 
-function permissionVisible(item: NavItem, hasPermission: (permission: string | string[]) => boolean) {
+function permissionVisible(
+ item: NavItem,
+ hasPermission: (permission: string | string[]) => boolean,
+ isPlatformStaff: boolean,
+) {
+ // A platform-only item is gated on User.platformRole, which no RBAC
+ // permission can stand in for.
+ if (item.platformOnly && !isPlatformStaff) return false;
  return !item.permission || hasPermission(item.permission);
 }
 
@@ -111,18 +118,20 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export function SidebarNav({ className, collapsed = false, onNavigate, mobile = false, scrollToActive = false }: { className?: string; collapsed?: boolean; onNavigate?: () => void; mobile?: boolean; scrollToActive?: boolean }) {
  const pathname = usePathname();
- const { hasPermission } = useAuth();
+ const { hasPermission, user } = useAuth();
+ const isPlatformStaff = Boolean(user?.platformRole);
  const activeRef = React.useRef<HTMLAnchorElement | null>(null);
- const visiblePrimary = primaryNav.filter((item) => permissionVisible(item, hasPermission));
- const visibleSecondary = secondaryNav.filter((item) => permissionVisible(item, hasPermission));
- const visibleComingSoon = comingSoonNav.filter((item) => permissionVisible(item, hasPermission));
- const showSettings = permissionVisible(settingsNav, hasPermission);
+ const visiblePrimary = primaryNav.filter((item) => permissionVisible(item, hasPermission, isPlatformStaff));
+ const visibleSecondary = secondaryNav.filter((item) => permissionVisible(item, hasPermission, isPlatformStaff));
+ const visibleComingSoon = comingSoonNav.filter((item) => permissionVisible(item, hasPermission, isPlatformStaff));
+ const showSettings = permissionVisible(settingsNav, hasPermission, isPlatformStaff);
+ const visiblePlatform = platformNav.filter((item) => permissionVisible(item, hasPermission, isPlatformStaff));
 
  /** One renderer for both lists: the markup is identical, and the only
  * thing that differed was which array it looped over. */
  const renderGroup = (items: NavItem[]) =>
  items.map((item, index) => {
- const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission));
+ const children = (item.children ?? []).filter((child) => permissionVisible(child, hasPermission, isPlatformStaff));
  const active = isNavItemActive(pathname, item.href) || children.some((child) => isNavItemActive(pathname, child.href));
  const isAi = item.accent === "ai";
  // The rule heads the AI group, so it belongs to the first AI item
@@ -203,6 +212,15 @@ export function SidebarNav({ className, collapsed = false, onNavigate, mobile = 
  </div>
  )}
  {collapsed && visibleComingSoon.map((item) => <NavLink key={item.href} item={item} active={isNavItemActive(pathname, item.href)} collapsed onNavigate={onNavigate} />)}
+
+ {/* Last, under its own rule: running the product is not part of
+     running a gym, and nobody outside platform staff ever sees it. */}
+ {visiblePlatform.length > 0 && (
+ <div className="mt-3 shrink-0 border-t border-sidebar-border/60 pt-3">
+ {!collapsed && <SectionLabel>Platform</SectionLabel>}
+ {renderGroup(visiblePlatform)}
+ </div>
+ )}
  </div>
 
  <div className="mt-3 shrink-0 border-t border-sidebar-border/60 pt-3">

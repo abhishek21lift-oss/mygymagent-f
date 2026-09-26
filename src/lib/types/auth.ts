@@ -12,6 +12,12 @@ export interface AuthUser {
    * every request 403, so the server answers this at sign-in rather than
    * leaving the client to probe for it. */
   memberId: string | null
+  /** Platform staff, or null for everyone else.
+   *
+   * Platform routes are gated server-side on this column rather than on
+   * an RBAC grant, so it is the only thing that can decide whether to
+   * offer the cross-tenant screens. */
+  platformRole: "PLATFORM_OWNER" | "PLATFORM_ADMIN" | null
 }
 
 export interface Organization {

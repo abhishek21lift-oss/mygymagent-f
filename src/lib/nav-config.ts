@@ -5,7 +5,19 @@ import {
   Megaphone, Package, Salad, Search, Settings, Sparkles, UserCog, Users, Wallet,
 } from "lucide-react";
 
-export interface NavItem { title: string; href: string; icon: LucideIcon; permission?: string | string[]; children?: NavItem[]; accent?: "ai" | "default"; comingSoon?: boolean }
+export interface NavItem {
+  title: string
+  href: string
+  icon: LucideIcon
+  permission?: string | string[]
+  /** Shown only to platform staff. Their access is decided by
+   * `User.platformRole`, not by an RBAC grant, so no `permission` value
+   * can express it. */
+  platformOnly?: boolean
+  children?: NavItem[]
+  accent?: "ai" | "default"
+  comingSoon?: boolean
+}
 
 /** Exact-segment route match: `pathname.startsWith(href)` alone is wrong
  * whenever one route is a literal string prefix of an unrelated sibling
@@ -89,4 +101,15 @@ export const secondaryNav: NavItem[] = [
 ];
 
 export const comingSoonNav: NavItem[] = [];
+/**
+ * Cross-tenant administration, for platform staff only.
+ *
+ * Kept out of the six work areas on purpose: this is not part of running
+ * a gym, it is running the product every gym is on. Nobody who signs in
+ * to a single organization ever sees it.
+ */
+export const platformNav: NavItem[] = [
+  { title: "Organizations", href: "/platform/organizations", icon: Building2, platformOnly: true },
+];
+
 export const settingsNav: NavItem = { title: "Settings", href: "/settings", icon: Settings, permission: "organizations.read" };
