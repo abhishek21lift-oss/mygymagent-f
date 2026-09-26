@@ -14,6 +14,7 @@ import { toast } from "sonner"
 
 import { MfaEnrolment } from "@/components/security/mfa-enrolment"
 import { ConfirmAction } from "@/components/shared/confirm-action"
+import { AuditLogPanel } from "./audit-log-panel"
 import { ErrorState } from "@/components/shared/error-state"
 import { PageHero } from "@/components/shared/page-hero"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -402,6 +403,7 @@ export default function SecuritySettingsPage() {
  // The policy endpoints are gated on `organizations.update`; querying them
  // without it would just 403 into an error state the user cannot act on.
  const canSetPolicy = hasPermission("organizations.update")
+ const canReadAudit = hasPermission("audit.read")
 
  return (
  <div className="pb-4">
@@ -448,6 +450,14 @@ export default function SecuritySettingsPage() {
  </div>
  </CardContent>
  </Card>
+
+ {canReadAudit ? (
+ <Card className="overflow-hidden border-border bg-card">
+ <CardContent className="p-6">
+ <AuditLogPanel />
+ </CardContent>
+ </Card>
+ ) : null}
 
  {canSetPolicy ? (
  <Card className="overflow-hidden border-border bg-card">
