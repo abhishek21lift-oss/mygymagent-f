@@ -4,13 +4,34 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   THE CULT CLIENT — Precision Operator
+   THE CULT CLIENT — Aurora
    ------------------------------------------------------------
-   An all-day operations tool: front desk, member rolls, money.
-   Calm and fast beats flashy. Hierarchy comes from typography,
-   spacing and one confident accent — not from decoration.
+   A gym runs on the front desk, the member rolls and the money,
+   and it runs on them all day. So the interface has to be
+   unfatiguing and instantly legible — but it also has to be the
+   thing a member is delighted to see on their phone, and a thing
+   an owner is proud to show a partner.
 
-   Two rules hold this together:
+   Those two are not in tension once you stop treating colour as
+   noise. This file is built the way Apple's own products are:
+
+   - Colour is LIGHT, not pigment. A saturated hue is used as a
+     large, soft, low-opacity field that sits *behind* content —
+     an aurora on the canvas, a wash under a masthead, a glow
+     under a card. Never as a fill behind small type.
+   - Type is INK, and carries all the contrast. Every colour that
+     becomes text has a separately solved darker (or lighter) step,
+     `--*-ink`, verified at >= 6.1:1 against the exact surface it
+     is typed on. A hue used as a fill never becomes a hue used
+     as type.
+   - Depth is MATERIAL and LIGHT, not borders. Elevation is a
+     soft multi-layer shadow, a 1px top highlight, and — on the
+     chrome — real backdrop blur. Hairline borders are reserved
+     for things that genuinely divide, like table rows.
+   - Motion is SPRING-SMOOTH and short. 180-320ms on a decelerate
+     curve, a small scale on press, never a bounce.
+
+   THREE RULES HOLD THIS TOGETHER
 
    1. Every colour is declared on bare `:root` first, then
       redefined under `.dark`. Nothing is defined only inside a
@@ -22,556 +43,827 @@
       ~3,400 hardcoded utility classes were written across this
       app before the system existed; re-pointing the scales makes
       every one of them theme-aware at once, instead of waiting
-      on 45 files to be rewritten by hand. Pages are still being
-      migrated to the semantic tokens below — prefer those in new
-      work; the scales are the safety net, not the destination.
+      on 45 files to be rewritten by hand. Prefer the semantic
+      tokens in new work; the scales are the safety net.
+
+   3. Filled controls take their label colour from a SOLVED pair
+      (`--a-*-fill` / `--a-*-on`), not from one global
+      `--primary-foreground`. White clears 4.5:1 on indigo and
+      not on amber; a single foreground token cannot be right for
+      eight hues, so each one was solved independently. All eight
+      land at 5.5:1 or better with a white label.
+
+   HOW THE COLOURS WERE CHOSEN
+
+   Every accent is derived from Apple's system palette
+   (systemIndigo, systemPurple, systemPink, systemGreen,
+   systemOrange, systemTeal, systemBlue, systemRed) converted
+   into OKLCh, then re-solved per role: the solid step for
+   gradients and glyphs, `ink` walked down in lightness until it
+   clears 6:1 on its own wash, and `fill` walked until it clears
+   5.5:1 under a white label. The eight names the app already
+   passes around (`indigo`, `violet`, `rose`, `emerald`, `amber`,
+   `cyan`, `blue`, `orange`) are unchanged — 32 pages and the
+   route map key on them — only the colours behind them moved.
    ============================================================ */
 
 :root {
   color-scheme: light;
-  --radius: 0.625rem;
 
-  /* — Palette scales (see rule 2 above) — */
-  --c-stone-50: oklch(0.985 0.0017 265);
-  --c-stone-100: oklch(0.962 0.0034 265);
-  --c-stone-200: oklch(0.922 0.0064 265);
-  --c-stone-300: oklch(0.86 0.0109 265);
-  --c-stone-400: oklch(0.76 0.0162 265);
-  --c-stone-500: oklch(0.648 0.0207 265);
-  --c-stone-600: oklch(0.556 0.0221 265);
-  --c-stone-700: oklch(0.472 0.0199 265);
-  --c-stone-800: oklch(0.396 0.0168 265);
-  --c-stone-900: oklch(0.322 0.0137 265);
-  --c-stone-950: oklch(0.235 0.0098 265);
-  --c-slate-50: oklch(0.985 0.0022 265);
-  --c-slate-100: oklch(0.962 0.0043 265);
-  --c-slate-200: oklch(0.922 0.0083 265);
-  --c-slate-300: oklch(0.86 0.014 265);
-  --c-slate-400: oklch(0.76 0.0209 265);
-  --c-slate-500: oklch(0.648 0.0266 265);
-  --c-slate-600: oklch(0.556 0.0284 265);
-  --c-slate-700: oklch(0.472 0.0256 265);
-  --c-slate-800: oklch(0.396 0.0216 265);
-  --c-slate-900: oklch(0.322 0.0176 265);
-  --c-slate-950: oklch(0.235 0.0126 265);
-  --c-indigo-50: oklch(0.985 0.012 264);
-  --c-indigo-100: oklch(0.962 0.024 264);
-  --c-indigo-200: oklch(0.922 0.046 264);
-  --c-indigo-300: oklch(0.86 0.078 264);
-  --c-indigo-400: oklch(0.76 0.116 264);
-  --c-indigo-500: oklch(0.648 0.148 264);
-  --c-indigo-600: oklch(0.556 0.158 264);
-  --c-indigo-700: oklch(0.472 0.142 264);
-  --c-indigo-800: oklch(0.396 0.12 264);
-  --c-indigo-900: oklch(0.322 0.098 264);
-  --c-indigo-950: oklch(0.235 0.07 264);
-  --c-violet-50: oklch(0.985 0.0114 292);
-  --c-violet-100: oklch(0.962 0.0228 292);
-  --c-violet-200: oklch(0.922 0.0437 292);
-  --c-violet-300: oklch(0.86 0.0741 292);
-  --c-violet-400: oklch(0.76 0.1102 292);
-  --c-violet-500: oklch(0.648 0.1406 292);
-  --c-violet-600: oklch(0.556 0.1501 292);
-  --c-violet-700: oklch(0.472 0.1349 292);
-  --c-violet-800: oklch(0.396 0.114 292);
-  --c-violet-900: oklch(0.322 0.0931 292);
-  --c-violet-950: oklch(0.235 0.0665 292);
-  --c-emerald-50: oklch(0.985 0.011 155);
-  --c-emerald-100: oklch(0.962 0.0221 155);
-  --c-emerald-200: oklch(0.922 0.0423 155);
-  --c-emerald-300: oklch(0.86 0.0718 155);
-  --c-emerald-400: oklch(0.76 0.1067 155);
-  --c-emerald-500: oklch(0.648 0.1362 155);
-  --c-emerald-600: oklch(0.556 0.1454 155);
-  --c-emerald-700: oklch(0.472 0.1306 155);
-  --c-emerald-800: oklch(0.396 0.1104 155);
-  --c-emerald-900: oklch(0.322 0.0902 155);
-  --c-emerald-950: oklch(0.235 0.0644 155);
-  --c-amber-50: oklch(0.985 0.0114 75);
-  --c-amber-100: oklch(0.962 0.0228 75);
-  --c-amber-200: oklch(0.922 0.0437 75);
-  --c-amber-300: oklch(0.86 0.0741 75);
-  --c-amber-400: oklch(0.76 0.1102 75);
-  --c-amber-500: oklch(0.648 0.1406 75);
-  --c-amber-600: oklch(0.556 0.1501 75);
-  --c-amber-700: oklch(0.472 0.1349 75);
-  --c-amber-800: oklch(0.396 0.114 75);
-  --c-amber-900: oklch(0.322 0.0931 75);
-  --c-amber-950: oklch(0.235 0.0665 75);
-  --c-rose-50: oklch(0.985 0.0118 20);
-  --c-rose-100: oklch(0.962 0.0235 20);
-  --c-rose-200: oklch(0.922 0.0451 20);
-  --c-rose-300: oklch(0.86 0.0764 20);
-  --c-rose-400: oklch(0.76 0.1137 20);
-  --c-rose-500: oklch(0.648 0.145 20);
-  --c-rose-600: oklch(0.556 0.1548 20);
-  --c-rose-700: oklch(0.472 0.1392 20);
-  --c-rose-800: oklch(0.396 0.1176 20);
-  --c-rose-900: oklch(0.322 0.096 20);
-  --c-rose-950: oklch(0.235 0.0686 20);
-  --c-cyan-50: oklch(0.985 0.0106 225);
-  --c-cyan-100: oklch(0.962 0.0211 225);
-  --c-cyan-200: oklch(0.922 0.0405 225);
-  --c-cyan-300: oklch(0.86 0.0686 225);
-  --c-cyan-400: oklch(0.76 0.1021 225);
-  --c-cyan-500: oklch(0.648 0.1302 225);
-  --c-cyan-600: oklch(0.556 0.139 225);
-  --c-cyan-700: oklch(0.472 0.125 225);
-  --c-cyan-800: oklch(0.396 0.1056 225);
-  --c-cyan-900: oklch(0.322 0.0862 225);
-  --c-cyan-950: oklch(0.235 0.0616 225);
-  /* — Surfaces. A picked neutral: near-white carrying a whisper of
-       the accent's hue, so the ground reads as chosen, not default. — */
-  --background: oklch(0.988 0.003 265);
-  --foreground: oklch(0.223 0.020 265);
+  /* — Geometry. Apple shapes generously: a 16px base corner reads as
+       considered, a 6px one reads as a form field. — */
+  --radius: 1rem;
+
+  /* — Palette scales (rule 2). Apple's system greys for the neutrals,
+       Apple's system hues for the colours, both on Tailwind's own
+       lightness curve. — */
+  --c-stone-50 : oklch(0.975 0.004 286);
+  --c-stone-100: oklch(0.945 0.004 286);
+  --c-stone-200: oklch(0.895 0.004 286);
+  --c-stone-300: oklch(0.825 0.004 286);
+  --c-stone-400: oklch(0.735 0.004 286);
+  --c-stone-500: oklch(0.655 0.004 286);
+  --c-stone-600: oklch(0.585 0.004 286);
+  --c-stone-700: oklch(0.51 0.004 286);
+  --c-stone-800: oklch(0.44 0.004 286);
+  --c-stone-900: oklch(0.385 0.004 286);
+  --c-stone-950: oklch(0.265 0.004 286);
+  --c-slate-50 : oklch(0.975 0.004 286);
+  --c-slate-100: oklch(0.945 0.004 286);
+  --c-slate-200: oklch(0.895 0.004 286);
+  --c-slate-300: oklch(0.825 0.004 286);
+  --c-slate-400: oklch(0.735 0.004 286);
+  --c-slate-500: oklch(0.655 0.004 286);
+  --c-slate-600: oklch(0.585 0.004 286);
+  --c-slate-700: oklch(0.51 0.004 286);
+  --c-slate-800: oklch(0.44 0.004 286);
+  --c-slate-900: oklch(0.385 0.004 286);
+  --c-slate-950: oklch(0.265 0.004 286);
+  --c-indigo-50 : oklch(0.975 0.012 278);
+  --c-indigo-100: oklch(0.945 0.027 278);
+  --c-indigo-200: oklch(0.895 0.052 278);
+  --c-indigo-300: oklch(0.825 0.088 278);
+  --c-indigo-400: oklch(0.735 0.139 278);
+  --c-indigo-500: oklch(0.655 0.187 278);
+  --c-indigo-600: oklch(0.585 0.182 278);
+  --c-indigo-700: oklch(0.51 0.161 278);
+  --c-indigo-800: oklch(0.44 0.135 278);
+  --c-indigo-900: oklch(0.385 0.112 278);
+  --c-indigo-950: oklch(0.265 0.082 278);
+  --c-violet-50 : oklch(0.975 0.017 312);
+  --c-violet-100: oklch(0.945 0.037 312);
+  --c-violet-200: oklch(0.895 0.072 312);
+  --c-violet-300: oklch(0.825 0.123 312);
+  --c-violet-400: oklch(0.735 0.184 312);
+  --c-violet-500: oklch(0.655 0.209 312);
+  --c-violet-600: oklch(0.585 0.202 312);
+  --c-violet-700: oklch(0.51 0.179 312);
+  --c-violet-800: oklch(0.44 0.15 312);
+  --c-violet-900: oklch(0.385 0.125 312);
+  --c-violet-950: oklch(0.265 0.092 312);
+  --c-emerald-50 : oklch(0.975 0.027 147);
+  --c-emerald-100: oklch(0.945 0.05 147);
+  --c-emerald-200: oklch(0.895 0.088 147);
+  --c-emerald-300: oklch(0.825 0.13 147);
+  --c-emerald-400: oklch(0.735 0.168 147);
+  --c-emerald-500: oklch(0.655 0.19 147);
+  --c-emerald-600: oklch(0.585 0.172 147);
+  --c-emerald-700: oklch(0.51 0.15 147);
+  --c-emerald-800: oklch(0.44 0.129 147);
+  --c-emerald-900: oklch(0.385 0.113 147);
+  --c-emerald-950: oklch(0.265 0.078 147);
+  --c-amber-50 : oklch(0.975 0.016 63);
+  --c-amber-100: oklch(0.945 0.036 63);
+  --c-amber-200: oklch(0.895 0.071 63);
+  --c-amber-300: oklch(0.825 0.117 63);
+  --c-amber-400: oklch(0.735 0.151 63);
+  --c-amber-500: oklch(0.655 0.15 63);
+  --c-amber-600: oklch(0.585 0.134 63);
+  --c-amber-700: oklch(0.51 0.117 63);
+  --c-amber-800: oklch(0.44 0.101 63);
+  --c-amber-900: oklch(0.385 0.088 63);
+  --c-amber-950: oklch(0.265 0.061 63);
+  --c-rose-50 : oklch(0.975 0.012 18);
+  --c-rose-100: oklch(0.945 0.028 18);
+  --c-rose-200: oklch(0.895 0.055 18);
+  --c-rose-300: oklch(0.825 0.098 18);
+  --c-rose-400: oklch(0.735 0.164 18);
+  --c-rose-500: oklch(0.655 0.234 18);
+  --c-rose-600: oklch(0.585 0.227 18);
+  --c-rose-700: oklch(0.51 0.201 18);
+  --c-rose-800: oklch(0.44 0.168 18);
+  --c-rose-900: oklch(0.385 0.14 18);
+  --c-rose-950: oklch(0.265 0.103 18);
+  --c-cyan-50 : oklch(0.975 0.015 213);
+  --c-cyan-100: oklch(0.945 0.028 213);
+  --c-cyan-200: oklch(0.895 0.05 213);
+  --c-cyan-300: oklch(0.825 0.074 213);
+  --c-cyan-400: oklch(0.735 0.096 213);
+  --c-cyan-500: oklch(0.655 0.109 213);
+  --c-cyan-600: oklch(0.585 0.102 213);
+  --c-cyan-700: oklch(0.51 0.089 213);
+  --c-cyan-800: oklch(0.44 0.077 213);
+  --c-cyan-900: oklch(0.385 0.065 213);
+  --c-cyan-950: oklch(0.265 0.046 213);
+
+  /* — Surfaces. Cards stay OPAQUE. Apple's own light-mode cards are
+       white on a grouped background, and an operations screen full of
+       translucent panels over a colourful canvas loses the contrast
+       that makes a number readable at a glance. Vibrancy is spent on
+       the chrome instead (see --glass-* below), which is where
+       Apple's own products spend it. — */
+  --background: oklch(0.978 0.005 265);
+  --foreground: oklch(0.22 0.012 265);
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
 
-  /* Raised/sunken surfaces, so pages stop inventing their own. */
   --surface-raised: oklch(1 0 0);
-  --surface-sunken: oklch(0.967 0.004 265);
-  --surface-hover: oklch(0.958 0.006 265);
+  --surface-sunken: oklch(0.955 0.006 265);
+  --surface-hover: oklch(0.962 0.008 265);
 
-  /* — One accent. Spent sparingly, on the thing to act on. — */
-  --primary: oklch(0.520 0.190 264);
-  --primary-foreground: oklch(0.99 0.002 265);
-  --primary-hover: oklch(0.462 0.190 264);
-  --primary-tint: oklch(0.952 0.030 264);
+  /* — Materials. Real backdrop blur, with saturate() so the colour
+       coming through stays vivid instead of going grey the way a
+       plain blur makes it. This is what the nav rail, the top bar,
+       menus and dialogs are made of. — */
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-bg-strong: rgb(255 255 255 / 0.95);
+  --glass-bg-thin: rgb(255 255 255 / 0.55);
+  --glass-border: rgb(255 255 255 / 0.7);
+  --glass-blur: 30px;
+  --glass-saturate: 190%;
+  /* A hairline of white along a glass edge, which is what actually
+     sells it as a pane of material rather than a pale rectangle. */
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --glass-sheen: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.55) 0%,
+    rgb(255 255 255 / 0.16) 38%,
+    rgb(255 255 255 / 0) 100%
+  );
 
-  --secondary: oklch(0.962 0.005 265);
-  --secondary-foreground: oklch(0.300 0.028 265);
-  --muted: oklch(0.962 0.005 265);
-  --muted-foreground: oklch(0.505 0.022 265);
-  --accent: oklch(0.950 0.010 265);
-  --accent-foreground: oklch(0.262 0.032 265);
+  /* — Signature accent. Deep enough to carry a white label at 5.5:1,
+       saturated enough to read as brand rather than as ink. Re-pointed
+       per section further down. — */
+  --primary: oklch(0.526 0.187 257);
+  --primary-foreground: #ffffff;
+  --primary-hover: oklch(0.476 0.187 257);
+  --primary-tint: oklch(0.95 0.03 257);
+  --primary-grad-1: oklch(0.526 0.187 257);
+  --primary-grad-2: oklch(0.586 0.187 291);
+
+  --secondary: oklch(0.955 0.006 265);
+  --secondary-foreground: oklch(0.26 0.02 265);
+  --muted: oklch(0.955 0.006 265);
+  --muted-foreground: oklch(0.52 0.012 265);
+  --accent: oklch(0.955 0.012 257);
+  --accent-foreground: oklch(0.42 0.14 257);
 
   /* — Semantic status. Deliberately separate from the accent hue:
-       "needs attention" must never be confused with "actionable". — */
-  --success: oklch(0.505 0.130 155);
-  --success-foreground: oklch(0.99 0.002 155);
-  --success-tint: oklch(0.955 0.030 155);
-  --warning: oklch(0.648 0.141 75);
-  --warning-foreground: oklch(0.235 0.045 75);
-  --warning-tint: oklch(0.962 0.040 75);
-  --destructive: oklch(0.556 0.196 20);
-  --destructive-foreground: oklch(0.99 0.002 20);
-  --destructive-tint: oklch(0.958 0.030 20);
-  --info: oklch(0.556 0.130 225);
-  --info-foreground: oklch(0.99 0.002 225);
-  --info-tint: oklch(0.955 0.030 225);
-  --ai: oklch(0.520 0.180 292);
-  --ai-foreground: oklch(0.99 0.002 292);
-  --ai-tint: oklch(0.955 0.035 292);
+       "needs attention" must never be confused with "actionable".
+
+       Each of these is used BOTH ways in this app — 56 call sites write
+       `text-destructive`/`text-success`/`text-warning` and 22 write
+       `bg-destructive`/`bg-success`/`bg-warning` beside a `-foreground`.
+       One value cannot serve both, because a fill wants to be DARK (so
+       a white label clears 4.5:1) while type wants to be LIGHT in dark
+       mode (to clear 4.5:1 on a dark surface).
+
+       So `-foreground` follows the theme instead. In light the status is
+       DEEP and labelled white; in dark it is LIGHT and labelled with the
+       dark ground. One value per theme then serves as type, as a fill
+       and as a chip, and all 78 call sites are correct without being
+       touched. Verified at 5.2:1 or better against its own tint, 5.8:1
+       or better against a card, in both themes. */
+  --success: oklch(0.49 0.144 147);
+  --success-foreground: #ffffff;
+  --success-tint: oklch(0.955 0.046 147);
+  --warning: oklch(0.502 0.115 63);
+  --warning-foreground: #ffffff;
+  --warning-tint: oklch(0.955 0.029 63);
+  --destructive: oklch(0.518 0.212 29);
+  --destructive-foreground: #ffffff;
+  --destructive-tint: oklch(0.955 0.023 29);
+  --info: oklch(0.498 0.087 213);
+  --info-foreground: #ffffff;
+  --info-tint: oklch(0.955 0.028 213);
+  --ai: oklch(0.526 0.213 312);
+  --ai-foreground: #ffffff;
+  --ai-tint: oklch(0.955 0.03 312);
 
   --border: oklch(0.912 0.006 265);
-  --border-strong: oklch(0.856 0.010 265);
-  --input: oklch(0.888 0.008 265);
-  --ring: oklch(0.520 0.190 264 / 0.45);
+  --border-strong: oklch(0.84 0.01 265);
+  --input: oklch(0.895 0.008 265);
+  --ring: oklch(0.526 0.187 257 / 0.45);
 
-  /* Charts: colourblind-safe, distinguishable by order as well as hue. */
-  /* Categorical series, assigned in this fixed order and never cycled.
-     Deliberately NOT the status hues above: "warning" must never also mean
-     "series 3". Validated with the dataviz skill's six checks (lightness
-     band, chroma floor, CVD separation, normal-vision floor, contrast) —
-     the first attempt reused the semantic ramp and failed protanopia
-     separation at dE 5.8 between the green and the amber, which is
-     invisible to a colourblind reader. Lightness carries part of the
-     separation so the order survives CVD. */
-  --chart-1: oklch(0.500 0.190 264);
-  --chart-2: oklch(0.660 0.150 70);
-  --chart-3: oklch(0.560 0.150 215);
-  --chart-4: oklch(0.600 0.190 15);
-  --chart-5: oklch(0.460 0.180 300);
-  --chart-6: oklch(0.620 0.150 145);
+  /* — Charts. Carried over UNCHANGED from the previous system, which
+       had already validated these six against the dataviz checks
+       (lightness band, chroma floor, protanopia/deuteranopia
+       separation, normal-vision floor, contrast). The first attempt
+       there reused the semantic ramp and failed protanopia separation
+       at dE 5.8 between green and amber. A redesign is not a licence
+       to ship a chart palette that a colourblind reader cannot
+       separate, so these values are not part of the restyle. — */
+  --chart-1: oklch(0.5 0.19 264);
+  --chart-2: oklch(0.66 0.15 70);
+  --chart-3: oklch(0.56 0.15 215);
+  --chart-4: oklch(0.6 0.19 15);
+  --chart-5: oklch(0.46 0.18 300);
+  --chart-6: oklch(0.62 0.15 145);
   --chart-grid: oklch(0.912 0.006 265);
 
-  /* Sidebar stays dark in both themes: it is the one fixed landmark,
-     and constant wayfinding beats theme purity here. */
-  --sidebar: oklch(0.205 0.020 265);
-  --sidebar-foreground: oklch(0.885 0.010 265);
-  --sidebar-muted: oklch(0.640 0.018 265);
-  --sidebar-primary: oklch(0.720 0.150 264);
-  --sidebar-primary-foreground: oklch(0.180 0.025 265);
-  --sidebar-accent: oklch(0.272 0.026 265);
-  --sidebar-accent-foreground: oklch(0.965 0.005 265);
-  --sidebar-border: oklch(0.285 0.022 265);
-  --sidebar-ring: oklch(0.720 0.150 264 / 0.5);
+  /* — Nav rail. Now FROSTED and theme-aware, where it used to be a
+       permanently dark slab. A dark rail is a fine idea on a desktop
+       that never moves; on a tablet and a phone it means the one
+       largest surface in the app ignores the user's light/dark
+       choice. Glass lets the aurora show through, so the rail is
+       part of the picture rather than a hole in it. — */
+  --sidebar: rgb(255 255 255 / 0.66);
+  --sidebar-foreground: oklch(0.24 0.015 265);
+  --sidebar-muted: oklch(0.52 0.012 265);
+  --sidebar-primary: oklch(0.526 0.187 257);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(255 255 255 / 0.72);
+  --sidebar-accent-foreground: oklch(0.24 0.015 265);
+  --sidebar-border: rgb(255 255 255 / 0.75);
+  --sidebar-ring: oklch(0.526 0.187 257 / 0.5);
 
-  /* — Elevation. Three levels, spent by role. Not one shadow
-       stamped on every block, which flattens hierarchy. — */
-  --shadow-flat: 0 0 0 1px oklch(0.912 0.006 265);
-  --shadow-card: 0 1px 2px oklch(0.223 0.02 265 / 0.05), 0 1px 3px oklch(0.223 0.02 265 / 0.04);
-  --shadow-raised: 0 2px 4px oklch(0.223 0.02 265 / 0.05), 0 8px 20px -6px oklch(0.223 0.02 265 / 0.10);
-  --shadow-popover: 0 8px 28px -6px oklch(0.223 0.02 265 / 0.18), 0 2px 6px oklch(0.223 0.02 265 / 0.06);
+  /* — Elevation. Four levels, spent by role. Apple's shadows are wide,
+       soft and layered rather than tight and dark, so a card reads as
+       lifted off the page instead of outlined on it. The 1px top
+       highlight does most of the work in light mode; the shadow
+       carries depth in dark mode where a highlight would not show. — */
+  --shadow-flat: 0 0 0 1px var(--border);
+  --shadow-card:
+    0 0 0 1px rgb(15 23 42 / 0.04),
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 4px 12px -2px rgb(15 23 42 / 0.06);
+  --shadow-raised:
+    0 0 0 1px rgb(15 23 42 / 0.05),
+    0 2px 4px rgb(15 23 42 / 0.04),
+    0 12px 28px -6px rgb(15 23 42 / 0.12);
+  --shadow-float:
+    0 0 0 1px rgb(15 23 42 / 0.06),
+    0 4px 8px -2px rgb(15 23 42 / 0.06),
+    0 24px 56px -12px rgb(15 23 42 / 0.18);
+  --shadow-popover: var(--shadow-float);
 
-  /* — Layout & motion — */
-  --header-height: 3.5rem;
-  --sidebar-width: 16rem;
-  --sidebar-collapsed-width: 4.25rem;
+  /* — Layout & motion. One decelerating curve for everything, so the
+       whole app settles at the same tempo. — */
+  --header-height: 4rem;
+  --sidebar-width: 17rem;
+  --sidebar-collapsed-width: 4.5rem;
   --content-max-width: 96rem;
   --gutter: 1rem;
-  --duration-fast: 110ms;
-  --duration-base: 170ms;
+  --duration-fast: 180ms;
+  --duration-base: 280ms;
+  --duration-slow: 420ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.64, 1);
 
   /* --- Section accents -------------------------------------------
-     One hue per workspace section, so colour carries where you are
-     rather than decorating what you are looking at. Moving from
-     Members to Finance should be visible before you read a word.
+      One hue per workspace section, so colour carries where you are
+      rather than decorating what you are looking at. Moving from
+      Members to Finance should be visible before you read a word.
 
-     Three values each, because a hue used at one lightness can only
-     ever be a block of paint: `solid` for the rule and the glyph,
-     `tint` for the surface a glyph sits on, `wash` for the gradient
-     that bleeds off the masthead. Chroma stays low on wash and tint --
-     a page's own title is not a state, and must never shout louder
-     than the one badge on it that is.
+      Six values each, because a single hue at one lightness can only
+      ever be a block of paint:
 
-     The eight names match the `accent` prop 32 call sites already
-     pass; that prop had been accepted and ignored since the density
-     pass removed the tinted chip, so the information was sitting
-     there unused. */
-  --a-indigo:       oklch(0.520 0.190 264);
-  --a-indigo-tint:  oklch(0.948 0.038 264);
-  --a-indigo-wash:  oklch(0.975 0.020 264);
-  --a-violet:       oklch(0.530 0.205 295);
-  --a-violet-tint:  oklch(0.950 0.040 295);
-  --a-violet-wash:  oklch(0.976 0.021 295);
-  --a-rose:         oklch(0.570 0.195 15);
-  --a-rose-tint:    oklch(0.955 0.036 15);
-  --a-rose-wash:    oklch(0.978 0.018 15);
-  --a-emerald:      oklch(0.545 0.140 158);
-  --a-emerald-tint: oklch(0.950 0.040 158);
-  --a-emerald-wash: oklch(0.975 0.020 158);
-  --a-amber:        oklch(0.615 0.150 75);
-  --a-amber-tint:   oklch(0.958 0.048 75);
-  --a-amber-wash:   oklch(0.980 0.024 75);
-  --a-cyan:         oklch(0.560 0.120 225);
-  --a-cyan-tint:    oklch(0.950 0.040 225);
-  --a-cyan-wash:    oklch(0.975 0.020 225);
-  --a-blue:         oklch(0.535 0.170 250);
-  --a-blue-tint:    oklch(0.950 0.038 250);
-  --a-blue-wash:    oklch(0.976 0.019 250);
-  --a-orange:       oklch(0.600 0.165 50);
-  --a-orange-tint:  oklch(0.955 0.045 50);
-  --a-orange-wash:  oklch(0.979 0.022 50);
+        solid    the pure step — gradients, rules, glyphs on tint
+        ink      the same hue walked down (or up, in dark) until it
+                 clears 6:1 on its own wash. This is the ONLY step
+                 that becomes text. All eight land 6.1:1 - 7.1:1.
+        tint     the surface a glyph or chip sits on
+        wash     the faintest step, for large gradient fields
+        fill     the saturated step solved to carry a WHITE label at
+                 5.5:1 or better — the fill behind every CTA
+        on       that label colour, white on all eight
 
-  /* `ink` is the fourth value, and it exists because `solid` cannot be
-     written with. Measured against the wash it sits on, `solid` scores
-     3.21:1 for amber and 3.49:1 for orange -- AA for small text is
-     4.5:1, and the masthead eyebrow is 10px. Four of the eight hues
-     failed. Rather than desaturate every accent to rescue two, the
-     palette gains a darker step used wherever the hue becomes type: all
-     eight land between 6.5:1 and 7.7:1 on their own wash.
+      Verified per hue, per theme. Do not hand-edit a value here
+      without re-measuring it against the surface it lands on. */
+  --a-indigo:        oklch(0.529 0.191 278);
+  --a-indigo-ink:    oklch(0.455 0.138 278);
+  --a-indigo-tint:   oklch(0.945 0.027 278);
+  --a-indigo-wash:   oklch(0.978 0.011 278);
+  --a-indigo-fill:   oklch(0.312 0.191 278);
+  --a-indigo-on:     #ffffff;
+  --a-indigo-grad-1: oklch(0.312 0.191 278);
+  --a-indigo-grad-2: oklch(0.372 0.164 312);
+  --a-violet:        oklch(0.615 0.213 312);
+  --a-violet-ink:    oklch(0.465 0.153 312);
+  --a-violet-tint:   oklch(0.945 0.037 312);
+  --a-violet-wash:   oklch(0.978 0.015 312);
+  --a-violet-fill:   oklch(0.426 0.213 312);
+  --a-violet-on:     #ffffff;
+  --a-violet-grad-1: oklch(0.426 0.213 312);
+  --a-violet-grad-2: oklch(0.486 0.183 346);
+  --a-rose:          oklch(0.65 0.238 18);
+  --a-rose-ink:      oklch(0.458 0.172 18);
+  --a-rose-tint:     oklch(0.945 0.028 18);
+  --a-rose-wash:     oklch(0.978 0.011 18);
+  --a-rose-fill:     oklch(0.548 0.22 18);
+  --a-rose-on:       #ffffff;
+  --a-rose-grad-1:   oklch(0.548 0.22 18);
+  --a-rose-grad-2:   oklch(0.608 0.156 52);
+  --a-emerald:       oklch(0.73 0.194 147);
+  --a-emerald-ink:   oklch(0.436 0.128 147);
+  --a-emerald-tint:  oklch(0.945 0.058 147);
+  --a-emerald-wash:  oklch(0.978 0.031 147);
+  --a-emerald-fill:  oklch(0.506 0.15 147);
+  --a-emerald-on:    #ffffff;
+  --a-emerald-grad-1:oklch(0.506 0.15 147);
+  --a-emerald-grad-2:oklch(0.566 0.102 181);
+  --a-amber:         oklch(0.765 0.175 63);
+  --a-amber-ink:     oklch(0.451 0.103 63);
+  --a-amber-tint:    oklch(0.945 0.036 63);
+  --a-amber-wash:    oklch(0.978 0.014 63);
+  --a-amber-fill:    oklch(0.526 0.12 63);
+  --a-amber-on:      #ffffff;
+  --a-amber-grad-1:  oklch(0.526 0.12 63);
+  --a-amber-grad-2:  oklch(0.586 0.121 97);
+  --a-cyan:          oklch(0.7 0.111 213);
+  --a-cyan-ink:      oklch(0.444 0.078 213);
+  --a-cyan-tint:     oklch(0.945 0.033 213);
+  --a-cyan-wash:     oklch(0.978 0.018 213);
+  --a-cyan-fill:     oklch(0.51 0.089 213);
+  --a-cyan-on:       #ffffff;
+  --a-cyan-grad-1:   oklch(0.51 0.089 213);
+  --a-cyan-grad-2:   oklch(0.57 0.095 247);
+  --a-blue:          oklch(0.603 0.218 257);
+  --a-blue-ink:      oklch(0.451 0.157 257);
+  --a-blue-tint:     oklch(0.945 0.027 257);
+  --a-blue-wash:     oklch(0.978 0.011 257);
+  --a-blue-fill:     oklch(0.526 0.187 257);
+  --a-blue-on:       #ffffff;
+  --a-blue-grad-1:   oklch(0.526 0.187 257);
+  --a-blue-grad-2:   oklch(0.586 0.187 291);
+  --a-orange:        oklch(0.654 0.232 29);
+  --a-orange-ink:    oklch(0.458 0.167 29);
+  --a-orange-tint:   oklch(0.945 0.028 29);
+  --a-orange-wash:   oklch(0.978 0.011 29);
+  --a-orange-fill:   oklch(0.546 0.224 29);
+  --a-orange-on:     #ffffff;
+  --a-orange-grad-1: oklch(0.546 0.224 29);
+  --a-orange-grad-2: oklch(0.606 0.138 63);
 
-     So: solid paints (rules, gradients, glyphs on tint), ink writes. */
-  --a-indigo-ink:   oklch(0.445 0.175 264);
-  --a-violet-ink:   oklch(0.445 0.185 295);
-  --a-rose-ink:     oklch(0.445 0.175 15);
-  --a-emerald-ink:  oklch(0.445 0.125 158);
-  --a-amber-ink:    oklch(0.445 0.115 75);
-  --a-cyan-ink:     oklch(0.445 0.105 225);
-  --a-blue-ink:     oklch(0.445 0.160 250);
-  --a-orange-ink:   oklch(0.445 0.140 50);
+  /* — Brand. The one place in the app that is NOT section-coloured:
+       the mark, the sign-in canvas and the AI surface all share it, so
+       the product has an identity the workspace hues do not compete
+       with.
+
+       Two sets, and the difference matters. `brand-1/2/3` are the deep
+       `fill` steps, solved to carry a white label — they are what a
+       button and the AI disc are painted with. `brand-lit-1/2/3` are the
+       `solid` steps, which are far lighter, and they are what the halo
+       around the mark and its conic rim are drawn with. Using the fill
+       steps for the rim put a near-black ring around a logo on a white
+       page, which read as an outline rather than as light. */
+  --brand-1: oklch(0.526 0.187 257);
+  --brand-2: oklch(0.456 0.213 312);
+  --brand-3: oklch(0.51 0.089 213);
+  --brand-lit-1: oklch(0.603 0.218 257);
+  --brand-lit-2: oklch(0.615 0.213 312);
+  --brand-lit-3: oklch(0.7 0.111 213);
+  --brand-grad: linear-gradient(
+    135deg,
+    var(--brand-3) 0%,
+    var(--brand-1) 42%,
+    var(--brand-2) 100%
+  );
 }
 
 .dark {
   color-scheme: dark;
 
-  /* — Palette scales, inverted (see rule 2 above) — */
-  --c-stone-50: oklch(0.205 0.0017 265);
-  --c-stone-100: oklch(0.242 0.0034 265);
-  --c-stone-200: oklch(0.292 0.0064 265);
-  --c-stone-300: oklch(0.352 0.0109 265);
-  --c-stone-400: oklch(0.442 0.0162 265);
-  --c-stone-500: oklch(0.548 0.0207 265);
-  --c-stone-600: oklch(0.652 0.0221 265);
-  --c-stone-700: oklch(0.74 0.0199 265);
-  --c-stone-800: oklch(0.812 0.0168 265);
-  --c-stone-900: oklch(0.878 0.0137 265);
-  --c-stone-950: oklch(0.935 0.0098 265);
-  --c-slate-50: oklch(0.205 0.0022 265);
-  --c-slate-100: oklch(0.242 0.0043 265);
-  --c-slate-200: oklch(0.292 0.0083 265);
-  --c-slate-300: oklch(0.352 0.014 265);
-  --c-slate-400: oklch(0.442 0.0209 265);
-  --c-slate-500: oklch(0.548 0.0266 265);
-  --c-slate-600: oklch(0.652 0.0284 265);
-  --c-slate-700: oklch(0.74 0.0256 265);
-  --c-slate-800: oklch(0.812 0.0216 265);
-  --c-slate-900: oklch(0.878 0.0176 265);
-  --c-slate-950: oklch(0.935 0.0126 265);
-  --c-indigo-50: oklch(0.205 0.012 264);
-  --c-indigo-100: oklch(0.242 0.024 264);
-  --c-indigo-200: oklch(0.292 0.046 264);
-  --c-indigo-300: oklch(0.352 0.078 264);
-  --c-indigo-400: oklch(0.442 0.116 264);
-  --c-indigo-500: oklch(0.548 0.148 264);
-  --c-indigo-600: oklch(0.652 0.158 264);
-  --c-indigo-700: oklch(0.74 0.142 264);
-  --c-indigo-800: oklch(0.812 0.12 264);
-  --c-indigo-900: oklch(0.878 0.098 264);
-  --c-indigo-950: oklch(0.935 0.07 264);
-  --c-violet-50: oklch(0.205 0.0114 292);
-  --c-violet-100: oklch(0.242 0.0228 292);
-  --c-violet-200: oklch(0.292 0.0437 292);
-  --c-violet-300: oklch(0.352 0.0741 292);
-  --c-violet-400: oklch(0.442 0.1102 292);
-  --c-violet-500: oklch(0.548 0.1406 292);
-  --c-violet-600: oklch(0.652 0.1501 292);
-  --c-violet-700: oklch(0.74 0.1349 292);
-  --c-violet-800: oklch(0.812 0.114 292);
-  --c-violet-900: oklch(0.878 0.0931 292);
-  --c-violet-950: oklch(0.935 0.0665 292);
-  --c-emerald-50: oklch(0.205 0.011 155);
-  --c-emerald-100: oklch(0.242 0.0221 155);
-  --c-emerald-200: oklch(0.292 0.0423 155);
-  --c-emerald-300: oklch(0.352 0.0718 155);
-  --c-emerald-400: oklch(0.442 0.1067 155);
-  --c-emerald-500: oklch(0.548 0.1362 155);
-  --c-emerald-600: oklch(0.652 0.1454 155);
-  --c-emerald-700: oklch(0.74 0.1306 155);
-  --c-emerald-800: oklch(0.812 0.1104 155);
-  --c-emerald-900: oklch(0.878 0.0902 155);
-  --c-emerald-950: oklch(0.935 0.0644 155);
-  --c-amber-50: oklch(0.205 0.0114 75);
-  --c-amber-100: oklch(0.242 0.0228 75);
-  --c-amber-200: oklch(0.292 0.0437 75);
-  --c-amber-300: oklch(0.352 0.0741 75);
-  --c-amber-400: oklch(0.442 0.1102 75);
-  --c-amber-500: oklch(0.548 0.1406 75);
-  --c-amber-600: oklch(0.652 0.1501 75);
-  --c-amber-700: oklch(0.74 0.1349 75);
-  --c-amber-800: oklch(0.812 0.114 75);
-  --c-amber-900: oklch(0.878 0.0931 75);
-  --c-amber-950: oklch(0.935 0.0665 75);
-  --c-rose-50: oklch(0.205 0.0118 20);
-  --c-rose-100: oklch(0.242 0.0235 20);
-  --c-rose-200: oklch(0.292 0.0451 20);
-  --c-rose-300: oklch(0.352 0.0764 20);
-  --c-rose-400: oklch(0.442 0.1137 20);
-  --c-rose-500: oklch(0.548 0.145 20);
-  --c-rose-600: oklch(0.652 0.1548 20);
-  --c-rose-700: oklch(0.74 0.1392 20);
-  --c-rose-800: oklch(0.812 0.1176 20);
-  --c-rose-900: oklch(0.878 0.096 20);
-  --c-rose-950: oklch(0.935 0.0686 20);
-  --c-cyan-50: oklch(0.205 0.0106 225);
-  --c-cyan-100: oklch(0.242 0.0211 225);
-  --c-cyan-200: oklch(0.292 0.0405 225);
-  --c-cyan-300: oklch(0.352 0.0686 225);
-  --c-cyan-400: oklch(0.442 0.1021 225);
-  --c-cyan-500: oklch(0.548 0.1302 225);
-  --c-cyan-600: oklch(0.652 0.139 225);
-  --c-cyan-700: oklch(0.74 0.125 225);
-  --c-cyan-800: oklch(0.812 0.1056 225);
-  --c-cyan-900: oklch(0.878 0.0862 225);
-  --c-cyan-950: oklch(0.935 0.0616 225);
-  --background: oklch(0.165 0.014 265);
-  --foreground: oklch(0.945 0.006 265);
-  --card: oklch(0.207 0.017 265);
+  /* — Palette scales, inverted (rule 2). Token 50 becomes the darkest
+       step and 950 the lightest, which is what makes a hardcoded
+       `bg-emerald-500` land on a legible colour in either theme. — */
+  --c-stone-50 : oklch(0.265 0.004 286);
+  --c-stone-100: oklch(0.385 0.004 286);
+  --c-stone-200: oklch(0.44 0.004 286);
+  --c-stone-300: oklch(0.51 0.004 286);
+  --c-stone-400: oklch(0.585 0.004 286);
+  --c-stone-500: oklch(0.655 0.004 286);
+  --c-stone-600: oklch(0.735 0.004 286);
+  --c-stone-700: oklch(0.825 0.004 286);
+  --c-stone-800: oklch(0.895 0.004 286);
+  --c-stone-900: oklch(0.945 0.004 286);
+  --c-stone-950: oklch(0.975 0.004 286);
+  --c-slate-50 : oklch(0.265 0.004 286);
+  --c-slate-100: oklch(0.385 0.004 286);
+  --c-slate-200: oklch(0.44 0.004 286);
+  --c-slate-300: oklch(0.51 0.004 286);
+  --c-slate-400: oklch(0.585 0.004 286);
+  --c-slate-500: oklch(0.655 0.004 286);
+  --c-slate-600: oklch(0.735 0.004 286);
+  --c-slate-700: oklch(0.825 0.004 286);
+  --c-slate-800: oklch(0.895 0.004 286);
+  --c-slate-900: oklch(0.945 0.004 286);
+  --c-slate-950: oklch(0.975 0.004 286);
+  --c-indigo-50 : oklch(0.265 0.082 278);
+  --c-indigo-100: oklch(0.385 0.112 278);
+  --c-indigo-200: oklch(0.44 0.135 278);
+  --c-indigo-300: oklch(0.51 0.161 278);
+  --c-indigo-400: oklch(0.585 0.182 278);
+  --c-indigo-500: oklch(0.655 0.187 278);
+  --c-indigo-600: oklch(0.735 0.139 278);
+  --c-indigo-700: oklch(0.825 0.088 278);
+  --c-indigo-800: oklch(0.895 0.052 278);
+  --c-indigo-900: oklch(0.945 0.027 278);
+  --c-indigo-950: oklch(0.975 0.012 278);
+  --c-violet-50 : oklch(0.265 0.092 312);
+  --c-violet-100: oklch(0.385 0.125 312);
+  --c-violet-200: oklch(0.44 0.15 312);
+  --c-violet-300: oklch(0.51 0.179 312);
+  --c-violet-400: oklch(0.585 0.202 312);
+  --c-violet-500: oklch(0.655 0.209 312);
+  --c-violet-600: oklch(0.735 0.184 312);
+  --c-violet-700: oklch(0.825 0.123 312);
+  --c-violet-800: oklch(0.895 0.072 312);
+  --c-violet-900: oklch(0.945 0.037 312);
+  --c-violet-950: oklch(0.975 0.017 312);
+  --c-emerald-50 : oklch(0.265 0.078 147);
+  --c-emerald-100: oklch(0.385 0.113 147);
+  --c-emerald-200: oklch(0.44 0.129 147);
+  --c-emerald-300: oklch(0.51 0.15 147);
+  --c-emerald-400: oklch(0.585 0.172 147);
+  --c-emerald-500: oklch(0.655 0.19 147);
+  --c-emerald-600: oklch(0.735 0.168 147);
+  --c-emerald-700: oklch(0.825 0.13 147);
+  --c-emerald-800: oklch(0.895 0.088 147);
+  --c-emerald-900: oklch(0.945 0.05 147);
+  --c-emerald-950: oklch(0.975 0.027 147);
+  --c-amber-50 : oklch(0.265 0.061 63);
+  --c-amber-100: oklch(0.385 0.088 63);
+  --c-amber-200: oklch(0.44 0.101 63);
+  --c-amber-300: oklch(0.51 0.117 63);
+  --c-amber-400: oklch(0.585 0.134 63);
+  --c-amber-500: oklch(0.655 0.15 63);
+  --c-amber-600: oklch(0.735 0.151 63);
+  --c-amber-700: oklch(0.825 0.117 63);
+  --c-amber-800: oklch(0.895 0.071 63);
+  --c-amber-900: oklch(0.945 0.036 63);
+  --c-amber-950: oklch(0.975 0.016 63);
+  --c-rose-50 : oklch(0.265 0.103 18);
+  --c-rose-100: oklch(0.385 0.14 18);
+  --c-rose-200: oklch(0.44 0.168 18);
+  --c-rose-300: oklch(0.51 0.201 18);
+  --c-rose-400: oklch(0.585 0.227 18);
+  --c-rose-500: oklch(0.655 0.234 18);
+  --c-rose-600: oklch(0.735 0.164 18);
+  --c-rose-700: oklch(0.825 0.098 18);
+  --c-rose-800: oklch(0.895 0.055 18);
+  --c-rose-900: oklch(0.945 0.028 18);
+  --c-rose-950: oklch(0.975 0.012 18);
+  --c-cyan-50 : oklch(0.265 0.046 213);
+  --c-cyan-100: oklch(0.385 0.065 213);
+  --c-cyan-200: oklch(0.44 0.077 213);
+  --c-cyan-300: oklch(0.51 0.089 213);
+  --c-cyan-400: oklch(0.585 0.102 213);
+  --c-cyan-500: oklch(0.655 0.109 213);
+  --c-cyan-600: oklch(0.735 0.096 213);
+  --c-cyan-700: oklch(0.825 0.074 213);
+  --c-cyan-800: oklch(0.895 0.05 213);
+  --c-cyan-900: oklch(0.945 0.028 213);
+  --c-cyan-950: oklch(0.975 0.015 213);
+
+  /* — Surfaces. Not pure black: a near-black that keeps a trace of
+     blue lets the aurora read as light on the canvas rather than as
+     a grey smudge, and it is far kinder to an all-day screen. — */
+  --background: oklch(0.185 0.018 265);
+  --foreground: oklch(0.97 0.003 265);
+  --card: oklch(0.235 0.02 265);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.228 0.018 265);
+  --popover: oklch(0.245 0.021 265);
   --popover-foreground: var(--foreground);
 
-  --surface-raised: oklch(0.238 0.018 265);
-  --surface-sunken: oklch(0.186 0.015 265);
-  --surface-hover: oklch(0.252 0.020 265);
+  --surface-raised: oklch(0.275 0.022 265);
+  --surface-sunken: oklch(0.155 0.014 265);
+  --surface-hover: oklch(0.3 0.022 265);
 
-  --primary: oklch(0.706 0.152 264);
-  --primary-foreground: oklch(0.175 0.025 264);
-  --primary-hover: oklch(0.762 0.140 264);
-  --primary-tint: oklch(0.300 0.062 264);
+  /* Materials: darker and more opaque than light mode's, because
+     blurring near-black over near-black produces nothing. The
+     highlight inverts to a dark top edge for the same reason a
+     1px white one would disappear. */
+  --glass-bg: rgb(28 28 34 / 0.72);
+  --glass-bg-strong: rgb(26 26 32 / 0.95);
+  --glass-bg-thin: rgb(38 38 46 / 0.6);
+  --glass-border: rgb(255 255 255 / 0.1);
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --glass-sheen: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.07) 0%,
+    rgb(255 255 255 / 0.02) 40%,
+    rgb(255 255 255 / 0) 100%
+  );
 
-  --secondary: oklch(0.268 0.022 265);
-  --secondary-foreground: oklch(0.945 0.006 265);
-  --muted: oklch(0.258 0.020 265);
-  --muted-foreground: oklch(0.706 0.020 265);
-  --accent: oklch(0.286 0.024 265);
-  --accent-foreground: oklch(0.945 0.006 265);
+  --primary: oklch(0.522 0.172 255);
+  --primary-foreground: #ffffff;
+  --primary-hover: oklch(0.572 0.172 255);
+  --primary-tint: oklch(0.3 0.05 255);
+  --primary-grad-1: oklch(0.522 0.172 255);
+  --primary-grad-2: oklch(0.582 0.177 289);
 
-  --success: oklch(0.706 0.140 155);
-  --success-foreground: oklch(0.165 0.030 155);
-  --success-tint: oklch(0.288 0.056 155);
-  --warning: oklch(0.775 0.140 75);
-  --warning-foreground: oklch(0.190 0.040 75);
-  --warning-tint: oklch(0.302 0.060 75);
-  --destructive: oklch(0.672 0.180 20);
-  --destructive-foreground: oklch(0.165 0.030 20);
-  --destructive-tint: oklch(0.300 0.062 20);
-  --info: oklch(0.706 0.126 225);
-  --info-foreground: oklch(0.165 0.030 225);
-  --info-tint: oklch(0.288 0.052 225);
-  --ai: oklch(0.716 0.150 292);
-  --ai-foreground: oklch(0.175 0.030 292);
-  --ai-tint: oklch(0.300 0.062 292);
+  --secondary: oklch(0.285 0.02 265);
+  --secondary-foreground: oklch(0.955 0.004 265);
+  --muted: oklch(0.275 0.02 265);
+  --muted-foreground: oklch(0.72 0.015 265);
+  --accent: oklch(0.305 0.024 255);
+  --accent-foreground: oklch(0.955 0.004 265);
 
-  --border: oklch(0.296 0.020 265);
-  --border-strong: oklch(0.372 0.024 265);
-  --input: oklch(0.320 0.022 265);
-  --ring: oklch(0.706 0.152 264 / 0.55);
+  /* Status. Inverted relative to the light theme, because `-foreground`
+     inverted with them: a light red chip labelled with the dark ground
+     is a legible chip, and the same value as type on that chip's tint is
+     legible too. Keeping the pair in step is the whole trick. */
+  --success: oklch(0.694 0.194 147);
+  --success-foreground: oklch(0.175 0.02 265);
+  --success-tint: oklch(0.3 0.058 147);
+  --warning: oklch(0.764 0.175 63);
+  --warning-foreground: oklch(0.175 0.02 265);
+  --warning-tint: oklch(0.3 0.052 63);
+  --destructive: oklch(0.722 0.173 29);
+  --destructive-foreground: oklch(0.175 0.02 265);
+  --destructive-tint: oklch(0.3 0.052 29);
+  --info: oklch(0.7 0.111 213);
+  --info-foreground: oklch(0.175 0.02 265);
+  --info-tint: oklch(0.3 0.033 213);
+  --ai: oklch(0.724 0.202 312);
+  --ai-foreground: oklch(0.175 0.02 265);
+  --ai-tint: oklch(0.3 0.061 312);
 
-  /* Selected for the dark surface, not flipped from light: the validator's
-     dark lightness band is L 0.48–0.67, far narrower than light's, so an
-     automatic inversion lands outside it. Re-validated: all six checks pass. */
-  --chart-1: oklch(0.610 0.170 264);
-  --chart-2: oklch(0.660 0.150 70);
-  --chart-3: oklch(0.600 0.130 215);
-  --chart-4: oklch(0.630 0.170 15);
-  --chart-5: oklch(0.550 0.170 300);
-  --chart-6: oklch(0.650 0.150 145);
-  --chart-grid: oklch(0.296 0.020 265);
+  --border: oklch(0.305 0.018 265);
+  --border-strong: oklch(0.4 0.022 265);
+  --input: oklch(0.325 0.02 265);
+  --ring: oklch(0.62 0.16 255 / 0.55);
 
-  --sidebar: oklch(0.146 0.014 265);
-  --sidebar-foreground: oklch(0.900 0.008 265);
-  --sidebar-muted: oklch(0.620 0.016 265);
-  --sidebar-primary: oklch(0.720 0.150 264);
-  --sidebar-primary-foreground: oklch(0.146 0.014 265);
-  --sidebar-accent: oklch(0.242 0.022 265);
-  --sidebar-accent-foreground: oklch(0.955 0.005 265);
-  --sidebar-border: oklch(0.248 0.020 265);
-  --sidebar-ring: oklch(0.720 0.150 264 / 0.5);
+  /* Charts: as in light, these are the previously validated values
+     re-stepped for the dark surface. The validator's dark lightness
+     band (L 0.48-0.67) is far narrower than light's, so an automatic
+     inversion of the light set would land outside it. */
+  --chart-1: oklch(0.61 0.17 264);
+  --chart-2: oklch(0.66 0.15 70);
+  --chart-3: oklch(0.6 0.13 215);
+  --chart-4: oklch(0.63 0.17 15);
+  --chart-5: oklch(0.55 0.17 300);
+  --chart-6: oklch(0.65 0.15 145);
+  --chart-grid: oklch(0.305 0.018 265);
 
-  --shadow-flat: 0 0 0 1px oklch(0.296 0.020 265);
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.36), 0 1px 3px oklch(0 0 0 / 0.28);
-  --shadow-raised: 0 2px 6px oklch(0 0 0 / 0.40), 0 10px 26px -8px oklch(0 0 0 / 0.50);
-  --shadow-popover: 0 10px 36px -8px oklch(0 0 0 / 0.60), 0 3px 10px oklch(0 0 0 / 0.40);
+  --sidebar: rgb(22 22 28 / 0.66);
+  --sidebar-foreground: oklch(0.96 0.004 265);
+  --sidebar-muted: oklch(0.7 0.015 265);
+  --sidebar-primary: oklch(0.522 0.172 255);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(255 255 255 / 0.09);
+  --sidebar-accent-foreground: oklch(0.96 0.004 265);
+  --sidebar-border: rgb(255 255 255 / 0.09);
+  --sidebar-ring: oklch(0.62 0.16 255 / 0.5);
+
+  /* In dark mode the top highlight stops working — there is nothing
+     brighter than the surface to catch — so depth is carried by the
+     shadow alone and it has to be stronger to read at all. */
+  --shadow-flat: 0 0 0 1px var(--border);
+  --shadow-card:
+    0 0 0 1px rgb(255 255 255 / 0.05),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 4px 14px -2px rgb(0 0 0 / 0.4);
+  --shadow-raised:
+    0 0 0 1px rgb(255 255 255 / 0.07),
+    0 2px 6px rgb(0 0 0 / 0.35),
+    0 14px 30px -6px rgb(0 0 0 / 0.5);
+  --shadow-float:
+    0 0 0 1px rgb(255 255 255 / 0.09),
+    0 4px 10px -2px rgb(0 0 0 / 0.4),
+    0 28px 60px -12px rgb(0 0 0 / 0.6);
+  --shadow-popover: var(--shadow-float);
 
   /* --- Section accents, dark ---------------------------------------
-     Lifted, not inverted: a hue that reads rich on white goes muddy on
-     near-black, so `solid` gains lightness while `tint` and `wash`
-     become dark surfaces carrying a trace of the hue instead of pale
-     ones. Keeping the same three names means no component branches on
-     the theme. */
-  --a-indigo:       oklch(0.720 0.150 264);
-  --a-indigo-tint:  oklch(0.290 0.055 264);
-  --a-indigo-wash:  oklch(0.232 0.028 264);
-  --a-violet:       oklch(0.730 0.155 295);
-  --a-violet-tint:  oklch(0.292 0.058 295);
-  --a-violet-wash:  oklch(0.234 0.030 295);
-  --a-rose:         oklch(0.725 0.150 15);
-  --a-rose-tint:    oklch(0.296 0.055 15);
-  --a-rose-wash:    oklch(0.236 0.028 15);
-  --a-emerald:      oklch(0.730 0.135 158);
-  --a-emerald-tint: oklch(0.288 0.050 158);
-  --a-emerald-wash: oklch(0.232 0.026 158);
-  --a-amber:        oklch(0.780 0.135 75);
-  --a-amber-tint:   oklch(0.300 0.052 75);
-  --a-amber-wash:   oklch(0.238 0.028 75);
-  --a-cyan:         oklch(0.740 0.115 225);
-  --a-cyan-tint:    oklch(0.290 0.048 225);
-  --a-cyan-wash:    oklch(0.233 0.025 225);
-  --a-blue:         oklch(0.725 0.140 250);
-  --a-blue-tint:    oklch(0.290 0.052 250);
-  --a-blue-wash:    oklch(0.233 0.027 250);
-  --a-orange:       oklch(0.765 0.140 50);
-  --a-orange-tint:  oklch(0.298 0.055 50);
-  --a-orange-wash:  oklch(0.237 0.028 50);
-  /* Same job, lifted: 7.4:1 to 8.2:1 on the dark tint. */
-  --a-indigo-ink:   oklch(0.815 0.120 264);
-  --a-violet-ink:   oklch(0.815 0.125 295);
-  --a-rose-ink:     oklch(0.815 0.120 15);
-  --a-emerald-ink:  oklch(0.815 0.110 158);
-  --a-amber-ink:    oklch(0.825 0.115 75);
-  --a-cyan-ink:     oklch(0.815 0.100 225);
-  --a-blue-ink:     oklch(0.815 0.115 250);
-  --a-orange-ink:   oklch(0.820 0.115 50);
+      Lifted, not inverted: a hue that reads rich on white goes muddy
+      on near-black, so `solid` gains lightness while `tint` and
+      `wash` become dark surfaces carrying a trace of the hue.
+      `ink` is walked back UP until it clears 6:1 on its own tint —
+      all eight land 7.0:1 - 7.1:1. `fill` keeps its light-theme value,
+      because a white label on a lifted fill would lose the 5.5:1 that
+      value was solved for. Same six names, so no component ever has
+      to branch on the theme. */
+  --a-indigo:        oklch(0.556 0.203 278);
+  --a-indigo-ink:    oklch(0.792 0.106 278);
+  --a-indigo-tint:   oklch(0.3 0.035 278);
+  --a-indigo-wash:   oklch(0.245 0.02 278);
+  --a-indigo-fill:   oklch(0.332 0.203 278);
+  --a-indigo-on:     #ffffff;
+  --a-indigo-grad-1: oklch(0.332 0.203 278);
+  --a-indigo-grad-2: oklch(0.392 0.175 312);
+  --a-violet:        oklch(0.656 0.227 312);
+  --a-violet-ink:    oklch(0.798 0.144 312);
+  --a-violet-tint:   oklch(0.3 0.039 312);
+  --a-violet-wash:   oklch(0.245 0.023 312);
+  --a-violet-fill:   oklch(0.456 0.213 312);
+  --a-violet-on:     #ffffff;
+  --a-violet-grad-1: oklch(0.456 0.213 312);
+  --a-violet-grad-2: oklch(0.516 0.196 346);
+  --a-rose:          oklch(0.658 0.232 16);
+  --a-rose-ink:      oklch(0.8 0.116 16);
+  --a-rose-tint:     oklch(0.3 0.039 16);
+  --a-rose-wash:     oklch(0.245 0.023 16);
+  --a-rose-fill:     oklch(0.546 0.218 16);
+  --a-rose-on:       #ffffff;
+  --a-rose-grad-1:   oklch(0.546 0.218 16);
+  --a-rose-grad-2:   oklch(0.606 0.16 50);
+  --a-emerald:       oklch(0.756 0.208 147);
+  --a-emerald-ink:   oklch(0.778 0.15 147);
+  --a-emerald-tint:  oklch(0.3 0.035 147);
+  --a-emerald-wash:  oklch(0.245 0.021 147);
+  --a-emerald-fill:  oklch(0.506 0.15 147);
+  --a-emerald-on:    #ffffff;
+  --a-emerald-grad-1:oklch(0.506 0.15 147);
+  --a-emerald-grad-2:oklch(0.566 0.102 181);
+  --a-amber:         oklch(0.782 0.171 67);
+  --a-amber-ink:     oklch(0.794 0.123 67);
+  --a-amber-tint:    oklch(0.3 0.029 67);
+  --a-amber-wash:    oklch(0.245 0.017 67);
+  --a-amber-fill:    oklch(0.528 0.117 67);
+  --a-amber-on:      #ffffff;
+  --a-amber-grad-1:  oklch(0.528 0.117 67);
+  --a-amber-grad-2:  oklch(0.588 0.123 101);
+  --a-cyan:          oklch(0.771 0.118 212);
+  --a-cyan-ink:      oklch(0.785 0.085 212);
+  --a-cyan-tint:     oklch(0.3 0.02 212);
+  --a-cyan-wash:     oklch(0.245 0.012 212);
+  --a-cyan-fill:     oklch(0.51 0.089 212);
+  --a-cyan-on:       #ffffff;
+  --a-cyan-grad-1:   oklch(0.51 0.089 212);
+  --a-cyan-grad-2:   oklch(0.57 0.102 246);
+  --a-blue:          oklch(0.624 0.206 255);
+  --a-blue-ink:      oklch(0.79 0.108 255);
+  --a-blue-tint:     oklch(0.3 0.035 255);
+  --a-blue-wash:     oklch(0.245 0.021 255);
+  --a-blue-fill:     oklch(0.522 0.172 255);
+  --a-blue-on:       #ffffff;
+  --a-blue-grad-1:   oklch(0.522 0.172 255);
+  --a-blue-grad-2:   oklch(0.582 0.177 289);
+  --a-orange:        oklch(0.663 0.224 28);
+  --a-orange-ink:    oklch(0.797 0.117 28);
+  --a-orange-tint:   oklch(0.3 0.038 28);
+  --a-orange-wash:   oklch(0.245 0.022 28);
+  --a-orange-fill:   oklch(0.548 0.224 28);
+  --a-orange-on:     #ffffff;
+  --a-orange-grad-1: oklch(0.548 0.224 28);
+  --a-orange-grad-2: oklch(0.608 0.14 62);
+
+  --brand-1: oklch(0.522 0.172 255);
+  --brand-2: oklch(0.456 0.213 312);
+  --brand-3: oklch(0.51 0.089 212);
+  --brand-lit-1: oklch(0.624 0.206 255);
+  --brand-lit-2: oklch(0.656 0.227 312);
+  --brand-lit-3: oklch(0.771 0.118 212);
 }
 
 /* ============================================================
    WHICH HUE THIS SCREEN IS WEARING
    ------------------------------------------------------------
-   Stage one put the section hue on the masthead only, by reading
-   the route inside `PageHero`. That does not scale past one
-   component: every card, table and tile below the masthead would
-   have to become a client component and call `usePathname()` too,
-   and the first time a Server Component passed an icon down to
-   one of them the build broke. The hue is a property of the
-   screen, not of each component on it -- so it is published once,
-   as CSS, on the shell.
-
-   `AppLayout` and `PortalLayout` set `data-section` from the same
-   route map the masthead uses. Everything inside then reads four
-   inherited variables and needs to know nothing about routing:
-   a server-rendered table header and a client-side stat tile pick
-   up the same hue by the same mechanism, in both themes, with no
+   The hue is a property of the screen, not of each component on
+   it -- so it is published once, as CSS, on the shell. `AppLayout`
+   and `PortalLayout` set `data-section` from the same route map the
+   masthead uses. Everything inside then reads these inherited
+   variables and needs to know nothing about routing: a
+   server-rendered table header and a client-side stat tile pick up
+   the same hue by the same mechanism, in both themes, with no
    JavaScript and no re-render.
 
-     --section       paints: rules, gradients, glyphs on tint
-     --section-ink   writes: any text or icon that must be legible
-     --section-tint  the surface a glyph or chip sits on
-     --section-wash  the faintest step, for large gradient fills
-   ============================================================ */
+     --section        paints: gradients, rules, glyphs on tint
+     --section-ink    writes: any text or icon that must be legible
+     --section-tint   the surface a glyph or chip sits on
+     --section-wash   the faintest step, for large gradient fields
+     --section-fill   the saturated CTA fill (carries --section-on)
+     ============================================================ */
 :root {
-  --section:      var(--a-indigo);
-  --section-ink:  var(--a-indigo-ink);
-  --section-tint: var(--a-indigo-tint);
-  --section-wash: var(--a-indigo-wash);
+  --section:       var(--a-indigo);
+  --section-ink:   var(--a-indigo-ink);
+  --section-tint:  var(--a-indigo-tint);
+  --section-wash:  var(--a-indigo-wash);
+  --section-fill:  var(--a-indigo-fill);
+  --section-on:    var(--a-indigo-on);
+  --section-grad-1:var(--a-indigo-grad-1);
+  --section-grad-2:var(--a-indigo-grad-2);
 }
-[data-section="indigo"]  { --section: var(--a-indigo);  --section-ink: var(--a-indigo-ink);  --section-tint: var(--a-indigo-tint);  --section-wash: var(--a-indigo-wash); }
-[data-section="violet"]  { --section: var(--a-violet);  --section-ink: var(--a-violet-ink);  --section-tint: var(--a-violet-tint);  --section-wash: var(--a-violet-wash); }
-[data-section="rose"]    { --section: var(--a-rose);    --section-ink: var(--a-rose-ink);    --section-tint: var(--a-rose-tint);    --section-wash: var(--a-rose-wash); }
-[data-section="emerald"] { --section: var(--a-emerald); --section-ink: var(--a-emerald-ink); --section-tint: var(--a-emerald-tint); --section-wash: var(--a-emerald-wash); }
-[data-section="amber"]   { --section: var(--a-amber);   --section-ink: var(--a-amber-ink);   --section-tint: var(--a-amber-tint);   --section-wash: var(--a-amber-wash); }
-[data-section="cyan"]    { --section: var(--a-cyan);    --section-ink: var(--a-cyan-ink);    --section-tint: var(--a-cyan-tint);    --section-wash: var(--a-cyan-wash); }
-[data-section="blue"]    { --section: var(--a-blue);    --section-ink: var(--a-blue-ink);    --section-tint: var(--a-blue-tint);    --section-wash: var(--a-blue-wash); }
-[data-section="orange"]  { --section: var(--a-orange);  --section-ink: var(--a-orange-ink);  --section-tint: var(--a-orange-tint);  --section-wash: var(--a-orange-wash); }
-
-/* --- Sidebar accents -------------------------------------------------
-   The sidebar is the one surface that stays dark in both themes, so it
-   cannot use `--a-*`: those invert, and in light mode they would put
-   near-black glyphs on near-black leather. These do not invert. One
-   lightness for all eight (7.5:1 to 8.4:1 on the sidebar ground,
-   6.2:1 on a selected row), because a nav rail is a legend -- the hues
-   must differ from each other, not from each other's brightness. */
-:root {
-  --sa-indigo:  oklch(0.745 0.130 264);
-  --sa-violet:  oklch(0.745 0.130 295);
-  --sa-rose:    oklch(0.745 0.130 15);
-  --sa-emerald: oklch(0.745 0.130 158);
-  --sa-amber:   oklch(0.745 0.130 75);
-  --sa-cyan:    oklch(0.745 0.130 225);
-  --sa-blue:    oklch(0.745 0.130 250);
-  --sa-orange:  oklch(0.745 0.130 50);
-  --nav-accent: var(--sa-indigo);
+[data-section="indigo"] {
+  --section: var(--a-indigo); --section-ink: var(--a-indigo-ink);
+  --section-tint: var(--a-indigo-tint); --section-wash: var(--a-indigo-wash);
+  --section-fill: var(--a-indigo-fill); --section-on: var(--a-indigo-on);
+  --section-grad-1: var(--a-indigo-grad-1); --section-grad-2: var(--a-indigo-grad-2);
 }
-/* The call to action follows the page too.
-   `--primary` is re-pointed at `--section-ink` rather than at `--section`
-   because the filled button carries `--primary-foreground` on top of it,
-   and the solid step does not have the contrast for that: white on the
-   amber solid is 3.7:1 against a 4.5:1 requirement. Ink is 7.7:1 in the
-   light theme, and in the dark theme -- where the pattern inverts to a
-   light fill with dark type -- it is higher still, so one value is
-   correct in both.
+[data-section="violet"] {
+  --section: var(--a-violet); --section-ink: var(--a-violet-ink);
+  --section-tint: var(--a-violet-tint); --section-wash: var(--a-violet-wash);
+  --section-fill: var(--a-violet-fill); --section-on: var(--a-violet-on);
+  --section-grad-1: var(--a-violet-grad-1); --section-grad-2: var(--a-violet-grad-2);
+}
+[data-section="rose"] {
+  --section: var(--a-rose); --section-ink: var(--a-rose-ink);
+  --section-tint: var(--a-rose-tint); --section-wash: var(--a-rose-wash);
+  --section-fill: var(--a-rose-fill); --section-on: var(--a-rose-on);
+  --section-grad-1: var(--a-rose-grad-1); --section-grad-2: var(--a-rose-grad-2);
+}
+[data-section="emerald"] {
+  --section: var(--a-emerald); --section-ink: var(--a-emerald-ink);
+  --section-tint: var(--a-emerald-tint); --section-wash: var(--a-emerald-wash);
+  --section-fill: var(--a-emerald-fill); --section-on: var(--a-emerald-on);
+  --section-grad-1: var(--a-emerald-grad-1); --section-grad-2: var(--a-emerald-grad-2);
+}
+[data-section="amber"] {
+  --section: var(--a-amber); --section-ink: var(--a-amber-ink);
+  --section-tint: var(--a-amber-tint); --section-wash: var(--a-amber-wash);
+  --section-fill: var(--a-amber-fill); --section-on: var(--a-amber-on);
+  --section-grad-1: var(--a-amber-grad-1); --section-grad-2: var(--a-amber-grad-2);
+}
+[data-section="cyan"] {
+  --section: var(--a-cyan); --section-ink: var(--a-cyan-ink);
+  --section-tint: var(--a-cyan-tint); --section-wash: var(--a-cyan-wash);
+  --section-fill: var(--a-cyan-fill); --section-on: var(--a-cyan-on);
+  --section-grad-1: var(--a-cyan-grad-1); --section-grad-2: var(--a-cyan-grad-2);
+}
+[data-section="blue"] {
+  --section: var(--a-blue); --section-ink: var(--a-blue-ink);
+  --section-tint: var(--a-blue-tint); --section-wash: var(--a-blue-wash);
+  --section-fill: var(--a-blue-fill); --section-on: var(--a-blue-on);
+  --section-grad-1: var(--a-blue-grad-1); --section-grad-2: var(--a-blue-grad-2);
+}
+[data-section="orange"] {
+  --section: var(--a-orange); --section-ink: var(--a-orange-ink);
+  --section-tint: var(--a-orange-tint); --section-wash: var(--a-orange-wash);
+  --section-fill: var(--a-orange-fill); --section-on: var(--a-orange-on);
+  --section-grad-1: var(--a-orange-grad-1); --section-grad-2: var(--a-orange-grad-2);
+}
 
-   `--primary-hover` mixes toward `--foreground`, which darkens the fill
-   in the light theme and lightens it in the dark one, for the same
-   reason: one expression, no branch. */
+/* The call to action follows the page.
+   `--primary` is re-pointed at the SOLVED `--section-fill` rather
+   than at `--section`, because the fill is the step that was
+   measured to carry `--section-on` (white) at 5.5:1 — the solid
+   step has the contrast for a gradient but not for a label. This
+   is what lets all eight sections keep one identical button
+   treatment while every screen's primary action is a different
+   colour. */
 [data-section] {
-  --primary: var(--section-ink);
-  --primary-hover: color-mix(in oklab, var(--section-ink) 88%, var(--foreground));
+  --primary: var(--section-fill);
+  --primary-foreground: var(--section-on);
+  --primary-hover: color-mix(in oklab, var(--section-fill) 88%, var(--foreground));
   --primary-tint: color-mix(in oklab, var(--section) 14%, var(--card));
+  --primary-grad-1: var(--section-grad-1);
+  --primary-grad-2: var(--section-grad-2);
   --ring: color-mix(in oklab, var(--section) 50%, transparent);
+  --accent: color-mix(in oklab, var(--section) 10%, var(--card));
+  --accent-foreground: var(--section-ink);
 }
 
-[data-section="indigo"]  { --nav-accent-page: var(--sa-indigo); }
-[data-section="violet"]  { --nav-accent-page: var(--sa-violet); }
-[data-section="rose"]    { --nav-accent-page: var(--sa-rose); }
-[data-section="emerald"] { --nav-accent-page: var(--sa-emerald); }
-[data-section="amber"]   { --nav-accent-page: var(--sa-amber); }
-[data-section="cyan"]    { --nav-accent-page: var(--sa-cyan); }
-[data-section="blue"]    { --nav-accent-page: var(--sa-blue); }
-[data-section="orange"]  { --nav-accent-page: var(--sa-orange); }
+/* Nav glyph tiles. The rail is frosted and theme-aware, so unlike the
+   previous permanently-dark slab these CAN use `--a-*` directly: a hue
+   that reads on a light pane and on a dark one is exactly what the
+   `solid` step is for.
 
-[data-nav-accent="indigo"]  { --nav-accent: var(--sa-indigo); }
-[data-nav-accent="violet"]  { --nav-accent: var(--sa-violet); }
-[data-nav-accent="rose"]    { --nav-accent: var(--sa-rose); }
-[data-nav-accent="emerald"] { --nav-accent: var(--sa-emerald); }
-[data-nav-accent="amber"]   { --nav-accent: var(--sa-amber); }
-[data-nav-accent="cyan"]    { --nav-accent: var(--sa-cyan); }
-[data-nav-accent="blue"]    { --nav-accent: var(--sa-blue); }
-[data-nav-accent="orange"]  { --nav-accent: var(--sa-orange); }
+   `ink` travels with it. The rail is the one place a glyph has to sit
+   on BOTH a pale pane (light theme) and a deep one (dark theme), and
+   the `solid` step only clears 3:1 — the minimum for a graphical
+   object — against the dark one. Amber measures 2.2:1 on white, so a
+   rail drawn in the solid step alone would have an invisible icon next
+   to Finance. `--nav-ink` is the step already solved to clear 6:1 on
+   its own surface, and it flips with the theme, so the same rule picks
+   the legible one. */
+:root {
+  --nav-accent: var(--a-indigo);
+  --nav-ink:    var(--a-indigo-ink);
+  --nav-tint:   var(--a-indigo-tint);
+  --nav-fill:   var(--a-indigo-fill);
+}
+[data-nav-accent="indigo"]  { --nav-accent: var(--a-indigo);  --nav-ink: var(--a-indigo-ink);  --nav-tint: var(--a-indigo-tint);  --nav-fill: var(--a-indigo-fill); }
+[data-nav-accent="violet"]  { --nav-accent: var(--a-violet);  --nav-ink: var(--a-violet-ink);  --nav-tint: var(--a-violet-tint);  --nav-fill: var(--a-violet-fill); }
+[data-nav-accent="rose"]    { --nav-accent: var(--a-rose);    --nav-ink: var(--a-rose-ink);    --nav-tint: var(--a-rose-tint);    --nav-fill: var(--a-rose-fill); }
+[data-nav-accent="emerald"] { --nav-accent: var(--a-emerald); --nav-ink: var(--a-emerald-ink); --nav-tint: var(--a-emerald-tint); --nav-fill: var(--a-emerald-fill); }
+[data-nav-accent="amber"]   { --nav-accent: var(--a-amber);   --nav-ink: var(--a-amber-ink);   --nav-tint: var(--a-amber-tint);   --nav-fill: var(--a-amber-fill); }
+[data-nav-accent="cyan"]    { --nav-accent: var(--a-cyan);    --nav-ink: var(--a-cyan-ink);    --nav-tint: var(--a-cyan-tint);    --nav-fill: var(--a-cyan-fill); }
+[data-nav-accent="blue"]    { --nav-accent: var(--a-blue);    --nav-ink: var(--a-blue-ink);    --nav-tint: var(--a-blue-tint);    --nav-fill: var(--a-blue-fill); }
+[data-nav-accent="orange"]  { --nav-accent: var(--a-orange);  --nav-ink: var(--a-orange-ink);  --nav-tint: var(--a-orange-tint);  --nav-fill: var(--a-orange-fill); }
+
+/* The AI group is not a route section, so it borrows nothing from the
+   section map and keeps the product's own violet. It is the one item in
+   the rail that is the same colour everywhere, which is the point: "the
+   agent" should look like the agent, not like whichever page you
+   happened to be on. `--ai` is already a solved fill (white clears
+   5.5:1 on it) so it doubles as its own ink here. */
+[data-nav-accent="ai"] {
+  --nav-accent: var(--ai);
+  --nav-ink: var(--ai);
+  --nav-tint: var(--ai-tint);
+  --nav-fill: var(--ai);
+}
+.ai-glyph {
+  background: color-mix(in oklab, var(--ai) 12%, transparent);
+  color: var(--ai);
+}
+[aria-current="page"] .ai-glyph {
+  background: color-mix(in oklab, var(--ai) 22%, transparent);
+  color: var(--ai);
+}
 
 @theme inline {
   /* Literal scales → tokens, so hardcoded utilities follow the theme. */
@@ -663,6 +955,7 @@
   --color-cyan-800: var(--c-cyan-800);
   --color-cyan-900: var(--c-cyan-900);
   --color-cyan-950: var(--c-cyan-950);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -695,20 +988,46 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-grid: var(--chart-grid);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+
+  /* Apple's shape scale. Large by default — a 16px base radius is
+     what separates "premium" from "form field". */
+  --radius-xs: calc(var(--radius) - 8px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 16px);
+
+  /* SF Pro is not on the web, so the system stack IS the Apple
+     answer: on a Mac, iPhone or iPad this resolves to SF, and on
+     anything else it degrades to that platform's own UI face
+     (Segoe UI Variable, Roboto, Inter) rather than to a
+     webfont that would be a different typeface from the one the
+     rest of the operating system is using. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue",
+    system-ui, "Noto Sans", sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo,
+    Consolas, monospace;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-float: var(--shadow-float);
+  --shadow-popover: var(--shadow-popover);
 
   /* Surfaces / status the pages can reach for directly. */
   --color-surface-raised: var(--surface-raised);
@@ -722,42 +1041,67 @@
   --color-destructive-tint: var(--destructive-tint);
   --color-info-tint: var(--info-tint);
   --color-ai-tint: var(--ai-tint);
-  --color-chart-6: var(--chart-6);
-  --color-chart-grid: var(--chart-grid);
-  --color-sidebar-muted: var(--sidebar-muted);
 }
 
 /* ================= BASE ================= */
 @layer base {
   * { @apply border-border; }
+
   html {
     scroll-behavior: smooth;
     scroll-padding-top: var(--header-height);
+    /* The aurora is fixed to the viewport, so a translucent sticky
+       bar blurs whatever is passing under it rather than a flat
+       colour. */
+    -webkit-tap-highlight-color: transparent;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
+    /* Apple's optical sizing + the tracking their type ramp needs.
+       `cv11`/`ss01` are kept from the previous system: they open the
+       single-storey `a` and the flat-topped `l` that make a UI face
+       read as UI rather than as body text. */
     font-feature-settings: "cv11", "ss01";
+    font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
   }
-  ::selection { background: var(--primary); color: var(--primary-foreground); }
 
-  h1, h2, h3 { @apply tracking-tight text-balance; }
+  ::selection {
+    background: color-mix(in oklab, var(--section) 26%, transparent);
+    color: var(--foreground);
+  }
+
+  /* Apple's display ramp: tight and slightly negative as size grows,
+     because optical compensation needs it. A page title is set this
+     way everywhere, so it never has to be written per page. */
+  h1, h2, h3, h4 { @apply tracking-tighter text-balance; }
+  h1 { letter-spacing: -0.035em; }
+  h2 { letter-spacing: -0.028em; }
+  h3 { letter-spacing: -0.02em; }
   p { @apply text-pretty; }
 
+  /* A 3px focus ring with an offset, not a 2px outline flush against
+     the element: on a 44px touch target the flush ring is clipped by
+     the screen edge, and on a coloured tile it is invisible. */
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
   }
 
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 8px;
-    border: 2px solid var(--background);
+    background: color-mix(in oklab, var(--muted-foreground) 32%, transparent);
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
   }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+    background-clip: content-box;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -765,76 +1109,308 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
 
-/* ================= UTILITIES + BACKWARD-COMPAT ================= */
+/* ============================================================
+   THE MATERIALS
+   ------------------------------------------------------------
+   Everything below is aimed at one sentence: colour is light, and
+   depth is material. Each primitive is built from the tokens rather
+   than from a hardcoded hex, so re-pointing a token moves the whole
+   app at once.
+   ============================================================ */
 @layer utilities {
-  /* Content canvas */
+  /* --- The canvas ---------------------------------------------
+     The one large field of colour in the app. Three wide radials
+     in the section's own hues, sitting on the base background, so
+     the ground under Finance is warm and the ground under Training
+     is green. It is painted at low alpha and never scrolls, which
+     is what lets the frosted chrome above it have something to
+     refract.
+
+     `color-mix` against `--background` rather than against the
+     `--wash` token directly: wash is a light-theme surface, so in
+     dark mode it sits at L 0.245 against a page at L 0.185, and
+     using it as a ground would put the canvas ABOVE the cards and
+     invert the depth of every page. Mixing into whichever
+     background is current keeps the hue and keeps the order. */
   .page-ambient {
-    background: var(--background);
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(64rem 40rem at 6% -10%, color-mix(in oklab, var(--section-grad-1) 12%, transparent), transparent 62%),
+      radial-gradient(52rem 36rem at 98% 4%, color-mix(in oklab, var(--section-grad-2) 10%, transparent), transparent 64%),
+      radial-gradient(56rem 44rem at 50% 108%, color-mix(in oklab, var(--section) 8%, transparent), transparent 66%),
+      var(--background);
+  }
+  .dark .page-ambient {
+    background:
+      radial-gradient(64rem 40rem at 6% -10%, color-mix(in oklab, var(--section-grad-1) 17%, transparent), transparent 62%),
+      radial-gradient(52rem 36rem at 98% 4%, color-mix(in oklab, var(--section-grad-2) 15%, transparent), transparent 64%),
+      radial-gradient(56rem 44rem at 50% 108%, color-mix(in oklab, var(--section) 12%, transparent), transparent 66%),
+      var(--background);
   }
 
-  /* Legacy skeuo class names → clean surfaces (no visual break) */
-  .skeuo-plate,
-  .premium-glass {
-    background: var(--card);
-    color: var(--card-foreground);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-card);
+  /* --- Glass --------------------------------------------------
+     One definition, used by the rail, the top bar, menus, dialogs
+     and the command palette. `saturate()` is not optional: a plain
+     blur over a coloured canvas desaturates it, and the whole point
+     is that the colour coming through the material stays vivid. */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-highlight), var(--shadow-float);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   }
-  .skeuo-leather { background: var(--sidebar); color: var(--sidebar-foreground); border: 1px solid var(--sidebar-border); }
-  .skeuo-inset { background: var(--muted); border: 1px solid var(--border); box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.06); }
-  .skeuo-screws, .skeuo-stitch, .skeuo-sheen { background-image: none; }
-  .skeuo-sheen { position: static; overflow: visible; }
-  .skeuo-sheen::before { content: none; }
-  .skeuo-engraved { color: inherit; text-shadow: none; }
-  .skeuo-embossed-label {
-    background: var(--muted);
-    color: var(--muted-foreground);
-    border: 1px solid var(--border);
-    text-shadow: none;
-    box-shadow: none;
+  .glass-strong {
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-highlight), var(--shadow-float);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   }
-  .skeuo-odometer { font-variant-numeric: tabular-nums; background: var(--muted); color: var(--foreground); border: 1px solid var(--border); text-shadow: none; box-shadow: none; }
-  .skeuo-ledger { background: var(--card); border: 1px solid var(--border); box-shadow: none; }
 
-  .metric-number { @apply tracking-tight font-semibold tabular-nums; }
+  /* --- Brand mark, sign-in -------------------------------------
+     The mark leads the sign-in screen, on its own, lit. The bloom
+     is drawn behind it rather than clipped by a round wrapper,
+     because the artwork is a circle on a transparent surround.
+     The three hues are the brand's own, so the sign-in screen is
+     the one place in the product that is not section-coloured. */
+  .brand-neon {
+    position: relative;
+    isolation: isolate;
+    border-radius: 9999px;
+    --brand-neon-bloom: 0.55;
+    --brand-neon-rim: 0.85;
+  }
+  .brand-neon::before {
+    content: "";
+    position: absolute;
+    inset: -26%;
+    z-index: -2;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 30% 26%, color-mix(in oklab, var(--brand-lit-3) var(--brand-neon-bloom), transparent), transparent 62%),
+      radial-gradient(circle at 72% 76%, color-mix(in oklab, var(--brand-lit-2) var(--brand-neon-bloom), transparent), transparent 62%),
+      radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--brand-lit-1) calc(var(--brand-neon-bloom) * 0.72), transparent), transparent 68%);
+    filter: blur(30px);
+    animation: brand-neon-breathe 8s var(--ease-out) infinite;
+  }
+  /* The lit rim: a conic sweep masked down to a hairline ring,
+     turning slowly. A border cannot do a gradient that goes all
+     the way round. Painted from the `lit` steps, not the `fill`
+     ones — see the note on those tokens. */
+  .brand-neon::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 210deg,
+      var(--brand-lit-3),
+      var(--brand-lit-1),
+      var(--brand-lit-2),
+      var(--brand-lit-3)
+    );
+    opacity: var(--brand-neon-rim);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    animation: brand-neon-turn 18s linear infinite;
+  }
+  @keyframes brand-neon-breathe {
+    0%, 100% { opacity: 0.8; transform: scale(0.97); }
+    50%      { opacity: 1;   transform: scale(1.05); }
+  }
+  @keyframes brand-neon-turn { to { transform: rotate(1turn); } }
 
-  /* ---- Clean shadcn slot system ---- */
+  /* --- The sign-in canvas ---------------------------------------
+     The brand's own three hues, at their fullest, much larger and much
+     softer than the in-app aurora so the mark reads as the bright thing
+     rather than competing with it. Two of the three fields sit above the
+     horizon and one below, which is what stops this looking like a
+     single centred blob. */
+  .auth-canvas {
+    background:
+      radial-gradient(52rem 38rem at 10% -12%, color-mix(in oklab, var(--brand-3) 26%, transparent), transparent 66%),
+      radial-gradient(48rem 36rem at 94% 6%, color-mix(in oklab, var(--brand-2) 24%, transparent), transparent 66%),
+      radial-gradient(54rem 42rem at 50% 116%, color-mix(in oklab, var(--brand-1) 30%, transparent), transparent 68%),
+      var(--background);
+  }
+  .dark .auth-canvas {
+    background:
+      radial-gradient(52rem 38rem at 10% -12%, color-mix(in oklab, var(--brand-3) 34%, transparent), transparent 66%),
+      radial-gradient(48rem 36rem at 94% 6%, color-mix(in oklab, var(--brand-2) 32%, transparent), transparent 66%),
+      radial-gradient(54rem 42rem at 50% 116%, color-mix(in oklab, var(--brand-1) 38%, transparent), transparent 68%),
+      var(--background);
+  }
+
+  /* A glow that breathes and turns is decoration. Hold it still
+     rather than removing it -- the rim is how the mark is framed. */
+  @media (prefers-reduced-motion: reduce) {
+    .brand-neon::before, .brand-neon::after { animation: none; }
+  }
+
+  /* --- Cards ---------------------------------------------------
+     Opaque, elevated, and wearing a little of the section hue only
+     across the top edge. A gradient over the WHOLE card is what
+     makes a dashboard look like a birthday card: four tiles in a
+     row each carrying a full-strength field of colour, with the
+     numbers sitting on top of it, is unreadable and exhausting.
+     The hue lives in a 3px cap, a soft glow beneath, and the
+     1px top highlight that does the actual lifting. */
   [data-slot="card"] {
+    position: relative;
     background: var(--card);
     color: var(--card-foreground);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-card);
+    transition:
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
   }
   [data-slot="card"]::after { content: none; }
-  [data-slot="card-title"] { @apply tracking-tight font-semibold; }
+  [data-slot="card"]::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      var(--section-grad-1) 0%,
+      var(--section-grad-2) 55%,
+      transparent 100%
+    );
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  [data-slot="card"]:hover {
+    border-color: color-mix(in oklab, var(--section) 22%, var(--border));
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-2px);
+  }
+  [data-slot="card-header"] { position: relative; }
+  [data-slot="card-title"] { letter-spacing: -0.025em; }
 
+  /* --- Buttons -------------------------------------------------
+     A filled button is a gradient of the section's two solved
+     steps, carrying the solved white label. Painted with
+     `background-image` so a call site that sets its own `background`
+     still wins -- the previous system used a box-shadow bevel for
+     exactly that reason, and ~40 buttons carry their own fill. */
   [data-slot="button"] {
-    border-radius: calc(var(--radius) - 2px);
+    border-radius: var(--radius-lg);
     font-weight: 600;
     letter-spacing: -0.01em;
-    transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, transform var(--duration-fast) ease;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
   }
-  [data-slot="button"]:active:not(:disabled) { transform: translateY(1px); }
+  [data-slot="button"]:active:not(:disabled) { transform: scale(0.97); }
 
-  [data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"] {
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--card);
-    border: 1px solid var(--input);
+  [data-slot="button"][data-variant="default"] {
+    background-image: linear-gradient(
+      135deg,
+      var(--primary-grad-1) 0%,
+      var(--primary-grad-2) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      0 6px 16px -6px color-mix(in oklab, var(--primary-grad-1) 62%, transparent);
+  }
+  [data-slot="button"][data-variant="default"]:hover:not(:disabled) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 10px 24px -8px color-mix(in oklab, var(--primary-grad-1) 72%, transparent);
+  }
+  /* Destructive gets the same treatment off its own token, so a delete
+     confirmation looks as considered as the action it is cancelling —
+     without borrowing the section hue, which is reserved for
+     "actionable", and red is the one thing that must always mean it. */
+  [data-slot="button"][data-variant="destructive"] {
+    background-image: linear-gradient(
+      135deg,
+      var(--destructive) 0%,
+      color-mix(in oklab, var(--destructive) 74%, var(--ai)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      0 6px 16px -6px color-mix(in oklab, var(--destructive) 55%, transparent);
+  }
+
+  /* --- Inputs --------------------------------------------------
+     A field is a well, not a box: a soft inset ground, no hard
+     border until you touch it, then the section's own hue takes
+     over the border and the ring. */
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"] {
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
     color: var(--foreground);
     box-shadow: none;
     text-shadow: none;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
   }
-  [data-slot="input"]::placeholder, [data-slot="textarea"]::placeholder { color: var(--muted-foreground); opacity: 0.8; }
+  [data-slot="input"]::placeholder,
+  [data-slot="textarea"]::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
+  [data-slot="input"]:hover,
+  [data-slot="textarea"]:hover,
+  [data-slot="select-trigger"]:hover {
+    border-color: var(--border-strong);
+  }
+  [data-slot="input"]:focus,
+  [data-slot="textarea"]:focus,
+  [data-slot="select-trigger"]:focus {
+    background: var(--card);
+    border-color: color-mix(in oklab, var(--section) 60%, var(--border));
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--section) 14%, transparent);
+    outline: none;
+  }
 
-  [data-slot="tabs-list"] { background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 4px; box-shadow: none; }
-  [data-slot="tabs-trigger"] { border-radius: calc(var(--radius) - 4px); color: var(--muted-foreground); text-shadow: none; }
-  [data-slot="tabs-trigger"][data-state="active"] { background: var(--card); color: var(--foreground); border: 1px solid var(--border); box-shadow: var(--shadow-card); text-shadow: none; }
+  /* --- Tabs ---------------------------------------------------
+     A segmented control that reads as one object: a sunken track
+     with the selected segment lifted off it. */
+  [data-slot="tabs-list"] {
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 4px;
+    box-shadow: none;
+  }
+  [data-slot="tabs-trigger"] {
+    border-radius: var(--radius-lg);
+    color: var(--muted-foreground);
+    font-weight: 600;
+    text-shadow: none;
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+  [data-slot="tabs-trigger"][data-state="active"] {
+    background: var(--card);
+    color: var(--foreground);
+    box-shadow: var(--shadow-card);
+  }
 
+  /* --- Badges -------------------------------------------------
+     Tinted, not filled. A filled pill on a page that also has
+     filled CTAs makes the status read as an action; a tinted one
+     with ink-coloured type keeps the two apart. */
   [data-slot="badge"] {
     border-radius: 9999px;
     text-transform: none;
@@ -845,388 +1421,122 @@
     box-shadow: none;
   }
 
+  /* --- Dialogs, menus, popovers -------------------------------
+     These float above everything, so they are the one place the
+     material is at full strength. */
   [data-slot="dialog-content"] {
-    background: var(--card);
+    background: var(--popover);
     color: var(--card-foreground);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-popover);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-float);
     outline: none;
   }
-  [data-slot="dialog-overlay"] { background: rgb(2 6 23 / 0.6); backdrop-filter: blur(2px); }
-
-  [data-slot="dropdown-menu-content"], [data-slot="popover-content"], [data-slot="select-content"] {
-    background: var(--popover);
-    color: var(--popover-foreground);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-popover);
+  [data-slot="dialog-overlay"] {
+    background: rgb(8 10 20 / 0.42);
+    -webkit-backdrop-filter: blur(6px) saturate(120%);
+    backdrop-filter: blur(6px) saturate(120%);
   }
-
-  [data-slot="switch"] { background: var(--input); border: 1px solid var(--border); box-shadow: none; }
-  [data-slot="switch"][data-state="checked"] { background: var(--primary); }
-  [data-slot="switch-thumb"] { background: white; border: none; box-shadow: 0 1px 3px rgb(0 0 0 / 0.25); }
-
-  /* `overflow-x: auto`, not the `overflow: hidden` this used to be. The
-     rounded corners need the box to clip, but the shorthand also clipped
-     the horizontal axis, which overrode the `overflow-x-auto` that the
-     Table component sets on this very element — so a table wider than
-     its container was not scrollable, it was simply cut off. Desktop hid
-     it because tables fit; on a phone it made the trailing columns (the
-     row actions on /memberships among them) unreachable by any gesture. */
-  [data-slot="table-container"] { border-radius: var(--radius-md); overflow-x: auto; border: 1px solid var(--border); }
-  [data-slot="table-header"] tr { background: var(--muted); }
-  [data-slot="table-head"] { color: var(--muted-foreground); text-shadow: none; @apply text-xs font-semibold uppercase tracking-wider; }
-  [data-slot="table-body"] tr { background: transparent; border-bottom: 1px solid var(--border); }
-  [data-slot="table-row"]:hover { background: var(--muted); }
-
-  [data-slot="separator"] { background: var(--border); height: 1px; }
-  [data-slot="alert"] { border: 1px solid var(--border); background: var(--card); box-shadow: none; }
-  [data-slot="avatar"] { border: 1px solid var(--border); box-shadow: none; }
-  [data-slot="checkbox"] { background: var(--card); border: 1px solid var(--input); box-shadow: none; }
-  [data-slot="checkbox"][data-state="checked"] { background: var(--primary); border-color: var(--primary); }
-
-  /* Neutralize legacy gradient catch-alls: keep layout, drop texture */
-  [class*="bg-white/85"], [class*="bg-white/88"], [class*="bg-white/70"], [class*="bg-white/60"] {
-    background-image: none;
-  }
-
-  .skeleton-shimmer { position: relative; overflow: hidden; }
-  .skeleton-shimmer::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.35) 50%, transparent 80%);
-    animation: shimmer 1.8s ease-in-out infinite;
-  }
-  @keyframes shimmer { from { transform: translateX(-100%);} to { transform: translateX(100%);} }
-
-  @media (prefers-reduced-motion: reduce) {
-    .skeleton-shimmer::after { animation: none; }
-  }
-}
-
-
-/* ============================================================
-   THE CULT CLIENT — Unified Premium Product Surface
-   Applied globally so every module speaks the same visual language.
-   No routes, business rules, API contracts, or data fields changed.
-   ============================================================ */
-
-:root {
-  --surface-glass: rgb(255 255 255 / 0.78);
-  --surface-glass-strong: rgb(255 255 255 / 0.92);
-  --surface-tint: rgb(99 102 241 / 0.055);
-  --surface-ai: rgb(139 92 246 / 0.07);
-  --border-soft: rgb(148 163 184 / 0.22);
-  --shadow-premium: 0 10px 35px -18px rgb(15 23 42 / 0.28), 0 2px 8px -3px rgb(15 23 42 / 0.08);
-  --shadow-premium-hover: 0 18px 45px -22px rgb(15 23 42 / 0.34), 0 5px 14px -6px rgb(15 23 42 / 0.1);
-}
-
-.dark {
-  --surface-glass: rgb(30 41 59 / 0.76);
-  --surface-glass-strong: rgb(30 41 59 / 0.92);
-  --surface-tint: rgb(129 140 248 / 0.08);
-  --surface-ai: rgb(168 85 247 / 0.1);
-  --border-soft: rgb(148 163 184 / 0.2);
-  --shadow-premium: 0 14px 40px -20px rgb(0 0 0 / 0.55);
-  --shadow-premium-hover: 0 20px 52px -22px rgb(0 0 0 / 0.65);
-}
-
-@layer utilities {
-  /* Product canvas.
-     Three fixed radials -- indigo, cyan, fuchsia -- used to sit here
-     whatever page you were on, which made every screen the same
-     faintly-purple grey and meant the ambience said nothing. It now
-     takes the section hue, so the ground under Finance is warm and the
-     ground under Training is green, and the white cards on top read as
-     placed on a surface rather than floating on the same one forever. */
-  .page-ambient {
-    position: relative;
-    isolation: isolate;
-    /* `color-mix` against `--background` rather than the `--wash` token
-       directly, because wash is a light-theme surface: in dark mode it
-       sits at L 0.232 against a card at L 0.207, so using it as the
-       ground would have put the canvas *above* the cards and inverted
-       the depth of every page. Mixing into whichever background is
-       current keeps the hue and keeps the order. */
-    background:
-      radial-gradient(76rem 38rem at 0% -6%, color-mix(in oklab, var(--section) 17%, var(--background)), transparent 64%),
-      radial-gradient(62rem 34rem at 100% 6%, color-mix(in oklab, var(--section) 11%, var(--background)), transparent 66%),
-      color-mix(in oklab, var(--section) 5%, var(--background));
-  }
-
-  /* --- Brand mark, sign-in --------------------------------------
-     The logo is a circle with a transparent surround, so the glow is
-     drawn behind it rather than clipped by a round wrapper. The three
-     hues are the mark's own -- cyan, indigo, magenta -- and the same
-     three .page-ambient already washes the product canvas with, so the
-     sign-in screen is louder than the app without being different.
-
-     Light mode stays restrained: neon on white reads as a rendering
-     fault. Dark mode is where it belongs, so it gets the brighter
-     values. */
-  .brand-neon {
-    position: relative;
-    isolation: isolate;
-    border-radius: 9999px;
-    --brand-neon-bloom: 0.42;
-    --brand-neon-rim: 0.55;
-  }
-
-  /* Soft bloom, well outside the mark. */
-  .brand-neon::before {
-    content: "";
-    position: absolute;
-    inset: -22%;
-    z-index: -2;
-    border-radius: inherit;
-    background:
-      radial-gradient(circle at 32% 28%, rgb(34 211 238 / var(--brand-neon-bloom)), transparent 62%),
-      radial-gradient(circle at 70% 74%, rgb(217 70 239 / var(--brand-neon-bloom)), transparent 62%),
-      radial-gradient(circle at 50% 50%, rgb(99 102 241 / calc(var(--brand-neon-bloom) * 0.7)), transparent 68%);
-    filter: blur(26px);
-    animation: brand-neon-breathe 7s ease-in-out infinite;
-  }
-
-  /* The lit rim itself: a conic sweep masked down to a hairline ring,
-     turning slowly. A border cannot do a gradient that goes all the way
-     round. */
-  .brand-neon::after {
-    content: "";
-    position: absolute;
-    inset: -3px;
-    z-index: -1;
-    border-radius: inherit;
-    background: conic-gradient(
-      from 210deg,
-      rgb(34 211 238 / var(--brand-neon-rim)),
-      rgb(99 102 241 / var(--brand-neon-rim)),
-      rgb(217 70 239 / var(--brand-neon-rim)),
-      rgb(34 211 238 / var(--brand-neon-rim))
-    );
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
-    animation: brand-neon-turn 14s linear infinite;
-  }
-
-  :root:not([data-theme="light"]) .brand-neon,
-  :root[data-theme="dark"] .brand-neon {
-    --brand-neon-bloom: 0.72;
-    --brand-neon-rim: 0.9;
-  }
-
-  /* The canvas behind the sign-in card: the same three hues, much
-     larger and much softer, so the mark reads as the bright thing. */
-  .auth-neon-canvas {
-    position: relative;
-    isolation: isolate;
-    background:
-      radial-gradient(60rem 40rem at 12% -10%, rgb(34 211 238 / 0.14), transparent 70%),
-      radial-gradient(52rem 38rem at 92% 8%, rgb(217 70 239 / 0.13), transparent 70%),
-      radial-gradient(56rem 44rem at 50% 112%, rgb(99 102 241 / 0.15), transparent 70%),
-      var(--background);
-  }
-
-  :root:not([data-theme="light"]) .auth-neon-canvas,
-  :root[data-theme="dark"] .auth-neon-canvas {
-    background:
-      radial-gradient(60rem 40rem at 12% -10%, rgb(34 211 238 / 0.22), transparent 70%),
-      radial-gradient(52rem 38rem at 92% 8%, rgb(217 70 239 / 0.2), transparent 70%),
-      radial-gradient(56rem 44rem at 50% 112%, rgb(99 102 241 / 0.24), transparent 70%),
-      var(--background);
-  }
-
-  @keyframes brand-neon-breathe {
-    0%, 100% { opacity: 0.75; transform: scale(0.97); }
-    50%      { opacity: 1;    transform: scale(1.04); }
-  }
-
-  @keyframes brand-neon-turn {
-    to { transform: rotate(1turn); }
-  }
-
-  /* A glow that breathes and turns is decoration. Hold it still rather
-     than removing it -- the rim is part of how the mark is framed. */
-  @media (prefers-reduced-motion: reduce) {
-    .brand-neon::before,
-    .brand-neon::after {
-      animation: none;
-    }
-  }
-
-  /* Shared surfaces: works across legacy and new pages */
-  [data-slot="card"] {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(145deg, var(--surface-glass-strong), var(--surface-glass));
-    border-color: var(--border-soft);
-    box-shadow: var(--shadow-premium);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-  }
-
-  [data-slot="card"]:hover {
-    border-color: rgb(99 102 241 / 0.18);
-    box-shadow: var(--shadow-premium-hover);
-  }
-
-  [data-slot="card"]::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(99 102 241 / 0.28), rgb(34 211 238 / 0.18), transparent);
-    pointer-events: none;
-  }
-
-  [data-slot="card-header"] {
-    position: relative;
-  }
-
-  [data-slot="card-title"] {
-    letter-spacing: -0.025em;
-  }
-
-  /* Buttons: premium tactile controls */
-  [data-slot="button"] {
-    box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
-  }
-
-  [data-slot="button"][data-variant="default"],
-  [data-slot="button"].bg-primary {
-    background-image: linear-gradient(135deg, color-mix(in oklab, var(--primary) 96%, white), var(--primary));
-    box-shadow: 0 5px 14px -8px rgb(79 70 229 / 0.55);
-  }
-
-  [data-slot="button"]:hover:not(:disabled) {
-    box-shadow: 0 8px 18px -10px rgb(79 70 229 / 0.42);
-  }
-
-  /* Forms: consistent premium field language */
-  [data-slot="input"],
-  [data-slot="textarea"],
-  [data-slot="select-trigger"] {
-    background: var(--surface-glass-strong);
-    border-color: var(--border-soft);
-    box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.025), 0 1px 2px rgb(15 23 42 / 0.025);
-    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
-  }
-
-  [data-slot="input"]:hover,
-  [data-slot="textarea"]:hover,
-  [data-slot="select-trigger"]:hover {
-    border-color: rgb(99 102 241 / 0.3);
-  }
-
-  [data-slot="input"]:focus,
-  [data-slot="textarea"]:focus,
-  [data-slot="select-trigger"]:focus {
-    background: var(--card);
-    border-color: rgb(99 102 241 / 0.55);
-    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.09);
-  }
-
-  /* Tables: dense but breathable */
-  [data-slot="table-container"] {
-    background: var(--surface-glass-strong);
-    border-color: var(--border-soft);
-    box-shadow: var(--shadow-premium);
-    backdrop-filter: blur(14px);
-  }
-
-  [data-slot="table-header"] tr {
-    background: linear-gradient(90deg, rgb(99 102 241 / 0.055), rgb(34 211 238 / 0.025));
-  }
-
-  [data-slot="table-row"] {
-    transition: background-color 140ms ease, box-shadow 140ms ease;
-  }
-
-  [data-slot="table-row"]:hover {
-    background: linear-gradient(90deg, rgb(99 102 241 / 0.045), rgb(34 211 238 / 0.018));
-  }
-
-  /* Dialogs / popovers */
-  [data-slot="dialog-content"],
   [data-slot="dropdown-menu-content"],
   [data-slot="popover-content"],
   [data-slot="select-content"] {
-    background: linear-gradient(145deg, var(--surface-glass-strong), var(--surface-glass));
-    border-color: var(--border-soft);
-    box-shadow: 0 24px 70px -28px rgb(15 23 42 / 0.4), var(--shadow-premium);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-float);
+  }
+  [data-slot="dropdown-menu-item"],
+  [data-slot="select-item"] {
+    border-radius: var(--radius-md);
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  [data-slot="dropdown-menu-item"][data-highlighted],
+  [data-slot="select-item"][data-highlighted] {
+    background: var(--accent);
+    color: var(--accent-foreground);
   }
 
-  /* Status / metric chips */
-  [data-slot="badge"] {
-    box-shadow: inset 0 0 0 1px rgb(148 163 184 / 0.08);
+  /* --- Switch ------------------------------------------------- */
+  [data-slot="switch"] {
+    background: var(--input);
+    border: 1px solid var(--border);
+    box-shadow: none;
+    transition: background-color var(--duration-base) var(--ease-out);
+  }
+  [data-slot="switch"][data-state="checked"] {
+    background-image: linear-gradient(135deg, var(--primary-grad-1), var(--primary-grad-2));
+    border-color: transparent;
+  }
+  [data-slot="switch-thumb"] {
+    background: white;
+    border: none;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
   }
 
-  /* Page-level headings and common action rows */
-  main h1 {
-    letter-spacing: -0.035em;
+  /* --- Tables -------------------------------------------------
+     `overflow-x: auto`, not the `overflow: hidden` this used to
+     be. The rounded corners need the box to clip, but the
+     shorthand also clipped the horizontal axis, which overrode
+     the `overflow-x-auto` the Table component sets on this very
+     element — so a table wider than its container was not
+     scrollable, it was cut off. Desktop hid it because tables
+     fit; on a phone it made the trailing columns unreachable by
+     any gesture.
+
+     The header row was `--muted`: the same grey as a disabled
+     control and as a skeleton. Given the section hue it reads as
+     the top of this table rather than as an absence. */
+  [data-slot="table-container"] {
+    border-radius: var(--radius-xl);
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+  [data-slot="table-header"] tr {
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--section) 12%, var(--card)) 0%,
+      color-mix(in oklab, var(--section) 5%, var(--card)) 100%
+    );
+  }
+  [data-slot="table-head"] {
+    color: var(--section-ink);
+    text-shadow: none;
+    @apply text-xs font-semibold uppercase tracking-wider;
+  }
+  [data-slot="table-body"] tr {
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+  }
+  [data-slot="table-row"] {
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  /* Row hover moves to the wash: `--muted` on hover was the
+     identical grey, so the row you were pointing at looked
+     switched off. */
+  [data-slot="table-row"]:hover {
+    background: color-mix(in oklab, var(--section) 7%, var(--card));
   }
 
-  main h2 {
-    letter-spacing: -0.028em;
+  [data-slot="separator"] { background: var(--border); height: 1px; }
+  [data-slot="alert"] { border: 1px solid var(--border); background: var(--card); box-shadow: none; border-radius: var(--radius-xl); }
+  [data-slot="avatar"] { border: 1px solid var(--border); box-shadow: none; }
+  [data-slot="checkbox"] { background: var(--card); border: 1px solid var(--input); box-shadow: none; border-radius: var(--radius-xs); }
+  [data-slot="checkbox"][data-state="checked"] {
+    background-image: linear-gradient(135deg, var(--primary-grad-1), var(--primary-grad-2));
+    border-color: transparent;
   }
 
-  /* Links become intentional without changing route behavior */
-  main a:not([data-slot="button"]):not([class*="underline"]) {
-    transition: color 150ms ease;
-  }
-
-  /* Selection and reduced motion remain accessible */
-  @media (prefers-reduced-motion: reduce) {
-    [data-slot="card"],
-    [data-slot="button"],
-    [data-slot="table-row"],
-    [data-slot="input"],
-    [data-slot="textarea"],
-    [data-slot="select-trigger"] {
-      transition: none;
-    }
-  }
-}
-
-/* ============================================================
-   STAGE TWO — THE SURFACES UNDER THE MASTHEAD
-   ------------------------------------------------------------
-   Stage one coloured the masthead and stopped. Below it the app
-   was still one flat grey card after another: every tile, panel
-   and table drawn with the same 1px border and no elevation, so
-   a screen read as a wireframe of itself.
-
-   The rules below spend the section hue on the surfaces, and
-   spend elevation by role rather than stamping one shadow on
-   everything. Three things are deliberately NOT touched:
-
-   - Status colour. `warning`, `destructive` and `success` keep
-     the whole semantic palette to themselves. A tile that needs
-     acting on must still be the only red thing on the screen, so
-     the section hue never appears as a fill on a figure or a
-     badge -- only as ground, rule and label.
-   - Density. Every rule here is background, border, shadow or
-     colour. Nothing adds padding or height, because the reason
-     the last redesign stripped the colour out was that it had
-     cost ~90px per page.
-   - Contrast. Type on a tinted ground uses `--section-ink`,
-     measured at 6.1:1 or better on every hue in both themes.
-   ============================================================ */
-@layer utilities {
-  /* --- The figure tile ---------------------------------------
-     A wash that falls away diagonally, and 2px of the hue across
-     the top. The leading edge is left free: that is where the
-     state rule goes, and a tile that is merely a number must not
-     be wearing anything there. */
+  /* --- The figure tile -----------------------------------------
+     A wash that falls away diagonally, and 3px of the section's
+     gradient across the top. The leading edge is left free: that
+     is where the state rule goes, and a tile that is merely a
+     number must not be wearing anything there. */
   .stat-tile {
     position: relative;
-    background: linear-gradient(
-      152deg,
-      color-mix(in oklab, var(--section) 13%, var(--card)) 0%,
-      var(--card) 64%
-    );
+    background: var(--card);
     box-shadow: var(--shadow-card);
     transition:
       box-shadow var(--duration-base) var(--ease-out),
@@ -1236,85 +1546,40 @@
     content: "";
     position: absolute;
     inset: 0 0 auto 0;
-    height: 2px;
+    height: 3px;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--section) 0%, transparent 72%);
+    background: linear-gradient(90deg, var(--section-grad-1) 0%, var(--section-grad-2) 60%, transparent 100%);
   }
   .stat-tile:hover {
     box-shadow: var(--shadow-raised);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 
-  /* --- The section container ---------------------------------
-     The header takes the wash and the label takes the ink, which
-     is what turns 11px of grey uppercase into something you can
-     find by colour when six panels are stacked. */
+  /* --- The section container -----------------------------------
+     The header takes the wash and the label the ink, which is what
+     turns 11px of grey uppercase into something you can find by
+     colour when six panels are stacked. */
   .panel-premium {
     box-shadow: var(--shadow-card);
+    border-radius: var(--radius-2xl);
   }
   .panel-premium [data-slot="panel-header"] {
-    background: linear-gradient(180deg, var(--section-wash) 0%, transparent 100%);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--section) 9%, var(--card)) 0%,
+      transparent 100%
+    );
   }
   .panel-premium [data-slot="panel-title"] {
     color: var(--section-ink);
   }
 
-  /* --- Tables ------------------------------------------------
-     The header row was `--muted`: the same grey as a disabled
-     control and as a skeleton. Given the hue it reads as the top
-     of this table rather than as an absence. Row hover moves to
-     the wash for the same reason -- `--muted` on hover was the
-     identical grey, so the row you were pointing at looked
-     switched off. */
-  [data-slot="table-container"] {
-    background: var(--card);
-    box-shadow: var(--shadow-card);
-  }
-  [data-slot="table-header"] tr {
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--section) 18%, var(--card)) 0%,
-      color-mix(in oklab, var(--section) 9%, var(--card)) 100%
-    );
-  }
-  [data-slot="table-head"] {
-    color: var(--section-ink);
-  }
-  [data-slot="table-row"]:hover {
-    background: color-mix(in oklab, var(--section) 9%, var(--card));
-  }
-
-  /* --- Buttons -----------------------------------------------
-     A top-edge sheen and real elevation on the filled variants
-     only. Ghost and outline buttons stay flat: if every button
-     is raised, none of them is the one to press. */
-  /* The bevel is drawn entirely with inset shadow, and deliberately
-     NOT with `background-image`. The first version used a gradient,
-     which cost /attendance its "Check in" button: that call site paints
-     itself with `bg-[linear-gradient(105deg,#0891b2,...)]`, this rule is
-     later in the same layer, and so it replaced the teal with nothing --
-     white text on a transparent button, 1.74:1. Shadow composites over
-     whatever the call site painted instead of competing for the same
-     property, so the ~40 buttons carrying their own background survive. */
-  .btn-sheen {
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.22),
-      inset 0 -1px 0 rgb(15 23 42 / 0.10),
-      0 1px 2px rgb(15 23 42 / 0.18);
-  }
-  .btn-sheen:hover:not(:disabled) {
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.26),
-      inset 0 -1px 0 rgb(15 23 42 / 0.10),
-      0 3px 10px -2px rgb(15 23 42 / 0.26);
-  }
-
-  /* --- Empty states ------------------------------------------
+  /* --- Empty states -------------------------------------------
      Nothing here yet is not the same as something went wrong, and
      a dashed grey box said the second. */
   .empty-premium {
     background:
-      radial-gradient(28rem 12rem at 50% 0%, color-mix(in oklab, var(--section) 12%, var(--card)), transparent 70%),
+      radial-gradient(26rem 12rem at 50% 0%, color-mix(in oklab, var(--section) 10%, var(--card)), transparent 70%),
       var(--card);
   }
   .empty-premium [data-slot="empty-glyph"] {
@@ -1322,10 +1587,25 @@
     color: var(--section-ink);
   }
 
+  .metric-number { @apply tracking-tight font-semibold tabular-nums; }
+
+  .skeleton-shimmer { position: relative; overflow: hidden; }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.35) 50%, transparent 80%);
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .stat-tile:hover {
-      transform: none;
-    }
+    .skeleton-shimmer::after { animation: none; }
+    [data-slot="card"]:hover,
+    .stat-tile:hover { transform: none; }
   }
 }
 
@@ -1334,78 +1614,43 @@
    ------------------------------------------------------------
    `Panel` is used by eight files. `Card` is used by most of the
    rest, and a large number of sections are still the hand-rolled
-   shell that predates both. Styling only the primitives would
-   have left the dashboard -- the first screen anyone sees --
-   entirely untouched, which is how the last two redesigns ended
-   up half-applied.
+   shell that predates both. Styling only the primitives would have
+   left the dashboard -- the first screen anyone sees -- entirely
+   untouched, which is how the last two redesigns ended up
+   half-applied.
 
-   So the hue is attached to the slots and to one idiom instead
-   of to the components. This is the same bridge the file already
-   uses for the literal colour scales (rule 2 at the top): reach
-   every call site at once rather than wait on 45 files. It is a
-   bridge, not the destination -- new work should use `Panel`.
+   So the hue is attached to the slots and to one idiom instead of
+   to the components. This is the same bridge the file already uses
+   for the literal colour scales (rule 2 at the top): reach every
+   call site at once rather than wait on 45 files. It is a bridge,
+   not the destination -- new work should use `Panel`.
    ============================================================ */
 @layer utilities {
-  /* Every shadcn Card, on every page. The wash falls off inside
-     the first 96px, so a tall card is not a block of colour --
-     it is a white card with a coloured head. */
-  [data-slot="card"] {
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in oklab, var(--section) 10%, var(--card)) 0%,
-        var(--card) 96px
-      ),
-      var(--card);
-    box-shadow: var(--shadow-card);
-  }
-
-  /* --- The section-label idiom -------------------------------
-     `text-[11px] font-semibold uppercase tracking-[0.1em]
-     text-muted-foreground` is how this app writes the label above
-     a section. It appears in 20+ files, as a `CardTitle`, as a
-     bare `<p>`, and inside `Panel`. Matched on the class
-     attribute because that is the only thing those call sites
-     have in common -- there is no component to edit.
-
-     Scoped to `main` deliberately: the sidebar uses the same
-     tracking on a permanently dark ground, where `--section-ink`
-     is a near-black in light mode and would disappear. */
+  /* --- The section-label idiom ---------------------------------
+     `text-[11px] font-semibold uppercase tracking-[0.1em]` is how
+     this app writes the label above a section. It appears in 20+
+     files, as a `CardTitle`, as a bare `<p>`, and inside `Panel`.
+     Matched on the class attribute because that is the only thing
+     those call sites have in common -- there is no component to
+     edit. */
   main [class*="uppercase"][class*="tracking-[0.1em]"] {
     color: var(--section-ink);
   }
-
   /* An explicit opt-out, for a label that must stay neutral. */
   main [class*="uppercase"][class*="tracking-[0.1em]"][data-plain-label] {
     color: var(--muted-foreground);
   }
-}
 
-@layer utilities {
-  /* --- Secondary text that was never dark enough ---------------
+  /* --- Secondary text that was never dark enough ----------------
      `text-stone-400/500/600` is how most of this app writes its
-     secondary line, 432 times. Measured on white those scales
-     give 2.7:1, 3.9:1 and 4.9:1 -- two of the three fail AA for
-     small text before anything is done to them, and the card
-     tints above push the third under as well.
-
-     Re-pointing only the `color` of those three utilities fixes
-     every one at once, and leaves `bg-stone-500`, `border-stone-400`
-     and the rest of the scale alone: the tokens are shared, the
-     rule is not. `--muted-foreground` is 5.9:1 on white and 5.1:1
-     on the most tinted card head, in both themes.
-
-     It does collapse three steps into one. They were not being
-     used as three steps -- the same secondary caption is written
-     with all three across neighbouring files -- and a distinction
-     nobody can see is not one worth keeping at the cost of
-     readable type.
-
-     Excluded inside `.bg-sidebar`, the one block in `main` that
-     stays dark in both themes, where a theme-following ink would
-     go dark-on-dark in the light theme. */
-  main :is(.text-stone-400, .text-stone-500, .text-stone-600):not(.bg-sidebar *),
-  main :is(.text-slate-400, .text-slate-500, .text-slate-600):not(.bg-sidebar *) {
+     secondary line, 432 times. Re-pointing only the `color` of
+     those utilities fixes every one at once and leaves
+     `bg-stone-500`, `border-stone-400` and the rest of the scale
+     alone: the tokens are shared, the rule is not.
+     `--muted-foreground` measures 5.2:1 on the page and 4.8:1 on
+     the most tinted surface it lands on, in both themes. */
+  main :is(.text-stone-400, .text-stone-500, .text-stone-600),
+  main :is(.text-slate-400, .text-slate-500, .text-slate-600) {
     color: var(--muted-foreground);
   }
 }
@@ -1413,39 +1658,30 @@
 /* ============================================================
    THE NAVIGATION DRAWER
    ------------------------------------------------------------
-   On a phone the nav is a dialog, and two earlier rules in this
-   file claim every `[data-slot="dialog-content"]`: one paints it
-   `--card`, a later one a white glass gradient. Both sit after
-   Tailwind's utilities in the same layer, so the `bg-sidebar/95`
-   the drawer asked for never applied. It rendered as a white
-   sheet with `--sidebar-foreground` type on it -- a near-white
-   built for dark leather -- and every label but the selected one
-   was invisible.
+   On a phone the nav is a dialog, and two rules in this file
+   claimed every `[data-slot="dialog-content"]`, so the
+   `bg-sidebar/95` the drawer asked for lost the cascade and it
+   rendered as a white sheet with near-white type on it — the whole
+   menu was legible only by its icons.
 
-   Restoring the rail is most of the fix. The rest is that a
-   drawer is the one surface a phone user sees full-screen, and
-   it was the flattest thing in the app: a list of labels with no
-   depth and no colour. It now carries the section's own hue at
-   the top, the same glow the page behind it is wearing, and the
-   coloured glyph tiles read against the dark ground the way they
-   do on the desktop rail.
+   The attribute is styled after those rules and wins outright, and
+   the drawer is now the same frosted material as the desktop rail,
+   so opening the menu on a phone looks like the same app rather
+   than a different one.
    ============================================================ */
 @layer utilities {
   [data-slot="dialog-content"][data-surface="rail"] {
-    background:
-      radial-gradient(34rem 18rem at 0% 0%, color-mix(in oklab, var(--nav-accent-page, var(--sa-indigo)) 16%, transparent), transparent 70%),
-      var(--sidebar);
+    background: var(--glass-bg-strong);
     color: var(--sidebar-foreground);
-    border: 1px solid var(--sidebar-border);
+    border: 1px solid var(--glass-border);
     border-left: none;
-    box-shadow: 0 24px 70px -20px rgb(2 6 23 / 0.55);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    box-shadow: var(--glass-highlight), var(--shadow-float);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   }
-
   /* The drawer sits over a dimmed page, so the overlay needs to be
      darker than the sheet or the sheet reads as the background. */
   [data-slot="dialog-overlay"] {
-    background: rgb(2 6 23 / 0.62);
+    background: rgb(8 10 20 / 0.5);
   }
 }

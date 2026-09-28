@@ -92,85 +92,91 @@ export default function PortalLayout({
       data-section={accentForPath(pathname)}
       className="page-ambient flex min-h-svh flex-col"
     >
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            {/* The member's half of the product is still the product.
-                Small and quiet here -- this header belongs to them, not
-                to the brand. */}
-            <Image
-              src={PRODUCT_LOGO_SRC}
-              alt={PRODUCT_LOGO_ALT}
-              width={96}
-              height={96}
-              className="size-9 shrink-0 rounded-full object-contain"
-              priority
-            />
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                {member?.primaryBranch?.name ?? "Your gym"}
-              </p>
-              <p className="truncate text-sm font-semibold">
-                {member?.firstName} {member?.lastName}
-              </p>
+      {/* Floating glass header, inset from the edges, for the same reason
+          the staff shell's is: it reads as a pane over the canvas rather
+          than as a band painted across the top of a document. */}
+      <header className="sticky top-0 z-20 px-3 pt-3">
+        <div className="glass rounded-3xl">
+          <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              {/* The member's half of the product is still the product.
+                  Small and quiet here -- this header belongs to them, not
+                  to the brand. */}
+              <Image
+                src={PRODUCT_LOGO_SRC}
+                alt={PRODUCT_LOGO_ALT}
+                width={96}
+                height={96}
+                className="size-9 shrink-0 rounded-full object-contain"
+                priority
+              />
+              <div className="min-w-0">
+                <p className="truncate text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+                  {member?.primaryBranch?.name ?? "Your gym"}
+                </p>
+                <p className="truncate text-sm font-semibold tracking-[-0.01em]">
+                  {member?.firstName} {member?.lastName}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              {/* Beside sign-out rather than a sixth tab: six do not fit a
+                  phone, and settings are not somewhere you go often. */}
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="min-h-11 rounded-2xl"
+              >
+                <Link href="/portal/account">
+                  <Settings className="size-4" aria-hidden="true" />
+                  <span className="sr-only">Account settings</span>
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void logout()}
+                className="min-h-11 rounded-2xl"
+              >
+                <LogOut className="size-4" aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">Sign out</span>
+              </Button>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
-            {/* Beside sign-out rather than a sixth tab: six do not fit a
-                phone, and settings are not somewhere you go often. */}
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="min-h-11 rounded-lg"
-            >
-              <Link href="/portal/account">
-                <Settings className="size-4" aria-hidden="true" />
-                <span className="sr-only">Account settings</span>
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void logout()}
-              className="min-h-11 rounded-lg"
-            >
-              <LogOut className="size-4" aria-hidden="true" />
-              <span className="sr-only sm:not-sr-only">Sign out</span>
-            </Button>
-          </div>
-        </div>
 
-        <nav
-          aria-label="Member portal"
-          className="mx-auto flex w-full max-w-3xl gap-1 overflow-x-auto px-3 pb-2"
-        >
-          {TABS.map(({ href, label, icon: Icon }) => {
-            const active =
-              href === "/portal"
-                ? pathname === "/portal"
-                : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted",
-                )}
-              >
-                <Icon className="size-4" aria-hidden="true" />
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
+          <nav
+            aria-label="Member portal"
+            className="mx-auto flex w-full max-w-3xl gap-1 overflow-x-auto px-3 pb-2"
+          >
+            {TABS.map(({ href, label, icon: Icon }) => {
+              const active =
+                href === "/portal"
+                  ? pathname === "/portal"
+                  : pathname.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-11 shrink-0 items-center gap-2 rounded-2xl px-3.5 text-sm font-semibold transition-all duration-200",
+                    active
+                      ? "text-accent-foreground"
+                      : "font-medium text-muted-foreground hover:bg-surface-hover hover:text-foreground",
+                  )}
+                  style={active ? { background: "var(--accent)" } : undefined}
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-5">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
         {children}
       </main>
     </div>

@@ -28,15 +28,15 @@ export function EmptyState({
  return (
  <div
  role="status"
- className={cn( "empty-premium flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border px-6 py-12 text-center",
+ className={cn( "empty-premium flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border px-6 py-14 text-center",
  className,
  )}
  >
  <span
  data-slot="empty-glyph"
- className="flex size-12 items-center justify-center rounded-full"
+ className="flex size-14 items-center justify-center rounded-2xl"
  >
- <Icon className="size-5" aria-hidden="true" strokeWidth={2} />
+ <Icon className="size-6" aria-hidden="true" strokeWidth={2} />
  </span>
  <div className="flex flex-col gap-1">
  <h3 className="text-sm font-semibold tracking-tight">{title}</h3>

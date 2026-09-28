@@ -65,25 +65,25 @@ export function StatCard({
 
  return (
  <div
- className={cn( "stat-tile min-w-0 overflow-hidden rounded-lg border border-border px-4 py-3",
- flagged && "before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:content-['']",
+ className={cn( "stat-tile min-w-0 overflow-hidden rounded-2xl border border-border px-5 py-4",
+ flagged && "before:absolute before:inset-y-3 before:left-0 before:w-1 before:rounded-full before:content-['']",
  TONE_RULE[effectiveTone],
  )}
  >
  <p
- className="truncate text-[11px] font-semibold uppercase tracking-[0.1em]"
+ className="truncate text-[11px] font-bold uppercase tracking-[0.1em]"
  style={{ color: "var(--section-ink)" }}
  >
  {title}
  </p>
  {isLoading ? (
  <Skeleton
- className="mt-1.5 h-7 w-20 rounded"
+ className="mt-2 h-8 w-20 rounded-lg"
  aria-label={`Loading ${title}`}
  />
  ) : isError ? (
  <p
- className="mt-0.5 truncate text-[1.625rem] font-semibold leading-tight tracking-tight text-muted-foreground"
+ className="mt-1 truncate text-[1.75rem] font-bold leading-tight tracking-[-0.03em] text-muted-foreground"
  title={`${title} could not be loaded`}
  >
  <span aria-hidden="true">&mdash;</span>
@@ -91,7 +91,7 @@ export function StatCard({
  </p>
  ) : (
  <p
- className={cn( "mt-0.5 truncate text-[1.625rem] font-semibold leading-tight tracking-tight tabular-nums",
+ className={cn( "mt-1 truncate text-[1.75rem] font-bold leading-tight tracking-[-0.03em] tabular-nums",
  effectiveTone === "destructive" && "text-destructive",
  effectiveTone === "warning" && "text-warning",
  )}

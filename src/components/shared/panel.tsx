@@ -53,20 +53,20 @@ export function Panel({
     <section
       aria-labelledby={title && titleId ? titleId : undefined}
       className={cn(
-        "panel-premium overflow-hidden rounded-lg border border-border bg-card",
+        "panel-premium overflow-hidden rounded-2xl border border-border bg-card",
         className,
       )}
     >
       {title ? (
         <div
           data-slot="panel-header"
-          className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5"
+          className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3 sm:px-6"
         >
           <div className="min-w-0">
             <h2
               id={titleId}
               data-slot="panel-title"
-              className="truncate text-[11px] font-semibold uppercase tracking-[0.1em]"
+              className="truncate text-[11px] font-bold uppercase tracking-[0.12em]"
             >
               {title}
             </h2>
@@ -84,10 +84,10 @@ export function Panel({
         </div>
       ) : null}
 
-      <div className={cn(!flush && "p-4 sm:p-5", bodyClassName)}>{children}</div>
+      <div className={cn(!flush && "p-5 sm:p-6", bodyClassName)}>{children}</div>
 
       {footer ? (
-        <div className="border-t border-border px-4 py-2.5 sm:px-5">
+        <div className="border-t border-border px-5 py-3 sm:px-6">
           {footer}
         </div>
       ) : null}
@@ -130,9 +130,5 @@ export function MetricStrip({
     5: "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
   }[columns];
 
-  return (
-    <section aria-label={label} className={cn("grid gap-2.5", cols, className)}>
-      {children}
-    </section>
-  );
+  return <section aria-label={label} className={cn("grid gap-3", cols, className)}>{children}</section>;
 }
