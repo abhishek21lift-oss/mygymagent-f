@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare,
+  BarChart3, Brain, Workflow, Building2, CalendarCheck, CalendarDays, CheckSquare,
   CreditCard, Dumbbell, Gauge, HandCoins, Home, LayoutDashboard, ListChecks,
   Megaphone, Package, Salad, Search, Settings, Sparkles, UserCog, Users, Wallet,
 } from "lucide-react";
@@ -91,6 +91,7 @@ export const secondaryNav: NavItem[] = [
     { title: "Business health", href: "/owner-os", icon: BarChart3, permission: "reports.view" },
     { title: "Command centre", href: "/command-center", icon: LayoutDashboard },
     { title: "Member intelligence", href: "/intelligence", icon: Brain, permission: "reports.view" },
+    { title: "Automations", href: "/automation", icon: Workflow, permission: "reports.view" },
     { title: "Business OS", href: "/business-os", icon: Gauge, permission: "reports.view" },
   ] },
   { title: "AI agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai", children: [
