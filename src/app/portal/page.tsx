@@ -1,18 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarCheck, Dumbbell, Salad, User, Wallet } from "lucide-react";
+import {
+  CalendarCheck,
+  Dumbbell,
+  FileText,
+  Receipt,
+  Salad,
+  TrendingUp,
+  User,
+  Wallet,
+} from "lucide-react";
 
 import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/shared/panel";
+import { CheckInCode } from "@/components/portal/check-in-code";
 import { usePortalMe, usePortalVisits } from "@/lib/hooks/use-portal";
 
 function daysLeft(endDate: string) {
   const ms = new Date(endDate).getTime() - Date.now();
   return Math.ceil(ms / 86_400_000);
 }
+
+/** Everything the tabs do not reach. Six tabs do not fit a phone, so
+ * the rest of the member's record hangs off Home instead. */
+const SHORTCUTS = [
+  { href: "/portal/plan", label: "My training", icon: Dumbbell },
+  { href: "/portal/nutrition", label: "My nutrition plan", icon: Salad },
+  { href: "/portal/progress", label: "Progress and goals", icon: TrendingUp },
+  { href: "/portal/billing", label: "Bills and payments", icon: Receipt },
+  { href: "/portal/documents", label: "My documents", icon: FileText },
+] as const;
 
 export default function PortalHome() {
   const me = usePortalMe();
@@ -68,22 +88,20 @@ export default function PortalHome() {
         </Link>
       </Panel>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Link
-          href="/portal/plan"
-          className="flex min-h-11 items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/50"
-        >
-          <Dumbbell className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <span className="text-sm font-medium">My training plan</span>
-        </Link>
-        <Link
-          href="/portal/nutrition"
-          className="flex min-h-11 items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/50"
-        >
-          <Salad className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <span className="text-sm font-medium">My nutrition plan</span>
-        </Link>
-      </div>
+      <CheckInCode />
+
+      <nav aria-label="Your record" className="grid gap-3 sm:grid-cols-2">
+        {SHORTCUTS.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex min-h-11 items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-muted/50"
+          >
+            <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="text-sm font-medium">{label}</span>
+          </Link>
+        ))}
+      </nav>
 
       <Panel
         title="Recent visits"

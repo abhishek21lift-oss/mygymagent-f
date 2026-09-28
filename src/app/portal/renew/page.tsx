@@ -14,20 +14,10 @@ import {
   usePortalRenewalOptions,
   useRequestPortalRenewal,
 } from "@/lib/hooks/use-portal";
+import { formatMoney } from "@/lib/money";
 
 function formatPrice(price: string | number, currency: string) {
-  const amount = typeof price === "string" ? Number(price) : price;
-  if (!Number.isFinite(amount)) return `${currency} ${String(price)}`;
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  } catch {
-    // An unrecognised currency code should show the number, not throw.
-    return `${currency} ${amount}`;
-  }
+  return formatMoney(price, currency, { whole: true });
 }
 
 /**

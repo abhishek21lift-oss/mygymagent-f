@@ -295,3 +295,188 @@ export function useRequestPortalRenewal() {
       }>("/portal/renewal-requests", input),
   });
 }
+
+// ---------------------------------------------------------------------
+// The rest of the member's own record: progress, the check-in code,
+// billing, training and documents. Same rule as everything above -- no
+// member id anywhere, the server scopes to the session.
+// ---------------------------------------------------------------------
+
+/** Decimal columns arrive as strings; null when never recorded. */
+type Num = string | null;
+
+export interface PortalMeasurement {
+  id: string;
+  recordedAt: string;
+  weightKg: Num;
+  heightCm: Num;
+  bodyFatPercent: Num;
+  muscleMassKg: Num;
+  waistCm: Num;
+  hipCm: Num;
+  chestCm: Num;
+  restingHeartRate: number | null;
+  bloodPressureSystolic: number | null;
+  bloodPressureDiastolic: number | null;
+}
+
+export interface PortalGoal {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  status: "ACTIVE" | "ACHIEVED" | "ABANDONED" | "PAUSED";
+  targetValue: Num;
+  targetUnit: string | null;
+  baselineValue: Num;
+  startDate: string;
+  targetDate: string | null;
+  achievedAt: string | null;
+  milestones: {
+    id: string;
+    title: string;
+    targetDate: string | null;
+    achievedAt: string | null;
+    value: Num;
+  }[];
+}
+
+export interface PortalProgress {
+  /** Newest first. */
+  measurements: PortalMeasurement[];
+  goals: PortalGoal[];
+}
+
+export function usePortalProgress() {
+  return useQuery({
+    queryKey: [KEY, "progress"],
+    queryFn: () => api.get<PortalProgress>("/portal/progress"),
+  });
+}
+
+export interface PortalCheckInCode {
+  token: string;
+  rotatesAt: string;
+}
+
+/**
+ * Mints the member's check-in code. A mutation, not a query: the server
+ * keeps only a hash, so every call issues a new code and retires the
+ * previous one. Caching it or refetching it in the background would
+ * quietly invalidate the code on the member's screen -- so it is minted
+ * once, when they ask to see it, and never persisted.
+ */
+export function useMintPortalCheckInCode() {
+  return useMutation({
+    mutationFn: () => api.post<PortalCheckInCode>("/portal/check-in-code"),
+  });
+}
+
+export interface PortalInvoice {
+  id: string;
+  number: string;
+  status: "ISSUED" | "PART_PAID" | "PAID" | "OVERDUE" | "VOID" | "WRITTEN_OFF";
+  grandTotal: string;
+  amountPaid: string;
+  balance: string;
+  currency: string;
+  lines: unknown;
+  issuedAt: string | null;
+  dueAt: string | null;
+  paidAt: string | null;
+}
+
+export interface PortalPayment {
+  id: string;
+  amount: string;
+  currency: string;
+  method: string;
+  status: "COMPLETED" | "REFUNDED" | "PARTIALLY_REFUNDED" | "FAILED";
+  createdAt: string;
+  planName: string | null;
+  /** The bills this payment was put against. */
+  invoiceNumbers: string[];
+}
+
+export function usePortalBilling() {
+  return useQuery({
+    queryKey: [KEY, "billing"],
+    queryFn: () =>
+      api.get<{ invoices: PortalInvoice[]; payments: PortalPayment[] }>(
+        "/portal/billing",
+      ),
+  });
+}
+
+export interface PortalPtPackage {
+  id: string;
+  name: string;
+  totalSessions: number;
+  usedSessions: number;
+  remainingSessions: number;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
+
+export interface PortalPtSession {
+  id: string;
+  startTime: string;
+  endTime: string;
+  type: string;
+  status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+  branch: { name: string } | null;
+  trainerName: string | null;
+}
+
+export interface PortalWorkoutSession {
+  id: string;
+  sessionDate: string;
+  status: "IN_PROGRESS" | "COMPLETED";
+  startedAt: string;
+  completedAt: string | null;
+  planName: string;
+  setCount: number;
+  volumeKg: string;
+}
+
+export interface PortalTraining {
+  packages: PortalPtPackage[];
+  upcomingSessions: PortalPtSession[];
+  pastSessions: PortalPtSession[];
+  workoutSessions: PortalWorkoutSession[];
+}
+
+export function usePortalTraining() {
+  return useQuery({
+    queryKey: [KEY, "training"],
+    queryFn: () => api.get<PortalTraining>("/portal/training"),
+  });
+}
+
+export interface PortalDocument {
+  id: string;
+  category: "DOCUMENT" | "PROGRESS_PHOTO" | "ID_SCAN" | "OTHER";
+  description: string | null;
+  status: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED";
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  rejectionReason: string | null;
+  currentVersion: number;
+  createdAt: string;
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+  /** Signed, and short-lived (15 minutes). */
+  url: string;
+}
+
+export function usePortalDocuments() {
+  return useQuery({
+    queryKey: [KEY, "documents"],
+    queryFn: () => api.get<{ items: PortalDocument[] }>("/portal/documents"),
+    // The links inside expire after 15 minutes; refetch well before.
+    staleTime: 5 * 60_000,
+    refetchInterval: 10 * 60_000,
+  });
+}
