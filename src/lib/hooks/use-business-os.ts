@@ -289,6 +289,41 @@ export function useTrialBalance(enabled = true) {
   })
 }
 
+/**
+ * The ledger behind the trial balance.
+ *
+ * The trial balance says what each account adds up to; it does not say
+ * which transactions got it there. Until this existed, a book could be
+ * posted to and totalled but never read back a line at a time, so it
+ * could not be reconciled against anything. `accountingEntries` is
+ * disabled until an account is actually being looked at, so the page
+ * does not fetch 500 rows nobody scrolls to.
+ */
+export interface LedgerEntry {
+  id: string
+  entryDate: string
+  description: string
+  debit: number
+  credit: number
+  referenceType: string | null
+  referenceId: string | null
+  account: { id: string; code: string; name: string; type: string }
+  branch: { id: string; name: string } | null
+}
+
+const LEDGER = "accounting-ledger"
+
+export function useAccountingEntries(accountId: string | null, enabled = true) {
+  return useQuery({
+    queryKey: [LEDGER, accountId ?? "all"],
+    queryFn: () =>
+      api.get<LedgerEntry[]>("/accounting/entries", {
+        query: accountId ? { accountId } : {},
+      }),
+    enabled: enabled && Boolean(accountId),
+  })
+}
+
 export interface TaxSummaryRow {
   totalDebit: number
   totalCredit: number

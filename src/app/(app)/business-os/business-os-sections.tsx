@@ -23,6 +23,7 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
   useAccountingAccounts,
+  useAccountingEntries,
   useConvertReferral,
   useCreateAccount,
   useCreateReferral,
@@ -470,6 +471,11 @@ export function AccountingSection() {
   const canManage = hasPermission("accounting.manage");
   const accounts = useAccountingAccounts(canRead);
   const trial = useTrialBalance(canRead);
+  // Which account the ledger is showing. `null` means "pick one" — the
+  // query stays off until then rather than pulling 500 rows nobody asked
+  // for.
+  const [ledgerAccount, setLedgerAccount] = React.useState<string | null>(null);
+  const ledger = useAccountingEntries(ledgerAccount, canRead);
   const tax = useTaxSummary({}, canRead);
   const createAccount = useCreateAccount();
   const journal = usePostJournal();
@@ -541,7 +547,18 @@ export function AccountingSection() {
                   {(trial.data ?? []).map((row) => (
                     <TableRow key={row.accountId}>
                       <TableCell className="font-medium">
-                        {row.code} · {row.name}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setLedgerAccount(
+                              ledgerAccount === row.accountId ? null : row.accountId,
+                            )
+                          }
+                          aria-pressed={ledgerAccount === row.accountId}
+                          className="text-left hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        >
+                          {row.code} · {row.name}
+                        </button>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {displayCurrencyAmount(row.debit)}
@@ -558,6 +575,76 @@ export function AccountingSection() {
               </Table>
             </div>
           )}
+
+          {/* The transactions behind the trial balance. Without this the
+              section could post entries and total them but never read one
+              back, so the numbers could not be reconciled against
+              anything. Pick an account above to open its ledger. */}
+          {ledgerAccount ? (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Ledger for{" "}
+                  <span className="font-semibold text-foreground">
+                    {(trial.data ?? []).find((r) => r.accountId === ledgerAccount)
+                      ?.name ?? "this account"}
+                  </span>
+                </p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setLedgerAccount(null)}
+                >
+                  Close
+                </Button>
+              </div>
+              <DataState
+                isLoading={ledger.isPending}
+                isError={ledger.isError}
+                onRetry={() => void ledger.refetch()}
+                errorMessage="Could not load this account's ledger."
+                isEmpty={(ledger.data ?? []).length === 0}
+                emptyIcon={ReceiptIndianRupee}
+                emptyTitle="No postings"
+                emptyDescription="Nothing has been posted to this account yet."
+              >
+                <div className="overflow-hidden rounded-lg border border-border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Branch</TableHead>
+                        <TableHead className="text-right">Debit</TableHead>
+                        <TableHead className="text-right">Credit</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(ledger.data ?? []).map((entry) => (
+                        <TableRow key={entry.id}>
+                          <TableCell className="whitespace-nowrap text-muted-foreground">
+                            {new Date(entry.entryDate).toLocaleDateString("en-IN")}
+                          </TableCell>
+                          <TableCell className="max-w-xs truncate font-medium">
+                            {entry.description}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {entry.branch?.name ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {entry.debit ? displayCurrencyAmount(entry.debit) : "—"}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {entry.credit ? displayCurrencyAmount(entry.credit) : "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </DataState>
+            </div>
+          ) : null}
 
           {canManage && (
             <div className="flex flex-col gap-2 border-t border-border pt-3">
