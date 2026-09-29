@@ -22,7 +22,7 @@ import {
   useCreatePortalInvite,
   useRevokePortalInvites,
 } from "@/lib/hooks/use-business-os"
-import { CampaignAudienceButton } from "./campaign-audience"
+import { CampaignAudienceButton, CampaignAudiencePanel } from "./campaign-audience"
 
 type Campaign = { id: string; name: string; channel: string; status: string; audienceFilter?: Record<string, unknown>; scheduledAt?: string | null }
 
@@ -48,6 +48,10 @@ export default function BusinessOsPage() {
   const [campaign, setCampaign] = React.useState({ name: "", channel: "EMAIL", templateKey: "", audienceFilter: "{}" })
   const [aiCommand, setAiCommand] = React.useState("")
   const [campaigns, setCampaigns] = React.useState<Campaign[]>([])
+  // Which campaign's audience is open, if any. One at a time: the panels
+  // are full-width rows of their card, so two open at once is two
+  // tall blocks of member names to read past each other.
+  const [audienceFor, setAudienceFor] = React.useState<string | null>(null)
   const [output, setOutput] = React.useState<unknown>(null)
   // Starts true: before B-P0-3 the first paint showed zeroes while the
   // fetch was still in flight, which reads as "you have none of anything"
@@ -244,8 +248,12 @@ export default function BusinessOsPage() {
                                 and moves the campaign to QUEUED. */}
                             {hasPermission("marketing.read") ? (
                               <CampaignAudienceButton
-                                campaignId={c.id}
-                                campaignName={c.name}
+                                open={audienceFor === c.id}
+                                onToggle={() =>
+                                  setAudienceFor(
+                                    audienceFor === c.id ? null : c.id,
+                                  )
+                                }
                               />
                             ) : null}
                             {hasPermission("marketing.manage") ? (
@@ -280,6 +288,16 @@ export default function BusinessOsPage() {
                             ) : null}
                           </div>
                         </div>
+                        {/* Full width of the card, below the button row --
+                            not beside the buttons. See the comment on
+                            CampaignAudienceButton for why these are two
+                            components. */}
+                        {audienceFor === c.id ? (
+                          <CampaignAudiencePanel
+                            campaignId={c.id}
+                            campaignName={c.name}
+                          />
+                        ) : null}
                       </div>
                     ))}
                   </div>
