@@ -335,9 +335,21 @@ export function useDeleteSegment() {
   })
 }
 
+/**
+ * Segment insights — an LLM reading the members currently in a segment.
+ *
+ * The call went to `/members/segments/insights`, but the route is
+ * mounted on the analytics controller, so the real path is
+ * `/analytics/segments/insights`. Nothing caught it because nothing
+ * called this hook: the backend route had no frontend caller and the
+ * hook had no caller either — a capability with no way to invoke it,
+ * which is the same shape as the missing-writer findings in the audit.
+ * The path is corrected here; wiring it into the segments screen is the
+ * remaining half.
+ */
 export function useSegmentInsights() {
   return useMutation({
     mutationFn: (input: { segmentId?: string; rules?: unknown }) =>
-      api.post<{ summary?: string; [k: string]: unknown }>("/members/segments/insights", input),
+      api.post<{ summary?: string; [k: string]: unknown }>("/analytics/segments/insights", input),
   })
 }

@@ -333,7 +333,15 @@ export interface MembershipStatusHistoryEntry {
   createdAt: string
 }
 
-export type AttendanceMethod = "QR" | "MANUAL" | "KIOSK" | "APP" | "STAFF"
+/**
+ * `BIOMETRIC` is written by the turnstile, not by a receptionist, so it
+ * was missing here when the biometric check-in path shipped. The backend's
+ * `CheckInDto` accepts it and `AttendanceMethod` in Prisma carries it, so
+ * every turnstile row arrived typed as something this union could not
+ * name — the union was simply wrong, and a staff member could not record
+ * one by hand because the client-side enum rejected it first.
+ */
+export type AttendanceMethod = "QR" | "MANUAL" | "KIOSK" | "APP" | "STAFF" | "BIOMETRIC"
 
 export interface Attendance {
   id: string

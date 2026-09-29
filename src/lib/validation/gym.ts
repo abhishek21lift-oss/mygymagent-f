@@ -80,7 +80,7 @@ export const checkInSchema = z.object({
   branchId: z.string().min(1, "Branch is required"),
   memberId: z.string().optional(),
   staffUserId: z.string().optional(),
-  method: z.enum(["QR", "MANUAL", "KIOSK", "APP", "STAFF"]),
+  method: z.enum(["QR", "MANUAL", "KIOSK", "APP", "STAFF", "BIOMETRIC"]),
 })
 export type CheckInInput = z.infer<typeof checkInSchema>
 

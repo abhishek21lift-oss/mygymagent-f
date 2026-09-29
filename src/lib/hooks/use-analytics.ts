@@ -41,7 +41,55 @@ export interface SalesSourcePerformance {
   conversionRatePct: number | string
 }
 
-export interface TrainerWorkload { trainerId: string; trainerName: string; activeMembers: number; pendingPtSessions: number; completedPtSessions: number }
+/**
+ * Trainer workload, as `GET /analytics/trainers/workload` actually
+ * returns it.
+ *
+ * These field names are not a choice. The backend's `TrainerWorkload`
+ * (`analytics/trainer-intelligence.service.ts`) is `{ userId, firstName,
+ * lastName, assignedMemberCount, workoutPlansAssignedLast30Days,
+ * dietPlansAssignedLast30Days }`, and the endpoint answers with an
+ * envelope `{ trainers, notComputable }` rather than a bare array.
+ *
+ * This type previously read `{ trainerId, trainerName, activeMembers,
+ * pendingPtSessions, completedPtSessions }` — no field in common — and
+ * the hook pushed the envelope straight through `asArray`, which returns
+ * `[]` for anything that is not an array. The panel therefore rendered
+ * its "No trainers assigned" empty state on every gym, permanently, with
+ * no error to explain it. The same payload is typed correctly on the
+ * daily-briefing hook, which is what made the disagreement visible.
+ */
+export interface TrainerWorkload {
+  userId: string
+  firstName: string
+  lastName: string
+  assignedMemberCount: number
+  workoutPlansAssignedLast30Days: number
+  dietPlansAssignedLast30Days: number
+}
+
+export interface TrainerWorkloadResponse {
+  trainers: TrainerWorkload[]
+  /** Figures the backend refuses to invent; surfaced, not shown as zero. */
+  notComputable: { key: string; reason: string }[]
+}
+
+/**
+ * Unwrap the trainer-workload envelope.
+ *
+ * Exported so it can be tested without a QueryClient, and because the
+ * bug it exists to prevent was invisible: the hook used to pass the whole
+ * response through `asArray`, which returns `[]` for anything that is
+ * not an array. The endpoint answers with an object, so every gym saw
+ * "No trainers assigned" forever, with no error and no failing request.
+ */
+export function readTrainerWorkload(payload: unknown): TrainerWorkloadResponse {
+  const body = (payload ?? {}) as Partial<TrainerWorkloadResponse>
+  return {
+    trainers: Array.isArray(body.trainers) ? body.trainers : [],
+    notComputable: Array.isArray(body.notComputable) ? body.notComputable : [],
+  }
+}
 export interface InventoryForecast { productId: string; productName: string; currentStock: number; daysUntilStockout: number | null; lowStock: boolean }
 
 interface RevenueQueryParams { from?: string; to?: string; branchId?: string }
@@ -163,7 +211,14 @@ export function useSalesAssigneePerformance(branchId?: string, params: SalesDate
 export function useTrainerWorkload(branchId?: string) {
   return useQuery({
     queryKey: ["analytics", "trainer-workload", branchId],
-    queryFn: async () => asArray<TrainerWorkload>(await api.get<TrainerWorkload[]>("/analytics/trainers/workload")),
+    // Unwrapped, not `asArray`d: the endpoint answers with an envelope,
+    // so `asArray` silently produced an empty list for every gym.
+    queryFn: async () =>
+      readTrainerWorkload(
+        await api.get<TrainerWorkloadResponse>("/analytics/trainers/workload", {
+          query: { branchId } as QueryParams,
+        }),
+      ),
   })
 }
 
