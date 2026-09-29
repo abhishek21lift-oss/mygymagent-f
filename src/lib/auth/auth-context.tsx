@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { api, ApiError } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import { setCurrentBranchId } from "@/lib/branch-context"
+import { unregisterPushOnSignOut } from "@/lib/push/web-push"
 import type {
  AuthUser,
  LoginResponse,
@@ -226,6 +227,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  )
 
  const logout = React.useCallback(async () => {
+ // First, while the session still authenticates the call: this browser
+ // must stop receiving the account's pushes once it is signed out.
+ await unregisterPushOnSignOut()
  try {
  await api.post("/auth/logout")
  } catch {
@@ -247,6 +251,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   * swallowed: "signed out everywhere" that silently did not is worse
   * than an error, because the user stops looking for the lost device. */
  const logoutEverywhere = React.useCallback(async () => {
+ await unregisterPushOnSignOut()
  await api.post("/auth/logout-all")
  sessionGen.current += 1
  await queryClient.cancelQueries().catch(() => undefined)

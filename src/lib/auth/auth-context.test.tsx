@@ -267,4 +267,23 @@ describe("AuthProvider MFA policy state", () => {
  // Left behind, it would gate or nag the next account to sign in here.
  expect(ctx.latest().mfaEnrolment).toBeNull()
  })
+
+ it("stops this browser's pushes before ending the session", async () => {
+ mockGet.mockImplementationOnce(async () => ({ user: userA, permissions: [] }))
+ const ctx = setup()
+ await waitFor(() => expect(ctx.latest().user?.id).toBe("user-a"))
+ window.localStorage.setItem("mga.push.token", "fcm-token-a")
+
+ mockPost.mockResolvedValue(undefined)
+ await act(async () => {
+ await ctx.latest().logout()
+ })
+
+ // Unregister first: the endpoint is authenticated, and after
+ // /auth/logout the next person on this browser would get A's pushes.
+ const paths = mockPost.mock.calls.map(([path]) => path)
+ expect(paths.indexOf("/notifications/devices/unregister")).toBeGreaterThanOrEqual(0)
+ expect(paths.indexOf("/notifications/devices/unregister")).toBeLessThan(paths.indexOf("/auth/logout"))
+ expect(window.localStorage.getItem("mga.push.token")).toBeNull()
+ })
 })
