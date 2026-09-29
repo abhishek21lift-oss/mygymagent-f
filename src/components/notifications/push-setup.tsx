@@ -194,7 +194,7 @@ export function PushSetup({ audience = "staff" }: { audience?: Audience } = {}) 
       tone: "warning",
       label: "Blocked",
       detail: client.native
-        ? "Notifications are turned off for this app. Allow them in Android Settings → Apps → THE CULT CLIENT → Notifications, then come back here."
+        ? "Notifications are turned off for this app. Allow them in Android Settings → Apps → Cult Client → Notifications, then come back here."
         : "Notifications are blocked for this site. Allow them in your browser's site settings, then come back here.",
     }
   } else if (enabledHere) {

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ApiError } from "@/lib/api/client"
+import { PRODUCT_NAME } from "@/lib/brand"
 import { useEnableMfa, useStartMfaEnrolment } from "@/lib/hooks/use-mfa"
 import type { MfaSetupResponse } from "@/lib/types/auth"
 
@@ -83,13 +84,13 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
 
  function onDownload() {
  const blob = new Blob(
- [`MyGymAgent two-factor recovery codes\nEach code works once.\n\n${asText}\n`],
+ [`${PRODUCT_NAME} two-factor recovery codes\nEach code works once.\n\n${asText}\n`],
  { type: "text/plain" },
  )
  const url = URL.createObjectURL(blob)
  const anchor = document.createElement("a")
  anchor.href = url
- anchor.download = "mygymagent-recovery-codes.txt"
+ anchor.download = "the-cult-client-recovery-codes.txt"
  anchor.click()
  URL.revokeObjectURL(url)
  setAcknowledged(true)

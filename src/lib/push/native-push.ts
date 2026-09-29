@@ -50,7 +50,7 @@ export async function nativePermission(): Promise<NativePermission> {
 
 export class NativePermissionDeniedError extends Error {
   constructor() {
-    super("Notifications are turned off for this app. Allow them in Android Settings → Apps → THE CULT CLIENT → Notifications.")
+    super("Notifications are turned off for this app. Allow them in Android Settings → Apps → Cult Client → Notifications.")
     this.name = "NativePermissionDeniedError"
   }
 }
