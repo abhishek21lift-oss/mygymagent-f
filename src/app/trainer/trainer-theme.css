@@ -1,0 +1,151 @@
+/*
+ * Trainer surface tokens.
+ *
+ * Scoped to `.trainer-surface` and deliberately NOT merged into the staff
+ * app's palette in `globals.css`. The two surfaces are different products
+ * wearing the same data: `globals.css` drives a desktop-first, sidebar
+ * chrome, light-and-neutral staff app; these tokens drive a phone-shaped
+ * trainer app with a dark tab bar, saturated gradient cards and a much
+ * heavier type scale. Re-pointing the staff tokens at this palette would
+ * restyle every existing screen to match screenshots it was never part
+ * of, so the two are kept apart and share only the primitives in
+ * `components/ui`.
+ *
+ * Every value here was read off the reference screenshots rather than
+ * chosen, which is why the ramps are specific -- the "1 to go" pill is
+ * #EAE0FD against #7C3AED text, not a generic violet.
+ */
+
+.trainer-surface {
+  color-scheme: light;
+
+  /* Surfaces ---------------------------------------------------------- */
+  --t-page: #f2f2f7;
+  --t-card: #ffffff;
+  --t-card-sunken: #f7f7fa;
+
+  /* Ink -------------------------------------------------------------- */
+  --t-ink: #14141f;
+  --t-ink-muted: #8e8e9a;
+  --t-ink-faint: #9aa0b0;
+  --t-ink-invert: #ffffff;
+
+  /* Lines ------------------------------------------------------------ */
+  --t-line: #edeef3;
+  --t-line-strong: #e5e7eb;
+
+  /* Accent: the coral-to-pink of the header mark and progress arc ---- */
+  --t-coral: #ff7a45;
+  --t-pink: #ff3d71;
+  --t-coral-soft: #ff6b35;
+  --t-amber: #ff8a3d;
+  --t-progress-track: #ffd9e8;
+
+  /* Teal: "on the floor", "done", and the Resume action -------------- */
+  --t-teal: #0e9f7e;
+  --t-teal-dot: #10b981;
+  --t-teal-tint: #d6f5ee;
+  --t-teal-grad-a: #0bc7c4;
+  --t-teal-grad-b: #0eafa0;
+
+  /* Violet: "to go", NEXT, and the Start action ---------------------- */
+  --t-violet: #7c3aed;
+  --t-violet-ink: #9333ea;
+  --t-violet-tint: #eae0fd;
+
+  /* Session card washes ---------------------------------------------- */
+  --t-cyan-card: #dff4fa;
+  --t-cyan-line: #b5e4f0;
+  --t-lav-card: #ede8fd;
+  --t-lav-line: #d9ccfb;
+
+  /* Caution strip ---------------------------------------------------- */
+  --t-warn-bg: #fbf1dd;
+  --t-warn-ink: #c2410c;
+
+  /* Muscle category gradients ---------------------------------------- */
+  --t-muscle-shoulders-a: #ff7a18;
+  --t-muscle-shoulders-b: #ff9f1c;
+  --t-muscle-arms-a: #a855f7;
+  --t-muscle-arms-b: #e935d8;
+  --t-muscle-legs-a: #10c9a0;
+  --t-muscle-legs-b: #0ea5e9;
+  --t-muscle-core-a: #f43f7e;
+  --t-muscle-core-b: #f97316;
+  --t-muscle-back-a: #6366f1;
+  --t-muscle-back-b: #8b5cf6;
+  --t-muscle-full-a: #0ea5e9;
+  --t-muscle-full-b: #10b981;
+
+  /* Exercise icon tiles ---------------------------------------------- */
+  --t-tile-cyan-a: #22d3ee;
+  --t-tile-cyan-b: #06b6d4;
+  --t-tile-teal-a: #10d9c4;
+  --t-tile-teal-b: #0fbfa8;
+  --t-tile-violet-a: #a78bfa;
+  --t-tile-violet-b: #7c3aed;
+  --t-tile-amber-a: #fbbf24;
+  --t-tile-amber-b: #f59e0b;
+  --t-tile-rose-a: #fb7185;
+  --t-tile-rose-b: #e11d48;
+
+  /* Metadata chips ---------------------------------------------------- */
+  --t-chip-neutral-ink: #6b7280;
+  --t-chip-neutral-line: #e5e7eb;
+  --t-chip-green-ink: #16a34a;
+  --t-chip-green-line: #86efac;
+  --t-chip-green-bg: #f0fdf4;
+  --t-chip-orange-ink: #ea580c;
+  --t-chip-orange-line: #fdba74;
+  --t-chip-orange-bg: #fff7ed;
+  --t-chip-blue-ink: #2563eb;
+  --t-chip-blue-line: #93c5fd;
+  --t-chip-blue-bg: #eff6ff;
+
+  /* Dark tab bar ------------------------------------------------------ */
+  --t-nav-bg: #0b0b12;
+  --t-nav-ink: #9ca3af;
+  --t-nav-ink-active: #ffffff;
+  --t-nav-ink-active-accent: #0bc7c4;
+
+  /* Radii -------------------------------------------------------------
+   * The reference is unapologetically round: a 32px screen card, 28px
+   * session cards, and full pills on anything that is conceptually a
+   * chip, a search field or a button. Nothing here is a 6px default. */
+  --t-radius-card: 32px;
+  --t-radius-tile: 28px;
+  --t-radius-muscle: 32px;
+  --t-radius-icon: 20px;
+  --t-radius-pill: 999px;
+
+  /* Elevation ---------------------------------------------------------
+   * Soft and wide rather than tight and dark. The reference cards float
+   * off the #F2F2F7 page; a 1px hairline would read as a table. */
+  --t-shadow-card: 0 18px 40px -22px rgb(20 20 31 / 0.28);
+  --t-shadow-tile: 0 10px 24px -14px rgb(20 20 31 / 0.3);
+  --t-shadow-cta: 0 14px 28px -14px rgb(12 175 160 / 0.75);
+  --t-shadow-cta-violet: 0 14px 28px -14px rgb(124 58 237 / 0.7);
+
+  /* Type scale --------------------------------------------------------
+   * Larger than a desktop scale at the same nominal size: this is a phone
+   * at arm's length, and the reference sets 32px for the page title
+   * against our 1.75rem hero. */
+  --t-text-hero: 2rem;
+  --t-text-title: 1.875rem;
+  --t-text-section: 1.875rem;
+  --t-text-card: 1.875rem;
+  --t-text-eyebrow: 1.5rem;
+  --t-text-body: 1.1875rem;
+  --t-text-meta: 1.0625rem;
+  --t-text-chip: 0.9375rem;
+}
+
+/* Respect the OS setting. The reference is a light surface, so this is
+   the surface that most visibly ought to honour "reduce contrast" --
+   dropping the gradient washes to flat tints rather than inverting the
+   whole surface into an unrequested dark theme. */
+@media (prefers-reduced-transparency: reduce) {
+  .trainer-surface [data-gradient] {
+    background-image: none !important;
+  }
+}

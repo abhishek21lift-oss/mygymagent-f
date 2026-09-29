@@ -7,6 +7,10 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Dumbbell, Layers3, Plus, Trash2, UserPlus, Users } from "lucide-react";
 import { MemberPicker } from "@/components/shared/member-picker";
+import {
+  NewExerciseDialog,
+  OutlineAddExerciseTrigger,
+} from "@/components/workouts/new-exercise-dialog";
 import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,55 +21,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth/auth-context";
-import { useCreateExercise, useCreateWorkoutPlan, useExercises, useAssignWorkoutPlan, useUpdateWorkoutAssignmentStatus, useWorkoutAssignments, useWorkoutPlans } from "@/lib/hooks/use-workouts";
+import { useCreateWorkoutPlan, useExercises, useAssignWorkoutPlan, useUpdateWorkoutAssignmentStatus, useWorkoutAssignments, useWorkoutPlans } from "@/lib/hooks/use-workouts";
 import { ApiError } from "@/lib/api/client";
-import { assignWorkoutPlanSchema, createExerciseSchema, createWorkoutPlanSchema, type AssignWorkoutPlanInput, type CreateExerciseInput, type CreateWorkoutPlanInput } from "@/lib/validation/gym";
+import { assignWorkoutPlanSchema, createWorkoutPlanSchema, type AssignWorkoutPlanInput, type CreateWorkoutPlanInput } from "@/lib/validation/gym";
 import type { WorkoutAssignment } from "@/lib/types/gym";
 import { WorkoutPlanEditDialog } from "./plan-edit-dialog";
-
-function AddExerciseDialog() {
- const [open, setOpen] = React.useState(false);
- const create = useCreateExercise();
- const form = useForm<CreateExerciseInput>({ resolver: zodResolver(createExerciseSchema), defaultValues: { name: "", muscleGroup: "", equipment: "", description: "" } });
- async function submit(v: CreateExerciseInput) {
- try {
- await create.mutateAsync(v);
- toast.success("Exercise added");
- setOpen(false);
- form.reset();
- } catch (e) {
- toast.error(e instanceof ApiError ? e.message : "Failed to add exercise");
- }
- }
- return (
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>
- <Button variant="outline" className="min-h-11 rounded-lg border-stone-200 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <Plus className="size-4" aria-hidden="true" />Add exercise
- </Button>
- </DialogTrigger>
- <DialogContent>
- <DialogHeader><DialogTitle>New exercise</DialogTitle></DialogHeader>
- <Form {...form}>
- <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
- <FormField control={form.control} name="name" render={({ field }) => (
- <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Back Squat" {...field} /></FormControl><FormMessage /></FormItem>
- )} />
- <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
- <FormField control={form.control} name="muscleGroup" render={({ field }) => (
- <FormItem><FormLabel>Muscle group</FormLabel><FormControl><Input placeholder="Legs" {...field} /></FormControl></FormItem>
- )} />
- <FormField control={form.control} name="equipment" render={({ field }) => (
- <FormItem><FormLabel>Equipment</FormLabel><FormControl><Input placeholder="Barbell" {...field} /></FormControl></FormItem>
- )} />
- </div>
- <DialogFooter><Button type="submit" disabled={create.isPending} className="min-h-11">{create.isPending ? "Adding..." : "Add exercise"}</Button></DialogFooter>
- </form>
- </Form>
- </DialogContent>
- </Dialog>
- );
-}
 
 function CreatePlanDialog() {
  const [open, setOpen] = React.useState(false);
@@ -273,7 +233,7 @@ export default function WorkoutsPage() {
  title="Workout plans"
  actions={
  <>
- {hasPermission("workouts.create") && <AddExerciseDialog />}
+ {hasPermission("workouts.create") && <NewExerciseDialog trigger={OutlineAddExerciseTrigger} />}
  {hasPermission("workouts.create") && <CreatePlanDialog />}
  </>
  }
