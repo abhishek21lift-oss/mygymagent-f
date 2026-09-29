@@ -262,7 +262,10 @@ export function useCreateAccount() {
 export function usePostJournal() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: { lines: JournalLineInput[]; memo?: string; occurredAt?: string }) =>
+    // Field names are the API's (`PostJournalDto`), which rejects anything
+    // else with a 400: `memo` labels any line without its own description,
+    // `entryDate` (YYYY-MM-DD or ISO) defaults to today.
+    mutationFn: (input: { lines: JournalLineInput[]; memo?: string; entryDate?: string }) =>
       api.post<unknown>("/accounting/journal", input),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: [TRIAL_BALANCE] })
