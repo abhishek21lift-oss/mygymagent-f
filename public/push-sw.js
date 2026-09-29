@@ -1,4 +1,4 @@
-/* MyGymAgent push service worker.
+/* THE CULT CLIENT push service worker.
  *
  * Deliberately free of the Firebase SDK. The page's CSP only allows
  * scripts from 'self', so `importScripts` from gstatic would be blocked,
@@ -30,7 +30,7 @@ self.addEventListener("push", (event) => {
 
   const notification = payload.notification || {}
   const data = payload.data || {}
-  const title = notification.title || "MyGymAgent"
+  const title = notification.title || "THE CULT CLIENT"
   // A relative link from the API (e.g. "/billing") travels in data.url;
   // an absolute one may come as fcmOptions.link.
   const url = data.url || (payload.fcmOptions && payload.fcmOptions.link) || "/dashboard"
@@ -38,8 +38,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: notification.body || "",
-      icon: "/logo-mark.webp",
-      badge: "/logo-mark.webp",
+      icon: "/brand/the-cult-client-192.png",
+      badge: "/brand/the-cult-client-192.png",
       // Same type replaces rather than stacks, so a burst of low-stock
       // alerts reads as one current notice.
       tag: data.type || undefined,

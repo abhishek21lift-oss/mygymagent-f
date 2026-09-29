@@ -66,7 +66,7 @@ describe("push service worker", () => {
       },
     })
     expect(worker.showNotification).toHaveBeenCalledWith(
-      "MyGymAgent",
+      "THE CULT CLIENT",
       expect.objectContaining({ body: "plain text" }),
     )
   })

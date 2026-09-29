@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { PageHero } from "@/components/shared/page-hero";
 import { DataState } from "@/components/shared/data-state";
 import { Panel } from "@/components/shared/panel";
+import { PushSetup } from "@/components/notifications/push-setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,7 +88,7 @@ export default function PortalAccountPage() {
 
   async function togglePreference(
     category: string,
-    channel: "email" | "whatsapp" | "inApp",
+    channel: "email" | "whatsapp" | "inApp" | "push",
     value: boolean,
   ) {
     try {
@@ -170,26 +171,43 @@ export default function PortalAccountPage() {
                       {row.description}
                     </p>
                   </div>
-                  {/* In-app only. The email and WhatsApp switches that
-                      used to sit beside this one wrote columns no sender
-                      reads -- see the note in the staff settings page --
-                      so a member could mute a channel that was never
-                      going to message them, or unmute one that still
-                      will not. */}
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id={`${row.key}-inApp`}
-                      checked={row.inApp}
-                      onCheckedChange={(next) =>
-                        void togglePreference(row.key, "inApp", next)
-                      }
-                    />
-                    <Label
-                      htmlFor={`${row.key}-inApp`}
-                      className="text-xs font-normal text-muted-foreground"
-                    >
-                      Notify me in the app
-                    </Label>
+                  {/* In-app and push only. The email and WhatsApp switches
+                      that used to sit here wrote columns no sender reads
+                      -- see the note in the staff settings page -- so a
+                      member could mute a channel that was never going to
+                      message them. Push joined once the API started
+                      sending members pushes (mygymagent-b B-P1-11). */}
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`${row.key}-inApp`}
+                        checked={row.inApp}
+                        onCheckedChange={(next) =>
+                          void togglePreference(row.key, "inApp", next)
+                        }
+                      />
+                      <Label
+                        htmlFor={`${row.key}-inApp`}
+                        className="text-xs font-normal text-muted-foreground"
+                      >
+                        Notify me in the app
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`${row.key}-push`}
+                        checked={row.push}
+                        onCheckedChange={(next) =>
+                          void togglePreference(row.key, "push", next)
+                        }
+                      />
+                      <Label
+                        htmlFor={`${row.key}-push`}
+                        className="text-xs font-normal text-muted-foreground"
+                      >
+                        Send to my phone
+                      </Label>
+                    </div>
                   </div>
                 </li>
               ))}
@@ -197,6 +215,8 @@ export default function PortalAccountPage() {
           </DataState>
         </div>
       </Panel>
+
+      <PushSetup audience="member" />
     </div>
   );
 }

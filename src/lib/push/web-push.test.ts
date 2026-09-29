@@ -5,6 +5,7 @@ import {
   PUSH_CHANGE_EVENT,
   PushPermissionDeniedError,
   PushSetupError,
+  pushUnavailableReason,
   refreshWebPush,
   storedPushDeviceId,
   storedPushToken,
@@ -224,5 +225,54 @@ describe("setup failures", () => {
     expect(mockPost).not.toHaveBeenCalled()
     expect(storedPushToken()).toBeNull()
     consoleError.mockRestore()
+  })
+})
+
+describe("pushUnavailableReason", () => {
+  const originalUA = navigator.userAgent
+  function as(ua: string, opts: { touch?: number; standalone?: boolean } = {}) {
+    Object.defineProperty(navigator, "userAgent", { value: ua, configurable: true })
+    Object.defineProperty(navigator, "maxTouchPoints", { value: opts.touch ?? 0, configurable: true })
+    Object.defineProperty(window, "matchMedia", {
+      value: () => ({ matches: Boolean(opts.standalone) }),
+      configurable: true,
+    })
+  }
+  afterEach(() => {
+    Object.defineProperty(navigator, "userAgent", { value: originalUA, configurable: true })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).Capacitor
+  })
+
+  const IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+
+  it("sends an iPhone in a Safari tab to the Home Screen", () => {
+    as(IPHONE)
+    expect(pushUnavailableReason()).toBe("ios-not-installed")
+  })
+
+  it("recognises an iPad, which reports itself as a Mac", () => {
+    as("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15", {
+      touch: 5,
+    })
+    expect(pushUnavailableReason()).toBe("ios-not-installed")
+  })
+
+  it("blames the iOS version once the app is already installed", () => {
+    as(IPHONE, { standalone: true })
+    expect(pushUnavailableReason()).toBe("ios-outdated")
+  })
+
+  it("recognises the Android app shell", () => {
+    as("Mozilla/5.0 (Linux; Android 14; wv) AppleWebKit/537.36")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(window as any).Capacitor = { isNativePlatform: () => true }
+    expect(pushUnavailableReason()).toBe("in-app")
+  })
+
+  it("treats a desktop Mac without touch as just a browser", () => {
+    as("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15")
+    expect(pushUnavailableReason()).toBe("browser")
   })
 })

@@ -20,6 +20,7 @@ import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC } from "@/lib/brand";
 import { accentForPath } from "@/lib/section-accent";
 import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
+import { refreshWebPush } from "@/lib/push/web-push";
 import { usePortalMe } from "@/lib/hooks/use-portal";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,14 @@ export default function PortalLayout({
   React.useEffect(() => {
     if (me.isError) router.replace("/dashboard");
   }, [me.isError, router]);
+
+  // Same as the staff shell: re-register a rotated FCM token once per
+  // session, for a device that already opted in. Never prompts.
+  const memberLoaded = me.isSuccess;
+  React.useEffect(() => {
+    if (!memberLoaded) return;
+    void refreshWebPush().catch(() => undefined);
+  }, [memberLoaded]);
 
   if (isLoading || !isAuthenticated || me.isPending) {
     return (

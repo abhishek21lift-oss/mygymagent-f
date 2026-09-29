@@ -17,16 +17,50 @@ import {
   notificationPermission,
   PushPermissionDeniedError,
   PushSetupError,
+  pushUnavailableReason,
   removePushDevice,
   sendTestPush,
   storedPushDeviceId,
   storedPushToken,
   subscribePushState,
   webPushSupport,
+  type PushUnavailableReason,
   type WebPushSupport,
 } from "@/lib/push/web-push"
 
 const DEVICES_KEY = ["push-devices"] as const
+
+type Audience = "staff" | "member"
+
+/**
+ * Staff and members see the same states in different words. A member
+ * cannot add a Firebase key and does not know what one is -- to them
+ * "not set up" means "your gym doesn't offer this yet".
+ */
+const COPY = {
+  staff: {
+    title: "Push on this device",
+    notConfigured: "Push isn't connected on this workspace yet. An owner needs to add the Firebase key to the server.",
+    noWebConfig: "This version of the web app has no Firebase web configuration, so it can't register for push.",
+    on: "Alerts you switch on in the Push column arrive here.",
+    off: "Turn push on here, then pick which activity to push using the Push column above.",
+  },
+  member: {
+    title: "Notifications on this device",
+    notConfigured: "Your gym hasn't turned on push notifications yet.",
+    noWebConfig: "Your gym hasn't turned on push notifications yet.",
+    on: "The updates you've switched on above arrive here.",
+    off: "Turn notifications on here, then choose what to receive using the switches above.",
+  },
+} as const
+
+const UNAVAILABLE: Record<PushUnavailableReason, string> = {
+  "ios-not-installed":
+    "On iPhone, notifications work once the app is on your Home Screen: tap Share, then Add to Home Screen, then open it from there and come back to this page.",
+  "ios-outdated": "Notifications need iOS 16.4 or later. Update your iPhone, then try again.",
+  "in-app": "The Android app can't receive push yet. Open this page in Chrome instead to get notifications on this phone.",
+  browser: "This browser can't receive push. Try Chrome, Edge, Firefox or Safari.",
+}
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof ApiError || error instanceof PushPermissionDeniedError || error instanceof PushSetupError)
@@ -46,7 +80,8 @@ function errorMessage(error: unknown, fallback: string) {
  * The per-category Push switches above decide *what* is pushed; this
  * decides *where*. Both are needed, and the copy says so.
  */
-export function PushSetup() {
+export function PushSetup({ audience = "staff" }: { audience?: Audience } = {}) {
+  const copy = COPY[audience]
   const queryClient = useQueryClient()
   // Everything here depends on `window`, so the server snapshot is null
   // and the client reads it after hydration. Serialised to a string so the
@@ -56,6 +91,7 @@ export function PushSetup() {
     () =>
       JSON.stringify({
         support: webPushSupport(),
+        reason: pushUnavailableReason(),
         permission: notificationPermission(),
         token: storedPushToken(),
         deviceId: storedPushDeviceId(),
@@ -67,6 +103,7 @@ export function PushSetup() {
       snapshot
         ? (JSON.parse(snapshot) as {
             support: WebPushSupport
+            reason: PushUnavailableReason
             permission: NotificationPermission | "unsupported"
             token: string | null
             deviceId: string | null
@@ -134,20 +171,19 @@ export function PushSetup() {
     state = {
       tone: "muted",
       label: "Not set up",
-      detail: "Push isn't connected on this workspace yet. An owner needs to add the Firebase key to the server.",
+      detail: copy.notConfigured,
     }
   } else if (client.support === "unsupported") {
     state = {
       tone: "muted",
-      label: "Unavailable here",
-      detail:
-        "This browser can't receive push. Use Chrome, Edge or Firefox on a computer or Android phone. On iPhone, add MyGymAgent to your Home Screen first. The Android app doesn't support push yet.",
+      label: client.reason === "ios-not-installed" ? "Add to Home Screen first" : "Unavailable here",
+      detail: UNAVAILABLE[client.reason],
     }
   } else if (client.support === "unconfigured") {
     state = {
       tone: "muted",
       label: "Not set up",
-      detail: "This version of the web app has no Firebase web configuration, so it can't register for push.",
+      detail: copy.noWebConfig,
     }
   } else if (client.permission === "denied") {
     state = {
@@ -156,12 +192,12 @@ export function PushSetup() {
       detail: "Notifications are blocked for this site. Allow them in your browser's site settings, then come back here.",
     }
   } else if (enabledHere) {
-    state = { tone: "success", label: "On for this device", detail: "Alerts you switch on in the Push column arrive here." }
+    state = { tone: "success", label: "On for this device", detail: copy.on }
   } else {
     state = {
       tone: "muted",
       label: "Off for this device",
-      detail: "Turn push on here, then pick which activity to push using the Push column above.",
+      detail: copy.off,
     }
   }
 
@@ -170,7 +206,7 @@ export function PushSetup() {
 
   return (
     <Panel
-      title="Push on this device"
+      title={copy.title}
       titleId="push-setup"
       description="Alerts even when the app is closed."
     >
