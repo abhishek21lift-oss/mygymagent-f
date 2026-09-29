@@ -102,13 +102,13 @@ If required backend/database data is unavailable, use `—` or `Data unavailable
 ## CURRENT PROJECT STATE
 
 ### Current Phase
-`PRODUCTION BASELINE → REMEDIATION OF CONFIRMED AUDIT FINDINGS`
+`PRODUCTION BASELINE → P0 CLOSED → P1/P2`
 
 ### Current Task
-`Fix verified architecture/security problems before expanding the product.`
+`Work the remaining P1/P2 items in BACKLOG.md (both repos) in priority order.`
 
 ### Current Subtask
-`Remediate AI tool access so trainer-scoped permissions cannot be bypassed through AI, then verify the complete AI authorization chain.`
+`B-P1-1 (real FCM push provider) is the next open backend item. The three P0-style frontend gaps that remained — F-P0-2, F-P0-3, F-P0-6/F-P0-7 — are all ✅.`
 
 ### Status
 `ACTIVE`
@@ -138,6 +138,11 @@ Keep only verified completed work here. Add dates and evidence where possible.
 - [x] Full verification of membership/attendance remediation — verified 2026-09-22 by `mygymagent-b/test/assignment-scoping-rest.e2e-spec.ts`. The remediation was **half complete**: list/detail/check-in/check-out were correctly scoped, but five sibling routes were gated on a `*_assigned` permission while never applying the scope — `GET /memberships/analytics/summary`, `/memberships/renewal-reminders`, `/memberships/history/:id`, `/attendance/live`, and `/attendance/qr-token/:memberId` (which minted a working entry credential for any member). All five fixed; the suite fails exactly those five cases when the fixes are reverted, so it demonstrably detects the regression.
 - [x] Full verification of workout/AI remediation — `GET /workout-assignments` is assignment-scoped over REST (covered by the same suite, including that a client-supplied `memberId` narrows rather than widens scope).
 - [x] AI workout-history tool updated to consume `workouts.read_assigned` and assignment scope without regressions — confirmed in `ToolExecutorService.readWorkoutHistory`: it resolves access over `['workouts.read', 'workouts.read_assigned']` and derives `assignmentScope` from the matched key.
+- [x] App-wide redesign landed on `mygymagent-f` `main` (`6b8347b`) — 8 solved section accents, 4-level elevation, frosted glass chrome, Apple system font stack, status colours made theme-aware via a `-foreground` step so one value serves as type, fill and chip across all 78 call sites. Verified in both themes and at 390px. 0 lint errors, clean build.
+- [x] F-P0-2 closed — the three write-only screens (support threads, campaign audience preview, accounting ledger) now have reads. The campaign preview deliberately reuses the same `campaignAudienceWhere` resolver as the send, because a count computed any other way can disagree with what goes out.
+- [x] Trainer-workload type defect fixed — it was permanently showing "No trainers assigned" because `asArray` was being applied to a `{ data: [...] }` envelope.
+- [x] `BIOMETRIC` added to the `AttendanceMethod` union and its zod schema — it was a legal backend value the client type could not name.
+- [x] `useSegmentInsights` was requesting `/analytics/segments/insight`; corrected to `/analytics/segments/insights`.
 - [ ] Architecture baseline fully documented
 - [ ] Multi-tenancy fully audited
 - [ ] Authentication fully audited
@@ -152,15 +157,13 @@ Keep only verified completed work here. Add dates and evidence where possible.
 ## IN PROGRESS
 
 ### Current Work
-`AI-first remediation: prevent AI tool access from exceeding the caller's real tenant, branch and trainer scope.`
+`Working the P1/P2 remainder in BACKLOG.md (both repos). Nothing is mid-edit in either tree — both are clean on their `main`.`
 
 ### Files / Modules Being Changed
-`mygymagent-b`: AI tool authorization, workout-assignment permissions/controller/service, trainer role catalog.
-
-`mygymagent-f`: `AI_TASK_STATE.md` project-state tracking only.
+`None at rest. The next change is expected to be `mygymagent-b` B-P1-1 (a real FCM push provider — pushes are written to the DB and never delivered).`
 
 ### Expected Outcome
-`A trainer cannot use MyGymAgent AI or workout-assignment APIs to retrieve workout data for an unrelated member, while legitimate assigned-member AI functionality remains available.`
+`Every P0 item in both backlogs closed and verified; the P1 list worked in order with each item proven by the check that would fail without it.`
 
 ## BLOCKERS
 
@@ -170,12 +173,14 @@ Keep only verified completed work here. Add dates and evidence where possible.
 | ~~AI workout-history adapter still uses the old `workouts.read` permission~~ | Resolved | `ToolExecutorService.readWorkoutHistory` now resolves `['workouts.read', 'workouts.read_assigned']` and derives the assignment scope from the matched key | — |
 | AI `read_attendance` tool is unreachable for trainers | P2 | It resolves access on `attendance.read` only, so a TRAINER holding just `attendance.read_assigned` is denied — fails closed (safe, not a leak), but the AI tool is inconsistent with the REST route, which *is* scoped and usable | Decide whether to add the `_assigned` key + scope like `readWorkoutHistory` does |
 | Full-system architecture/security audit is incomplete | P1 | Other issues may still exist outside the audited surface | Continue the audit; see `BACKLOG.md` in both repos for the itemized remainder |
+| ~~No Row Level Security anywhere in 48 migrations~~ | Known, deferred | Cross-tenant reads are prevented at the application layer, not by the database. A compromised or hand-written query has no second line of defence | Only defensible with a real database to validate against. The bare-`organizationId` gap is meanwhile bounded by an exact ratchet list in `mygymagent-b/src/common/validators/tenant-schema.spec.ts`, so it cannot grow unnoticed |
+| `test/rate-limiting.e2e-spec.ts` is `describe.skip` | P3 | Rate limiting is configured but unasserted end to end | The test app substitutes `MockThrottlerGuard`, so the limit cannot be exercised through it. Un-skipping needs a different guard strategy, not a tweak |
 
 ## NEXT ACTION
 
 There must be exactly **ONE primary next action**.
 
-`Work the P0 items in BACKLOG.md (both repos) in order — next up is B-P0-4 (no MFA anywhere) and B-P0-7 (the remaining 18 @IsBoolean() DTO fields that silently coerce strings to true).`
+`B-P1-1 in mygymagent-b — wire a real FCM push provider. Push notifications are currently written to the database and never delivered, which means the notification centre reports sends that never reached anyone. Every P0 item in both backlogs is now ✅.`
 
 ## IMPORTANT DECISIONS
 
@@ -403,10 +408,18 @@ A new idea does not automatically replace the mission. A bug does not become the
 
 ## LAST UPDATED
 
-`2026-09-22`
+`2026-09-29`
 
-Current state: `AUDIT FINDINGS TRACKED IN BACKLOG.md (BOTH REPOS) → P0 REMEDIATION IN PROGRESS`
+Current state: `ALL P0 ITEMS CLOSED AND VERIFIED IN BOTH REPOS → P1/P2 IN PROGRESS`
 
-F-05 (assignment scoping) is closed and verified. Remaining work is itemized in
-`BACKLOG.md` in each repo rather than here, so this file stays a statement of
-mission and standing rules instead of drifting into a stale task list again.
+What changed since the last update: every P0 row in both `BACKLOG.md` files is now ✅. The
+cross-tenant import hole in `mygymagent-b` is closed, the Action Center can no longer be approved by
+its own proposer (`ARCHITECTURE_DECISIONS.md` AI-34), the three write-only Business OS screens have
+reads (F-P0-2), and the app-wide redesign is on `mygymagent-f` `main` at `6b8347b`.
+
+The e2e suite also runs locally for the first time — 539 passing / 0 failing against a real
+Postgres, Redis and s3rver, nothing mocked. That run found a genuine defect in the WhatsApp
+signature tests, described in `mygymagent-b/CHANGELOG_AI_TRANSFORMATION.md`.
+
+Remaining work is itemized in `BACKLOG.md` in each repo rather than here, so this file stays a
+statement of mission and standing rules instead of drifting into a stale task list again.
