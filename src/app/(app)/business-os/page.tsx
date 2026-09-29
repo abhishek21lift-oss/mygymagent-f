@@ -22,6 +22,7 @@ import {
   useCreatePortalInvite,
   useRevokePortalInvites,
 } from "@/lib/hooks/use-business-os"
+import { CampaignAudienceButton } from "./campaign-audience"
 
 type Campaign = { id: string; name: string; channel: string; status: string; audienceFilter?: Record<string, unknown>; scheduledAt?: string | null }
 
@@ -228,35 +229,57 @@ export default function BusinessOsPage() {
                     {campaigns.slice(0, 6).map((c) => (
                       <div
                         key={c.id}
-                        className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
+                        className="grid grid-cols-1 gap-2 rounded-lg border border-border px-3 py-2"
                       >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{c.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {c.channel} · {c.status}
-                          </p>
-                        </div>
-                        {hasPermission("marketing.manage") && (
-                          <div className="flex shrink-0 gap-2">
-                            {/* Enrol builds the audience; run sends to it.
-                                Both endpoints existed with no button. */}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                void run(() => api.post(`/marketing/campaigns/${c.id}/enroll`), "Audience enrolled")
-                              }
-                            >
-                              Enrol
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => void run(() => api.post(`/marketing/campaigns/${c.id}/run`), "Campaign run")}
-                            >
-                              Run
-                            </Button>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{c.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {c.channel} · {c.status}
+                            </p>
                           </div>
-                        )}
+                          <div className="flex shrink-0 flex-wrap items-center gap-2">
+                            {/* Look before you send. Enrol is
+                                irreversible: it writes a row per member
+                                and moves the campaign to QUEUED. */}
+                            {hasPermission("marketing.read") ? (
+                              <CampaignAudienceButton
+                                campaignId={c.id}
+                                campaignName={c.name}
+                              />
+                            ) : null}
+                            {hasPermission("marketing.manage") ? (
+                              <>
+                                {/* Enrol builds the audience; run sends to
+                                    it. Both endpoints existed with no
+                                    button. */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    void run(
+                                      () => api.post(`/marketing/campaigns/${c.id}/enroll`),
+                                      "Audience enrolled",
+                                    )
+                                  }
+                                >
+                                  Enrol
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    void run(
+                                      () => api.post(`/marketing/campaigns/${c.id}/run`),
+                                      "Campaign run",
+                                    )
+                                  }
+                                >
+                                  Run
+                                </Button>
+                              </>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
