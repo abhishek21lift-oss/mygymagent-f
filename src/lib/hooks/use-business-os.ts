@@ -67,17 +67,21 @@ export interface SupportTicket {
   priority: string
   resolvedAt: string | null
   createdAt: string
+  /** Present now that the list carries the reply count. */
+  _count?: { messages: number }
 }
 
 export interface SupportTicketMessage {
   id: string
   ticketId: string
-  authorUserId: string
+  authorUserId: string | null
   body: string
   createdAt: string
+  authorUser?: { id: string; firstName: string; lastName: string } | null
 }
 
 const TICKETS = "support-tickets"
+const TICKET_MESSAGES = "support-ticket-messages"
 
 export function useSupportTickets(status?: string, enabled = true) {
   return useQuery({
@@ -87,6 +91,27 @@ export function useSupportTickets(status?: string, enabled = true) {
         query: status ? { status } : {},
       }),
     enabled,
+  })
+}
+
+/**
+ * The thread on one ticket.
+ *
+ * This is the read half of a write that already existed. `addTicketMessage`
+ * has been on the page for a while, but nothing ever read the messages
+ * back, so a reply was accepted, the ticket list was re-fetched (which
+ * does not carry messages), and the page looked exactly as it had before
+ * the reply. The backend grew `GET /support/tickets/:id/messages` to match.
+ *
+ * `enabled` is false until a ticket is opened, so the list does not fan
+ * out one request per row.
+ */
+export function useTicketMessages(ticketId: string | null, enabled = true) {
+  return useQuery({
+    queryKey: [TICKET_MESSAGES, ticketId],
+    queryFn: () =>
+      api.get<SupportTicketMessage[]>(`/support/tickets/${ticketId}/messages`),
+    enabled: enabled && Boolean(ticketId),
   })
 }
 
@@ -114,7 +139,12 @@ export function useAddTicketMessage() {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: string }) =>
       api.post<SupportTicketMessage>(`/support/tickets/${id}/messages`, { body }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [TICKETS] }),
+    // Both keys, not just the ticket list. The list carries the reply
+    // count, so its badge has to move, and the open thread has to append.
+    onSuccess: (_data, variables) => {
+      void qc.invalidateQueries({ queryKey: [TICKETS] })
+      void qc.invalidateQueries({ queryKey: [TICKET_MESSAGES, variables.id] })
+    },
   })
 }
 

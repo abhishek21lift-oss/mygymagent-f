@@ -2,14 +2,15 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Gift, Headphones, Loader2, ReceiptIndianRupee, Star } from "lucide-react";
+import { Gift, Headphones, Loader2, MessageSquare, ReceiptIndianRupee, Star } from "lucide-react";
+
+import { SupportTicketDialog } from "./support-ticket-dialog";
 
 import { DataState } from "@/components/shared/data-state";
 import { Panel } from "@/components/shared/panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -22,7 +23,6 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
   useAccountingAccounts,
-  useAddTicketMessage,
   useConvertReferral,
   useCreateAccount,
   useCreateReferral,
@@ -36,16 +36,14 @@ import {
   useSurveys,
   useTaxSummary,
   useTrialBalance,
-  useUpdateTicketStatus,
   type JournalLineInput,
+  type SupportTicket,
 } from "@/lib/hooks/use-business-os";
 import { displayCurrencyAmount } from "@/lib/utils";
 
 function fail(error: unknown, fallback: string) {
   toast.error(error instanceof ApiError ? error.message : fallback);
 }
-
-const TICKET_STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
 
 /**
  * The support queue.
@@ -61,16 +59,17 @@ export function SupportSection() {
   const canManage = hasPermission("support.manage");
   const tickets = useSupportTickets(undefined, canRead);
   const create = useCreateSupportTicket();
-  const setStatus = useUpdateTicketStatus();
-  const addMessage = useAddTicketMessage();
 
   const [draft, setDraft] = React.useState({ subject: "", description: "", priority: "NORMAL" });
-  const [replyTo, setReplyTo] = React.useState<string | null>(null);
-  const [reply, setReply] = React.useState("");
+  // The thread lives in a dialog rather than inline under the row. It was
+  // inline, and the reply it wrote was never read back by anything, so the
+  // conversation had nowhere to appear.
+  const [openTicket, setOpenTicket] = React.useState<SupportTicket | null>(null);
 
   if (!canRead) return null;
 
   return (
+    <>
     <Panel
       title="Support tickets"
       titleId="support-tickets"
@@ -98,72 +97,26 @@ export function SupportSection() {
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  {/* How many answers are already on it, so a thread you
+                      have replied to is visibly not an untouched one. */}
+                  {(ticket._count?.messages ?? 0) > 0 ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                      <MessageSquare className="size-3.5" aria-hidden="true" />
+                      {ticket._count?.messages}
+                    </span>
+                  ) : null}
                   <Badge variant={ticket.status === "RESOLVED" || ticket.status === "CLOSED" ? "success" : "secondary"}>
                     {ticket.status}
                   </Badge>
-                  {canManage && (
-                    <>
-                      <select
-                        aria-label={`Status for ${ticket.subject}`}
-                        value={ticket.status}
-                        onChange={(e) =>
-                          void setStatus
-                            .mutateAsync({ id: ticket.id, status: e.target.value })
-                            .then(() => toast.success("Ticket updated"))
-                            .catch((error) => fail(error, "Could not update the ticket"))
-                        }
-                        className="h-9 rounded-md border border-input bg-card px-2 text-xs text-foreground"
-                      >
-                        {TICKET_STATUSES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setReplyTo(replyTo === ticket.id ? null : ticket.id)}
-                      >
-                        Reply
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    size="sm"
+                    variant={canManage ? "default" : "outline"}
+                    onClick={() => setOpenTicket(ticket)}
+                  >
+                    {canManage ? "Reply" : "View"}
+                  </Button>
                 </div>
               </div>
-
-              {canManage && replyTo === ticket.id && (
-                <div className="mt-2 flex flex-col gap-2">
-                  <Textarea
-                    aria-label="Reply"
-                    value={reply}
-                    onChange={(e) => setReply(e.target.value)}
-                    placeholder="Write a reply…"
-                    className="min-h-20"
-                  />
-                  <div>
-                    <Button
-                      size="sm"
-                      disabled={!reply.trim() || addMessage.isPending}
-                      onClick={() =>
-                        void addMessage
-                          .mutateAsync({ id: ticket.id, body: reply.trim() })
-                          .then(() => {
-                            setReply("");
-                            setReplyTo(null);
-                            toast.success("Reply added");
-                          })
-                          .catch((error) => fail(error, "Could not add the reply"))
-                      }
-                    >
-                      {addMessage.isPending && (
-                        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                      )}
-                      Send reply
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
 
@@ -200,6 +153,15 @@ export function SupportSection() {
         </div>
       </DataState>
     </Panel>
+
+      <SupportTicketDialog
+        key={openTicket?.id ?? "none"}
+        ticket={openTicket}
+        onOpenChange={(open) => {
+          if (!open) setOpenTicket(null);
+        }}
+      />
+    </>
   );
 }
 
