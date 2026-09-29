@@ -31,7 +31,8 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: PRODUCT_NAME, statusBarStyle: "default" },
   icons: {
     icon: PRODUCT_LOGO_ICON_SRC,
-    apple: PRODUCT_LOGO_ICON_SRC,
+    // Opaque: iOS paints a transparent Home Screen icon's corners black.
+    apple: "/brand/apple-touch-icon.png",
   },
 };
 

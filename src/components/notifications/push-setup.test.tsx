@@ -11,6 +11,7 @@ jest.mock("@/lib/push/web-push", () => {
   return {
     ...actual,
     webPushSupport: jest.fn(),
+    pushUnavailableReason: jest.fn(),
     notificationPermission: jest.fn(),
     storedPushToken: jest.fn(),
     storedPushDeviceId: jest.fn(),
@@ -26,6 +27,8 @@ jest.mock("@/lib/push/web-push", () => {
 const mocked = push as jest.Mocked<typeof push>
 
 function given(opts: {
+  audience?: "staff" | "member"
+  reason?: push.PushUnavailableReason
   configured?: boolean
   support?: push.WebPushSupport
   permission?: NotificationPermission
@@ -34,13 +37,14 @@ function given(opts: {
 }) {
   mocked.getPushStatus.mockResolvedValue({ configured: opts.configured ?? true })
   mocked.webPushSupport.mockReturnValue(opts.support ?? "supported")
+  mocked.pushUnavailableReason.mockReturnValue(opts.reason ?? "browser")
   mocked.notificationPermission.mockReturnValue(opts.permission ?? "default")
   mocked.storedPushToken.mockReturnValue(opts.token ?? null)
   mocked.storedPushDeviceId.mockReturnValue(opts.token ? "device-here" : null)
   mocked.listPushDevices.mockResolvedValue(opts.devices ?? [])
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <PushSetup />
+      <PushSetup audience={opts.audience} />
     </QueryClientProvider>,
   )
 }
@@ -53,10 +57,10 @@ describe("PushSetup", () => {
     expect(screen.queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument()
   })
 
-  it("says the Android app and unsupported browsers can't receive push", async () => {
-    given({ support: "unsupported" })
+  it("sends someone in the Android app to Chrome, where push works", async () => {
+    given({ support: "unsupported", reason: "in-app" })
     expect(await screen.findByText("Unavailable here")).toBeInTheDocument()
-    expect(screen.getByText(/Android app doesn't support push yet/)).toBeInTheDocument()
+    expect(screen.getByText(/Open this page in Chrome/)).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument()
   })
 
@@ -112,5 +116,27 @@ describe("PushSetup when the status check fails", () => {
     )
     expect(await screen.findByText("Unavailable")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument()
+  })
+})
+
+describe("PushSetup for members", () => {
+  it("never mentions Firebase or owners to a member", async () => {
+    given({ audience: "member", configured: false })
+    expect(await screen.findByText("Not set up")).toBeInTheDocument()
+    expect(screen.getByText("Your gym hasn't turned on push notifications yet.")).toBeInTheDocument()
+    expect(screen.queryByText(/Firebase|owner/i)).not.toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Notifications on this device" })).toBeInTheDocument()
+  })
+
+  it("tells an iPhone user in Safari exactly how to install first", async () => {
+    given({ audience: "member", support: "unsupported", reason: "ios-not-installed" })
+    expect(await screen.findByText("Add to Home Screen first")).toBeInTheDocument()
+    expect(screen.getByText(/tap Share, then Add to Home Screen/)).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument()
+  })
+
+  it("asks an installed but outdated iPhone to update iOS", async () => {
+    given({ audience: "member", support: "unsupported", reason: "ios-outdated" })
+    expect(await screen.findByText(/iOS 16.4 or later/)).toBeInTheDocument()
   })
 })

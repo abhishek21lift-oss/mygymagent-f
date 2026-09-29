@@ -69,6 +69,39 @@ export function webPushSupport(): WebPushSupport {
   return firebaseWebConfig() ? "supported" : "unconfigured"
 }
 
+/** Running inside the Capacitor shell (the Android app) rather than a
+ * browser tab. The shell exposes `window.Capacitor`. */
+export function isNativeApp(): boolean {
+  if (typeof window === "undefined") return false
+  const capacitor = (window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
+  return Boolean(capacitor?.isNativePlatform?.())
+}
+
+export type PushUnavailableReason =
+  /** iPhone/iPad in a Safari tab: push arrives only once the site is on
+   * the Home Screen and opened from there. */
+  | "ios-not-installed"
+  /** Installed on iOS, but older than 16.4, which added web push. */
+  | "ios-outdated"
+  /** The Capacitor Android shell: WebView has no Push API. */
+  | "in-app"
+  | "browser"
+
+/** Why `webPushSupport()` said "unsupported" -- each has a different fix,
+ * and only the person holding the device can apply it. */
+export function pushUnavailableReason(): PushUnavailableReason {
+  if (typeof window === "undefined") return "browser"
+  if (isNativeApp()) return "in-app"
+  const ua = navigator.userAgent
+  // iPadOS reports itself as a Mac; a touch screen gives it away.
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+  if (!isIOS) return "browser"
+  const standalone =
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    (navigator as { standalone?: boolean }).standalone === true
+  return standalone ? "ios-outdated" : "ios-not-installed"
+}
+
 export function notificationPermission(): NotificationPermission | "unsupported" {
   return typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported"
 }
