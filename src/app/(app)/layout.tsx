@@ -7,6 +7,7 @@ import { accentForPath } from "@/lib/section-accent";
 import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
+import { refreshWebPush } from "@/lib/push/web-push";
 import { MfaRequiredGate } from "@/components/security/mfa-required-gate";
 import { MfaGraceBanner } from "@/components/security/mfa-grace-banner";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
@@ -37,6 +38,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
     if (isMember) router.replace(homeRouteFor(user));
   }, [isLoading, isAuthenticated, isMember, user, router]);
+
+  // FCM rotates tokens occasionally; re-register once per session for a
+  // browser that already opted in. Never prompts, and does nothing for one
+  // that has not.
+  const userId = user?.id;
+  const confined = mfaEnrolment?.state === "ENFORCED";
+  React.useEffect(() => {
+    if (!userId || isMember || confined) return;
+    void refreshWebPush().catch(() => undefined);
+  }, [userId, isMember, confined]);
 
   if (isLoading || !isAuthenticated || isMember) {
     return (

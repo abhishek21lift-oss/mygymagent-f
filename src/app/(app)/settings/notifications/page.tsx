@@ -17,6 +17,7 @@ import {
  type NotificationPreference,
 } from "@/lib/notifications"
 import { ApiError } from "@/lib/api/client"
+import { PushSetup } from "@/components/notifications/push-setup"
 /**
  * Only the channels the server actually delivers on get a switch.
  *
@@ -32,22 +33,30 @@ import { ApiError } from "@/lib/api/client"
  * They are named below the table instead, so the capability stays
  * visible as planned rather than pretended. When a sender starts reading
  * one of those columns, move it up here.
+ *
+ * Push moved up with mygymagent-b B-P1-1: `PushDispatchService` reads
+ * `push` per category, and it is opt-in (the column defaults to false).
  */
 const channels = [
  { key: "inApp", label: "In-app", icon: Bell },
+ { key: "push", label: "Push", icon: Zap },
 ] as const
 
 const PENDING_CHANNELS = [
  { label: "Email", icon: Mail },
  { label: "WhatsApp", icon: MessageCircle },
  { label: "SMS", icon: Smartphone },
- { label: "Push", icon: Zap },
 ] as const
+
+/** One label column plus one per channel. Spelled out because Tailwind
+ * only generates classes it can read in the source. */
+const GRID = "grid-cols-[1fr_4.5rem_4.5rem]"
 
 type ChannelKey = (typeof channels)[number]["key"]
 
 function preferenceValue(preference: NotificationPreference | undefined, channel: ChannelKey) {
- if (!preference) return channel === "inApp" || channel === "email"
+ // No row yet: the server defaults -- in-app on, push off (opt-in).
+ if (!preference) return channel === "inApp"
  return preference[channel]
 }
 
@@ -83,13 +92,13 @@ export default function NotificationSettingsPage() {
  userId: "",
  category,
  inApp: channel === "inApp" ? value : true,
+ push: channel === "push" ? value : false,
  // The row the server stores still carries these columns; they
  // are simply not offered as switches while nothing sends on
  // them, so the optimistic copy just mirrors the defaults.
  email: true,
  whatsapp: false,
  sms: false,
- push: false,
  updatedAt: new Date().toISOString(),
  createdAt: new Date().toISOString(),
  },
@@ -129,7 +138,7 @@ export default function NotificationSettingsPage() {
  <Card className="overflow-hidden border-border bg-card">
  <CardContent className="p-0">
  <div>
- <div className="grid grid-cols-[1fr_5rem] items-center border-b border-border bg-stone-50/80 px-5 py-3">
+ <div className={`grid ${GRID} items-center border-b border-border bg-stone-50/80 px-5 py-3`}>
  <div className="text-xs font-bold uppercase tracking-[0.14em] text-stone-500">Activity</div>
  {channels.map(({ key, label, icon: Icon }) => (
  <div key={key} className="flex flex-col items-center gap-1 text-center text-[10px] font-bold uppercase tracking-wider text-stone-500">
@@ -154,7 +163,7 @@ export default function NotificationSettingsPage() {
  {(categories.data ?? []).map((category) => {
  const preference = preferenceMap.get(category.key)
  return (
- <div key={category.key} className="grid grid-cols-[1fr_5rem] items-center gap-0 border-b border-stone-100 px-5 py-4 last:border-b-0">
+ <div key={category.key} className={`grid ${GRID} items-center gap-0 border-b border-stone-100 px-5 py-4 last:border-b-0`}>
  <div className="pr-5">
  <div className="text-sm font-bold text-stone-900">{category.label}</div>
  <div className="mt-1 text-xs leading-5 text-stone-500">{category.description}</div>
@@ -165,7 +174,7 @@ export default function NotificationSettingsPage() {
  checked={preferenceValue(preference, key)}
  disabled={update.isPending}
  onCheckedChange={(value) => update.mutate({ category: category.key, channel: key, value })}
- aria-label={`${category.label}: ${key}`}
+ aria-label={`${category.label}: ${key === "inApp" ? "in-app" : "push"}`}
  />
  </div>
  ))}
@@ -177,6 +186,8 @@ export default function NotificationSettingsPage() {
  </div>
  </CardContent>
  </Card>
+
+ <PushSetup />
 
  <section aria-labelledby="pending-channels" className="rounded-lg border border-border bg-muted/40 p-4">
  <h2 id="pending-channels" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Not delivering yet</h2>
