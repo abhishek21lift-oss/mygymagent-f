@@ -1,4 +1,12 @@
 import { api } from "@/lib/api/client"
+import {
+  NativePermissionDeniedError,
+  nativePermission,
+  nativePushAvailable,
+  nativePushToken,
+  unregisterNativePush,
+  type NativePermission,
+} from "@/lib/push/native-push"
 
 /**
  * Web push over FCM for the staff app.
@@ -11,10 +19,9 @@ import { api } from "@/lib/api/client"
  * Firebase is imported only inside `enableWebPush`/`refreshWebPush`, so a
  * visitor who never turns push on never downloads it.
  *
- * Not covered here: the Android APK. It is a WebView around this site, and
- * Android WebView does not implement the Push API, so `webPushSupport()`
- * reports it unsupported. Native push there needs the Capacitor plugin and
- * the Firebase project's google-services.json in the build.
+ * Inside the Android app (a Capacitor WebView, which has no Push API),
+ * every entry point below routes to `native-push.ts` instead, so the
+ * settings panel, sign-out and refresh work the same way in both.
  */
 
 export const PUSH_SERVICE_WORKER_URL = "/push-sw.js"
@@ -58,6 +65,9 @@ export type WebPushSupport =
   | "supported"
 
 export function webPushSupport(): WebPushSupport {
+  // In the app, native push needs no Firebase web config -- only a build
+  // that includes the plugin.
+  if (isNativeApp()) return nativePushAvailable() ? "supported" : "unsupported"
   if (
     typeof window === "undefined" ||
     !("serviceWorker" in navigator) ||
@@ -102,7 +112,23 @@ export function pushUnavailableReason(): PushUnavailableReason {
   return standalone ? "ios-outdated" : "ios-not-installed"
 }
 
+/** The app's permission is only readable asynchronously, from the plugin,
+ * so it is cached here and refreshed whenever the UI subscribes. */
+let nativePermissionCache: NativePermission = "default"
+
+function refreshNativePermission() {
+  if (!nativePushAvailable()) return
+  void nativePermission()
+    .then((permission) => {
+      if (permission === nativePermissionCache) return
+      nativePermissionCache = permission
+      window.dispatchEvent(new Event(PUSH_CHANGE_EVENT))
+    })
+    .catch(() => undefined)
+}
+
 export function notificationPermission(): NotificationPermission | "unsupported" {
+  if (isNativeApp()) return nativePushAvailable() ? nativePermissionCache : "unsupported"
   return typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported"
 }
 
@@ -142,6 +168,7 @@ function storePushToken(registration: { token: string; deviceId: string } | null
 /** For useSyncExternalStore: the storage event covers other tabs, the
  * custom event this one. */
 export function subscribePushState(onChange: () => void): () => void {
+  refreshNativePermission()
   window.addEventListener(PUSH_CHANGE_EVENT, onChange)
   window.addEventListener("storage", onChange)
   return () => {
@@ -151,8 +178,10 @@ export function subscribePushState(onChange: () => void): () => void {
 }
 
 export class PushPermissionDeniedError extends Error {
-  constructor() {
-    super("Notifications are blocked for this site. Allow them in your browser's site settings, then try again.")
+  constructor(
+    message = "Notifications are blocked for this site. Allow them in your browser's site settings, then try again.",
+  ) {
+    super(message)
     this.name = "PushPermissionDeniedError"
   }
 }
@@ -165,8 +194,11 @@ export class PushPermissionDeniedError extends Error {
  * console and the person gets a sentence they can act on.
  */
 export class PushSetupError extends Error {
-  constructor(readonly cause: unknown) {
-    super("Push couldn't be set up in this browser. Try again, or use another browser. If it keeps happening, the workspace's Firebase web settings may be wrong.")
+  constructor(
+    readonly cause: unknown,
+    message = "Push couldn't be set up in this browser. Try again, or use another browser. If it keeps happening, the workspace's Firebase web settings may be wrong.",
+  ) {
+    super(message)
     this.name = "PushSetupError"
   }
 }
@@ -209,6 +241,7 @@ async function fetchMessagingToken(config: FirebaseWebConfig): Promise<string> {
  * to ask anyway.
  */
 export async function enableWebPush(): Promise<string> {
+  if (isNativeApp()) return enableNativePush()
   const config = firebaseWebConfig()
   if (webPushSupport() !== "supported" || !config) {
     throw new Error("Push notifications aren't available in this browser.")
@@ -229,6 +262,7 @@ export async function enableWebPush(): Promise<string> {
  * granted.
  */
 export async function refreshWebPush(): Promise<void> {
+  if (isNativeApp()) return refreshNativePush()
   const previous = storedPushToken()
   const config = firebaseWebConfig()
   if (!previous || !config || webPushSupport() !== "supported") return
@@ -250,6 +284,10 @@ export async function disableWebPush(): Promise<void> {
   const token = storedPushToken()
   storePushToken(null)
   if (token) await unregisterPushDevice(token)
+  if (isNativeApp()) {
+    await unregisterNativePush().catch(() => undefined)
+    return
+  }
   const config = firebaseWebConfig()
   if (!config || webPushSupport() !== "supported") return
   try {
@@ -261,6 +299,43 @@ export async function disableWebPush(): Promise<void> {
     if (app) await deleteToken(getMessaging(app))
   } catch {
     // The API no longer sends to this token either way.
+  }
+}
+
+/* ------------------------------------------------------ Android app (native) */
+
+async function enableNativePush(): Promise<string> {
+  if (!nativePushAvailable()) throw new Error("Push notifications aren't available in this version of the app.")
+  let token: string
+  try {
+    token = await nativePushToken(true)
+  } catch (error) {
+    if (error instanceof NativePermissionDeniedError) {
+      nativePermissionCache = "denied"
+      throw new PushPermissionDeniedError(error.message)
+    }
+    console.error("Native push setup failed", error)
+    throw new PushSetupError(error, "Push couldn't be set up in the app. Check your connection and try again.")
+  }
+  nativePermissionCache = "granted"
+  const device = await registerPushDevice(token)
+  storePushToken({ token, deviceId: device.id })
+  return token
+}
+
+async function refreshNativePush(): Promise<void> {
+  const previous = storedPushToken()
+  if (!previous || !nativePushAvailable()) return
+  if ((await nativePermission()) !== "granted") {
+    // Turned off in Android settings since: stop claiming this device.
+    storePushToken(null)
+    await unregisterPushDevice(previous).catch(() => undefined)
+    return
+  }
+  const token = await nativePushToken(false)
+  if (token !== previous) {
+    const device = await registerPushDevice(token)
+    storePushToken({ token, deviceId: device.id })
   }
 }
 

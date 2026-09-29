@@ -21,6 +21,7 @@ import { accentForPath } from "@/lib/section-accent";
 import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
 import { refreshWebPush } from "@/lib/push/web-push";
+import { listenForNativeTaps } from "@/lib/push/native-push";
 import { usePortalMe } from "@/lib/hooks/use-portal";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +76,10 @@ export default function PortalLayout({
     if (!memberLoaded) return;
     void refreshWebPush().catch(() => undefined);
   }, [memberLoaded]);
+
+  React.useEffect(() => {
+    listenForNativeTaps((path) => router.push(path));
+  }, [router]);
 
   if (isLoading || !isAuthenticated || me.isPending) {
     return (
