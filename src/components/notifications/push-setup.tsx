@@ -17,6 +17,7 @@ import {
   notificationPermission,
   PushPermissionDeniedError,
   PushSetupError,
+  isNativeApp,
   pushUnavailableReason,
   removePushDevice,
   sendTestPush,
@@ -58,7 +59,8 @@ const UNAVAILABLE: Record<PushUnavailableReason, string> = {
   "ios-not-installed":
     "On iPhone, notifications work once the app is on your Home Screen: tap Share, then Add to Home Screen, then open it from there and come back to this page.",
   "ios-outdated": "Notifications need iOS 16.4 or later. Update your iPhone, then try again.",
-  "in-app": "The Android app can't receive push yet. Open this page in Chrome instead to get notifications on this phone.",
+  // A build of the app made without the Firebase config has no push plugin.
+  "in-app": "This version of the app can't receive push. Update the app, or open this page in Chrome to get notifications on this phone.",
   browser: "This browser can't receive push. Try Chrome, Edge, Firefox or Safari.",
 }
 
@@ -92,6 +94,7 @@ export function PushSetup({ audience = "staff" }: { audience?: Audience } = {}) 
       JSON.stringify({
         support: webPushSupport(),
         reason: pushUnavailableReason(),
+        native: isNativeApp(),
         permission: notificationPermission(),
         token: storedPushToken(),
         deviceId: storedPushDeviceId(),
@@ -104,6 +107,7 @@ export function PushSetup({ audience = "staff" }: { audience?: Audience } = {}) 
         ? (JSON.parse(snapshot) as {
             support: WebPushSupport
             reason: PushUnavailableReason
+            native: boolean
             permission: NotificationPermission | "unsupported"
             token: string | null
             deviceId: string | null
@@ -189,7 +193,9 @@ export function PushSetup({ audience = "staff" }: { audience?: Audience } = {}) 
     state = {
       tone: "warning",
       label: "Blocked",
-      detail: "Notifications are blocked for this site. Allow them in your browser's site settings, then come back here.",
+      detail: client.native
+        ? "Notifications are turned off for this app. Allow them in Android Settings → Apps → THE CULT CLIENT → Notifications, then come back here."
+        : "Notifications are blocked for this site. Allow them in your browser's site settings, then come back here.",
     }
   } else if (enabledHere) {
     state = { tone: "success", label: "On for this device", detail: copy.on }

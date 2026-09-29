@@ -8,6 +8,7 @@ import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
 import { refreshWebPush } from "@/lib/push/web-push";
+import { listenForNativeTaps } from "@/lib/push/native-push";
 import { MfaRequiredGate } from "@/components/security/mfa-required-gate";
 import { MfaGraceBanner } from "@/components/security/mfa-grace-banner";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
@@ -48,6 +49,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (!userId || isMember || confined) return;
     void refreshWebPush().catch(() => undefined);
   }, [userId, isMember, confined]);
+
+  // In the Android app, a tapped notification opens its page. A no-op in
+  // a browser, where the service worker handles the click.
+  React.useEffect(() => {
+    listenForNativeTaps((path) => router.push(path));
+  }, [router]);
 
   if (isLoading || !isAuthenticated || isMember) {
     return (

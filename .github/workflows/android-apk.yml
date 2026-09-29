@@ -41,14 +41,27 @@ jobs:
       - name: Install web dependencies
         run: npm ci
 
-      - name: Install Capacitor
-        run: npm install --no-save @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
-
       - name: Generate Android project
         run: npx cap add android
 
       - name: Prepare Capacitor assets directory
         run: mkdir -p android/app/src/main/assets
+
+      # Push needs the Firebase project's google-services.json. Store it as
+      # the GOOGLE_SERVICES_JSON repository secret (raw JSON or base64).
+      # Without it the APK is built without the push plugin, and the app
+      # says push is unavailable rather than offering a button that fails.
+      # Must run before `cap sync`, which decides which plugins go in.
+      - name: Configure push notifications
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            node scripts/android-push.mjs enable
+          else
+            echo "::notice title=Push disabled::GOOGLE_SERVICES_JSON is not set, so this APK is built without push notifications."
+            node scripts/android-push.mjs disable
+          fi
 
       - name: Sync Capacitor
         run: npx cap sync android

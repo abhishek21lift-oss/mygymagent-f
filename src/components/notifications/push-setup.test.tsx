@@ -12,6 +12,7 @@ jest.mock("@/lib/push/web-push", () => {
     ...actual,
     webPushSupport: jest.fn(),
     pushUnavailableReason: jest.fn(),
+    isNativeApp: jest.fn(() => false),
     notificationPermission: jest.fn(),
     storedPushToken: jest.fn(),
     storedPushDeviceId: jest.fn(),
@@ -57,10 +58,10 @@ describe("PushSetup", () => {
     expect(screen.queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument()
   })
 
-  it("sends someone in the Android app to Chrome, where push works", async () => {
+  it("tells someone on an app build without push to update, or use Chrome", async () => {
     given({ support: "unsupported", reason: "in-app" })
     expect(await screen.findByText("Unavailable here")).toBeInTheDocument()
-    expect(screen.getByText(/Open this page in Chrome/)).toBeInTheDocument()
+    expect(screen.getByText(/Update the app, or open this page in Chrome/)).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument()
   })
 
