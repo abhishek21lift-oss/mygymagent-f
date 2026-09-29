@@ -571,7 +571,15 @@ function WorkoutProgress({ memberId }: { memberId: string }) {
  );
 
  return (
- <div className="grid gap-3 sm:grid-cols-3">
+ // A container query, not a viewport breakpoint. These three sit inside
+ // a card in a four-across grid, so at a 1512px viewport the card itself is
+ // only ~180px wide — but `sm:grid-cols-3` keys off the viewport and fired
+ // anyway, squeezing the labels to "Compl… Sessi…" and "Logg… Volur". A stat
+ // is unreadable at that width, and the part that survived was the number,
+ // which is the part that means nothing alone. `@lg` (32rem) is the first
+ // container width where three across is actually comfortable.
+ <div className="@container">
+ <div className="grid gap-3 @lg:grid-cols-3">
  <ProgressStat
  icon={CheckCircle2}
  label="Completed Sessions"
@@ -594,6 +602,7 @@ function WorkoutProgress({ memberId }: { memberId: string }) {
  value={last ? new Date(last.sessionDate).toLocaleDateString() : "—"}
  color="text-violet-500"
  />
+ </div>
  </div>
  );
 }

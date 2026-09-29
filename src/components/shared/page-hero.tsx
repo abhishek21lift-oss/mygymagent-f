@@ -121,7 +121,15 @@ export function PageHero({
         }}
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      {/* `flex-wrap`, so the action group drops to its own line instead of
+          squeezing the title. With `justify-between` and no wrap, a page
+          carrying several actions (the member masthead has seven) left the
+          h1 whatever was left over: measured at 1512px it got 147px for a
+          name needing 191px, and `truncate` rendered it as "Ananya S…". A
+          title is the one thing on a screen that must not be the part that
+          gets cut, and at 1920px there was room for both — so the squeeze
+          only appeared at the widths people actually demo on. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-3">
         <div className="flex min-w-0 items-center gap-3.5">
           {Icon ? (
             <span

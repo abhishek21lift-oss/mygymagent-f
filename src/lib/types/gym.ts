@@ -356,6 +356,10 @@ export interface Attendance {
   createdAt: string
   member?: { id: string; firstName: string; lastName: string } | null
   staffUser?: { id: string; firstName: string; lastName: string } | null
+  /** Present on `GET /attendance`; absent on a check-in's own response,
+   *  which returns the bare record. Optional so neither caller has to
+   *  lie about it. */
+  branch?: { id: string; name: string } | null
 }
 
 export type PaymentMethod = "CASH" | "CARD" | "UPI" | "BANK_TRANSFER" | "OTHER"

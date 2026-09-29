@@ -1503,7 +1503,7 @@ function AttendancePanel({ memberId }: { memberId: string }) {
  {new Date(record.checkInAt).toLocaleDateString()} {new Date(record.checkInAt).toLocaleTimeString()}
  </p>
  <p className="text-xs text-stone-600">
- {record.method} &bull; Branch: {record.branchId}
+ {record.method} &bull; Branch: {record.branch?.name ?? "—"}
  </p>
  </div>
  </div>
