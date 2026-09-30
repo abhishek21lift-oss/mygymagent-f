@@ -166,6 +166,13 @@ export default function WhatsAppSettingsPage() {
  }
  />
 
+ {/* First: linking the gym's own number is what most gyms come here
+ for, and on a phone the Meta card below fills the whole first
+ screen -- this card used to start exactly one screen down. */}
+ <div className="w-full max-w-3xl">
+ <WhatsAppWebCard canManage={hasPermission("whatsapp.manage")} />
+ </div>
+
  {integrationQuery.isLoading ? (
  <Card className="max-w-3xl border-border bg-card dark:bg-card"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full rounded-lg" /><Skeleton className="h-11 w-40 rounded-lg" /></CardContent></Card>
  ) : integrationQuery.isError ? <ErrorState onRetry={() => integrationQuery.refetch()} /> : (
@@ -197,7 +204,6 @@ export default function WhatsAppSettingsPage() {
  )}
 
  <div className="flex w-full max-w-3xl flex-col gap-5">
- <WhatsAppWebCard canManage={hasPermission("whatsapp.manage")} />
  <TestSendCard canManage={canManage} orgCountry={orgCountry} />
  <TemplatesCard />
  <InboundCard />

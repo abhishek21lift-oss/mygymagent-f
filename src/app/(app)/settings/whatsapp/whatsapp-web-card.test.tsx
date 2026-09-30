@@ -39,7 +39,8 @@ describe("WhatsAppWebCard", () => {
 
   it("says when the deployment has it switched off", async () => {
     renderWith({ ...base, available: false })
-    expect(await screen.findByText(/isn.t switched on for this deployment/)).toBeTruthy()
+    expect(await screen.findByText(/Not switched on on the server yet/)).toBeTruthy()
+    expect(screen.getByText("WHATSAPP_WEB_ENABLED=true")).toBeTruthy()
     expect(screen.queryByRole("button", { name: /link my whatsapp/i })).toBeNull()
   })
 
