@@ -71,6 +71,13 @@ async function clearRefreshCookie() {
 function assertSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin")
   if (!origin) return true // non-browser client
+
+  const configuredOrigin = process.env.APP_URL?.replace(/\/$/, "")
+
+  if (configuredOrigin && origin === configuredOrigin) {
+    return true
+  }
+
   try {
     return origin === new URL(request.url).origin
   } catch {
