@@ -292,7 +292,7 @@ export default function StaffPage() {
 
  <section aria-labelledby="staff-roster" className="overflow-hidden rounded-lg border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
- <h2 id="staff-roster" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team roster</h2>
+ <h2 id="staff-roster" className="section-title">Team roster</h2>
  </div>
  <div className="p-4 sm:p-5">
  <DataTable

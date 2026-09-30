@@ -301,7 +301,7 @@ export default function InventoryPage() {
 
  <section aria-labelledby="inventory-products" className="overflow-hidden rounded-lg border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
- <h2 id="inventory-products" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Products</h2>
+ <h2 id="inventory-products" className="section-title">Products</h2>
  </div>
  <div className="p-4 sm:p-5">
  <DataTable
@@ -322,7 +322,7 @@ export default function InventoryPage() {
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-orange-950/30 dark:via-stone-950 dark:to-yellow-950/10">
  <div className="flex items-center gap-3">
  <div>
- <h2 id="inventory-movements" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Stock movements</h2>
+ <h2 id="inventory-movements" className="section-title">Stock movements</h2>
  </div>
  </div>
  <Link href="/command-center" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">

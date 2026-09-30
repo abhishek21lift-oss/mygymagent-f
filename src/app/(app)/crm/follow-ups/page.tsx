@@ -79,7 +79,7 @@ export default function SalesFollowUpsPage() {
  <div className="flex flex-col gap-4 border-b border-border px-4 py-2.5 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
  <div className="flex items-center gap-3">
  <div>
- <h2 id="followups-list" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 id="followups-list" className="section-title">
  Sales actions
  </h2>
  </div>

@@ -236,7 +236,7 @@ export default function AutomationPage() {
       )}
 
       <section aria-labelledby="automation-jobs">
-       <h2 id="automation-jobs" className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+       <h2 id="automation-jobs" className="mb-3 section-title">
         Jobs
        </h2>
        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

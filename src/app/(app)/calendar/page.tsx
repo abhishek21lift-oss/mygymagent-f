@@ -172,7 +172,7 @@ export default function CalendarPage() {
  <div className="flex flex-col gap-3 border-b border-border px-4 py-2.5 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
  <div className="flex items-center gap-3">
  <div>
- <h2 id="calendar-board-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{title}</h2>
+ <h2 id="calendar-board-title" className="section-title">{title}</h2>
  </div>
  </div>
  <div className="flex flex-wrap items-center gap-2">
@@ -417,7 +417,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
  <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-rose-900/5">
  <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Book an appointment</h2>
+ <h2 className="section-title">Book an appointment</h2>
  </div>
  </div>
  <CardContent className="pt-5">
@@ -555,7 +555,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-cyan-900/5">
  <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Trainer availability &amp; time off</h2>
+ <h2 className="section-title">Trainer availability &amp; time off</h2>
  </div>
  </div>
  <CardContent className="flex flex-col gap-5 pt-5">

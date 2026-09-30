@@ -107,7 +107,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Lead profile</h2>
+ <h2 className="section-title">Lead profile</h2>
  </div>
  </div>
  <div className="p-5 sm:p-6">
@@ -150,7 +150,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
 
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="border-b border-border px-4 py-2.5 sm:px-5">
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Pipeline control</h2>
+ <h2 className="section-title">Pipeline control</h2>
  </div>
  <div className="space-y-5 p-5 sm:p-6">
  <div>
@@ -190,7 +190,7 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  <section aria-labelledby="lead-followups" className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 id="lead-followups" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Follow-ups</h2>
+ <h2 id="lead-followups" className="section-title">Follow-ups</h2>
  </div>
  </div>
  <div className="space-y-5 p-5 sm:p-6">

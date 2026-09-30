@@ -3103,134 +3103,140 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
  );
 }
 
+/** An iOS segmented control that scrolls sideways: twenty-one sections
+ * never fit across a phone, and snapping keeps a swipe landing on a whole
+ * tab rather than half of one. */
+const TAB_TRIGGER =
+ "min-h-10 shrink-0 snap-start rounded-xl px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm";
+
 export function Member360Tabs({ memberId }: { memberId: string }) {
  return (
  <Tabs defaultValue="overview" className="w-full">
- <div className="relative -mx-1 px-1">
- <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-xl border border-violet-100/70 bg-muted/40 p-1.5 shadow-sm">
+ <div className="relative">
+ <TabsList className="flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  <TabsTrigger
  value="overview"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Overview
  </TabsTrigger>
  <TabsTrigger
  value="tags"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Tags
  </TabsTrigger>
  <TabsTrigger
  value="addresses"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Addresses
  </TabsTrigger>
  <TabsTrigger
  value="emergency"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Emergency
  </TabsTrigger>
  <TabsTrigger
  value="notes"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Notes
  </TabsTrigger>
  <TabsTrigger
  value="consents"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Consents
  </TabsTrigger>
  <TabsTrigger
  value="assessments"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Assessments
  </TabsTrigger>
  <TabsTrigger
  value="goals"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Goals
  </TabsTrigger>
  <TabsTrigger
  value="documents"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Documents
  </TabsTrigger>
  <TabsTrigger
  value="history"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  History
  </TabsTrigger>
  <TabsTrigger
  value="attendance"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Attendance
  </TabsTrigger>
  <TabsTrigger
  value="payments"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Payments
  </TabsTrigger>
  <TabsTrigger
  value="screening"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  PAR-Q
  </TabsTrigger>
  <TabsTrigger
  value="pt-sessions"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  PT Sessions
  </TabsTrigger>
  <TabsTrigger
  value="workouts"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Workouts
  </TabsTrigger>
  <TabsTrigger
  value="nutrition"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Nutrition
  </TabsTrigger>
  <TabsTrigger
  value="follow-ups"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Follow-ups
  </TabsTrigger>
  <TabsTrigger
  value="communications"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Messages
  </TabsTrigger>
  <TabsTrigger
  value="timeline"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Timeline
  </TabsTrigger>
  <TabsTrigger
  value="duplicates"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Duplicates
  </TabsTrigger>
  <TabsTrigger
  value="membership-history"
- className="relative min-h-11 rounded-t-[16px] border-b-2 border-transparent px-4 py-3 text-sm font-bold text-stone-600 transition-colors after:absolute after:inset-x-2 after:bottom-0 after:h-1 after:rounded-full after:after:bg-primary after:opacity-0 after:transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:border-transparent data-[state=active]:bg-violet-50/70 data-[state=active]:text-violet-800 data-[state=active]:shadow-none data-[state=active]:after:opacity-100"
+ className={TAB_TRIGGER}
  >
  Membership History
  </TabsTrigger>

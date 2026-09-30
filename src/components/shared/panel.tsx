@@ -11,11 +11,12 @@ import { cn } from "@/lib/utils";
  * one string appeared 91 times across 34 files. This is what replaces
  * it.
  *
- * The header is a label, not a headline: a section inside a page is not
- * competing with the page's own title, so it wears the same small
- * uppercase treatment as a metric tile's label. `title` still renders a
- * real `h2` so the document outline is intact, and `titleId` wires
- * `aria-labelledby` for callers that were already doing it.
+ * The header is a sentence-case title led by a dot of the section's hue,
+ * as a grouped section is headed on iOS. It is 15px against the page
+ * title's 28-30px, so it still does not compete with the masthead.
+ * `title` renders a real `h2` so the document outline is intact, and
+ * `titleId` wires `aria-labelledby` for callers that were already doing
+ * it.
  *
  * `flush` is for sections whose body is a table or a list that should
  * meet the border — padding around a table just pushes it away from the
@@ -53,22 +54,30 @@ export function Panel({
     <section
       aria-labelledby={title && titleId ? titleId : undefined}
       className={cn(
-        "panel-premium overflow-hidden rounded-2xl border border-border bg-card",
+        "panel-premium overflow-hidden rounded-3xl border border-border/60 bg-card",
         className,
       )}
     >
       {title ? (
         <div
           data-slot="panel-header"
-          className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3 sm:px-6"
+          className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3.5 sm:px-6"
         >
           <div className="min-w-0">
             <h2
               id={titleId}
               data-slot="panel-title"
-              className="truncate text-[11px] font-bold uppercase tracking-[0.12em]"
+              className="flex items-center gap-2 truncate text-[15px] font-semibold tracking-tight text-foreground"
             >
-              {title}
+              {/* The section's hue as a dot, rather than as the text colour:
+                  a sentence-case title in ink-on-card reads as a heading,
+                  the way a grouped list's header does on iOS. */}
+              <span
+                aria-hidden="true"
+                data-slot="panel-dot"
+                className="size-2 shrink-0 rounded-full"
+              />
+              <span className="truncate">{title}</span>
             </h2>
             {description ? (
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -87,7 +96,7 @@ export function Panel({
       <div className={cn(!flush && "p-5 sm:p-6", bodyClassName)}>{children}</div>
 
       {footer ? (
-        <div className="border-t border-border px-5 py-3 sm:px-6">
+        <div className="border-t border-border/60 px-5 py-3 sm:px-6">
           {footer}
         </div>
       ) : null}

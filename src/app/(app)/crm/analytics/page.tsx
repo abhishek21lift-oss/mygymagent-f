@@ -98,7 +98,7 @@ export default function SalesAnalyticsPage() {
  <section aria-labelledby="analytics-window" className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
  <div>
- <h2 id="analytics-window" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 id="analytics-window" className="section-title">
  Reporting window
  </h2>
  </div>
@@ -130,7 +130,7 @@ export default function SalesAnalyticsPage() {
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Pipeline distribution</h2>
+ <h2 className="section-title">Pipeline distribution</h2>
  </div>
  </div>
  <div className="space-y-4 p-5 sm:p-6">
@@ -159,7 +159,7 @@ export default function SalesAnalyticsPage() {
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Follow-up discipline</h2>
+ <h2 className="section-title">Follow-up discipline</h2>
  </div>
  </div>
  <div className="grid gap-3 p-5 sm:grid-cols-3 xl:grid-cols-1">
@@ -173,7 +173,7 @@ export default function SalesAnalyticsPage() {
  <section aria-labelledby="analytics-sources" className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex flex-col gap-3 border-b border-border px-4 py-2.5 sm:px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
  <div>
- <h2 id="analytics-sources" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Lead source performance</h2>
+ <h2 id="analytics-sources" className="section-title">Lead source performance</h2>
  </div>
  <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
@@ -217,7 +217,7 @@ export default function SalesAnalyticsPage() {
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Why leads are lost</h2>
+ <h2 className="section-title">Why leads are lost</h2>
  </div>
  </div>
  <div className="space-y-3 p-5 sm:p-6">
@@ -243,7 +243,7 @@ export default function SalesAnalyticsPage() {
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Rep performance</h2>
+ <h2 className="section-title">Rep performance</h2>
  </div>
  </div>
  <div className="p-4 sm:p-5">

@@ -103,13 +103,14 @@ export function EntryAccessCard({
   return (
     <section
       aria-labelledby="member-entry-access"
-      className="overflow-hidden rounded-lg border border-border bg-card"
+      className="panel-premium overflow-hidden rounded-3xl border border-border/60 bg-card"
     >
-      <div className="border-b border-border px-5 py-3">
+      <div data-slot="panel-header" className="border-b border-border/60 px-5 py-3.5">
         <h2
           id="member-entry-access"
-          className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground"
+          className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-foreground"
         >
+          <span aria-hidden="true" data-slot="panel-dot" className="size-2 shrink-0 rounded-full" />
           Entry access
         </h2>
       </div>

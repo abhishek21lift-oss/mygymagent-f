@@ -1556,12 +1556,10 @@
   }
 
   /* --- The section container -----------------------------------
-     The header takes the wash and the label the ink, which is what
-     turns 11px of grey uppercase into something you can find by
-     colour when six panels are stacked. */
+     The header takes the wash and the title a dot of the section's
+     gradient, so six stacked panels are still findable by colour. */
   .panel-premium {
     box-shadow: var(--shadow-card);
-    border-radius: var(--radius-2xl);
   }
   .panel-premium [data-slot="panel-header"] {
     background: linear-gradient(
@@ -1570,8 +1568,36 @@
       transparent 100%
     );
   }
-  .panel-premium [data-slot="panel-title"] {
-    color: var(--section-ink);
+  .panel-premium [data-slot="panel-dot"] {
+    background: linear-gradient(135deg, var(--section-grad-1), var(--section-grad-2));
+    box-shadow: 0 0 0 3px var(--section-tint);
+  }
+
+  /* --- Section headings ---------------------------------------
+     A sentence-case title led by a dot of the section's gradient, as
+     a grouped section is headed on iOS -- the same treatment `Panel`
+     gives its own title. It replaced an 11px grey uppercase label
+     hand-rolled on forty-odd section headers, which read as a caption
+     rather than as the name of the thing below it. */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+  .section-title::before {
+    content: "";
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--section-grad-1), var(--section-grad-2));
+    box-shadow: 0 0 0 3px var(--section-tint);
   }
 
   /* --- Empty states -------------------------------------------
