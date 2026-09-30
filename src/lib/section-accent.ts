@@ -24,7 +24,11 @@ export type Accent =
  * nothing.
  */
 const ROUTE_ACCENTS: ReadonlyArray<readonly [string, Accent]> = [
-  // Tools
+  // Engage, then Tools. The two WhatsApp pages live under /settings but
+  // belong to Engage, so they come first.
+  ["/settings/whatsapp", "orange"],
+  ["/settings/messages", "orange"],
+  ["/automation", "orange"],
   ["/settings", "orange"],
   ["/owner-os", "blue"],
   ["/command-center", "blue"],
@@ -36,14 +40,15 @@ const ROUTE_ACCENTS: ReadonlyArray<readonly [string, Accent]> = [
   // Operations
   ["/attendance", "cyan"],
   ["/inventory", "cyan"],
-  ["/staff", "cyan"],
   ["/branches", "cyan"],
-  ["/onboarding", "cyan"],
+  ["/onboarding", "orange"],
+  // Team
+  ["/staff", "indigo"],
+  ["/payroll", "indigo"],
   // Finance
   ["/billing", "amber"],
   ["/membership-plans", "amber"],
-  ["/memberships", "amber"],
-  ["/payroll", "amber"],
+  ["/memberships", "violet"],
   // Training
   ["/pt-operations", "emerald"],
   ["/workout-sessions", "emerald"],
@@ -79,6 +84,9 @@ export function accentForPath(pathname: string | null | undefined): Accent {
  * the wrong word above the title.
  */
 const ROUTE_SECTIONS: ReadonlyArray<readonly [string, string]> = [
+  ["/settings/whatsapp", "Engage"],
+  ["/settings/messages", "Engage"],
+  ["/automation", "Engage"],
   ["/settings", "Settings"],
   ["/owner-os", "Insights"],
   ["/command-center", "Insights"],
@@ -89,13 +97,13 @@ const ROUTE_SECTIONS: ReadonlyArray<readonly [string, string]> = [
   ["/search", "Search"],
   ["/attendance", "Operations"],
   ["/inventory", "Operations"],
-  ["/staff", "Operations"],
   ["/branches", "Operations"],
-  ["/onboarding", "Operations"],
+  ["/onboarding", "Settings"],
+  ["/staff", "Team"],
+  ["/payroll", "Team"],
   ["/billing", "Finance"],
   ["/membership-plans", "Finance"],
-  ["/memberships", "Finance"],
-  ["/payroll", "Finance"],
+  ["/memberships", "Members"],
   ["/pt-operations", "Training"],
   ["/workout-sessions", "Training"],
   ["/workouts", "Training"],
