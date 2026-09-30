@@ -36,6 +36,8 @@ export interface WhatsAppMessage {
 export interface WhatsAppWebSession {
   /** Whether this deployment runs WhatsApp Web at all. */
   available: boolean
+  /** Which server setting is missing when it doesn't. */
+  unavailableReason?: "DISABLED" | "KEY_MISSING" | "KEY_INVALID" | null
   status: "DISCONNECTED" | "PAIRING" | "CONNECTED" | "LOGGED_OUT"
   phoneNumber: string | null
   useForSending: boolean

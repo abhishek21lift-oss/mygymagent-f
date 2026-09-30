@@ -63,17 +63,7 @@ export function WhatsAppWebCard({ canManage }: { canManage: boolean }) {
         ) : query.isError ? (
           <p className="text-sm text-destructive">Couldn&rsquo;t load WhatsApp Web status.</p>
         ) : !query.data.available ? (
-          <div className="rounded-2xl bg-amber-500/10 p-4 text-sm leading-6 text-amber-950 dark:text-amber-100">
-            <p className="font-semibold">Not switched on on the server yet</p>
-            <p className="mt-1">
-              Linking a number needs two settings on the backend (Render &rarr; Environment), then a redeploy:
-            </p>
-            <ul className="mt-2 space-y-1 font-mono text-xs">
-              <li>WHATSAPP_WEB_ENABLED=true</li>
-              <li>WHATSAPP_TOKEN_KEY=&lt;64 hex characters&gt;</li>
-            </ul>
-            <p className="mt-2">After that, a QR code to scan appears here.</p>
-          </div>
+          <ServerSetup reason={query.data.unavailableReason ?? "DISABLED"} />
         ) : query.data.status === "CONNECTED" ? (
           <Connected session={query.data} canManage={canManage} />
         ) : query.data.status === "PAIRING" ? (
@@ -83,6 +73,39 @@ export function WhatsAppWebCard({ canManage }: { canManage: boolean }) {
         )}
       </div>
     </section>
+  )
+}
+
+/** What to change on the server, for the one setting that is wrong. */
+function ServerSetup({ reason }: { reason: NonNullable<WhatsAppWebSession["unavailableReason"]> }) {
+  const copy = {
+    DISABLED: {
+      title: "Not switched on on the server yet",
+      body: "Linking a number needs two settings on the backend (Render → Environment), then a redeploy:",
+      lines: ["WHATSAPP_WEB_ENABLED=true", "WHATSAPP_TOKEN_KEY=<64 hex characters>"],
+    },
+    KEY_MISSING: {
+      title: "WHATSAPP_TOKEN_KEY is not set",
+      body: "WhatsApp Web is switched on, but the server has no key to encrypt the linked session with. Add it on the backend (Render → Environment), then redeploy:",
+      lines: ["WHATSAPP_TOKEN_KEY=<64 hex characters>"],
+    },
+    KEY_INVALID: {
+      title: "WHATSAPP_TOKEN_KEY is not a valid key",
+      body: "It must be exactly 64 characters, using only 0-9 and a-f. Paste the key itself, not the <64 hex characters> placeholder. Generate one with the command below, set it on the backend (Render → Environment), then redeploy:",
+      lines: ["openssl rand -hex 32"],
+    },
+  }[reason]
+  return (
+    <div className="rounded-2xl bg-amber-500/10 p-4 text-sm leading-6 text-amber-950 dark:text-amber-100">
+      <p className="font-semibold">{copy.title}</p>
+      <p className="mt-1">{copy.body}</p>
+      <ul className="mt-2 space-y-1 break-all font-mono text-xs">
+        {copy.lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      <p className="mt-2">After that, a QR code to scan appears here.</p>
+    </div>
   )
 }
 
@@ -196,6 +219,11 @@ function Pairing({ session, canManage }: { session: WhatsAppWebSession; canManag
   const code = session.pairingCode
   return (
     <div className="space-y-5">
+      {session.lastError ? (
+        <p role="alert" className="rounded-2xl bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-100">
+          {session.lastError}
+        </p>
+      ) : null}
       <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
         {code ? (
           <div className="w-full rounded-2xl bg-muted/60 p-5 text-center sm:w-64">
@@ -212,8 +240,11 @@ function Pairing({ session, canManage }: { session: WhatsAppWebSession; canManag
             className="size-56 shrink-0 rounded-2xl bg-white p-2 ring-1 ring-border/60"
           />
         ) : (
-          <div className="flex size-56 shrink-0 items-center justify-center rounded-2xl bg-muted/60">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" aria-label="Getting a code from WhatsApp" />
+          <div className="flex size-56 shrink-0 flex-col items-center justify-center gap-3 rounded-2xl bg-muted/60 p-4 text-center">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            <p className="text-xs text-muted-foreground" role="status">
+              Connecting to WhatsApp… this can take up to 45 seconds.
+            </p>
           </div>
         )}
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-muted-foreground">

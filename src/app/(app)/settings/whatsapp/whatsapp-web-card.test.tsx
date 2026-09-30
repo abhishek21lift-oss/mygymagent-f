@@ -44,6 +44,22 @@ describe("WhatsAppWebCard", () => {
     expect(screen.queryByRole("button", { name: /link my whatsapp/i })).toBeNull()
   })
 
+  it("says exactly which server setting is wrong", async () => {
+    const { unmount } = renderWith({ ...base, available: false, unavailableReason: "KEY_MISSING" })
+    expect(await screen.findByText("WHATSAPP_TOKEN_KEY is not set")).toBeTruthy()
+    unmount()
+    renderWith({ ...base, available: false, unavailableReason: "KEY_INVALID" })
+    expect(await screen.findByText("WHATSAPP_TOKEN_KEY is not a valid key")).toBeTruthy()
+    expect(screen.getByText(/not the <64 hex characters> placeholder/)).toBeTruthy()
+    expect(screen.getByText("openssl rand -hex 32")).toBeTruthy()
+  })
+
+  it("while linking, says it is connecting and shows why an attempt failed", async () => {
+    renderWith({ ...base, status: "PAIRING", lastError: "Connecting to WhatsApp failed (code 405: Connection Failure). Retrying…" })
+    expect(await screen.findByText(/can take up to 45 seconds/)).toBeTruthy()
+    expect(screen.getByRole("alert").textContent).toMatch(/code 405/)
+  })
+
   it("will not link until the ban risk is accepted, and then sends that acceptance", async () => {
     renderWith(base)
     const link = await screen.findByRole("button", { name: /link my whatsapp/i })
