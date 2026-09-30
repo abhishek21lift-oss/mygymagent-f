@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
-import type { WhatsAppIntegration, WhatsAppMessage } from "@/lib/types/whatsapp"
+import type { WhatsAppIntegration, WhatsAppMessage, WhatsAppWebSession } from "@/lib/types/whatsapp"
 
 const KEY = "whatsapp"
 
@@ -121,5 +121,45 @@ export function useInboundWhatsApp(params: { matched?: boolean; limit?: number }
           ...(params.limit ? { limit: params.limit } : {}),
         },
       }),
+  })
+}
+
+// --- WhatsApp Web: the gym's own number, linked as a device -------------
+
+const WEB_KEY = [KEY, "web"] as const
+
+export function useWhatsAppWeb() {
+  return useQuery({
+    queryKey: WEB_KEY,
+    queryFn: () => api.get<WhatsAppWebSession>("/whatsapp-web"),
+    // While a code is on screen, follow it: QR codes rotate every ~20 s,
+    // and the page should flip to "linked" the moment the phone scans.
+    refetchInterval: (query) => (query.state.data?.status === "PAIRING" ? 2_000 : false),
+  })
+}
+
+export function useConnectWhatsAppWeb() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { phoneNumber?: string }) =>
+      api.post<WhatsAppWebSession>("/whatsapp-web/connect", { acceptRisk: true, ...input }),
+    onSuccess: (data) => queryClient.setQueryData(WEB_KEY, data),
+  })
+}
+
+export function useDisconnectWhatsAppWeb() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<WhatsAppWebSession>("/whatsapp-web/disconnect", {}),
+    onSuccess: (data) => queryClient.setQueryData(WEB_KEY, data),
+  })
+}
+
+export function useUpdateWhatsAppWebSettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { useForSending?: boolean; dailyLimit?: number }) =>
+      api.patch<WhatsAppWebSession>("/whatsapp-web/settings", input),
+    onSuccess: (data) => queryClient.setQueryData(WEB_KEY, data),
   })
 }
