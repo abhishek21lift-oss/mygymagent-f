@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Ban, RefreshCw, Wallet } from "lucide-react";
+import { Ban, Link2, RefreshCw, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ import {
  getInvoiceOutstanding,
  invoiceStatusVariant,
  useInvoice,
+ useLinkablePayments,
+ useLinkPayment,
  useRetryCollection,
  useVoidInvoice,
  type RetryCollectionResult,
@@ -32,6 +34,64 @@ function RetryResult({ result }: { result: RetryCollectionResult }) {
  ₹ {Number(result.amount).toFixed(2)}
  {result.orderId ? ` · Order ${result.orderId}` : ""}
  </p>
+ </div>
+ );
+}
+
+/**
+ * Payments the member already made that aren't on this invoice yet --
+ * typically taken at the desk without picking the membership. Putting one
+ * here settles the invoice and stops the reminders.
+ */
+function LinkPayments({ invoiceId, currency }: { invoiceId: string; currency: string }) {
+ const linkable = useLinkablePayments(invoiceId);
+ const link = useLinkPayment();
+
+ async function handleLink(paymentId: string) {
+ try {
+ const updated = await link.mutateAsync({ invoiceId, paymentId });
+ toast.success(
+ updated.status === "PAID" ? "Payment added. The invoice is paid." : "Payment added to the invoice",
+ );
+ } catch (error) {
+ toast.error(error instanceof ApiError ? error.message : "Couldn't add the payment");
+ }
+ }
+
+ if (linkable.isLoading || linkable.isError || !linkable.data?.length) return null;
+
+ return (
+ <div>
+ <h3 className="mb-1 text-sm font-black uppercase tracking-wide text-stone-500">Payments not on an invoice</h3>
+ <p className="mb-2 text-xs text-stone-500">
+ This member paid these without an invoice. Add one to settle this invoice.
+ </p>
+ <div className="flex flex-col gap-2">
+ {linkable.data.map((p) => (
+ <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-stone-300 p-3 text-sm dark:border-white/15">
+ <div className="min-w-0">
+ <p className="font-bold tabular-nums">
+ {currency === "INR" ? "₹" : currency} {Number(p.unallocated).toFixed(2)} · {p.method}
+ </p>
+ <p className="text-xs text-stone-500 tabular-nums">
+ {fmtDateTime(p.createdAt)}
+ {Number(p.unallocated) < Number(p.amount) ? ` · of ${Number(p.amount).toFixed(2)}` : ""}
+ {p.note ? ` · ${p.note}` : ""}
+ </p>
+ </div>
+ <Button
+ size="sm"
+ variant="outline"
+ className="min-h-11"
+ disabled={link.isPending}
+ onClick={() => handleLink(p.id)}
+ >
+ <Link2 className="size-4" aria-hidden="true" />
+ {link.isPending && link.variables?.paymentId === p.id ? "Adding…" : "Add to invoice"}
+ </Button>
+ </div>
+ ))}
+ </div>
  </div>
  );
 }
@@ -66,6 +126,11 @@ export function InvoiceDrawer({
 
  const invoice = detail.data;
  const outstanding = invoice ? getInvoiceOutstanding(invoice) : 0;
+ const canLink =
+ hasPermission("payments.create") &&
+ !!invoice &&
+ ["ISSUED", "PART_PAID", "OVERDUE"].includes(invoice.status) &&
+ outstanding > 0;
  const canVoid =
  hasPermission("payments.refund") && invoice && invoice.status !== "VOID" && invoice.status !== "PAID";
 
@@ -193,6 +258,8 @@ export function InvoiceDrawer({
  </div>
  )}
  </div>
+
+ {canLink && <LinkPayments invoiceId={invoice.id} currency={invoice.currency} />}
 
  <div>
  <h3 className="mb-2 text-sm font-black uppercase tracking-wide text-stone-500">Reminders</h3>
