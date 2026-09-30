@@ -68,6 +68,53 @@ export interface InvoiceDetail {
   taxBreakup?: InvoiceTaxLine[] | null;
   payments: InvoicePayment[];
   dunningAttempts: DunningAttempt[];
+  /** What is still owed, as the server computes it (refunds netted). */
+  outstanding?: string | number;
+  membershipId?: string | null;
+}
+
+/** A payment that could still go towards an invoice. */
+export interface LinkablePayment {
+  id: string;
+  amount: string | number;
+  currency: string;
+  method: string;
+  status: string;
+  note: string | null;
+  membershipId: string | null;
+  createdAt: string;
+  /** How much of it is not on any invoice yet. */
+  unallocated: string;
+}
+
+/**
+ * The API sends an invoice's payments as `paymentLinks` (each with the
+ * amount put on this invoice and the payment itself), its subtotal as
+ * `subtotal`, and a reminder's time as `sentAt` or, for one not yet sent,
+ * `createdAt`. The screens were written against `payments`, `subTotal`
+ * and `sentAt`, so the drawer showed no payments, an outstanding equal to
+ * the full total, and crashed reading `payments.length`.
+ */
+export function toInvoiceDetail(raw: Record<string, unknown>): InvoiceDetail {
+  const links = Array.isArray(raw.paymentLinks)
+    ? (raw.paymentLinks as Array<{ amount: string | number; payment?: InvoicePayment }>)
+    : [];
+  const payments: InvoicePayment[] = Array.isArray(raw.payments)
+    ? (raw.payments as InvoicePayment[])
+    : links
+        .filter((link) => link.payment)
+        .map((link) => ({ ...link.payment!, amount: link.amount }));
+  const dunning = Array.isArray(raw.dunningAttempts)
+    ? (raw.dunningAttempts as Array<DunningAttempt & { createdAt?: string }>)
+    : [];
+  return {
+    ...(raw as unknown as InvoiceDetail),
+    subTotal: (raw.subTotal ?? raw.subtotal) as string | number | undefined,
+    discount: (raw.discount ?? raw.discountTotal) as string | number | null | undefined,
+    lines: Array.isArray(raw.lines) ? (raw.lines as InvoiceLine[]) : [],
+    payments,
+    dunningAttempts: dunning.map((d) => ({ ...d, sentAt: d.sentAt ?? d.createdAt ?? "" })),
+  };
 }
 
 export interface RetryCollectionResult {
@@ -75,6 +122,17 @@ export interface RetryCollectionResult {
   amount: string | number;
   currency: string;
   keyId?: string;
+}
+
+/** The API answers `{ outstanding, currency, keyId, order: { id } }`. */
+export function toRetryResult(raw: Record<string, unknown>): RetryCollectionResult {
+  const order = (raw.order ?? {}) as { id?: string; currency?: string };
+  return {
+    orderId: (raw.orderId as string | undefined) ?? order.id,
+    amount: (raw.amount ?? raw.outstanding ?? 0) as string | number,
+    currency: ((raw.currency ?? order.currency) as string) ?? "",
+    keyId: raw.keyId as string | undefined,
+  };
 }
 
 export interface AgingBuckets {
@@ -92,16 +150,38 @@ export type AgingResponse =
   | { buckets: AgingBuckets; currency: string; rows?: AgingRow[] }
   | { rows: AgingRow[]; currency?: string; buckets?: AgingBuckets };
 
-/** Backend may return `{ buckets, currency }` or `{ rows: [...] }` — normalize to per-currency rows. */
+/**
+ * Aging arrives as one map per bucket, keyed by currency:
+ * `{ current: { INR: "1200.00" }, d1_7: {}, d8_30: {}, d30plus: {} }`.
+ * The older `{ buckets }` and `{ rows }` shapes are still accepted. Reading
+ * only those, the aging strip never showed.
+ */
 export function normalizeAging(data: AgingResponse | undefined): AgingRow[] {
   if (!data) return [];
   if (Array.isArray(data.rows) && data.rows.length > 0) return data.rows;
   if (data.buckets) return [{ currency: data.currency ?? "", ...data.buckets }];
-  return [];
+  const perCurrency = data as unknown as Partial<Record<keyof AgingBuckets, Record<string, string | number>>>;
+  const keys: Array<keyof AgingBuckets> = ["current", "d1_7", "d8_30", "d30plus"];
+  const currencies = new Set<string>();
+  for (const key of keys) {
+    const bucket = perCurrency[key];
+    if (bucket && typeof bucket === "object") Object.keys(bucket).forEach((c) => currencies.add(c));
+  }
+  return [...currencies].map((currency) => {
+    const row = { currency } as AgingRow;
+    for (const key of keys) {
+      const bucket = perCurrency[key];
+      row[key] = bucket && typeof bucket === "object" ? (bucket[currency] ?? 0) : 0;
+    }
+    return row;
+  });
 }
 
 /** Net still owed on a fully-loaded invoice (display helper; server owns the truth). */
 export function getInvoiceOutstanding(invoice: InvoiceDetail): number {
+  if (invoice.outstanding !== undefined && invoice.outstanding !== null) {
+    return Number(invoice.outstanding);
+  }
   const paid = (invoice.payments ?? [])
     .filter((p) => p.status !== "FAILED" && p.status !== "REFUNDED")
     .reduce((sum, p) => sum + Number(p.amount), 0);
@@ -131,7 +211,8 @@ export function useInvoices(
 export function useInvoice(id: string | null | undefined) {
   return useQuery({
     queryKey: [KEY, id],
-    queryFn: () => api.get<InvoiceDetail>(`/invoices/${id}`),
+    queryFn: async () =>
+      toInvoiceDetail(await api.get<Record<string, unknown>>(`/invoices/${id}`)),
     enabled: !!id,
   });
 }
@@ -156,8 +237,33 @@ export function useVoidInvoice() {
 export function useRetryCollection() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.post<RetryCollectionResult>(`/invoices/${id}/retry-collection`, {}),
+    mutationFn: async (id: string) =>
+      toRetryResult(await api.post<Record<string, unknown>>(`/invoices/${id}/retry-collection`, {})),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export function useLinkablePayments(invoiceId: string | null | undefined, enabled = true) {
+  return useQuery({
+    queryKey: [KEY, invoiceId, "linkable-payments"],
+    queryFn: () => api.get<LinkablePayment[]>(`/invoices/${invoiceId}/linkable-payments`),
+    enabled: !!invoiceId && enabled,
+  });
+}
+
+/** Puts an existing payment on an invoice. */
+export function useLinkPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ invoiceId, paymentId }: { invoiceId: string; paymentId: string }) =>
+      toInvoiceDetail(
+        await api.post<Record<string, unknown>>(`/invoices/${invoiceId}/payments`, { paymentId }),
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [KEY] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["member-payments"] });
+    },
   });
 }
 
