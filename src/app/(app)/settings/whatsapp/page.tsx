@@ -38,6 +38,7 @@ import {
  type WhatsAppTestSendResult,
 } from "@/lib/hooks/use-whatsapp"
 import { useBranches } from "@/lib/hooks/use-branches"
+import { WhatsAppWebCard } from "./whatsapp-web-card"
 
 declare global {
  interface Window {
@@ -196,6 +197,7 @@ export default function WhatsAppSettingsPage() {
  )}
 
  <div className="flex w-full max-w-3xl flex-col gap-5">
+ <WhatsAppWebCard canManage={hasPermission("whatsapp.manage")} />
  <TestSendCard canManage={canManage} orgCountry={orgCountry} />
  <TemplatesCard />
  <InboundCard />

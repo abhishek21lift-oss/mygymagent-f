@@ -31,3 +31,21 @@ export interface WhatsAppMessage {
   sentAt: string | null
   createdAt: string
 }
+
+/** A gym's own number linked as a WhatsApp Web device (mygymagent-b B-P1-13). */
+export interface WhatsAppWebSession {
+  /** Whether this deployment runs WhatsApp Web at all. */
+  available: boolean
+  status: "DISCONNECTED" | "PAIRING" | "CONNECTED" | "LOGGED_OUT"
+  phoneNumber: string | null
+  useForSending: boolean
+  dailyLimit: number
+  sentLast24h: number
+  riskAcceptedAt: string | null
+  connectedAt: string | null
+  lastError: string | null
+  /** While pairing: the QR to scan, as an image. */
+  qrDataUrl: string | null
+  /** While pairing with a phone number: the code to type on the phone. */
+  pairingCode: string | null
+}

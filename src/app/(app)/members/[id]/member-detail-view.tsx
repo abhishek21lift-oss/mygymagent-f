@@ -11,6 +11,7 @@ import {
  Flame,
  HeartPulse,
  MessageCircle,
+ MessageSquareText,
  Dumbbell,
  Phone,
  PlayCircle,
@@ -108,6 +109,8 @@ import {
  surfaceClass,
 } from "./member-profile-parts";
 import { initials, netPaid, termProgress, visitStreak, visitSummary } from "./member-profile-stats";
+import { useBranches } from "@/lib/hooks/use-branches";
+import { whatsappDrafts, whatsappLink, whatsappNumber } from "@/lib/whatsapp-link";
 
 function SellMembershipDialog({ memberId, trigger }: { memberId: string; trigger?: React.ReactNode }) {
  const [open, setOpen] = React.useState(false);
@@ -1184,9 +1187,11 @@ function MemberHero({
  daysLeft: number | null;
 }) {
  const router = useRouter();
- const { hasPermission } = useAuth();
+ const { hasPermission, user } = useAuth();
  const deleteMember = useDeleteMember();
  const [deleteOpen, setDeleteOpen] = React.useState(false);
+ const branches = useBranches({ pageSize: 100 });
+ const branch = branches.data?.items.find((b) => b.id === member.primaryBranchId);
 
  async function handleDelete() {
  try {
@@ -1201,6 +1206,15 @@ function MemberHero({
 
  const hue = memberHue(member.id);
  const phone = member.phone?.trim() || null;
+ const waNumber = whatsappNumber(phone, branch?.country);
+ const drafts = whatsappDrafts({
+ firstName: member.firstName,
+ staffFirstName: user?.firstName,
+ branchName: branch?.name,
+ planName: activeMembership?.membershipPlan?.name,
+ endDate: activeMembership?.endDate,
+ daysLeft,
+ });
  const email = member.email?.trim() || null;
  const meta = [
  `#${member.memberCode}`,
@@ -1262,21 +1276,47 @@ function MemberHero({
  <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
  <div className="flex justify-center gap-1 sm:justify-start" role="group" aria-label="Contact and manage">
  <QuickAction
- accent="emerald"
+ accent="cyan"
  icon={Phone}
  label="Call"
  href={phone ? `tel:${phone}` : undefined}
  disabled={!phone}
  disabledReason="no phone number"
  />
+ {/* Click-to-chat: opens WhatsApp on this device with a message
+ typed, for the staff member to send themselves. Free, and none of
+ the ban risk of automating a number. */}
+ {waNumber ? (
+ <DropdownMenu>
+ <DropdownMenuTrigger asChild>
+ <QuickAction accent="emerald" icon={MessageCircle} label="WhatsApp" aria-label="WhatsApp" />
+ </DropdownMenuTrigger>
+ <DropdownMenuContent align="center" className="w-56">
+ <DropdownMenuLabel>Open WhatsApp with…</DropdownMenuLabel>
+ <DropdownMenuSeparator />
+ {drafts.map((draft) => (
+ <DropdownMenuItem key={draft.id} asChild>
+ <a href={whatsappLink(waNumber, draft.text)} target="_blank" rel="noopener noreferrer">
+ {draft.label}
+ </a>
+ </DropdownMenuItem>
+ ))}
+ <DropdownMenuItem asChild>
+ <a href={whatsappLink(waNumber)} target="_blank" rel="noopener noreferrer">
+ A blank message
+ </a>
+ </DropdownMenuItem>
+ </DropdownMenuContent>
+ </DropdownMenu>
+ ) : (
  <QuickAction
- accent="blue"
+ accent="emerald"
  icon={MessageCircle}
- label="Text"
- href={phone ? `sms:${phone}` : undefined}
- disabled={!phone}
- disabledReason="no phone number"
+ label="WhatsApp"
+ disabled
+ disabledReason={phone ? "save the number with its country code" : "no phone number"}
  />
+ )}
  <QuickAction
  accent="violet"
  icon={Mail}
@@ -1308,6 +1348,14 @@ function MemberHero({
  <Copy className="mr-2 size-3.5" />
  Copy member code
  </DropdownMenuItem>
+ {phone ? (
+ <DropdownMenuItem asChild>
+ <a href={`sms:${phone}`}>
+ <MessageSquareText className="mr-2 size-3.5" />
+ Send an SMS
+ </a>
+ </DropdownMenuItem>
+ ) : null}
  {hasPermission("members.delete") && (
  <>
  <DropdownMenuSeparator />
