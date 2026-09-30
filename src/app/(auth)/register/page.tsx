@@ -138,6 +138,12 @@ export default function RegisterPage() {
  {isSubmitting ? "Creating account..." : "Create account"}
  {!isSubmitting && <ArrowRight className="ml-2 size-4" aria-hidden="true" />}
  </Button>
+ <p className="text-center text-xs leading-5 text-muted-foreground">
+ By creating an account you agree to our{" "}
+ <Link href="/terms" className="font-medium text-foreground underline underline-offset-2">Terms of Service</Link>{" "}
+ and{" "}
+ <Link href="/privacy" className="font-medium text-foreground underline underline-offset-2">Privacy Policy</Link>.
+ </p>
  </form>
  </Form>
  <p className="mt-5 text-center text-xs font-medium text-stone-600">
