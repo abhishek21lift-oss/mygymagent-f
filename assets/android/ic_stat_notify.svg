@@ -1,0 +1,17 @@
+<!-- Status-bar notification icon: a dumbbell, white on transparent.
+     Android draws this icon as a silhouette (alpha only), so it must be a
+     simple solid shape; the full-colour logo would read as a white disc.
+     24x24 with the recommended 2px margin. Edit this file, then run
+     node scripts/render-android-icon.mjs to regenerate res/drawable-*. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <g fill="#ffffff">
+    <!-- bar -->
+    <rect x="7" y="10.75" width="10" height="2.5" rx="0.6"/>
+    <!-- left plates -->
+    <rect x="2.25" y="8.5" width="2.5" height="7" rx="1"/>
+    <rect x="4.9" y="6" width="2.6" height="12" rx="1.1"/>
+    <!-- right plates -->
+    <rect x="16.5" y="6" width="2.6" height="12" rx="1.1"/>
+    <rect x="19.25" y="8.5" width="2.5" height="7" rx="1"/>
+  </g>
+</svg>

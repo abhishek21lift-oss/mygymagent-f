@@ -1,13 +1,18 @@
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync } from "fs"
+import { cpSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
+import sharp from "sharp"
 import {
+  ACCENT_COLOR,
   APP_ID,
   assertForApp,
   decodeGoogleServices,
+  installNotificationResources,
   patchManifest,
   removePlugin,
 } from "../../../scripts/android-push.mjs"
+
+const DENSITIES: Record<string, number> = { mdpi: 24, hdpi: 36, xhdpi: 48, xxhdpi: 72, xxxhdpi: 96 }
 
 /** The manifest `cap add android` generates (Capacitor 8.5.2 template). */
 const TEMPLATE_MANIFEST = `<?xml version="1.0" encoding="utf-8"?>
@@ -95,5 +100,55 @@ describe("android-push build script", () => {
     const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
     expect(pkg.dependencies).toEqual({ "@capacitor/core": "8.5.2" })
     expect(existsSync(pluginDir)).toBe(false)
+  })
+
+  it("sets the monochrome status-bar icon and brand colour, instead of the launcher icon", () => {
+    const out = patchManifest(TEMPLATE_MANIFEST)
+    for (const key of ["default_notification_icon", "default_notification_color"]) {
+      const at = out.indexOf(`com.google.firebase.messaging.${key}"`)
+      expect(at).toBeGreaterThan(-1)
+      expect(at).toBeLessThan(out.indexOf("</application>"))
+    }
+    expect(out).toContain('android:resource="@drawable/ic_stat_notify"')
+    expect(out).toContain('android:resource="@color/push_notification_color"')
+  })
+
+  it("installs the icon at every density and the colour resource", () => {
+    const root = mkdtempSync(join(tmpdir(), "android-res-"))
+    mkdirSync(join(root, "android/app/src/main/res"), { recursive: true })
+    // The real committed assets, via a copy of the repo's assets dir.
+    const repo = join(__dirname, "../../..")
+    cpSync(join(repo, "assets"), join(root, "assets"), { recursive: true })
+
+    installNotificationResources(root)
+
+    for (const density of Object.keys(DENSITIES)) {
+      expect(existsSync(join(root, `android/app/src/main/res/drawable-${density}/ic_stat_notify.png`))).toBe(true)
+    }
+    const colors = readFileSync(join(root, "android/app/src/main/res/values/push_notification_color.xml"), "utf8")
+    expect(colors).toContain(`<color name="push_notification_color">${ACCENT_COLOR}</color>`)
+  })
+
+  it("ships icons Android can draw as a silhouette: right size, transparent, white only", async () => {
+    const repo = join(__dirname, "../../..")
+    for (const [density, px] of Object.entries(DENSITIES)) {
+      const file = join(repo, `assets/android/res/drawable-${density}/ic_stat_notify.png`)
+      const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+      expect([info.width, info.height]).toEqual([px, px])
+      let transparent = 0
+      let visible = 0
+      for (let i = 0; i < data.length; i += 4) {
+        const alpha = data[i + 3]
+        if (alpha === 0) transparent++
+        // Fully drawn pixels must be white: colour is thrown away, and an
+        // opaque background is what turns an icon into a solid disc.
+        if (alpha === 255) {
+          visible++
+          expect([data[i], data[i + 1], data[i + 2]]).toEqual([255, 255, 255])
+        }
+      }
+      expect(transparent).toBeGreaterThan(0)
+      expect(visible).toBeGreaterThan(0)
+    }
   })
 })
