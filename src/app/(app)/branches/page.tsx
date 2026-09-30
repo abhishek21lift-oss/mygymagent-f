@@ -5,8 +5,9 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Building2, Mail, MapPin, Phone, Plus, Sparkles } from "lucide-react";
+import { Building2, Clock, Mail, MapPin, Phone, Plus, Sparkles } from "lucide-react";
 
+import { BranchEditDialog } from "@/components/branches/branch-edit-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHero } from "@/components/shared/page-hero";
 import { ErrorState } from "@/components/shared/error-state";
@@ -34,6 +35,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { useBranches, useCreateBranch } from "@/lib/hooks/use-branches";
 import { BranchDevicesRow } from "./branch-devices-row";
 import { ApiError } from "@/lib/api/client";
+import { readableWeek } from "@/lib/opening-hours";
 import { createBranchSchema, type CreateBranchInput } from "@/lib/validation/gym";
 
 const BRANCH_TOPS = [ "bg-cyan-400", "bg-teal-400", "bg-violet-600",
@@ -61,7 +63,12 @@ function CreateBranchDialog() {
 
  async function onSubmit(values: CreateBranchInput) {
  try {
- await createBranch.mutateAsync(values);
+ // Optional fields left blank are left out: the API reads "" as a
+ // (malformed) email rather than none.
+ const filled = Object.fromEntries(
+ Object.entries(values).filter(([, value]) => typeof value !== "string" || value.trim() !== ""),
+ ) as CreateBranchInput;
+ await createBranch.mutateAsync(filled);
  toast.success("Branch created");
  setOpen(false);
  form.reset();
@@ -247,10 +254,12 @@ export default function BranchesPage() {
  </Badge>
  </div>
  <div className="flex flex-col gap-1.5 px-5 py-5 text-sm font-medium text-stone-600 sm:px-6 dark:text-stone-400">
- {branch.city && <p className="inline-flex items-center gap-2"><MapPin className="size-4 shrink-0 text-cyan-600" aria-hidden="true" />{[branch.city, branch.country].filter(Boolean).join(", ")}</p>}
+ {(branch.addressLine1 || branch.city) && <p className="inline-flex items-start gap-2"><MapPin className="mt-0.5 size-4 shrink-0 text-cyan-600" aria-hidden="true" />{[branch.addressLine1, branch.city, branch.country].filter(Boolean).join(", ")}</p>}
  {branch.phone && <p className="inline-flex items-center gap-2 tabular-nums"><Phone className="size-4 shrink-0 text-cyan-600" aria-hidden="true" />{branch.phone}</p>}
  {branch.email && <p className="inline-flex min-w-0 items-center gap-2"><Mail className="size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span className="truncate">{branch.email}</span></p>}
- {!branch.city && !branch.phone && !branch.email && <p className="text-xs">No contact details yet.</p>}
+ {readableWeek(branch.openingHours).length > 0 && <p className="inline-flex items-start gap-2"><Clock className="mt-0.5 size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span>{readableWeek(branch.openingHours).join(" · ")}</span></p>}
+ {!branch.addressLine1 && !branch.city && !branch.phone && !branch.email && <p className="text-xs">No contact details yet.</p>}
+ {hasPermission("branches.update") && <div className="pt-2"><BranchEditDialog branch={branch} /></div>}
  </div>
  <BranchDevicesRow branchId={branch.id} />
  </article>
