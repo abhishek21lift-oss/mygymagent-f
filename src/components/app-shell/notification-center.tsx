@@ -19,6 +19,7 @@ import {
 } from "@/lib/notifications"
 import { ApiError } from "@/lib/api/client"
 import { cn } from "@/lib/utils"
+import { notificationPath } from "@/lib/notification-links"
 
 const notificationKey = ["notifications"]
 const filters = [
@@ -145,7 +146,7 @@ export function NotificationCenter() {
 
  function openNotification(item: NotificationItem) {
  if (!item.readAt) readMutation.mutate(item.id)
- if (item.actionUrl) { setOpen(false); router.push(item.actionUrl) }
+ if (item.actionUrl) { setOpen(false); router.push(notificationPath(item.actionUrl)) }
  }
  function applySearch(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setAppliedSearch(search.trim()) }
 

@@ -304,7 +304,8 @@ function InboundCard() {
  const inbound = useInboundWhatsApp({ limit: 50, ...(unmatchedOnly ? { matched: false } : {}) })
 
  return (
- <Card className="overflow-hidden border-border bg-card dark:bg-card">
+ // `#inbox` is where a "new WhatsApp message" alert from an unknown number lands.
+ <Card id="inbox" className="scroll-mt-20 overflow-hidden border-border bg-card dark:bg-card">
  <CardHeader className="border-b border-border bg-muted/40">
  <div className="flex flex-wrap items-start justify-between gap-3">
  <div className="flex items-start gap-3">
