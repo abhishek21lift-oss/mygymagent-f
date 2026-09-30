@@ -2,6 +2,7 @@ import * as React from "react";
 import Image from "next/image";
 
 import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC } from "@/lib/brand";
+import { LegalFooter } from "../(legal)/legal-ui";
 
 /**
  * The sign-in canvas.
@@ -49,6 +50,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <p className="text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Secure &middot; Role-based access
         </p>
+        <LegalFooter className="-mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground" />
       </div>
     </main>
   );

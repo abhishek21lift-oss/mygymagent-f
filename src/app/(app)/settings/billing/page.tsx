@@ -1,16 +1,15 @@
 "use client";
 
-import * as React from "react";
-import { CreditCard, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
+import Link from "next/link";
+import { CreditCard, CheckCircle2, MessageCircle } from "lucide-react";
 import { api } from "@/lib/api/client";
+import { LEGAL } from "@/lib/legal";
 import { PageHero } from "@/components/shared/page-hero";
-import { Button } from "@/components/ui/button";
 import { DataState } from "@/components/shared/data-state";
 import { useQuery } from "@tanstack/react-query";
 
 type Plan = { id:string; key:string; name:string; priceMinor:number; currency:string; maxMembers:number|null; maxBranches:number|null; maxStaff:number|null; aiMonthlyRequests:number|null; };
-type Usage = { plan: (Plan & { status:string; planKey:string }) | null; usage:{members:number;branches:number;staff:number} };
+type Usage = { plan: (Plan & { status:string; planKey:string; currentPeriodEnd?:string }) | null; usage:{members:number;branches:number;staff:number} };
 type PlatformInvoice = { id:string; amountMinor:number; currency:string; status:string; periodStart:string; periodEnd:string; paidAt:string|null };
 
 function money(minor:number, currency:string){
@@ -64,14 +63,36 @@ export default function PlatformBillingPage() {
  });
  const plans=q.data?.plans??[];
  const usage=q.data?.usage??null;
- const [busy,setBusy]=React.useState<string|null>(null);
- async function choose(planKey:string){setBusy(planKey);try{await api.post("/platform-billing/subscription",{planKey});toast.success("Plan updated");window.location.reload()}catch(e){toast.error(e instanceof Error?e.message:"Plan update failed")}finally{setBusy(null)}}
  return <main className="space-y-8"><PageHero title="Platform billing" icon={CreditCard} />
   <DataState isLoading={q.isPending} isError={q.isError} onRetry={()=>void q.refetch()} errorMessage="Could not load your plan and usage." isEmpty={plans.length===0} emptyTitle="No plans available" emptyDescription="No subscription plans are configured for this platform yet." skeletonRows={4}>
    <div className="space-y-8">
     <section className="rounded-xl border bg-card p-6 shadow-sm"><h2 className="text-xl font-black">Current usage</h2><div className="mt-4 grid gap-4 grid-cols-2 sm:grid-cols-3">{[["Members",usage?.usage.members,usage?.plan?.maxMembers],["Branches",usage?.usage.branches,usage?.plan?.maxBranches],["Staff",usage?.usage.staff,usage?.plan?.maxStaff]].map(([label,value,max])=><div key={String(label)} className="rounded-lg border p-4"><p className="text-sm text-stone-500">{label}</p><p className="mt-1 text-2xl font-black">{value ?? "—"} <span className="text-sm font-medium text-stone-400">/ {max ?? "∞"}</span></p></div>)}</div></section>
     <InvoiceHistory />
-    <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">{plans.map(p=><div key={p.id} className={`rounded-xl border bg-card p-6 shadow-sm ${usage?.plan?.planKey===p.key?"ring-2 ring-indigo-500":""}`}><h2 className="text-xl font-black">{p.name}</h2><p className="mt-2 text-3xl font-black">{p.priceMinor===0?"Free":`₹${(p.priceMinor/100).toLocaleString()}`}<span className="text-sm font-medium text-stone-500">/mo</span></p><ul className="my-5 space-y-2 text-sm text-stone-600"><li>Up to {p.maxMembers??"unlimited"} members</li><li>{p.maxBranches??"Unlimited"} branches</li><li>{p.maxStaff??"Unlimited"} staff</li><li>{p.aiMonthlyRequests??"Unlimited"} AI requests/month</li></ul><Button className="w-full rounded-lg" disabled={busy!==null||usage?.plan?.planKey===p.key} aria-busy={busy===p.key} onClick={()=>choose(p.key)}>{usage?.plan?.planKey===p.key?<><CheckCircle2 className="mr-2 size-4"/>Current plan</>:busy===p.key?"Updating…":"Choose plan"}</Button></div>)}</section>
+    {/* Plans are shown for comparison, not chosen here. Switching used to be
+        a button that changed the plan with no payment behind it; until
+        self-serve checkout exists, our team sets the plan once it is paid
+        (see mygymagent-b B-P0-16). */}
+    <section aria-labelledby="plans-title" className="space-y-4">
+     <div className="flex flex-col gap-3 rounded-3xl border border-border/60 bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div>
+       <h2 id="plans-title" className="section-title">Plans</h2>
+       <p className="mt-1 text-sm text-muted-foreground">
+        {usage?.plan
+         ? <>You&rsquo;re on <strong className="font-semibold text-foreground">{usage.plan.name}</strong>{usage.plan.currentPeriodEnd ? <>, paid until {new Date(usage.plan.currentPeriodEnd).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</> : null}. To change plan or renew, talk to us.</>
+         : <>To choose a plan or renew, talk to us.</>}
+       </p>
+      </div>
+      <Link href={LEGAL.supportEmail?`mailto:${LEGAL.supportEmail}?subject=${encodeURIComponent("Change my plan")}`:"/contact"} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+       <MessageCircle className="size-4" aria-hidden="true" />
+       Talk to us
+      </Link>
+     </div>
+     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{plans.map(p=>{const current=usage?.plan?.planKey===p.key;return <div key={p.id} className={`rounded-3xl border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6 ${current?"border-primary ring-2 ring-primary/30":"border-border/60"}`}>
+      <div className="flex items-center justify-between gap-2"><h3 className="text-lg font-semibold tracking-tight">{p.name}</h3>{current?<span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary"><CheckCircle2 className="size-3.5" aria-hidden="true"/>Current</span>:null}</div>
+      <p className="mt-2 text-3xl font-semibold tracking-tight">{p.priceMinor===0?"Free":money(p.priceMinor,p.currency)}<span className="text-sm font-medium text-muted-foreground">{p.priceMinor===0?"":"/mo"}</span></p>
+      <ul className="mt-4 space-y-2 text-sm text-muted-foreground"><li>Up to {p.maxMembers??"unlimited"} members</li><li>{p.maxBranches??"Unlimited"} branches</li><li>{p.maxStaff??"Unlimited"} staff</li><li>{p.aiMonthlyRequests??"Unlimited"} AI requests/month</li></ul>
+     </div>})}</div>
+    </section>
    </div>
   </DataState>
  </main>;
