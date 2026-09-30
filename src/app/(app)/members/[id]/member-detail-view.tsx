@@ -62,7 +62,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { useMember, useUpdateMember, useDeleteMember } from "@/lib/hooks/use-members";
 import { useMemberWorkoutHistory } from "@/lib/hooks/use-workout-history";
@@ -86,6 +86,11 @@ import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { ApiError } from "@/lib/api/client";
 import type { MembershipStatus } from "@/lib/types/gym";
 import { useCreatePayment } from "@/lib/hooks/use-payments";
+import {
+ defaultPaymentMembership,
+ membershipIdForPayment,
+ NOT_FOR_MEMBERSHIP,
+} from "@/lib/member-payments";
 import { useQueryClient } from "@tanstack/react-query";
 import {
  DropdownMenu,
@@ -121,6 +126,11 @@ function SellMembershipDialog({ memberId, trigger }: { memberId: string; trigger
 
  const selectedPlan = plansQuery.data?.items.find((p) => p.id === planId);
  const finalPrice = selectedPlan ? Math.max(0, Number(selectedPlan.price) - discount) : null;
+ // The server refuses a discount above the price or below zero; say so here.
+ const discountError =
+ selectedPlan && (discount < 0 || discount > Number(selectedPlan.price))
+ ? `Discount must be between 0 and ${selectedPlan.price}.`
+ : null;
 
  async function handleSell() {
  if (!planId) return;
@@ -194,15 +204,22 @@ function SellMembershipDialog({ memberId, trigger }: { memberId: string; trigger
  step="1"
  value={discount}
  onChange={(e) => setDiscount(Number(e.target.value) || 0)}
+ aria-invalid={discountError ? true : undefined}
+ aria-describedby={discountError ? "sell-discount-error" : undefined}
  className="mt-1"
  />
+ {discountError && (
+ <p id="sell-discount-error" className="mt-1 text-xs font-medium text-destructive">
+ {discountError}
+ </p>
+ )}
  </div>
  </div>
  )}
  <DialogFooter>
  <Button
  onClick={handleSell}
- disabled={!planId || createMembership.isPending}
+ disabled={!planId || Boolean(discountError) || createMembership.isPending}
  >
  {createMembership.isPending ? "Selling..." : "Confirm Sale"}
  </Button>
@@ -249,7 +266,7 @@ function CollectPaymentDialog({
  await createPayment.mutateAsync({
  ...values,
  memberId,
- membershipId: values.membershipId || undefined,
+ membershipId: membershipIdForPayment(values.membershipId),
  });
  toast.success("Payment collected successfully");
  setOpen(false);
@@ -265,7 +282,17 @@ function CollectPaymentDialog({
  open={open}
  onOpenChange={(next) => {
  setOpen(next);
- if (!next) form.reset();
+ // Each opening starts on the membership the payment is most likely for.
+ if (next) {
+ form.reset({
+ amount: 0,
+ method: "CASH",
+ membershipId: defaultPaymentMembership(activeMemberships),
+ note: "",
+ });
+ } else {
+ form.reset();
+ }
  }}
  >
  <DialogTrigger asChild>
@@ -330,8 +357,8 @@ function CollectPaymentDialog({
  name="membershipId"
  render={({ field }) => (
  <FormItem>
- <FormLabel>Membership (optional)</FormLabel>
- <Select value={field.value || ""} onValueChange={field.onChange}>
+ <FormLabel>For</FormLabel>
+ <Select value={field.value || NOT_FOR_MEMBERSHIP} onValueChange={field.onChange}>
  <FormControl>
  <SelectTrigger className="w-full">
  <SelectValue placeholder="Select a membership" />
@@ -344,8 +371,14 @@ function CollectPaymentDialog({
  {m.membershipPlan?.price || "—"}
  </SelectItem>
  ))}
+ <SelectItem value={NOT_FOR_MEMBERSHIP}>
+ Not a membership (PT, product, other)
+ </SelectItem>
  </SelectContent>
  </Select>
+ <FormDescription>
+ A membership payment settles that membership&apos;s invoice.
+ </FormDescription>
  <FormMessage />
  </FormItem>
  )}
