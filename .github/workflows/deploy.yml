@@ -1,42 +1,77 @@
 name: Deploy Frontend
 
 on:
-  push:
-    branches:
-      - main
+  # Only a main commit that passed CI goes live. Deploying on `push` ran
+  # in parallel with CI, so a commit that failed its checks still shipped.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  # Manual redeploy of main's current commit (Actions → Deploy Frontend).
+  workflow_dispatch:
 
 concurrency:
   group: mygymagent-frontend-production
-  cancel-in-progress: true
+  # Never stop a deploy halfway (between build and restart); a newer one
+  # waits its turn instead.
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy Frontend to VPS
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.2
+        env:
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script_stop: true
+          envs: DEPLOY_SHA
+          command_timeout: 25m
           script: |
-            set -e
+            set -eu
 
             cd /opt/thecultclient/mygymagent-f
 
             git fetch origin main
-            git reset --hard origin/main
+            if [ "$(git rev-parse origin/main)" != "$DEPLOY_SHA" ]; then
+              # CI for an older commit finished after a newer one landed:
+              # the newer commit's own deploy ships it once its CI passes.
+              echo "$DEPLOY_SHA is no longer main's latest commit; skipping"
+              exit 0
+            fi
+            git reset --hard "$DEPLOY_SHA"
 
             cd /opt/thecultclient
 
             docker compose build frontend
             docker compose up -d --no-deps --force-recreate frontend
 
-            sleep 10
+            # Wait up to 2 minutes for the server to answer.
+            healthy=0
+            for attempt in $(seq 1 24); do
+              if curl -fsSI --max-time 5 http://127.0.0.1:3200 >/dev/null 2>&1; then
+                healthy=1
+                break
+              fi
+              sleep 5
+            done
 
-            curl -fsSI http://127.0.0.1:3200
+            if [ "$healthy" != 1 ]; then
+              echo "Frontend did not come up; last logs:"
+              docker compose logs --tail=200 frontend || true
+              exit 1
+            fi
 
-            echo "Frontend deployment successful"
+            docker image prune -f >/dev/null 2>&1 || true
+
+            echo "Frontend deployment successful ($DEPLOY_SHA)"
