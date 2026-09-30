@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
 
-export type AutomationChannel = "email" | "sms" | "none"
+export type AutomationChannel = "email" | "whatsapp" | "sms" | "none"
 export type AutomationRunStatus = "SENT" | "SKIPPED" | "FAILED"
 
 export interface AutomationScanner {
@@ -14,6 +14,9 @@ export interface AutomationScanner {
   /** False when the channel this job sends through cannot deliver, which
    * means it can run exactly on time and reach nobody. */
   channelReady: boolean
+  /** True when this reminder currently goes on the gym's own WhatsApp
+   * number instead of email. */
+  viaWhatsapp?: boolean
   nextRunAt: string | null
   lastRunAt: string | null
   lastRunState: "completed" | "failed" | null
@@ -39,7 +42,7 @@ export interface AutomationRunRow {
 
 export interface AutomationOverview {
   windowDays: number
-  channels: { email: boolean; sms: boolean }
+  channels: { email: boolean; sms: boolean; whatsapp?: boolean }
   scanners: AutomationScanner[]
   blockers: AutomationBlocker[]
   recent: AutomationRunRow[]

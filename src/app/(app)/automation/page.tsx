@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { AlertTriangle, Bot, CheckCircle2, Clock, Mail, MessageSquare, Workflow, XCircle } from "lucide-react"
+import { AlertTriangle, Bot, CheckCircle2, Clock, Mail, MessageCircle, MessageSquare, Workflow, XCircle } from "lucide-react"
 
 import { useAuth } from "@/lib/auth/auth-context"
 import {
@@ -60,7 +60,9 @@ function ScannerCard({ scanner, now }: { scanner: AutomationScanner; now: number
       <p className="font-bold leading-tight">{scanner.title}</p>
       <p className="mt-1 text-xs text-muted-foreground">{scanner.description}</p>
      </div>
-     {scanner.channel === "email" ? (
+     {scanner.viaWhatsapp || scanner.channel === "whatsapp" ? (
+      <MessageCircle className="size-4 shrink-0 text-emerald-600" aria-label="Sends on WhatsApp" />
+     ) : scanner.channel === "email" ? (
       <Mail className="size-4 shrink-0 text-muted-foreground" aria-label="Sends email" />
      ) : scanner.channel === "sms" ? (
       <MessageSquare className="size-4 shrink-0 text-muted-foreground" aria-label="Sends SMS" />
@@ -72,6 +74,12 @@ function ScannerCard({ scanner, now }: { scanner: AutomationScanner; now: number
     {/* A chip, not a paragraph: when email is down it is down for every
         reminder, and the banner above already says so in full. Seven
         repeats of the same sentence buried the jobs themselves. */}
+    {scanner.viaWhatsapp && (
+     <span className="inline-flex w-fit items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-500/30 dark:text-emerald-300">
+      <MessageCircle className="size-3" aria-hidden="true" />
+      On WhatsApp · email if no phone
+     </span>
+    )}
     {blocked && (
      <span className="inline-flex w-fit items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[11px] font-bold text-rose-800 ring-1 ring-rose-500/30 dark:text-rose-300">
       <XCircle className="size-3" aria-hidden="true" />
@@ -203,6 +211,7 @@ export default function AutomationPage() {
       <div className="flex flex-wrap items-center gap-2">
        <ChannelPill label="Email" ready={data.channels.email} />
        <ChannelPill label="SMS" ready={data.channels.sms} />
+       {data.channels.whatsapp !== undefined && <ChannelPill label="WhatsApp" ready={data.channels.whatsapp} />}
       </div>
 
       {data.blockers.length > 0 && (
