@@ -158,7 +158,7 @@ export function useDisconnectWhatsAppWeb() {
 export function useUpdateWhatsAppWebSettings() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: { useForSending?: boolean; dailyLimit?: number }) =>
+    mutationFn: (input: { useForSending?: boolean; autoReply?: boolean; dailyLimit?: number }) =>
       api.patch<WhatsAppWebSession>("/whatsapp-web/settings", input),
     onSuccess: (data) => queryClient.setQueryData(WEB_KEY, data),
   })
