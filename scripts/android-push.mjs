@@ -15,12 +15,18 @@
  * disable: removes the push plugin before `cap sync`, so the app reports
  *          push as unavailable instead of offering a button that fails.
  */
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 export const APP_ID = "com.mygymagent.app"
 export const CHANNEL_ID = "general"
+/** assets/android/res/drawable-<density>/ic_stat_notify.png, rendered from the SVG
+ * by scripts/render-android-icon.mjs. */
+export const ICON_NAME = "ic_stat_notify"
+/** --primary from globals.css, as sRGB: tints the icon in the shade. */
+export const ACCENT_COLOR = "#0065D3"
+const COLOR_NAME = "push_notification_color"
 const PLUGIN = "@capacitor/push-notifications"
 
 /** Accepts the file's JSON as-is, or base64 of it (the form that survives
@@ -51,7 +57,10 @@ export function assertForApp(googleServices, appId = APP_ID) {
 /**
  * Android 13+ shows no notification without POST_NOTIFICATIONS, and the
  * plugin does not declare it. The channel meta-data makes FCM use the
- * named channel the app creates, not a generic "Miscellaneous" one.
+ * named channel the app creates, not a generic "Miscellaneous" one. The
+ * icon and colour replace the launcher icon, which Android flattens to a
+ * white disc in the status bar; Firebase reads the same meta-data whether
+ * it draws the notification (app closed) or the plugin does (app open).
  * Idempotent: a second run changes nothing.
  */
 export function patchManifest(xml) {
@@ -61,13 +70,30 @@ export function patchManifest(xml) {
     if (!out.includes("</manifest>")) throw new Error("AndroidManifest.xml has no </manifest>")
     out = out.replace("</manifest>", `    ${permission}\n</manifest>`)
   }
-  const channel = `<meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="${CHANNEL_ID}" />`
-  if (!out.includes("default_notification_channel_id")) {
+  const metaData = [
+    ["default_notification_channel_id", `android:value="${CHANNEL_ID}"`],
+    ["default_notification_icon", `android:resource="@drawable/${ICON_NAME}"`],
+    ["default_notification_color", `android:resource="@color/${COLOR_NAME}"`],
+  ]
+  for (const [key, attribute] of metaData) {
+    if (out.includes(`com.google.firebase.messaging.${key}"`)) continue
     const close = out.lastIndexOf("</application>")
     if (close === -1) throw new Error("AndroidManifest.xml has no </application>")
-    out = `${out.slice(0, close)}    ${channel}\n    ${out.slice(close)}`
+    const tag = `<meta-data android:name="com.google.firebase.messaging.${key}" ${attribute} />`
+    out = `${out.slice(0, close)}    ${tag}\n    ${out.slice(close)}`
   }
   return out
+}
+
+/** The monochrome status-bar icon and its accent colour, as resources. */
+export function installNotificationResources(root) {
+  const res = join(root, "android/app/src/main/res")
+  cpSync(join(root, "assets/android/res"), res, { recursive: true })
+  mkdirSync(join(res, "values"), { recursive: true })
+  writeFileSync(
+    join(res, "values", `${COLOR_NAME}.xml`),
+    `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="${COLOR_NAME}">${ACCENT_COLOR}</color>\n</resources>\n`,
+  )
 }
 
 /** Drops the plugin from what `cap sync` will see. CI-only: edits the
@@ -99,7 +125,8 @@ function main() {
   const manifestPath = join(root, "android/app/src/main/AndroidManifest.xml")
   if (!existsSync(manifestPath)) throw new Error(`${manifestPath} not found -- run cap add android first`)
   writeFileSync(manifestPath, patchManifest(readFileSync(manifestPath, "utf8")))
-  console.log("Push enabled for this build: google-services.json written, manifest patched.")
+  installNotificationResources(root)
+  console.log("Push enabled for this build: google-services.json written, manifest patched, notification icon installed.")
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

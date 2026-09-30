@@ -19,6 +19,7 @@ import {
  Dumbbell,
  UtensilsCrossed,
  User,
+ BellRing,
  Mail,
  Calendar,
  Users,
@@ -2586,6 +2587,13 @@ function TagsPanel({ memberId }: { memberId: string }) {
 }
 
 // -- Communications Panel
+const CHANNEL_LABEL: Record<string, string> = {
+ EMAIL: "Email",
+ WHATSAPP: "WhatsApp",
+ SMS: "SMS",
+ PUSH: "App notification",
+}
+
 function CommunicationsPanel({ memberId }: { memberId: string }) {
  const query = useMemberCommunications(memberId);
  const sendMessage = useSendMemberMessage(memberId);
@@ -2600,7 +2608,8 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  await sendMessage.mutateAsync({
  channel,
  customBody,
- customSubject: channel === "EMAIL" ? customSubject : undefined,
+ // Email's subject, or a push's title (the gym's name when blank).
+ customSubject: channel === "EMAIL" || channel === "PUSH" ? customSubject : undefined,
  });
  toast.success("Message sent");
  setSendOpen(false);
@@ -2644,14 +2653,20 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  <SelectContent>
  <SelectItem value="EMAIL">Email</SelectItem>
  <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+ <SelectItem value="PUSH">App notification</SelectItem>
  </SelectContent>
  </Select>
+ {channel === "PUSH" && (
+ <p className="mt-1.5 text-xs text-muted-foreground">
+ Goes to the member&apos;s phone, if they&apos;ve turned on notifications in the member app.
+ </p>
+ )}
  </div>
- {channel === "EMAIL" && (
+ {(channel === "EMAIL" || channel === "PUSH") && (
  <div>
- <Label className="text-xs">Subject</Label>
+ <Label className="text-xs">{channel === "PUSH" ? "Title (optional)" : "Subject"}</Label>
  <Input
- placeholder="Email subject..."
+ placeholder={channel === "PUSH" ? "Defaults to your gym's name" : "Email subject..."}
  value={customSubject}
  onChange={(e) => setCustomSubject(e.target.value)}
  />
@@ -2681,21 +2696,31 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  <EmptyState
  icon={Mail}
  title="No messages yet"
- description="Send emails or WhatsApp messages to this member."
+ description="Send an email, WhatsApp message or app notification to this member."
  />
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((msg) => (
  <div key={msg.id} className="flex items-start gap-3 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm">
  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
- {msg.channel === "EMAIL" ? <Mail className="size-4" /> : <MessageSquare className="size-4" />}
+ {msg.channel === "EMAIL" ? (
+ <Mail className="size-4" />
+ ) : msg.channel === "PUSH" ? (
+ <BellRing className="size-4" />
+ ) : (
+ <MessageSquare className="size-4" />
+ )}
  </div>
  <div className="min-w-0 flex-1">
  <div className="flex items-center gap-2">
- <p className="text-sm font-medium">{msg.channel}</p>
+ <p className="text-sm font-medium">{CHANNEL_LABEL[msg.channel] ?? msg.channel}</p>
  <Badge variant={statusVariant[msg.status] ?? "outline"}>{msg.status}</Badge>
  </div>
- <p className="mt-1 text-xs text-stone-600">{msg.recipient}</p>
+ {/* A push is logged per device as `device:<id>`; the id means
+ nothing to staff, and the token is never stored. */}
+ <p className="mt-1 text-xs text-stone-600">
+ {msg.recipient.startsWith("device:") ? "Their app" : msg.recipient}
+ </p>
  <p className="mt-1 text-xs text-stone-600">
  {fmtDateTime(msg.createdAt)}
  </p>
