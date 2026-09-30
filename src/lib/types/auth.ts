@@ -29,6 +29,17 @@ export interface Organization {
   currency: string
   parentOrganizationId: string | null
   settings: Record<string, unknown>
+  /** Short-lived link to the gym's logo, or null. Optional: an older API
+   * doesn't send the profile fields. */
+  logoUrl?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  website?: string | null
+  /** Instagram handle, without the "@". */
+  instagram?: string | null
+  /** Sender name and reply-to on the gym's emails to members. */
+  emailFromName?: string | null
+  emailReplyTo?: string | null
   createdAt: string
   updatedAt: string
 }

@@ -1,62 +1,21 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { ArrowRight, Building2, MessageCircle, Settings2, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowRight, Building2, MessageCircle, Settings2, ShieldCheck, Store } from "lucide-react";
 
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
- Form,
- FormControl,
- FormField,
- FormItem,
- FormLabel,
- FormMessage,
-} from "@/components/ui/form";
 import { useAuth } from "@/lib/auth/auth-context";
-import { useOrganization, useUpdateOrganization } from "@/lib/hooks/use-organization";
-import { ApiError } from "@/lib/api/client";
-
-interface OrgSettingsForm {
- name: string;
- timezone: string;
- currency: string;
-}
+import { useOrganization } from "@/lib/hooks/use-organization";
 
 export default function SettingsPage() {
  const { hasPermission } = useAuth();
  const orgQuery = useOrganization();
- const updateOrg = useUpdateOrganization();
  const canEdit = hasPermission("organizations.update");
  const canManageSettings = hasPermission("settings.manage");
-
- const form = useForm<OrgSettingsForm>({ defaultValues: { name: "", timezone: "UTC", currency: "USD" } });
-
- React.useEffect(() => {
- if (orgQuery.data) {
- form.reset({
- name: orgQuery.data.name,
- timezone: orgQuery.data.timezone,
- currency: orgQuery.data.currency,
- });
- }
- }, [orgQuery.data, form]);
-
- async function onSubmit(values: OrgSettingsForm) {
- try {
- await updateOrg.mutateAsync(values);
- toast.success("Organization updated");
- } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Failed to update organization");
- }
- }
 
  return (
  <div className="pb-4">
@@ -88,7 +47,7 @@ export default function SettingsPage() {
  <Building2 className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="settings-org" className="section-title">Organization profile</h2>
+ <h2 id="settings-org" className="section-title">Gym profile</h2>
  </div>
  </div>
  <CardContent className="p-5 sm:p-6">
@@ -99,52 +58,30 @@ export default function SettingsPage() {
  </div>
  ) : orgQuery.isError ? (
  <ErrorState onRetry={() => orgQuery.refetch()} />
+ ) : orgQuery.data ? (
+ <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+ <div className="flex min-w-0 items-center gap-4">
+ <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
+ {orgQuery.data.logoUrl ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img src={orgQuery.data.logoUrl} alt="" className="size-full object-contain" />
  ) : (
- <Form {...form}>
- <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
- <FormField
- control={form.control}
- name="name"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Organization name</FormLabel>
- <FormControl><Input disabled={!canEdit} {...field} className="min-h-11 rounded-xl" /></FormControl>
- <FormMessage />
- </FormItem>
+ <Store className="size-7 text-muted-foreground" aria-hidden="true" />
  )}
- />
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="timezone"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Timezone</FormLabel>
- <FormControl><Input disabled={!canEdit} {...field} className="min-h-11 rounded-xl" /></FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="currency"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Currency</FormLabel>
- <FormControl><Input disabled={!canEdit} {...field} className="min-h-11 rounded-xl" /></FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
  </div>
- {canEdit && (
- <div className="flex justify-end">
- <Button type="submit" disabled={updateOrg.isPending} className="btn-sheen min-h-11 rounded-lg bg-primary">{updateOrg.isPending ? "Saving..." : "Save changes"}</Button>
+ <div className="min-w-0">
+ <p className="truncate text-lg font-semibold tracking-tight">{orgQuery.data.name}</p>
+ <p className="truncate text-sm text-muted-foreground">
+ {[orgQuery.data.contactPhone, orgQuery.data.contactEmail].filter(Boolean).join(" · ") || "Logo, contact details, branches and opening hours"}
+ </p>
+ <p className="text-xs text-muted-foreground">{orgQuery.data.timezone} · {orgQuery.data.currency}</p>
  </div>
- )}
- </form>
- </Form>
- )}
+ </div>
+ <Button asChild className="min-h-11 shrink-0 rounded-lg">
+ <Link href="/settings/profile">{canEdit ? "Edit gym profile" : "View gym profile"} <ArrowRight className="size-4" aria-hidden="true" /></Link>
+ </Button>
+ </div>
+ ) : null}
  </CardContent>
  </Card>
  </section>

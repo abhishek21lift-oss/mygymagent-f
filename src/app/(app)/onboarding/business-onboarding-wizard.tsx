@@ -34,6 +34,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useOrganization, useUpdateOrganization } from "@/lib/hooks/use-organization";
 import { useBranches, useUpdateBranch } from "@/lib/hooks/use-branches";
+import { CURRENCIES, TIMEZONES } from "@/lib/regions";
 import { useAuth } from "@/lib/auth/auth-context";
 import { ApiError } from "@/lib/api/client";
 
@@ -46,34 +47,6 @@ const STEPS = [
  { id: "complete", title: "Complete", description: "You're ready!" },
 ];
 
-const TIMEZONES = [
- { value: "America/New_York", label: "Eastern Time (ET)" },
- { value: "America/Chicago", label: "Central Time (CT)" },
- { value: "America/Denver", label: "Mountain Time (MT)" },
- { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
- { value: "America/Phoenix", label: "Arizona (no DST)" },
- { value: "Pacific/Honolulu", label: "Hawaii Time (HT)" },
- { value: "America/Anchorage", label: "Alaska Time (AKT)" },
- { value: "Europe/London", label: "London (GMT/BST)" },
- { value: "Europe/Paris", label: "Central European (CET)" },
- { value: "Asia/Tokyo", label: "Japan (JST)" },
- { value: "Asia/Kolkata", label: "India (IST)" },
- { value: "Australia/Sydney", label: "Sydney (AEST)" },
- { value: "Asia/Dubai", label: "Dubai (GST)" },
- { value: "Asia/Singapore", label: "Singapore (SGT)" },
-];
-
-const CURRENCIES = [
- { value: "USD", label: "USD ($)", symbol: "$" },
- { value: "EUR", label: "EUR (€)", symbol: "€" },
- { value: "GBP", label: "GBP (£)", symbol: "£" },
- { value: "INR", label: "INR (₹)", symbol: "₹" },
- { value: "AUD", label: "AUD (A$)", symbol: "A$" },
- { value: "CAD", label: "CAD (C$)", symbol: "C$" },
- { value: "SGD", label: "SGD (S$)", symbol: "S$" },
- { value: "AED", label: "AED (د.إ)", symbol: "د.إ" },
- { value: "SAR", label: "SAR (﷼)", symbol: "﷼" },
-];
 
 const BUSINESS_TYPES = [
  { value: "GYM", label: "Fitness Gym" },
@@ -890,12 +863,17 @@ export function BusinessOnboardingWizard() {
  });
 
  if (primaryBranch) {
+ // Every address field the wizard asks for; street, state and PIN
+ // were asked for and then dropped.
  await updateBranch.mutateAsync({
  name: data.branchName,
+ addressLine1: data.branchAddress || undefined,
+ city: data.branchCity || undefined,
+ state: data.branchState || undefined,
+ postalCode: data.branchPostalCode || undefined,
+ country: data.branchCountry || undefined,
  phone: data.branchPhone || undefined,
  email: data.branchEmail || undefined,
- city: data.branchCity || undefined,
- country: data.branchCountry || undefined,
  });
  }
 

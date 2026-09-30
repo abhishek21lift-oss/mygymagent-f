@@ -1,3 +1,5 @@
+import type { OpeningSlot } from "@/lib/opening-hours"
+
 export type CommunicationChannel = "EMAIL" | "WHATSAPP" | "SMS" | "PUSH"
 
 export interface Branch {
@@ -15,6 +17,9 @@ export interface Branch {
   state: string | null
   postalCode: string | null
   country: string | null
+  /** Directions link for members. */
+  mapsUrl?: string | null
+  openingHours?: OpeningSlot[] | null
   createdAt: string
   updatedAt: string
 }
