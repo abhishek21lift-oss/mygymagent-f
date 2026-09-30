@@ -324,9 +324,9 @@ function Connected({ session, canManage }: { session: WhatsAppWebSession; canMan
           <span>
             <span className="block font-medium text-foreground">Auto-reply to members</span>
             <span className="block text-xs leading-5 text-muted-foreground">
-              When a member messages PLANS, CLASSES, MY PLAN, CONTACT or HI, they get an instant answer from your plans, class
-              schedule and their membership. Other questions get &ldquo;our team will reply soon&rdquo; and stay in the inbox for you.
-              {!session.useForSending && " Works while messages are sent from this number."}
+              When a member messages this number with PLANS, TIMINGS, CLASSES, MY PLAN, CONTACT or HI, they get an instant answer
+              from your plans, hours, class schedule and their membership. Other questions get &ldquo;our team will reply soon&rdquo;
+              and stay in the inbox for you. Replies always come from this number, even if reminders go through the official setup.
             </span>
           </span>
           <Switch
