@@ -76,6 +76,111 @@ export const inviteStaffSchema = z.object({
 })
 export type InviteStaffInput = z.infer<typeof inviteStaffSchema>
 
+/**
+ * The Add staff form. One schema for all three ways in, with the rules
+ * each one adds checked against the chosen `access`: an email to sign in
+ * with, a password when one is set now, and neither when there is no app
+ * access (the server refuses an email then -- see `toAddStaffPayload`).
+ */
+export const addStaffSchema = z
+  .object({
+    firstName: z.string().trim().min(1, "First name is required").max(80),
+    lastName: z.string().trim().min(1, "Last name is required").max(80),
+    phone: z
+      .string()
+      .trim()
+      .max(20)
+      .regex(/^[+\d][\d\s-]{6,}$/, "Enter a valid phone number")
+      .optional()
+      .or(z.literal("")),
+    jobTitle: z.string().trim().max(80).optional().or(z.literal("")),
+    isTrainer: z.boolean(),
+    specializations: z.array(z.string().trim().min(1).max(40)).max(12),
+    primaryBranchId: z.string().min(1, "Pick a branch"),
+    roleKey: z.string().min(1, "Pick a role"),
+    allBranches: z.boolean(),
+    access: z.enum(["INVITE", "PASSWORD", "NONE"]),
+    email: z.string().trim().optional().or(z.literal("")),
+    password: z.string().optional().or(z.literal("")),
+    salaryType: z.enum(["NONE", "MONTHLY", "DAILY", "HOURLY"]),
+    salaryAmount: z.string().trim().optional().or(z.literal("")),
+    employeeCode: z.string().trim().max(60).optional().or(z.literal("")),
+    hireDate: z.string().optional().or(z.literal("")),
+  })
+  .superRefine((values, ctx) => {
+    if (values.access !== "NONE") {
+      if (!values.email || !z.string().email().safeParse(values.email).success) {
+        ctx.addIssue({ code: "custom", path: ["email"], message: "Enter a valid email address" })
+      }
+    }
+    if (values.access === "PASSWORD" && (values.password ?? "").length < 10) {
+      ctx.addIssue({ code: "custom", path: ["password"], message: "Use at least 10 characters" })
+    }
+    if (values.salaryType !== "NONE") {
+      const amount = Number(values.salaryAmount)
+      if (!values.salaryAmount || !Number.isFinite(amount) || amount <= 0) {
+        ctx.addIssue({ code: "custom", path: ["salaryAmount"], message: "Enter an amount above 0" })
+      } else if (!/^\d+(\.\d{1,2})?$/.test(values.salaryAmount)) {
+        ctx.addIssue({ code: "custom", path: ["salaryAmount"], message: "Up to 2 decimal places" })
+      }
+    }
+  })
+export type AddStaffValues = z.infer<typeof addStaffSchema>
+
+/** What `POST /users` takes. */
+export interface AddStaffPayload {
+  access: "INVITE" | "PASSWORD" | "NONE"
+  email?: string
+  password?: string
+  firstName: string
+  lastName: string
+  phone?: string
+  primaryBranchId: string
+  roleKey: string
+  roleBranchId?: string
+  jobTitle?: string
+  isTrainer: boolean
+  specializations?: string[]
+  employeeCode?: string
+  hireDate?: string
+  pay?: {
+    salaryType: "MONTHLY" | "DAILY" | "HOURLY"
+    baseSalary?: number
+    hourlyRate?: number
+  }
+}
+
+/** Form values to the request: empty strings dropped, the email left out
+ * when there is no app access, and the amount put on the rate the salary
+ * type pays by. `canSetPay` is `hr.manage`: without it no pay is sent,
+ * since the server would refuse the whole request. */
+export function toAddStaffPayload(values: AddStaffValues, canSetPay: boolean): AddStaffPayload {
+  const text = (value: string | undefined) => (value && value.trim() ? value.trim() : undefined)
+  const amount = Number(values.salaryAmount)
+  return {
+    access: values.access,
+    email: values.access === "NONE" ? undefined : text(values.email)?.toLowerCase(),
+    password: values.access === "PASSWORD" ? values.password : undefined,
+    firstName: values.firstName.trim(),
+    lastName: values.lastName.trim(),
+    phone: text(values.phone),
+    primaryBranchId: values.primaryBranchId,
+    roleKey: values.roleKey,
+    roleBranchId: values.allBranches ? undefined : values.primaryBranchId,
+    jobTitle: text(values.jobTitle),
+    isTrainer: values.isTrainer,
+    specializations: values.isTrainer && values.specializations.length ? values.specializations : undefined,
+    employeeCode: canSetPay ? text(values.employeeCode) : undefined,
+    hireDate: canSetPay ? text(values.hireDate) : undefined,
+    pay:
+      canSetPay && values.salaryType !== "NONE"
+        ? values.salaryType === "HOURLY"
+          ? { salaryType: "HOURLY", hourlyRate: amount }
+          : { salaryType: values.salaryType, baseSalary: amount }
+        : undefined,
+  }
+}
+
 export const checkInSchema = z.object({
   branchId: z.string().min(1, "Branch is required"),
   memberId: z.string().optional(),
