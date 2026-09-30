@@ -231,7 +231,7 @@ function StepHeading({ icon: Icon, tile, title, subtitle }: { icon: typeof Build
  <div className={`mb-4 inline-flex size-14 items-center justify-center rounded-lg text-white shadow-lg ${tile}`}>
  <Icon className="size-6" aria-hidden="true" />
  </div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{title}</h2>
+ <h2 className="section-title">{title}</h2>
  <p className="mt-2 text-sm font-medium text-stone-600">{subtitle}</p>
  </div>
  );

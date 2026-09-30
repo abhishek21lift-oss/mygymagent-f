@@ -51,7 +51,7 @@ function CheckInForm() {
  return (
  <section aria-labelledby="attendance-checkin" className="overflow-hidden rounded-lg border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
- <h2 id="attendance-checkin" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Manual check-in</h2>
+ <h2 id="attendance-checkin" className="section-title">Manual check-in</h2>
  </div>
  <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:p-6">
  <div className="flex-1">
@@ -247,7 +247,7 @@ export default function AttendancePage() {
 
  <section aria-labelledby="attendance-log" className="overflow-hidden rounded-lg border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
- <h2 id="attendance-log" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Visit log</h2>
+ <h2 id="attendance-log" className="section-title">Visit log</h2>
  </div>
  <div className="p-4 sm:p-5">
  <DataTable

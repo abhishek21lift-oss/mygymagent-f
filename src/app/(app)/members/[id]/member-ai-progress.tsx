@@ -32,14 +32,14 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
  }
 
  return (
- <Card className="overflow-hidden rounded-xl border-border bg-card">
- <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-border px-4 py-2.5 sm:px-5">
+ <Card className="panel-premium overflow-hidden rounded-3xl border-border/60 bg-card">
+ <CardHeader data-slot="panel-header" className="flex flex-row items-start justify-between gap-4 border-b border-border/60 px-5 py-3.5 [.border-b]:pb-3.5">
  <div className="flex items-start gap-3">
  <div>
- <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">
+ <CardTitle className="section-title">
  AI workout progress
  </CardTitle>
- <p className="mt-0.5 text-xs font-medium text-stone-600">
+ <p className="mt-0.5 text-xs text-muted-foreground">
  Evidence-based analysis from verified workout execution data.
  </p>
  </div>

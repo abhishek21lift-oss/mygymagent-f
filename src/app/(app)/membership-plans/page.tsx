@@ -179,7 +179,7 @@ export default function MembershipPlansPage() {
  <section aria-labelledby="plans-grid-title" className="">
  <div className="mb-4 flex items-end justify-between gap-4">
  <div>
- <h2 id="plans-grid-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">All plans</h2>
+ <h2 id="plans-grid-title" className="section-title">All plans</h2>
  </div>
  {!plansQuery.isLoading && !plansQuery.isError && plansQuery.data && plansQuery.data.items.length > 0 && (
  <span className="rounded-full bg-emerald-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-emerald-500/20">{plansQuery.data.items.length}</span>

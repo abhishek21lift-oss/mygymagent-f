@@ -302,7 +302,7 @@ export default function PayrollPage() {
    <section className="overflow-hidden rounded-lg border border-border bg-card">
    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
    <div className="min-w-0">
-   <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Create payroll run</h2>
+   <h2 className="section-title">Create payroll run</h2>
    <p className="mt-0.5 text-xs text-muted-foreground">
    Staff is selected server-side from the active organization and branch scope.
    </p>

@@ -6,27 +6,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
- ArrowLeft,
+ BadgeCheck,
  CalendarCheck,
+ Flame,
+ HeartPulse,
+ MessageCircle,
  Dumbbell,
- Heart,
- MapPin,
  Phone,
  PlayCircle,
  Plus,
  Snowflake,
  Sparkles,
- Target,
  TrendingUp,
  Wallet,
  XCircle,
  Activity,
- Clock,
- AlertCircle,
  CheckCircle2,
- Users,
- BarChart3,
- Shield,
  Pencil,
  IndianRupee,
  MoreHorizontal,
@@ -37,14 +32,11 @@ import {
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/shared/error-state";
-import { PageHero } from "@/components/shared/page-hero";
 import { ExerciseHistoryPanel } from "./exercise-history-panel";
 import { RiskRecommendationsPanel } from "./risk-recommendations-panel";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
  Dialog,
@@ -67,7 +59,6 @@ import {
  SelectTrigger,
  SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -104,17 +95,21 @@ import {
  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createPaymentSchema, type CreatePaymentInput } from "@/lib/validation/gym";
+import { formatMoney } from "@/lib/money";
+import type { Accent } from "@/lib/section-accent";
+import { cn } from "@/lib/utils";
+import {
+ GlanceTile,
+ ProfileSection,
+ QuickAction,
+ StatusPill,
+ TermRing,
+ accentVars,
+ surfaceClass,
+} from "./member-profile-parts";
+import { initials, netPaid, termProgress, visitStreak, visitSummary } from "./member-profile-stats";
 
-const MEMBERSHIP_STATUS_VARIANT: Record<MembershipStatus, "default" | "secondary" | "destructive" | "warning"> = {
- PENDING: "secondary",
- ACTIVE: "default",
- FROZEN: "warning",
- PAUSED: "secondary",
- EXPIRED: "destructive",
- CANCELLED: "secondary",
-};
-
-function SellMembershipDialog({ memberId }: { memberId: string }) {
+function SellMembershipDialog({ memberId, trigger }: { memberId: string; trigger?: React.ReactNode }) {
  const [open, setOpen] = React.useState(false);
  const [planId, setPlanId] = React.useState("");
  const [discount, setDiscount] = React.useState(0);
@@ -144,10 +139,12 @@ function SellMembershipDialog({ memberId }: { memberId: string }) {
  return (
  <Dialog open={open} onOpenChange={setOpen}>
  <DialogTrigger asChild>
+ {trigger ?? (
  <Button size="sm" className="btn-sheen min-h-11 rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" aria-hidden="true" />
  Sell Membership
  </Button>
+ )}
  </DialogTrigger>
  <DialogContent className="border-border bg-card">
  <DialogHeader>
@@ -215,8 +212,10 @@ function SellMembershipDialog({ memberId }: { memberId: string }) {
 function CollectPaymentDialog({
  memberId,
  memberships,
+ trigger,
 }: {
  memberId: string;
+ trigger?: React.ReactNode;
  memberships: Array<{
  id: string;
  status: string;
@@ -267,10 +266,12 @@ function CollectPaymentDialog({
  }}
  >
  <DialogTrigger asChild>
+ {trigger ?? (
  <Button size="sm" className="min-h-11 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <IndianRupee className="size-3.5" aria-hidden="true" />
  Collect Payment
  </Button>
+ )}
  </DialogTrigger>
  <DialogContent className="border-border bg-card">
  <DialogHeader>
@@ -408,13 +409,13 @@ function MembershipActions({
  const live = status === "ACTIVE" || status === "FROZEN";
 
  return (
- <div className="flex flex-wrap gap-2">
+ <div className="grid auto-cols-fr grid-flow-col gap-2">
  {status === "ACTIVE" && (
  <Button
  variant="outline"
  size="sm"
  onClick={() => setFreezeOpen(true)}
- className="min-h-11 rounded-lg"
+ className="min-h-11 rounded-2xl"
  >
  <Snowflake className="size-3.5" />
  Freeze
@@ -427,7 +428,7 @@ function MembershipActions({
  size="sm"
  disabled={resume.isPending}
  onClick={() => handle(resume.mutateAsync(membershipId), "Membership resumed")}
- className="min-h-11 rounded-lg"
+ className="min-h-11 rounded-2xl"
  >
  <PlayCircle className="size-3.5" />
  Resume
@@ -441,7 +442,7 @@ function MembershipActions({
  size="sm"
  disabled={renew.isPending}
  onClick={() => handle(renew.mutateAsync({ id: membershipId }), "Membership renewed")}
- className="min-h-11 rounded-lg"
+ className="min-h-11 rounded-2xl"
  >
  <Sparkles className="size-3.5" />
  Renew
@@ -450,7 +451,7 @@ function MembershipActions({
  variant="outline"
  size="sm"
  onClick={() => setCancelOpen(true)}
- className="rounded-xl text-destructive hover:text-destructive"
+ className="min-h-11 rounded-2xl text-destructive hover:text-destructive"
  >
  <XCircle className="size-3.5" />
  Cancel
@@ -619,186 +620,14 @@ function ProgressStat({
  color?: string;
 }) {
  return (
- <div className="group relative overflow-hidden rounded-xl border border-stone-200/70 bg-card p-4 transition-all duration-200 hover:-translate-y-px hover:shadow-md">
- <div className="relative">
+ <div className="rounded-2xl bg-muted/50 p-4">
+ <div>
  <Icon className={`size-5 ${color}`} aria-hidden="true" />
- <p className="mt-3 font-mono text-xl font-black tabular-nums text-stone-950">{value}</p>
- <p className="mt-0.5 text-xs font-medium text-stone-600">
+ <p className="mt-3 text-xl font-semibold tracking-tight tabular-nums text-foreground">{value}</p>
+ <p className="mt-0.5 text-xs font-medium text-muted-foreground">
  {label}
  </p>
  </div>
- </div>
- );
-}
-
-function AttendanceStats({ memberId }: { memberId: string }) {
- const { data: attendance, isLoading } = useMemberAttendance(memberId);
-
- if (isLoading) return <Skeleton className="h-16 w-full rounded-xl" />;
-
- if (!attendance || attendance.length === 0)
- return (
- <p className="text-sm font-medium text-stone-600">No attendance records</p>
- );
-
- const thisMonth = attendance.filter((a) => {
- const date = new Date(a.checkInAt);
- const now = new Date();
- return (
- date.getMonth() === now.getMonth() &&
- date.getFullYear() === now.getFullYear()
- );
- }).length;
-
- const last30Days = attendance.filter((a) => {
- const date = new Date(a.checkInAt);
- const now = new Date();
- const diff = now.getTime() - date.getTime();
- return diff <= 30 * 24 * 60 * 60 * 1000;
- }).length;
-
- const streak = calculateStreak(attendance.map((a) => a.checkInAt));
-
- return (
- <div className="flex flex-wrap gap-2.5">
- <div className="flex items-center gap-2 rounded-lg border border-emerald-200/70 bg-emerald-50/70 px-3 py-2">
- <CalendarCheck className="size-4 text-emerald-600" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">{thisMonth}</span>
- <span className="text-xs font-medium text-stone-600">this month</span>
- </div>
- <div className="flex items-center gap-2 rounded-lg border border-cyan-200/70 bg-cyan-50/70 px-3 py-2">
- <Clock className="size-4 text-cyan-700" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">{last30Days}</span>
- <span className="text-xs font-medium text-stone-600">last 30 days</span>
- </div>
- <div className="flex items-center gap-2 rounded-lg border border-violet-200/70 bg-violet-50/70 px-3 py-2">
- <Sparkles className="size-4 text-violet-600" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">{streak}</span>
- <span className="text-xs font-medium text-stone-600">day streak</span>
- </div>
- </div>
- );
-}
-
-function calculateStreak(dates: string[]): number {
- if (!dates.length) return 0;
-
- const sorted = [...dates]
- .map((d) => new Date(d).toDateString())
- .filter((v, i, a) => a.indexOf(v) === i)
- .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
- let streak = 0;
- let current = new Date();
-
- for (const date of sorted) {
- const d = new Date(date);
- const diff = Math.floor(
- (current.getTime() - d.getTime()) / (24 * 60 * 60 * 1000)
- );
- if (diff <= 1) {
- streak++;
- current = d;
- } else {
- break;
- }
- }
-
- return streak;
-}
-
-function PaymentSummary({ memberId }: { memberId: string }) {
- const { data: payments, isLoading } = useMemberPayments(memberId);
-
- if (isLoading) return <Skeleton className="h-16 w-full rounded-xl" />;
-
- if (!payments || payments.length === 0)
- return <p className="text-sm font-medium text-stone-600">No payments recorded</p>;
-
- const total = payments.reduce((sum, p) => sum + Number(p.amount), 0);
- const paid = payments.filter((p) => p.status === "COMPLETED").length;
- const refunded = payments.filter((p) => p.status === "REFUNDED").length;
-
- return (
- <div className="flex flex-wrap gap-2.5">
- <div className="flex items-center gap-2 rounded-lg border border-emerald-200/70 bg-emerald-50/70 px-3 py-2">
- <Wallet className="size-4 text-emerald-600" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">
- {payments[0]?.currency || "USD"} {total.toLocaleString()}
- </span>
- <span className="text-xs font-medium text-stone-600">total paid</span>
- </div>
- <div className="flex items-center gap-2 rounded-lg border border-cyan-200/70 bg-cyan-50/70 px-3 py-2">
- <CheckCircle2 className="size-4 text-cyan-700" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">{paid}</span>
- <span className="text-xs font-medium text-stone-600">completed</span>
- </div>
- {refunded > 0 && (
- <div className="flex items-center gap-2 rounded-lg border border-amber-200/70 bg-amber-50/70 px-3 py-2">
- <AlertCircle className="size-4 text-amber-600" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">{refunded}</span>
- <span className="text-xs font-medium text-stone-600">refunded</span>
- </div>
- )}
- </div>
- );
-}
-
-function HealthOverview({ memberId }: { memberId: string }) {
- const { data: screenings, isLoading: screeningLoading } =
- useMemberScreenings(memberId);
- const { data: measurements, isLoading: measurementLoading } =
- useMemberMeasurements(memberId);
- const { data: goals, isLoading: goalsLoading } = useMemberGoals(memberId);
-
- if (screeningLoading || measurementLoading || goalsLoading)
- return <Skeleton className="h-16 w-full rounded-xl" />;
-
- const latestScreening = screenings?.[0];
- const latestMeasurement = measurements
- ? [...measurements].sort(
- (a, b) =>
- new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
- )[0]
- : null;
- const activeGoals = goals?.filter((g) => g.status === "ACTIVE").length ?? 0;
-
- const hasHealthConcerns = latestScreening?.responses
- ? Object.values(latestScreening.responses).some((v) => v === true)
- : false;
-
- return (
- <div className="flex flex-wrap gap-2.5">
- {latestMeasurement && (
- <div className="flex items-center gap-2 rounded-lg border border-violet-200/70 bg-violet-50/70 px-3 py-2">
- <BarChart3 className="size-4 text-violet-600" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">
- {latestMeasurement.weightKg ?? "—"}{" "}
- {latestMeasurement.weightKg ? "kg" : ""}
- </span>
- <span className="text-xs font-medium text-stone-600">weight</span>
- </div>
- )}
- {activeGoals > 0 && (
- <div className="flex items-center gap-2 rounded-lg border border-emerald-200/70 bg-emerald-50/70 px-3 py-2">
- <Target className="size-4 text-emerald-600" aria-hidden="true" />
- <span className="font-mono text-sm font-black tabular-nums text-stone-900">{activeGoals}</span>
- <span className="text-xs font-medium text-stone-600">active goals</span>
- </div>
- )}
- {hasHealthConcerns || latestScreening?.flaggedForMedicalClearance ? (
- <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
- <AlertCircle className="size-4 text-amber-600" aria-hidden="true" />
- <span className="text-sm font-bold text-amber-800">
- Medical attention
- </span>
- </div>
- ) : (
- <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
- <Shield className="size-4 text-emerald-600" aria-hidden="true" />
- <span className="text-sm font-bold text-emerald-700">Cleared</span>
- </div>
- )}
  </div>
  );
 }
@@ -1307,28 +1136,52 @@ interface MemberWithMemberships {
  } | null;
 }
 
-function MemberHeader({
+
+type MembershipSummary = MemberWithMemberships["memberships"][number];
+
+const HUES: readonly Accent[] = ["blue", "violet", "rose", "emerald", "amber", "cyan", "indigo", "orange"];
+
+/** A colour of the member's own, as iOS gives each contact -- stable for a
+ * given member, so the same person always wears the same hue. */
+function memberHue(id: string): Accent {
+ let hash = 0;
+ for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
+ return HUES[Math.abs(hash) % HUES.length];
+}
+
+function statusAccent(status: string): Accent {
+ if (status === "ACTIVE") return "emerald";
+ if (status === "FROZEN") return "cyan";
+ if (status === "INACTIVE" || status === "PENDING") return "amber";
+ return "rose";
+}
+
+function membershipAccent(membership: MembershipSummary, daysLeft: number | null): Accent {
+ if (membership.status === "FROZEN") return "cyan";
+ if (daysLeft === null || daysLeft > 7) return "emerald";
+ return daysLeft > 0 ? "amber" : "rose";
+}
+
+function titleCase(value: string): string {
+ return value.charAt(0) + value.slice(1).toLowerCase().replace(/_/g, " ");
+}
+
+function formatDate(iso: string, withYear = true): string {
+ return new Date(iso).toLocaleDateString(undefined, {
+ day: "numeric",
+ month: "short",
+ ...(withYear ? { year: "numeric" } : {}),
+ });
+}
+
+function MemberHero({
  member,
  activeMembership,
  daysLeft,
- allMemberships,
 }: {
  member: MemberWithMemberships;
- activeMembership: {
- id: string;
- status: string;
- startDate: string;
- endDate: string;
- membershipPlan?: { id: string; name: string; price: string };
- } | undefined;
+ activeMembership: MembershipSummary | undefined;
  daysLeft: number | null;
- allMemberships: Array<{
- id: string;
- status: string;
- startDate: string;
- endDate: string;
- membershipPlan?: { id: string; name: string; price: string };
- }>;
 }) {
  const router = useRouter();
  const { hasPermission } = useAuth();
@@ -1346,68 +1199,114 @@ function MemberHeader({
  }
  }
 
+ const hue = memberHue(member.id);
+ const phone = member.phone?.trim() || null;
+ const email = member.email?.trim() || null;
+ const meta = [
+ `#${member.memberCode}`,
+ `Joined ${new Date(member.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}`,
+ member.assignedTrainer ? `Coach ${member.assignedTrainer.firstName}` : null,
+ ].filter(Boolean);
+
  return (
- <PageHero
- id="member-title"
- icon={Users}
- title={
- <>
- {member?.firstName} {member?.lastName}
- </>
- }
- actions={
- <>
- {activeMembership && (
- <MembershipActions
- membershipId={activeMembership.id}
- status={activeMembership.status as MembershipStatus}
+ <section
+ aria-labelledby="member-title"
+ style={accentVars(hue)}
+ className={cn(surfaceClass, "relative isolate overflow-hidden")}
+ >
+ {/* The member's colour, as a band across the top of the card. The
+ highlight is what makes it read as glass rather than a flat fill. */}
+ <div
+ aria-hidden="true"
+ className="h-24 sm:h-28"
+ style={{ backgroundImage: "radial-gradient(90% 160% at 100% 0%, var(--t) 0%, transparent 60%), linear-gradient(135deg, var(--t-g1), var(--t-g2))" }}
+ >
+ <div className="size-full bg-[radial-gradient(70%_130%_at_15%_0%,rgb(255_255_255/0.32),transparent_60%)]" />
+ </div>
+
+ <div className="px-4 pb-5 sm:px-6 sm:pb-6">
+ <div className="-mt-12 flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left">
+ <div className="relative shrink-0">
+ <div
+ className="flex size-24 items-center justify-center rounded-full text-[34px] font-semibold tracking-tight text-white shadow-lg shadow-black/15 ring-4 ring-card"
+ style={{ backgroundImage: "linear-gradient(160deg, var(--t), var(--t-g1))" }}
+ aria-hidden="true"
+ >
+ {initials(member.firstName, member.lastName)}
+ </div>
+ <span
+ aria-hidden="true"
+ style={accentVars(statusAccent(member.status))}
+ className="absolute bottom-1 right-1 size-5 rounded-full bg-[var(--t)] ring-[3px] ring-card"
  />
+ </div>
+ <div className="min-w-0 flex-1 sm:pt-[3.75rem]">
+ <h1 id="member-title" className="truncate text-[26px] font-semibold leading-tight tracking-tight text-foreground sm:text-[30px]">
+ {member.firstName} {member.lastName}
+ </h1>
+ <p className="mt-1 text-sm text-muted-foreground">{meta.join(" · ")}</p>
+ <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+ <StatusPill accent={statusAccent(member.status)}>{titleCase(member.status)}</StatusPill>
+ {activeMembership ? (
+ <StatusPill accent={membershipAccent(activeMembership, daysLeft)}>
+ {activeMembership.membershipPlan?.name ?? "Membership"}
+ {daysLeft !== null ? ` · ${daysLeft}d left` : null}
+ </StatusPill>
+ ) : (
+ <StatusPill accent="amber">No active membership</StatusPill>
  )}
- <SellMembershipDialog memberId={member?.id ?? ""} />
- <CollectPaymentDialog
- memberId={member?.id ?? ""}
- memberships={allMemberships}
+ </div>
+ </div>
+ </div>
+
+ <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+ <div className="flex justify-center gap-1 sm:justify-start" role="group" aria-label="Contact and manage">
+ <QuickAction
+ accent="emerald"
+ icon={Phone}
+ label="Call"
+ href={phone ? `tel:${phone}` : undefined}
+ disabled={!phone}
+ disabledReason="no phone number"
+ />
+ <QuickAction
+ accent="blue"
+ icon={MessageCircle}
+ label="Text"
+ href={phone ? `sms:${phone}` : undefined}
+ disabled={!phone}
+ disabledReason="no phone number"
+ />
+ <QuickAction
+ accent="violet"
+ icon={Mail}
+ label="Email"
+ href={email ? `mailto:${email}` : undefined}
+ disabled={!email}
+ disabledReason="no email address"
  />
  <EditMemberDialog member={member}>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <Pencil className="size-3.5" aria-hidden="true" />
- Edit
- </Button>
+ <QuickAction accent="amber" icon={Pencil} label="Edit" />
  </EditMemberDialog>
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <MoreHorizontal className="size-3.5" aria-hidden="true" />
- More
- </Button>
+ <QuickAction accent="indigo" icon={MoreHorizontal} label="More" aria-label="More actions" />
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end">
- <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
+ <DropdownMenuLabel>Member actions</DropdownMenuLabel>
  <DropdownMenuSeparator />
  <DropdownMenuItem
  onClick={async () => {
- await navigator.clipboard.writeText(member?.memberCode ?? "");
- toast.success("Member code copied!");
+ try {
+ await navigator.clipboard.writeText(member.memberCode);
+ toast.success("Member code copied");
+ } catch {
+ toast.error("Couldn't copy -- your browser blocked clipboard access");
+ }
  }}
  >
- <Copy className="size-3.5 mr-2" />
- Copy Member Code
- </DropdownMenuItem>
- <DropdownMenuItem
- onClick={() => {
- window.open(`tel:${member?.phone ?? ""}`, "_self");
- }}
- >
- <Phone className="size-3.5 mr-2" />
- Call Member
- </DropdownMenuItem>
- <DropdownMenuItem
- onClick={() => {
- window.open(`mailto:${member?.email ?? ""}`, "_self");
- }}
- >
- <Mail className="size-3.5 mr-2" />
- Email Member
+ <Copy className="mr-2 size-3.5" />
+ Copy member code
  </DropdownMenuItem>
  {hasPermission("members.delete") && (
  <>
@@ -1416,57 +1315,40 @@ function MemberHeader({
  onClick={() => setDeleteOpen(true)}
  className="text-destructive focus:text-destructive"
  >
- <Trash2 className="size-3.5 mr-2" />
- Delete Member
+ <Trash2 className="mr-2 size-3.5" />
+ Delete member
  </DropdownMenuItem>
  </>
  )}
  </DropdownMenuContent>
  </DropdownMenu>
- </>
- }
+ </div>
+
+ <div className="grid grid-cols-2 gap-2 sm:flex">
+ <CollectPaymentDialog
+ memberId={member.id}
+ memberships={member.memberships}
+ trigger={
+ <Button
+ style={accentVars("emerald")}
+ className="h-12 rounded-2xl px-5 text-[15px] font-semibold text-white shadow-md shadow-emerald-900/10 transition active:scale-[0.98] [background-image:linear-gradient(135deg,var(--t-g1),var(--t-g2))] hover:brightness-110"
  >
- <div className="flex flex-wrap items-center gap-2">
- <Badge
- variant={
- member?.status === "ACTIVE"
- ? "default"
- : member?.status === "FROZEN"
- ? "warning"
- : "secondary"
+ <IndianRupee className="size-4" aria-hidden="true" />
+ Collect
+ </Button>
  }
- className={`rounded-full px-2.5 py-1 text-xs font-black tracking-widest ring-1 ${
- member?.status === "ACTIVE"
- ? "bg-emerald-500/10 text-emerald-700 ring-emerald-200/70"
- : member?.status === "FROZEN"
- ? "bg-cyan-500/10 text-cyan-800 ring-cyan-200/70"
- : member?.status === "INACTIVE"
- ? "bg-amber-500/15 text-amber-800 ring-amber-200/70"
- : "bg-rose-500/10 text-rose-700 ring-rose-200/70"
- }`}
- >
- {member?.status}
- </Badge>
- {activeMembership ? (
- <span className="inline-flex items-center gap-2 rounded-full border border-stone-200/70 bg-card px-3 py-1.5 text-xs font-bold text-stone-700">
- {activeMembership.membershipPlan?.name || "Plan"}
- <Badge
- variant={
- MEMBERSHIP_STATUS_VARIANT[activeMembership.status as MembershipStatus] || "secondary"
+ />
+ <SellMembershipDialog
+ memberId={member.id}
+ trigger={
+ <Button className="h-12 rounded-2xl px-5 text-[15px] font-semibold shadow-md shadow-primary/15 transition active:scale-[0.98]">
+ <Plus className="size-4" aria-hidden="true" />
+ Sell plan
+ </Button>
  }
- className="rounded-full"
- >
- {activeMembership.status}
- </Badge>
- {daysLeft !== null && (
- <span className={`font-mono tabular-nums ${daysLeft <= 7 ? "text-amber-700" : "text-emerald-600"}`}>
- {daysLeft}d left
- </span>
- )}
- </span>
- ) : (
- <span className="text-xs font-semibold text-stone-500">No active membership</span>
- )}
+ />
+ </div>
+ </div>
  </div>
 
  <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -1474,7 +1356,7 @@ function MemberHeader({
  <DialogHeader>
  <DialogTitle>Delete member</DialogTitle>
  </DialogHeader>
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  {member.firstName} {member.lastName} will be marked inactive and removed from active
  member views. Their membership, payment, and activity history is preserved and this
  can be reversed by support if needed.
@@ -1489,91 +1371,200 @@ function MemberHeader({
  </DialogFooter>
  </DialogContent>
  </Dialog>
- </PageHero>
+ </section>
  );
 }
 
-function QuickStatsRow({ memberId }: { memberId: string }) {
+function MembershipCard({
+ member,
+ activeMembership,
+ daysLeft,
+ now,
+}: {
+ member: MemberWithMemberships;
+ activeMembership: MembershipSummary | undefined;
+ daysLeft: number | null;
+ now: number;
+}) {
+ const lastEnded = activeMembership
+ ? undefined
+ : [...member.memberships].sort((a, b) => b.endDate.localeCompare(a.endDate))[0];
+ const accent = activeMembership ? membershipAccent(activeMembership, daysLeft) : "amber";
+
  return (
- <section aria-label="Member quick stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
- <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-emerald-400" aria-hidden="true" />
- <CardContent className="flex items-center gap-4 p-5">
- <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110">
- <Dumbbell className="size-6" aria-hidden="true" />
- </div>
+ <ProfileSection
+ id="membership-title"
+ title="Membership"
+ icon={BadgeCheck}
+ accent={accent}
+ action={
+ activeMembership ? (
+ <StatusPill accent={accent}>{titleCase(activeMembership.status)}</StatusPill>
+ ) : null
+ }
+ >
+ {activeMembership ? (
+ <>
+ <div className="flex items-center gap-5">
+ <TermRing
+ accent={accent}
+ daysLeft={daysLeft ?? 0}
+ remaining={1 - termProgress(activeMembership.startDate, activeMembership.endDate, now)}
+ />
  <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Workout</p>
- <div className="mt-2"><WorkoutProgress memberId={memberId} /></div>
- {/* Directly under the session totals: those say how much work was
- done, this says whether it is getting heavier -- which is the
- question logging sets exists to answer, and had no surface. */}
- <div className="mt-4"><ExerciseHistoryPanel memberId={memberId} /></div>
- {/* The engine scored this member, explained the score and proposed
- actions, and none of it was reachable -- no recompute, no reason,
- and no way to execute or dismiss a single proposed action. */}
- <div className="mt-4"><RiskRecommendationsPanel memberId={memberId} /></div>
- </div>
- </CardContent>
- </Card>
-
- <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-cyan-400" aria-hidden="true" />
- <CardContent className="flex items-center gap-4 p-5">
- <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 transition-transform duration-300 group-hover:scale-110">
- <CalendarCheck className="size-6" aria-hidden="true" />
- </div>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">
- Attendance
+ <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+ {activeMembership.membershipPlan?.name ?? "Membership"}
  </p>
- <div className="mt-2"><AttendanceStats memberId={memberId} /></div>
+ <dl className="mt-2 space-y-1 text-sm">
+ <div className="flex justify-between gap-3">
+ <dt className="text-muted-foreground">Started</dt>
+ <dd className="font-medium tabular-nums text-foreground">{formatDate(activeMembership.startDate)}</dd>
  </div>
- </CardContent>
- </Card>
-
- <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-violet-600" aria-hidden="true" />
- <CardContent className="flex items-center gap-4 p-5">
- <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/30 transition-transform duration-300 group-hover:scale-110">
- <Wallet className="size-6" aria-hidden="true" />
+ <div className="flex justify-between gap-3">
+ <dt className="text-muted-foreground">Ends</dt>
+ <dd className="font-medium tabular-nums text-foreground">{formatDate(activeMembership.endDate)}</dd>
  </div>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">
- Payments
+ </dl>
+ </div>
+ </div>
+ <div className="mt-5">
+ <MembershipActions
+ membershipId={activeMembership.id}
+ status={activeMembership.status as MembershipStatus}
+ />
+ </div>
+ </>
+ ) : (
+ <div className="text-center">
+ <p className="font-medium text-foreground">No active membership</p>
+ <p className="mt-1 text-sm text-muted-foreground">
+ {lastEnded
+ ? `${lastEnded.membershipPlan?.name ?? "Last plan"} ended ${formatDate(lastEnded.endDate)}.`
+ : "Sell a plan to get them started."}
  </p>
- <div className="mt-2"><PaymentSummary memberId={memberId} /></div>
+ <div className="mt-4">
+ <SellMembershipDialog
+ memberId={member.id}
+ trigger={
+ <Button className="h-11 w-full rounded-2xl font-semibold">
+ <Plus className="size-4" aria-hidden="true" />
+ Sell a plan
+ </Button>
+ }
+ />
  </div>
- </CardContent>
- </Card>
+ </div>
+ )}
+ {member.memberships.length > 1 ? (
+ <p className="mt-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+ {member.memberships.length} memberships on record -- see the Memberships tab below.
+ </p>
+ ) : null}
+ </ProfileSection>
+ );
+}
 
- <Card className="group relative overflow-hidden border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1">
- <span className="absolute inset-x-0 top-0 h-1.5 bg-amber-400" aria-hidden="true" />
- <CardContent className="flex items-center gap-4 p-5">
- <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-300 group-hover:scale-110">
- <Heart className="size-6" aria-hidden="true" />
- </div>
- <div className="min-w-0 flex-1">
- <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Health</p>
- <div className="mt-2"><HealthOverview memberId={memberId} /></div>
- </div>
- </CardContent>
- </Card>
+function GlanceRow({ memberId }: { memberId: string }) {
+ const attendance = useMemberAttendance(memberId);
+ const payments = useMemberPayments(memberId);
+ const screenings = useMemberScreenings(memberId);
+ const measurements = useMemberMeasurements(memberId);
+ const goals = useMemberGoals(memberId);
+ const [now] = React.useState(() => new Date());
+
+ const checkIns = (attendance.data ?? []).map((row) => row.checkInAt);
+ const visits = visitSummary(checkIns, now);
+ const streak = visitStreak(checkIns, now);
+ const lastVisit = checkIns.reduce<string | null>((latest, iso) => (!latest || iso > latest ? iso : latest), null);
+ const paid = netPaid(payments.data ?? []);
+
+ const latestScreening = screenings.data?.[0];
+ const flagged = latestScreening
+ ? latestScreening.flaggedForMedicalClearance ||
+ Object.values(latestScreening.responses ?? {}).some((answer) => answer === true)
+ : false;
+ const latestWeight = [...(measurements.data ?? [])]
+ .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))
+ .find((row) => row.weightKg != null)?.weightKg;
+ const activeGoals = goals.data?.filter((goal) => goal.status === "ACTIVE").length ?? 0;
+ const healthCaption = [
+ latestWeight != null ? `${latestWeight} kg` : null,
+ activeGoals ? `${activeGoals} active goal${activeGoals === 1 ? "" : "s"}` : null,
+ ].filter(Boolean).join(" · ");
+
+ return (
+ <section aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+ <GlanceTile
+ accent="cyan"
+ icon={CalendarCheck}
+ label="Visits"
+ isLoading={attendance.isLoading}
+ value={attendance.isError ? "—" : visits.thisMonth}
+ caption={attendance.isError ? "Couldn't load visits" : `This month · ${visits.last30Days} in 30 days`}
+ />
+ <GlanceTile
+ accent="orange"
+ icon={Flame}
+ label="Streak"
+ isLoading={attendance.isLoading}
+ value={attendance.isError ? "—" : `${streak} ${streak === 1 ? "day" : "days"}`}
+ caption={
+ attendance.isError
+ ? "Couldn't load visits"
+ : lastVisit
+ ? `Last visit ${formatDate(lastVisit, false)}`
+ : "No visits yet"
+ }
+ />
+ <GlanceTile
+ accent="emerald"
+ icon={Wallet}
+ label="Paid"
+ isLoading={payments.isLoading}
+ value={payments.isError ? "—" : paid.currency ? formatMoney(paid.amount, paid.currency, { whole: true }) : "—"}
+ caption={
+ payments.isError
+ ? "Couldn't load payments"
+ : paid.completed + paid.refunded === 0
+ ? "No payments yet"
+ : [
+ `${paid.completed} payment${paid.completed === 1 ? "" : "s"}`,
+ paid.refunded ? `${paid.refunded} refunded` : null,
+ ].filter(Boolean).join(" · ")
+ }
+ />
+ <GlanceTile
+ accent={flagged ? "rose" : "blue"}
+ icon={HeartPulse}
+ label="Health"
+ isLoading={screenings.isLoading || measurements.isLoading || goals.isLoading}
+ value={screenings.isError || !latestScreening ? "—" : flagged ? "Flagged" : "Cleared"}
+ caption={
+ screenings.isError
+ ? "Couldn't load screening"
+ : !latestScreening
+ ? "Not screened yet"
+ : healthCaption || (flagged ? "Needs medical clearance" : `Screened ${formatDate(latestScreening.completedAt, false)}`)
+ }
+ />
  </section>
  );
 }
 
 export function MemberDetailView({ memberId }: { memberId: string }) {
- const router = useRouter();
  const memberQuery = useMember(memberId);
  const [now] = React.useState(() => Date.now());
 
  if (memberQuery.isLoading)
  return (
- <div className="flex flex-col gap-4">
- <Skeleton className="h-8 w-64" />
- <Skeleton className="h-48 w-full rounded-xl" />
- <Skeleton className="h-32 w-full" />
+ <div className="flex flex-col gap-4" aria-busy="true" aria-label="Loading member">
+ <Skeleton className="h-[292px] w-full rounded-3xl sm:h-[236px]" />
+ <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+ {[0, 1, 2, 3].map((i) => (
+ <Skeleton key={i} className="h-[122px] rounded-3xl" />
+ ))}
+ </div>
+ <Skeleton className="h-64 w-full rounded-3xl" />
  </div>
  );
 
@@ -1590,57 +1581,45 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  (m) => m.status === "ACTIVE" || m.status === "FROZEN"
  );
  const daysLeft = activeMembership
- ? Math.max(
- 0,
- Math.ceil(
- (new Date(activeMembership.endDate).getTime() - now) / 86400000
- )
- )
+ ? Math.max(0, Math.ceil((new Date(activeMembership.endDate).getTime() - now) / 86400000))
  : null;
 
  return (
- <div className="flex flex-col gap-8">
- {/* Back button */}
- <Button
- variant="ghost"
- size="sm"
- className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl px-2 font-bold text-stone-600 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
- onClick={() => router.push("/members")}
- >
- <ArrowLeft className="size-4" aria-hidden="true" />
- Back to members
- </Button>
+ // Mobile first: one column, in the order a front desk needs it -- who,
+ // how they're doing, their plan, then the detail. From lg the plan and
+ // access cards move into a side column beside training.
+ <div className="flex flex-col gap-4 pt-2 sm:gap-5 lg:gap-6">
+ <MemberHero member={member} activeMembership={activeMembership} daysLeft={daysLeft} />
 
- {/* Sticky Header */}
- <MemberHeader
- member={member}
- activeMembership={activeMembership}
- daysLeft={daysLeft}
- allMemberships={member.memberships}
- />
+ <GlanceRow memberId={memberId} />
 
- {/* Quick Stats */}
- <QuickStatsRow memberId={memberId} />
-
+ <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)] lg:gap-6">
+ <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:gap-6">
+ <MembershipCard member={member} activeMembership={activeMembership} daysLeft={daysLeft} now={now} />
  {/* Every credential that opens the door, in one place */}
  <EntryAccessCard memberId={memberId} branchId={member.primaryBranchId} />
-
  {/* Whether this member can sign in to the app at all */}
  <PortalAccessCard member={member} />
+ </div>
 
- {/* AI Progress Card */}
- <Card className="overflow-hidden rounded-xl border-border bg-card p-0">
- <CardContent className="p-0">
+ <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:gap-6">
+ <ProfileSection id="training-title" title="Training" icon={Dumbbell} accent="violet">
+ <WorkoutProgress memberId={memberId} />
+ {/* Directly under the session totals: those say how much work was
+ done, this says whether it is getting heavier. */}
+ <div className="mt-4">
+ <ExerciseHistoryPanel memberId={memberId} />
+ </div>
+ </ProfileSection>
+ {/* The engine's risk score, its reasons, and the actions it proposes. */}
+ <RiskRecommendationsPanel memberId={memberId} />
  <MemberAiProgress memberId={memberId} />
- </CardContent>
- </Card>
+ </div>
+ </div>
 
- {/* Tabbed Content */}
- <Card className="overflow-hidden rounded-xl border-border bg-card">
- <CardContent className="p-4 sm:p-6">
+ <section aria-label="Member records" className={cn(surfaceClass, "p-3 sm:p-6")}>
  <Member360Tabs memberId={memberId} />
- </CardContent>
- </Card>
+ </section>
  </div>
  );
 }

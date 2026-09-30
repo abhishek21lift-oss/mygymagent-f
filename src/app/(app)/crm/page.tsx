@@ -713,7 +713,7 @@ export default function CrmPage() {
  <div>
  <h2
  id="crm-pipeline"
- className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground"
+ className="section-title"
  >
  Conversion pipeline
  </h2>
@@ -745,7 +745,7 @@ export default function CrmPage() {
  <section className="grid gap-5">
  <div className="overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 className="section-title">
  Leads
  </h2>
  {sla.data && (

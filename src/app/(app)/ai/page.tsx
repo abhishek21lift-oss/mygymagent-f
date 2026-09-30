@@ -115,14 +115,14 @@ export default function AiPage() {
  </CardContent>
  </Card>
  ) : (
- <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+ <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
  <section aria-label="Conversation" className="flex min-h-[480px] flex-col overflow-hidden rounded-xl border border-border bg-card">
  <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-4">
  <span className="flex size-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md">
  <Sparkles className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Conversation</h2>
+ <h2 className="section-title">Conversation</h2>
  </div>
  {chat.isPending && <span className="ml-auto rounded-full bg-violet-500/10 px-3 py-1 text-xs font-black text-violet-700">THINKING…</span>}
  </div>
@@ -230,7 +230,7 @@ export default function AiPage() {
  type="button"
  variant="outline"
  onClick={() => void handleSend(tip)}
- className="h-auto min-h-11 w-full justify-between rounded-lg px-4 py-3 text-left text-xs"
+ className="h-auto min-h-11 w-full justify-between whitespace-normal rounded-lg px-4 py-3 text-left text-xs"
  >
  {tip}
  <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />

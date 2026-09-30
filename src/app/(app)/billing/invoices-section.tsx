@@ -161,7 +161,7 @@ export function InvoicesSectionHeader() {
  return (
  <div className="flex items-center gap-3">
  <div>
- <h2 id="billing-activity" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Invoices</h2>
+ <h2 id="billing-activity" className="section-title">Invoices</h2>
  </div>
  </div>
  );

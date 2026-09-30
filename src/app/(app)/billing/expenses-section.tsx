@@ -145,7 +145,7 @@ export function ExpensesSection() {
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-emerald-950/40 dark:via-stone-950 dark:to-amber-950/20">
  <div className="flex items-center gap-3">
  <div>
- <h2 id="expenses-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Expenses</h2>
+ <h2 id="expenses-title" className="section-title">Expenses</h2>
  <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Rent, salaries, utilities and everything the gym spends.</p>
  </div>
  </div>

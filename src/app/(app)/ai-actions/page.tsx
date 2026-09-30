@@ -71,7 +71,7 @@ export default function AiActionsPage() {
  <Zap className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="aia-queue" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Approval queue</h2>
+ <h2 id="aia-queue" className="section-title">Approval queue</h2>
  </div>
  </div>
  <div className="grid gap-4">

@@ -527,7 +527,7 @@ export default function CommandCenterPage() {
  <section aria-labelledby="cc-pulse" className="">
  <div className="mb-4 flex items-end justify-between gap-4">
  <div>
- <h2 id="cc-pulse" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 id="cc-pulse" className="section-title">
  Business pulse
  </h2>
  </div>
@@ -587,7 +587,7 @@ export default function CommandCenterPage() {
  <Zap className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="cc-decisions" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 id="cc-decisions" className="section-title">
  Decision queue
  </h2>
  </div>
@@ -680,7 +680,7 @@ export default function CommandCenterPage() {
  <CreditCard className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="cc-money" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 id="cc-money" className="section-title">
  Money movement
  </h2>
  {data ? (
@@ -877,7 +877,7 @@ export default function CommandCenterPage() {
  <Zap className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="cc-fast" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+ <h2 id="cc-fast" className="section-title">
  Move faster
  </h2>
  </div>

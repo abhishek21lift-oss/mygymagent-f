@@ -252,7 +252,7 @@ export default function WorkoutsPage() {
  <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm shadow-rose-900/5">
  <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="min-w-0">
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Workout plans</h2>
+ <h2 className="section-title">Workout plans</h2>
  </div>
  </div>
  <CardContent className="p-4">
@@ -286,7 +286,7 @@ export default function WorkoutsPage() {
  <Card className="overflow-hidden rounded-xl border-border bg-card shadow-lg">
  <div className="flex items-start gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div>
- <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Recent assignments</h2>
+ <h2 className="section-title">Recent assignments</h2>
  </div>
  </div>
  <CardContent className="space-y-3 p-4">

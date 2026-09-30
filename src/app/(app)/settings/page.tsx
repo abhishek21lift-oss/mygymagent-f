@@ -88,7 +88,7 @@ export default function SettingsPage() {
  <Building2 className="size-5" aria-hidden="true" />
  </span>
  <div>
- <h2 id="settings-org" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Organization profile</h2>
+ <h2 id="settings-org" className="section-title">Organization profile</h2>
  </div>
  </div>
  <CardContent className="p-5 sm:p-6">

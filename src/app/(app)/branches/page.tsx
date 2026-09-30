@@ -210,7 +210,7 @@ export default function BranchesPage() {
  <section aria-labelledby="branches-grid-title" className="">
  <div className="mb-4 flex items-end justify-between gap-4">
  <div>
- <h2 id="branches-grid-title" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">All locations</h2>
+ <h2 id="branches-grid-title" className="section-title">All locations</h2>
  </div>
  {!branchesQuery.isLoading && !branchesQuery.isError && branchesQuery.data && branchesQuery.data.items.length > 0 && (
  <span className="rounded-full bg-cyan-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-cyan-500/20">{branchesQuery.data.items.length}</span>
