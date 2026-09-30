@@ -33,12 +33,18 @@ export interface StaffProfile {
   bio: string | null
   commissionRate: string | null
   hireDate: string | null
+  branchId?: string | null
+  payrollEnabled?: boolean
+  salaryType?: "MONTHLY" | "DAILY" | "HOURLY" | null
+  baseSalary?: string | null
+  hourlyRate?: string | null
 }
 
 export interface StaffUser {
   id: string
   organizationId: string
-  email: string
+  /** Null for staff added without app access. */
+  email: string | null
   firstName: string
   lastName: string
   phone: string | null
@@ -49,6 +55,20 @@ export interface StaffUser {
   createdAt: string
   staffProfile: StaffProfile | null
   userRoles: { id: string; role: { id: string; key: string; name: string }; branchId: string | null }[]
+  /** Whether a password is set -- what separates someone who can sign in
+   * from someone whose invite is still out. Absent on older API builds. */
+  hasPassword?: boolean
+}
+
+/** How a staff member stands with the app, from the fields the API sends. */
+export type StaffAccessState = "SIGNED_IN" | "INVITE_PENDING" | "NO_ACCESS" | "OFF"
+
+export interface StaffStats {
+  total: number
+  active: number
+  invited: number
+  noAccess: number
+  trainers: number
 }
 
 export type Gender = "MALE" | "FEMALE" | "OTHER" | "UNDISCLOSED"

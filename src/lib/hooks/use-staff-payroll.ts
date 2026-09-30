@@ -15,7 +15,7 @@ export interface StaffPayroll {
   salaryType: SalaryType | null
   baseSalary: string | null
   hourlyRate: string | null
-  user: { id: string; firstName: string; lastName: string; email: string }
+  user: { id: string; firstName: string; lastName: string; email: string | null }
 }
 
 export const STAFF_PAYROLL_KEY = "hr-payroll-staff"

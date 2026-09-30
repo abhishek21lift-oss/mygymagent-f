@@ -2,313 +2,231 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Plus, Sparkles, UserX, Users } from "lucide-react";
+import { CalendarCheck, Dumbbell, KeyRound, MailCheck, UserRoundX, Users, type LucideIcon } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
 import { PageHero } from "@/components/shared/page-hero";
-import { BranchSelect } from "@/components/shared/branch-select";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import {
- Dialog,
- DialogContent,
- DialogFooter,
- DialogHeader,
- DialogTitle,
- DialogTrigger,
-} from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
- Form,
- FormControl,
- FormField,
- FormItem,
- FormLabel,
- FormMessage,
-} from "@/components/ui/form";
 import { useAuth } from "@/lib/auth/auth-context";
-import { useAssignableRoles, useStaff, useInviteStaff, useDeactivateStaff } from "@/lib/hooks/use-staff";
-import { ManageRolesDialog } from "./manage-roles-dialog";
-import { ApiError } from "@/lib/api/client";
-import { inviteStaffSchema, type InviteStaffInput } from "@/lib/validation/gym";
+import { staffAccessState, useStaff, useStaffStats } from "@/lib/hooks/use-staff";
+import type { Accent } from "@/lib/section-accent";
 import type { StaffUser } from "@/lib/types/gym";
+import { cn } from "@/lib/utils";
+import { AddStaffDialog } from "./add-staff-dialog";
+import { ManageRolesDialog } from "./manage-roles-dialog";
+import { StaffRowActions } from "./staff-row-actions";
+import { AccessBadge, RolePill, StaffAvatar, accentVars } from "./staff-visuals";
 
-
-function InviteStaffDialog() {
- const [open, setOpen] = React.useState(false);
- const inviteStaff = useInviteStaff();
- // Was a hardcoded list in this file, which could drift from the catalogue
- // the server validates `roleKey` against -- a key on one side and not the
- // other is a 400 the operator has no way to explain.
- const roles = useAssignableRoles(open);
-
- const form = useForm<InviteStaffInput>({
- resolver: zodResolver(inviteStaffSchema),
- defaultValues: {
- email: "",
- firstName: "",
- lastName: "",
- phone: "",
- primaryBranchId: "",
- roleKey: "STAFF",
- jobTitle: "",
- isTrainer: false,
- },
- });
-
- async function onSubmit(values: InviteStaffInput) {
- try {
- await inviteStaff.mutateAsync(values);
- toast.success("Invitation sent");
- setOpen(false);
- form.reset();
- } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Failed to invite staff member");
- }
- }
-
- return (
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>
- <Button className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <Plus className="size-4" aria-hidden="true" />
- Invite staff
- </Button>
- </DialogTrigger>
- <DialogContent>
- <DialogHeader>
- <DialogTitle>Invite a staff member</DialogTitle>
- </DialogHeader>
- <Form {...form}>
- <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="firstName"
- render={({ field }) => (
- <FormItem>
- <FormLabel>First name</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="lastName"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Last name</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </div>
- <FormField
- control={form.control}
- name="email"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Email</FormLabel>
- <FormControl>
- <Input type="email" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="primaryBranchId"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Branch</FormLabel>
- <FormControl>
- <BranchSelect value={field.value} onChange={field.onChange} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="roleKey"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Role</FormLabel>
- <Select value={field.value} onValueChange={field.onChange}>
- <FormControl>
- <SelectTrigger className="w-full">
- <SelectValue />
- </SelectTrigger>
- </FormControl>
- <SelectContent>
- {(roles.data ?? []).map((role) => (
- <SelectItem key={role.key} value={role.key}>
- {role.name}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="isTrainer"
- render={({ field }) => (
- <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
- <FormLabel className="mb-0">This person is a trainer</FormLabel>
- <FormControl>
- <Switch checked={field.value} onCheckedChange={field.onChange} />
- </FormControl>
- </FormItem>
- )}
- />
- <DialogFooter>
- <Button type="submit" className="w-full sm:w-auto" disabled={inviteStaff.isPending}>
- {inviteStaff.isPending ? "Sending invite..." : "Send invite"}
- </Button>
- </DialogFooter>
- </form>
- </Form>
- </DialogContent>
- </Dialog>
- );
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  accent,
+  loading,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number | undefined;
+  accent: Accent;
+  loading: boolean;
+}) {
+  return (
+    <div
+      style={accentVars(accent)}
+      className="relative overflow-hidden rounded-2xl border bg-card p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none"
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-6 -top-8 size-24 rounded-full opacity-25 blur-2xl"
+        style={{ backgroundImage: "linear-gradient(135deg, var(--tone-grad-1), var(--tone-grad-2))" }}
+      />
+      <div className="relative flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex size-10 items-center justify-center rounded-xl shadow-sm"
+          style={{ backgroundImage: "linear-gradient(135deg, var(--tone-grad-1), var(--tone-grad-2))", color: "var(--tone-on)" }}
+        >
+          <Icon className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold leading-tight text-muted-foreground">{label}</p>
+          {loading ? (
+            <span className="mt-1 block h-6 w-10 animate-pulse rounded bg-muted" />
+          ) : (
+            <p className="text-2xl font-bold tabular-nums tracking-tight">{value ?? 0}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function useColumns(canManage: boolean, canManageRoles: boolean): ColumnDef<StaffUser>[] {
- const deactivate = useDeactivateStaff();
+function useColumns(perms: {
+  canUpdate: boolean;
+  canInvite: boolean;
+  canDeactivate: boolean;
+  canManageRoles: boolean;
+}): ColumnDef<StaffUser>[] {
+  return React.useMemo(() => {
+    const columns: ColumnDef<StaffUser>[] = [
+      {
+        header: "Name",
+        accessorKey: "firstName",
+        cell: ({ row }) => {
+          const user = row.original;
+          const profile = user.staffProfile;
+          return (
+            <div className="flex min-w-0 items-center gap-3">
+              <StaffAvatar firstName={user.firstName} lastName={user.lastName} seed={user.id} />
+              <div className="flex min-w-0 flex-col">
+                <span className="flex items-center gap-1.5 truncate font-semibold text-foreground">
+                  {user.firstName} {user.lastName}
+                  {profile?.isTrainer && (
+                    <span style={accentVars("emerald")} title="Trainer" className="text-[var(--tone-ink)]">
+                      <Dumbbell className="size-3.5" aria-hidden="true" />
+                      <span className="sr-only">Trainer</span>
+                    </span>
+                  )}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {[profile?.jobTitle, user.email ?? user.phone].filter(Boolean).join(" · ") || "—"}
+                </span>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        header: "Role",
+        accessorKey: "userRoles",
+        cell: ({ row }) => (
+          <div className="flex flex-wrap gap-1">
+            {row.original.userRoles.length ? (
+              row.original.userRoles.map((ur) => <RolePill key={ur.id} roleKey={ur.role.key} name={ur.role.name} />)
+            ) : (
+              <span className="text-xs text-muted-foreground">No role</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        header: "App access",
+        accessorKey: "status",
+        cell: ({ row }) => <AccessBadge state={staffAccessState(row.original)} />,
+      },
+    ];
 
- const base: ColumnDef<StaffUser>[] = [
- {
- header: "Name",
- accessorKey: "firstName",
- cell: ({ row }) => (
- <div className="flex items-center gap-3">
- <div className="flex min-w-0 flex-col">
- <span className="truncate font-bold text-stone-900 dark:text-stone-100">
- {row.original.firstName} {row.original.lastName}
- </span>
- <span className="truncate text-xs font-medium text-stone-600 dark:text-stone-400">{row.original.email}</span>
- </div>
- </div>
- ),
- },
- {
- header: "Roles",
- accessorKey: "userRoles",
- cell: ({ row }) => (
- <div className="flex flex-wrap gap-1">
- {row.original.userRoles.map((ur) => (
- <Badge key={ur.id} variant="secondary" className="rounded-full bg-cyan-500/10 text-cyan-800 ring-1 ring-cyan-200/60">
- {ur.role.name}
- </Badge>
- ))}
- </div>
- ),
- },
- {
- header: "Status",
- accessorKey: "status",
- cell: ({ row }) => (
- <Badge variant={row.original.status === "ACTIVE" ? "default" : "secondary"} className={row.original.status === "ACTIVE" ? "rounded-full bg-emerald-500 text-white shadow-sm" : "rounded-full"}>
- {row.original.status}
- </Badge>
- ),
- },
- ];
-
- // Deactivating is users.delete; changing a grant is users.manage_roles.
- // The column shows if either applies, and each control gates itself.
- if (canManage || canManageRoles) {
- base.push({
- id: "actions",
- header: "",
- cell: ({ row }) => (
- <div className="flex items-center justify-end gap-1">
- {canManageRoles && <ManageRolesDialog user={row.original} />}
- {canManage && row.original.status !== "DISABLED" && (
- <Button
- variant="ghost"
- size="sm"
- className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
- disabled={deactivate.isPending}
- onClick={() =>
- deactivate
- .mutateAsync(row.original.id)
- .then(() => toast.success("Staff member deactivated"))
- .catch((e) => toast.error(e instanceof ApiError ? e.message : "Failed to deactivate"))
- }
- >
- <UserX className="size-3.5" aria-hidden="true" />
- Deactivate
- </Button>
- )}
- </div>
- ),
- });
- }
-
- return base;
+    if (perms.canUpdate || perms.canInvite || perms.canDeactivate || perms.canManageRoles) {
+      columns.push({
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <StaffRowActions
+            user={row.original}
+            canUpdate={perms.canUpdate}
+            canInvite={perms.canInvite}
+            canDeactivate={perms.canDeactivate && row.original.status !== "DISABLED"}
+            rolesSlot={perms.canManageRoles ? <ManageRolesDialog user={row.original} /> : undefined}
+          />
+        ),
+      });
+    }
+    return columns;
+  }, [perms.canUpdate, perms.canInvite, perms.canDeactivate, perms.canManageRoles]);
 }
 
 export default function StaffPage() {
- const { hasPermission } = useAuth();
- const [page, setPage] = React.useState(1);
- const staffQuery = useStaff({ page, pageSize: 20 });
- const canManage = hasPermission("users.delete");
- const canManageRoles = hasPermission("users.manage_roles");
- const columns = useColumns(canManage, canManageRoles);
+  const { hasPermission } = useAuth();
+  const [page, setPage] = React.useState(1);
+  const [search, setSearch] = React.useState("");
+  const [query, setQuery] = React.useState("");
 
- return (
- <div className="pb-4">
- <div className="flex flex-col gap-5">
- <PageHero
- id="staff-title"
- icon={Users}
- title="Staff"
- actions={
- <>
- {hasPermission("users.create") && <InviteStaffDialog />}
- <Link href="/attendance" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <Sparkles className="size-4" aria-hidden="true" /> Attendance
- </Link>
- </>
- }
- />
+  // Typing shouldn't fire a request per key.
+  React.useEffect(() => {
+    const id = window.setTimeout(() => {
+      setQuery(search.trim());
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [search]);
 
- <section aria-labelledby="staff-roster" className="overflow-hidden rounded-lg border border-border bg-card">
- <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
- <h2 id="staff-roster" className="section-title">Team roster</h2>
- </div>
- <div className="p-4 sm:p-5">
- <DataTable
- columns={columns}
- data={staffQuery.data}
- isLoading={staffQuery.isLoading}
- isError={staffQuery.isError}
- onRetry={() => staffQuery.refetch()}
- page={page}
- onPageChange={setPage}
- emptyTitle="No staff yet"
- emptyDescription="Invite your first team member."
- />
- </div>
- </section>
- </div>
- </div>
- );
+  const staffQuery = useStaff({ page, pageSize: 20, ...(query ? { search: query } : {}) });
+  const stats = useStaffStats();
+  const canCreate = hasPermission("users.create");
+  const columns = useColumns({
+    canUpdate: hasPermission("users.update"),
+    canInvite: canCreate,
+    canDeactivate: hasPermission("users.delete"),
+    canManageRoles: hasPermission("users.manage_roles"),
+  });
+
+  const tiles: { icon: LucideIcon; label: string; value: number | undefined; accent: Accent }[] = [
+    { icon: Users, label: "Team", value: stats.data?.total, accent: "violet" },
+    { icon: KeyRound, label: "Can sign in", value: stats.data?.active, accent: "emerald" },
+    { icon: MailCheck, label: "Invite pending", value: stats.data?.invited, accent: "amber" },
+    { icon: Dumbbell, label: "Trainers", value: stats.data?.trainers, accent: "blue" },
+    { icon: UserRoundX, label: "No app access", value: stats.data?.noAccess, accent: "rose" },
+  ];
+
+  return (
+    <div className="pb-4">
+      <div className="flex flex-col gap-5">
+        <PageHero
+          id="staff-title"
+          icon={Users}
+          title="Staff"
+          description="Your team, their roles and how they sign in."
+          actions={
+            <>
+              {canCreate && <AddStaffDialog />}
+              <Link
+                href="/attendance"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border/80 bg-card px-5 text-sm font-semibold shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transform-none"
+              >
+                <CalendarCheck className="size-4" aria-hidden="true" /> Attendance
+              </Link>
+            </>
+          }
+        />
+
+        {!stats.isError && (
+          <section aria-label="Team at a glance" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {tiles.map((tile, i) => (
+              <div key={tile.label} className={cn(i === tiles.length - 1 && "col-span-2 sm:col-span-1")}>
+                <StatTile {...tile} loading={stats.isLoading} />
+              </div>
+            ))}
+          </section>
+        )}
+
+        <section aria-labelledby="staff-roster" className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
+            <h2 id="staff-roster" className="section-title">Team roster</h2>
+            {staffQuery.data && (
+              <span className="text-xs font-medium text-muted-foreground">
+                {staffQuery.data.total} {staffQuery.data.total === 1 ? "person" : "people"}
+              </span>
+            )}
+          </div>
+          <div className="p-4 sm:p-5">
+            <DataTable
+              columns={columns}
+              data={staffQuery.data}
+              isLoading={staffQuery.isLoading}
+              isError={staffQuery.isError}
+              onRetry={() => staffQuery.refetch()}
+              page={page}
+              onPageChange={setPage}
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search by name, email or phone"
+              emptyTitle={query ? "No one matches" : "No staff yet"}
+              emptyDescription={query ? "Try another name, email or phone number." : "Add your first team member to get started."}
+              emptyAction={!query && canCreate ? <AddStaffDialog /> : undefined}
+            />
+          </div>
+        </section>
+      </div>
+    </div>
+  );
 }
