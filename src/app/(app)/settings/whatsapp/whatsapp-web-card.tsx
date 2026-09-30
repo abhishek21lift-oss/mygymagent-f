@@ -63,10 +63,17 @@ export function WhatsAppWebCard({ canManage }: { canManage: boolean }) {
         ) : query.isError ? (
           <p className="text-sm text-destructive">Couldn&rsquo;t load WhatsApp Web status.</p>
         ) : !query.data.available ? (
-          <p className="rounded-2xl bg-muted/60 p-4 text-sm text-muted-foreground">
-            WhatsApp Web isn&rsquo;t switched on for this deployment. Ask your administrator to set{" "}
-            <code className="font-mono text-xs">WHATSAPP_WEB_ENABLED=true</code> on the server.
-          </p>
+          <div className="rounded-2xl bg-amber-500/10 p-4 text-sm leading-6 text-amber-950 dark:text-amber-100">
+            <p className="font-semibold">Not switched on on the server yet</p>
+            <p className="mt-1">
+              Linking a number needs two settings on the backend (Render &rarr; Environment), then a redeploy:
+            </p>
+            <ul className="mt-2 space-y-1 font-mono text-xs">
+              <li>WHATSAPP_WEB_ENABLED=true</li>
+              <li>WHATSAPP_TOKEN_KEY=&lt;64 hex characters&gt;</li>
+            </ul>
+            <p className="mt-2">After that, a QR code to scan appears here.</p>
+          </div>
         ) : query.data.status === "CONNECTED" ? (
           <Connected session={query.data} canManage={canManage} />
         ) : query.data.status === "PAIRING" ? (
