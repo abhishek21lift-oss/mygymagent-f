@@ -279,7 +279,7 @@ function Connected({ session, canManage }: { session: WhatsAppWebSession; canMan
   const limitValid = Number.isInteger(limitNumber) && limitNumber >= 1 && limitNumber <= 1000
   const used = Math.min(100, Math.round((session.sentLast24h / Math.max(1, session.dailyLimit)) * 100))
 
-  async function save(input: { useForSending?: boolean; dailyLimit?: number }, done: string) {
+  async function save(input: { useForSending?: boolean; autoReply?: boolean; dailyLimit?: number }, done: string) {
     try {
       await update.mutateAsync(input)
       toast.success(done)
@@ -318,6 +318,25 @@ function Connected({ session, canManage }: { session: WhatsAppWebSession; canMan
           aria-label="Send WhatsApp messages from this number"
         />
       </label>
+
+      {session.autoReply !== undefined && (
+        <label className="flex items-center justify-between gap-4 rounded-2xl bg-muted/50 p-4">
+          <span>
+            <span className="block font-medium text-foreground">Auto-reply to members</span>
+            <span className="block text-xs leading-5 text-muted-foreground">
+              When a member messages PLANS, CLASSES, MY PLAN, CONTACT or HI, they get an instant answer from your plans, class
+              schedule and their membership. Other questions get &ldquo;our team will reply soon&rdquo; and stay in the inbox for you.
+              {!session.useForSending && " Works while messages are sent from this number."}
+            </span>
+          </span>
+          <Switch
+            checked={session.autoReply}
+            disabled={!canManage || update.isPending}
+            onCheckedChange={(on) => void save({ autoReply: on }, on ? "Auto-replies on" : "Auto-replies off")}
+            aria-label="Auto-reply to members"
+          />
+        </label>
+      )}
 
       <div className="rounded-2xl bg-muted/50 p-4">
         <div className="flex items-baseline justify-between gap-3 text-sm">

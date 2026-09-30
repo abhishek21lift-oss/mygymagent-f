@@ -102,6 +102,22 @@ describe("WhatsAppWebCard", () => {
     expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("75")
   })
 
+  it("turns auto-replies off and on", async () => {
+    const connected = { ...base, status: "CONNECTED" as const, phoneNumber: "919876543210", useForSending: true, autoReply: true }
+    ;(api.patch as jest.Mock).mockResolvedValue({ ...connected, autoReply: false })
+    renderWith(connected)
+    const toggle = await screen.findByRole("switch", { name: "Auto-reply to members" })
+    expect(toggle.getAttribute("aria-checked")).toBe("true")
+    fireEvent.click(toggle)
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith("/whatsapp-web/settings", { autoReply: false }))
+  })
+
+  it("hides the auto-reply switch when the server doesn't offer it", async () => {
+    renderWith({ ...base, status: "CONNECTED", phoneNumber: "919876543210" })
+    await screen.findByText("+91 98765 43210")
+    expect(screen.queryByRole("switch", { name: "Auto-reply to members" })).toBeNull()
+  })
+
   it("shows why a number was unlinked", async () => {
     renderWith({ ...base, status: "LOGGED_OUT", lastError: "WhatsApp blocked or restricted this number." })
     expect((await screen.findByRole("alert")).textContent).toMatch(/blocked or restricted/)

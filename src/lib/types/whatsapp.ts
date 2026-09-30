@@ -41,6 +41,9 @@ export interface WhatsAppWebSession {
   status: "DISCONNECTED" | "PAIRING" | "CONNECTED" | "LOGGED_OUT"
   phoneNumber: string | null
   useForSending: boolean
+  /** Answers members' questions (plans, classes, their membership) on its own.
+   * Optional: an older API doesn't send it. */
+  autoReply?: boolean
   dailyLimit: number
   sentLast24h: number
   riskAcceptedAt: string | null
