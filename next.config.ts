@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
       .map((origin) => origin.trim())
       .filter(Boolean),
   ],
+  // Links in notifications created before these pages had a home; the
+  // app maps them too (src/lib/notification-links.ts), this covers a push
+  // tapped in a browser that opens the old address directly.
+  async redirects() {
+    return [
+      { source: "/whatsapp/inbox", destination: "/settings/whatsapp", permanent: false },
+      { source: "/pt/sessions/:id", destination: "/pt-operations/sessions", permanent: false },
+      { source: "/inventory/products/:id((?!new$)[^/]+)", destination: "/inventory/reorder", permanent: false },
+    ];
+  },
   async headers() {
     // Local development talks to the local API over plain http; the
     // production CSP (https: only) must stay untouched.

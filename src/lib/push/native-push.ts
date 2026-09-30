@@ -1,5 +1,6 @@
 import type { PluginListenerHandle } from "@capacitor/core"
 import type { PushNotificationsPlugin } from "@capacitor/push-notifications"
+import { notificationPath } from "@/lib/notification-links"
 
 /**
  * Native push for the Android app.
@@ -129,7 +130,7 @@ export function listenForNativeTaps(navigate: (path: string) => void): void {
   tapListener = plugin().then((push) =>
     push.addListener("pushNotificationActionPerformed", (action) => {
       const path = safeInAppPath((action.notification.data as { url?: unknown } | undefined)?.url)
-      if (path) navigate(path)
+      if (path) navigate(notificationPath(path))
     }),
   )
   tapListener.catch(() => {
