@@ -11,6 +11,11 @@ if (!CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
 // prod, so any hardcoded host here would be dead code implying protection
 // it does not provide. Development falls back to the local API.
 const API_URL = CONFIGURED_API_URL ?? "http://localhost:4000"
+/** The API origin, for the few callers that must not go through `apiFetch`
+ * -- the self-service kiosk authenticates with a device key, never a staff
+ * session, so it must neither attach the access token nor attempt a staff
+ * refresh on a 401. */
+export const API_BASE_URL = API_URL
 const AUTH_PROXY_PATHS = new Set([
   "/auth/login",
   "/auth/register",
