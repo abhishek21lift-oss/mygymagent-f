@@ -1,5 +1,6 @@
 "use client";
 
+import { useRefreshOnPull } from "@/components/shared/pull-to-refresh"
 import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, Brain, CreditCard, Dumbbell, Sparkles, Users, Wallet, AlertTriangle, Target, CheckCircle2 } from "lucide-react";
@@ -24,7 +25,19 @@ const CARD_TONES = [
 export default function OwnerOsPage() {
  const [data, setData] = React.useState<OwnerBriefing | null>(null);
  const [error, setError] = React.useState<string | null>(null);
- React.useEffect(() => { let active = true; api.get<OwnerBriefing>("/owner-os/briefing").then(v => active && setData(v)).catch(e => active && setError(e instanceof ApiError ? e.message : "Unable to load owner briefing")); return () => { active = false; }; }, []);
+ const load = React.useCallback(async () => {
+  try {
+   setData(await api.get<OwnerBriefing>("/owner-os/briefing"));
+   setError(null);
+  } catch (e) {
+   setError(e instanceof ApiError ? e.message : "Unable to load owner briefing");
+  }
+ }, []);
+ React.useEffect(() => {
+  const timer = window.setTimeout(() => void load(), 0);
+  return () => window.clearTimeout(timer);
+ }, [load]);
+ useRefreshOnPull(load);
  if (error) return <div className="pb-4">
  <div className="flex flex-col gap-5"><Card className="border-rose-200 bg-muted/40"><CardContent className="p-6 text-sm font-bold text-rose-700" role="alert">{error}</CardContent></Card></div></div>;
  if (!data) return <div className="pb-4">

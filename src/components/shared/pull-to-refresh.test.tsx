@@ -1,10 +1,11 @@
 import * as React from "react";
 import { act, fireEvent, render } from "@testing-library/react";
 
-import { PULL_THRESHOLD, PullToRefresh, resist } from "./pull-to-refresh";
+import { PULL_THRESHOLD, PullToRefresh, resist, useRefreshOnPull } from "./pull-to-refresh";
 
 jest.mock("next/navigation", () => ({ useRouter: () => ({ refresh: jest.fn() }) }));
-jest.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ refetchQueries: jest.fn() }) }));
+const mockRefetch = jest.fn().mockResolvedValue(undefined);
+jest.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ refetchQueries: mockRefetch }) }));
 
 beforeAll(() => {
   window.matchMedia ??= ((query: string) => ({
@@ -108,5 +109,27 @@ describe("PullToRefresh", () => {
     const { getByTestId } = render(<Ignored />);
     await act(async () => pull(getByTestId("pad"), 0, 300));
     expect(onRefresh).not.toHaveBeenCalled();
+  });
+
+  it("also reloads a screen that fetches its own data", async () => {
+    const load = jest.fn().mockResolvedValue(undefined);
+    function ManualPage() {
+      useRefreshOnPull(load);
+      return <p>Payroll</p>;
+    }
+    function App() {
+      const ref = React.useRef<HTMLDivElement | null>(null);
+      return (
+        <div ref={ref} data-testid="scroller">
+          <PullToRefresh scrollRef={ref}>
+            <ManualPage />
+          </PullToRefresh>
+        </div>
+      );
+    }
+    const { getByTestId } = render(<App />);
+    await act(async () => pull(getByTestId("scroller"), 0, 300));
+    expect(mockRefetch).toHaveBeenCalledWith({ type: "active" });
+    expect(load).toHaveBeenCalledTimes(1);
   });
 });

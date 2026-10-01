@@ -6,7 +6,6 @@ import {
  CheckCircle2,
  HandCoins,
  Plus,
- RefreshCw,
  Save,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -17,6 +16,7 @@ import { CommissionsSection } from "./commissions-section";
 import { useAuth } from "@/lib/auth/auth-context";
 import { PageHero } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
+import { useRefreshOnPull } from "@/components/shared/pull-to-refresh";
 
 type LeaveType = {
  id: string;
@@ -153,6 +153,8 @@ export default function PayrollPage() {
  }, 0);
  return () => window.clearTimeout(timer);
  }, [load]);
+ // Not React Query, so the pull has to be told how to reload it.
+ useRefreshOnPull(load);
 
  async function createRun() {
  if (periodEnd < periodStart) {
@@ -258,12 +260,6 @@ export default function PayrollPage() {
  title="Payroll"
  description="Runs, leave and payslips"
  icon={HandCoins}
- actions={
- <Button variant="outline" onClick={() => void load()} disabled={loading}>
- <RefreshCw className="mr-2 size-4" />
- Refresh
- </Button>
- }
  />
 
         <section className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">

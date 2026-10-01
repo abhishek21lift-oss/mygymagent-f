@@ -18,6 +18,26 @@ const RING = 2 * Math.PI * 15;
 
 type Phase = "idle" | "pulling" | "armed" | "refreshing" | "done";
 
+type RefreshHandler = () => unknown;
+const RefreshRegistry = React.createContext<((handler: RefreshHandler) => () => void) | null>(null);
+
+/**
+ * For a screen that loads its data itself rather than through React
+ * Query: the pull runs `handler` too, and waits for it. Without this a
+ * pull refetches every query on screen and leaves such a page as it was.
+ */
+export function useRefreshOnPull(handler: RefreshHandler) {
+  const register = React.useContext(RefreshRegistry);
+  const latest = React.useRef(handler);
+  React.useEffect(() => {
+    latest.current = handler;
+  });
+  React.useEffect(() => {
+    if (!register) return;
+    return register(() => latest.current());
+  }, [register]);
+}
+
 /**
  * Finger travel to content travel: close to the finger at first, then
  * heavier the further you pull, the way iOS rubber-bands. About 115px of
@@ -96,10 +116,21 @@ export function PullToRefresh({
   const phaseRef = React.useRef<Phase>("idle");
   const [top, setTop] = React.useState(0);
 
+  const handlers = React.useRef(new Set<RefreshHandler>());
+  const register = React.useCallback((handler: RefreshHandler) => {
+    handlers.current.add(handler);
+    return () => {
+      handlers.current.delete(handler);
+    };
+  }, []);
+
   const refresh = React.useCallback(async () => {
     if (onRefresh) return onRefresh();
     router.refresh();
-    await queryClient.refetchQueries({ type: "active" });
+    await Promise.allSettled([
+      queryClient.refetchQueries({ type: "active" }),
+      ...[...handlers.current].map((handler) => Promise.resolve().then(handler)),
+    ]);
   }, [onRefresh, queryClient, router]);
 
   const setPhaseBoth = React.useCallback((next: Phase) => {
@@ -287,7 +318,7 @@ export function PullToRefresh({
       {/* No standing transform or will-change: either makes this the
           containing block for every position:fixed thing on the page. */}
       <div ref={contentRef} className={className}>
-        {children}
+        <RefreshRegistry.Provider value={register}>{children}</RefreshRegistry.Provider>
       </div>
     </>
   );

@@ -24,7 +24,6 @@ import {
  WalletCards,
  Zap,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -277,10 +276,6 @@ export default function IntelligencePage() {
  const activeMembers = status.data?.find((item) => item.status === "ACTIVE")?.count ?? 0;
  const riskCount = atRisk.data?.length ?? 0;
  const lowStockCount = inventory.data?.filter((item) => item.lowStock).length ?? 0;
- const refresh = () => {
- void Promise.all([revenue.refetch(), trend.refetch(), atRisk.refetch(), status.refetch(), sales.refetch(), sources.refetch(), trainers.refetch(), inventory.refetch(), lifecycle.refetch()]);
- toast.success("Intelligence refreshed");
- };
 
  return (
  <div className="pb-4">
@@ -292,7 +287,7 @@ export default function IntelligencePage() {
  >
  <div className="grid gap-2 sm:grid-cols-2">
  <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card p-1.5"><Filter className="ml-2 size-4 shrink-0 text-muted-foreground" aria-hidden="true" /><Select value={branchId} onValueChange={setBranchId}><SelectTrigger aria-label="Filter by branch" className="h-9 border-0 bg-transparent text-foreground shadow-none focus:ring-0"><SelectValue placeholder="All branches" /></SelectTrigger><SelectContent>{<SelectItem value="all">All branches</SelectItem>}{branches?.items?.map((item: { id: string; name: string }) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
- <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card p-1.5"><BarChart3 className="ml-2 size-4 shrink-0 text-muted-foreground" aria-hidden="true" /><Select value={months} onValueChange={setMonths}><SelectTrigger aria-label="Select month range" className="h-9 border-0 bg-transparent text-foreground shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select><Button size="icon" variant="ghost" onClick={refresh} className="min-h-10 min-w-10 text-white hover:bg-card hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" title="Refresh intelligence" aria-label="Refresh intelligence"><RefreshCw className="size-4" aria-hidden="true" /></Button></div>
+ <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card p-1.5"><BarChart3 className="ml-2 size-4 shrink-0 text-muted-foreground" aria-hidden="true" /><Select value={months} onValueChange={setMonths}><SelectTrigger aria-label="Select month range" className="h-9 border-0 bg-transparent text-foreground shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">Last 3 months</SelectItem><SelectItem value="6">Last 6 months</SelectItem><SelectItem value="12">Last 12 months</SelectItem></SelectContent></Select></div>
  </div>
  </PageHero>
 

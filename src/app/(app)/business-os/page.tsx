@@ -1,8 +1,9 @@
 "use client"
 
+import { useRefreshOnPull } from "@/components/shared/pull-to-refresh"
 import * as React from "react"
 import { toast } from "sonner"
-import { Brain, Megaphone, RefreshCw, ShieldCheck, Sparkles, Star, Tablet } from "lucide-react"
+import { Brain, Megaphone, ShieldCheck, Sparkles, Star, Tablet } from "lucide-react"
 
 import { api } from "@/lib/api/client"
 import { useAuth } from "@/lib/auth/auth-context"
@@ -86,6 +87,8 @@ export default function BusinessOsPage() {
     }, 0)
     return () => window.clearTimeout(timer)
   }, [refresh])
+  // Campaigns are fetched by hand, so the pull has to reload them itself.
+  useRefreshOnPull(refresh)
 
   const run = async (fn: () => Promise<unknown>, message?: string) => {
     try {
@@ -124,12 +127,6 @@ export default function BusinessOsPage() {
         icon={Sparkles}
         title="Business OS"
         description="Loyalty, referrals, support, feedback, marketing and the ledger."
-        actions={
-          <Button variant="outline" onClick={() => void refresh()} disabled={loading}>
-            <RefreshCw className={`mr-2 size-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-        }
       />
 
       <SupportSection />

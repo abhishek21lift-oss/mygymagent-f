@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ArrowRight, CalendarClock, Check, Flame, ListChecks, RefreshCw, Sparkles } from "lucide-react"
+import { ArrowRight, CalendarClock, Check, Flame, ListChecks, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -92,9 +92,6 @@ export default function SalesFollowUpsPage() {
  <TabsTrigger value="ALL" className="min-h-11">All</TabsTrigger>
  </TabsList>
  </Tabs>
- <Button variant="ghost" size="sm" onClick={() => query.refetch()} disabled={query.isFetching} className="min-h-11 rounded-xl hover:bg-blue-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <RefreshCw className={query.isFetching ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
- </Button>
  </div>
  </div>
  <div className="space-y-3 p-4 sm:p-5">
