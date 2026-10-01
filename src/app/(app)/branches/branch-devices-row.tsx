@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Copy, Fingerprint, Loader2, MonitorSmartphone, Plus, Trash2 } from "lucide-react";
 
@@ -223,6 +224,13 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
                   Add
                 </Button>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Setting up the screen you are using right now?{" "}
+                <Link href="/kiosk" className="font-semibold text-foreground underline underline-offset-2">
+                  Open kiosk setup
+                </Link>{" "}
+                — it registers this screen without showing its key, then signs you out of it.
+              </p>
             </>
           )}
         </DialogContent>
