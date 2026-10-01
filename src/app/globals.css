@@ -1711,3 +1711,21 @@
     background: rgb(8 10 20 / 0.5);
   }
 }
+
+/* Landing page product tour (src/components/landing/product-tour.tsx). */
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes tour-screen {
+  from {
+    opacity: 0;
+    transform: perspective(1600px) rotateY(-18deg) rotateX(8deg) translate3d(40px, 20px, -60px);
+  }
+}
