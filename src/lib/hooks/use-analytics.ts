@@ -116,14 +116,14 @@ export function useRevenueSummary(params: RevenueQueryParams = {}) {
   })
 }
 
-export function useRevenueTrend(months: number = 6, branchId?: string) {
+export function useRevenueTrend(months: number = 6, branchId?: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["analytics", "revenue-trend", months, branchId],
     queryFn: async () => {
       const data = await api.get<RevenueTrendMonth[]>("/analytics/revenue/trend", { query: { months, branchId } })
       return asArray<RevenueTrendMonth>(data)
     },
-    enabled: months > 0,
+    enabled: enabled && months > 0,
   })
 }
 
@@ -134,10 +134,11 @@ export function useAtRiskMembers(branchId?: string) {
   })
 }
 
-export function useMemberStatusBreakdown(branchId?: string) {
+export function useMemberStatusBreakdown(branchId?: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["analytics", "member-status-breakdown", branchId],
     queryFn: async () => asArray<MemberStatusBreakdown>(await api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown")),
+    enabled,
   })
 }
 

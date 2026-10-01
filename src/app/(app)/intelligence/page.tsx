@@ -1,5 +1,6 @@
 "use client";
 
+import { memberStatusLabel } from "@/lib/member-status";
 import * as React from "react";
 import Link from "next/link";
 import {
@@ -134,16 +135,16 @@ function StatusBreakdown({ data, error, onRetry }: { data: { status: string; cou
   if (error) return <ErrorState message="Could not load the member breakdown." onRetry={onRetry} />;
  if (!data?.length) return <div className="py-12 text-center text-sm font-medium text-stone-600">No member data available</div>;
  const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
- const colors: Record<string, string> = { ACTIVE: "bg-emerald-500", INACTIVE: "bg-amber-400", FROZEN: "bg-sky-500", EXPIRED: "bg-rose-500", CANCELLED: "bg-stone-400" };
+ const colors: Record<string, string> = { ACTIVE: "bg-emerald-500", INACTIVE: "bg-amber-400", FROZEN: "bg-sky-500", UPCOMING: "bg-violet-400", EXPIRED: "bg-rose-500", NO_MEMBERSHIP: "bg-stone-400" };
  return (
  <div className="space-y-5">
  <div className="flex h-5 overflow-hidden rounded-full bg-stone-100 p-0.5">
- {data.map((item) => <div key={item.status} className={`${colors[item.status] ?? "bg-stone-400"} first:rounded-l-full last:rounded-r-full transition-all`} style={{ width: `${(item.count / total) * 100}%` }} title={`${item.status}: ${item.count}`} />)}
+ {data.map((item) => <div key={item.status} className={`${colors[item.status] ?? "bg-stone-400"} first:rounded-l-full last:rounded-r-full transition-all`} style={{ width: `${(item.count / total) * 100}%` }} title={`${memberStatusLabel(item.status)}: ${item.count}`} />)}
  </div>
  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
  {data.map((item) => (
  <div key={item.status} className="rounded-lg border border-stone-100 bg-stone-50/70 p-3">
- <div className="flex items-center gap-2"><span className={`size-2 rounded-full ${colors[item.status] ?? "bg-stone-400"}`} aria-hidden="true" /><span className="text-xs font-bold uppercase tracking-wider text-stone-600">{item.status}</span></div>
+ <div className="flex items-center gap-2"><span className={`size-2 rounded-full ${colors[item.status] ?? "bg-stone-400"}`} aria-hidden="true" /><span className="text-xs font-bold uppercase tracking-wider text-stone-600">{memberStatusLabel(item.status)}</span></div>
  <p className="mt-1 text-xl font-black tracking-tight text-stone-900">{item.count}</p>
  </div>
  ))}
