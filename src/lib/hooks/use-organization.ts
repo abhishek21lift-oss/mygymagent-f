@@ -25,10 +25,11 @@ export type OrganizationUpdate = Partial<
 export const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 export const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
-export function useOrganization() {
+export function useOrganization({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [KEY],
     queryFn: () => api.get<Organization>("/organizations/current"),
+    enabled,
   });
 }
 

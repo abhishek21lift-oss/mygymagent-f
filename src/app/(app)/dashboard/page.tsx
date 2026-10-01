@@ -33,6 +33,8 @@ import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { memberStatusLabel } from "@/lib/member-status";
+import { revenueChart } from "@/lib/revenue-chart";
 
 const QUICK_ACTIONS = [
  ["Add a member", "Register a new client", "/members/new", UserPlus, "members.create"],
@@ -42,15 +44,19 @@ const QUICK_ACTIONS = [
  ["Add a lead", "Track a new prospect", "/crm", Megaphone, "leads.manage"],
 ] as const;
 
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 export default function DashboardPage() {
- const { hasPermission } = useAuth();
- const briefing = useDailyBriefing();
+ const { hasPermission, user } = useAuth();
+ // Home is every staff member's landing page, but its figures need
+ // `reports.view`, which trainers, front desk, sales and inventory staff
+ // do not hold. Asking anyway guaranteed a page of 403s and Retry
+ // buttons that could never work; without the permission the page is a
+ // staff home of the actions this person can take, and asks for nothing.
+ const canViewReports = hasPermission("reports.view");
+ const briefing = useDailyBriefing({ enabled: canViewReports });
  const data = briefing.data;
- const organization = useOrganization();
- const revenueTrend = useRevenueTrend(6);
- const statusBreakdown = useMemberStatusBreakdown();
+ const organization = useOrganization({ enabled: hasPermission("organizations.read") });
+ const revenueTrend = useRevenueTrend(6, undefined, { enabled: canViewReports });
+ const statusBreakdown = useMemberStatusBreakdown(undefined, { enabled: canViewReports });
 
  const gymName = organization.data?.name ?? "Dashboard";
 
@@ -63,8 +69,10 @@ export default function DashboardPage() {
  const revenueRow =
  data?.revenue.revenue.find((r) => r.currency === currencyCode) ??
  data?.revenue.revenue[0];
- const currency = currencySymbol(currencyCode);
  const revenue = revenueRow?.netRevenue ?? "0.00";
+ // Formatted in the currency the figure is actually in -- the fallback
+ // row above can be a different one from the gym's.
+ const revenueCurrency = revenueRow?.currency ?? currencyCode;
 
  const visibleActions = QUICK_ACTIONS.filter(
  ([, , , , permission]) => hasPermission(permission as string),
@@ -80,11 +88,17 @@ export default function DashboardPage() {
  href: "/members",
  action: "Review members",
  },
- data.salesFunnel.followUps.total > 0 && {
+ // Open follow-ups due by the end of today, on any open lead. This
+ // used to show `salesFunnel.followUps.total` -- every follow-up, done
+ // or not, on leads created this month -- as "due".
+ (data.followUpsDue?.count ?? 0) > 0 && {
  icon: Megaphone,
  tone: "warning" as const,
- title: `${data.salesFunnel.followUps.total} follow-ups are due`,
- detail: `${data.salesFunnel.followUps.completionRatePct}% completed so far.`,
+ title: `${data.followUpsDue!.count} lead follow-up${data.followUpsDue!.count === 1 ? "" : "s"} due today`,
+ detail:
+ data.followUpsDue!.overdue > 0
+ ? `${data.followUpsDue!.overdue} overdue — call those first.`
+ : "Due by the end of today.",
  href: "/crm",
  action: "Open Sales",
  },
@@ -107,17 +121,10 @@ export default function DashboardPage() {
  ].filter(Boolean)
  : [];
 
- const weeklyData = useMemo(() => {
- const months = revenueTrend.data ?? [];
- if (months.length === 0) return [];
- const firstCurrency = months[0]?.revenue[0]?.currency;
- return months.map((m) => {
- const [, month] = m.month.split("-").map(Number);
- const label = month >= 1 && month <= 12 ? MONTH_LABELS[month - 1] : m.month;
- const row = m.revenue.find((r) => r.currency === firstCurrency);
- return { day: label, value: Math.max(0, Math.round(Number(row?.netRevenue ?? 0))) };
- });
- }, [revenueTrend.data]);
+ const { weeklyData, chartCurrency } = useMemo(
+ () => revenueChart(revenueTrend.data ?? [], currencyCode),
+ [revenueTrend.data, currencyCode],
+ );
 
  const maxRevenue = Math.max(1, ...weeklyData.map((d) => d.value));
  // The series arrives six-months-long whether or not any money came in,
@@ -127,7 +134,7 @@ export default function DashboardPage() {
 
  const membershipData = useMemo(() => {
  return (statusBreakdown.data ?? []).map((row) => ({
- label: row.status,
+ label: memberStatusLabel(row.status),
  value: row.count,
  }));
  }, [statusBreakdown.data]);
@@ -137,11 +144,15 @@ export default function DashboardPage() {
  if (!data) return [];
  return [
  { label: "Check-ins", time: "Today", value: Math.min(1, data.today.checkIns / 50), detail: `${data.today.checkIns} check-ins` },
- { label: "Revenue", time: "This month", value: Math.min(1, Number(revenueRow?.netRevenue ?? 0) / 10000), detail: displayCurrencyAmount(revenue, currencyCode) },
+ { label: "Revenue", time: "This month", value: Math.min(1, Number(revenueRow?.netRevenue ?? 0) / 10000), detail: displayCurrencyAmount(revenue, revenueCurrency) },
  { label: "Conversions", time: "This month", value: Math.min(1, data.salesFunnel.wonLeads / 20), detail: `${data.salesFunnel.wonLeads} won` },
  { label: "Follow-ups", time: "Tracked", value: Math.min(1, data.salesFunnel.followUps.total / 10), detail: `${data.salesFunnel.followUps.total} total` },
  ];
- }, [data, currency, revenue]);
+ }, [data, revenueRow, revenue, revenueCurrency]);
+
+ if (!canViewReports) {
+ return <StaffHome firstName={user?.firstName} gymName={organization.data?.name} actions={visibleActions} />;
+ }
 
  return (
  <div className="flex w-full flex-col gap-4 pb-8">
@@ -179,8 +190,16 @@ export default function DashboardPage() {
  </Button>
  </div>
  <div className="grid gap-3 grid-cols-2 xl:grid-cols-4">
- <StatCard icon={CalendarCheck} title="Today's check-ins" value={data?.today.checkIns} isLoading={briefing.isLoading} isError={briefing.isError} tone="primary" />
- <StatCard icon={Wallet} title="Net revenue" value={data ? displayCurrencyAmount(revenue, currencyCode) : undefined} isLoading={briefing.isLoading} isError={briefing.isError} tone="success" />
+ <StatCard
+ icon={CalendarCheck}
+ title="Today's check-ins"
+ value={data?.today.checkIns}
+ hint={data?.today.deniedCheckIns ? `${data.today.deniedCheckIns} turned away at the door` : undefined}
+ isLoading={briefing.isLoading}
+ isError={briefing.isError}
+ tone="primary"
+ />
+ <StatCard icon={Wallet} title="Net revenue" value={data ? displayCurrencyAmount(revenue, revenueCurrency) : undefined} hint="This month, after refunds" isLoading={briefing.isLoading} isError={briefing.isError} tone="success" />
  <StatCard icon={Users} title="Members at risk" value={data?.atRiskMembers.count} isLoading={briefing.isLoading} isError={briefing.isError} tone="warning" />
  <StatCard icon={Sparkles} title="AI actions" value={data?.pendingAiActions} isLoading={briefing.isLoading} isError={briefing.isError} tone="primary" />
  </div>
@@ -210,7 +229,7 @@ export default function DashboardPage() {
  ) : (
  <>
  <p className="mb-2 text-xs text-muted-foreground">
- Peak <span className="font-medium tabular-nums text-foreground">{currency}{maxRevenue.toLocaleString()}</span> · last 6 months
+ Peak <span className="font-medium tabular-nums text-foreground">{currencySymbol(chartCurrency)}{maxRevenue.toLocaleString()}</span> · last 6 months
  </p>
  <div role="img" aria-label={`Revenue trend: ${weeklyData.map((d) => `${d.day} ${d.value}`).join(", ")}`} className="flex h-48 items-end gap-2">
  {weeklyData.map((d) => (
@@ -438,6 +457,57 @@ function MiniInsight({ icon: Icon, label, value }: { icon: typeof TrendingUp; la
  <div className="rounded-lg border border-sidebar-border/60 bg-sidebar-accent/50 p-4">
  <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider opacity-70"><Icon className="size-3.5" aria-hidden="true" />{label}</div>
  <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">{value}</p>
+ </div>
+ );
+}
+
+/**
+ * Home for staff without `reports.view`: who they are, and what they can
+ * do from here. No figures, so nothing to fail.
+ */
+function StaffHome({
+ firstName,
+ gymName,
+ actions,
+}: {
+ firstName?: string;
+ gymName?: string;
+ actions: ReadonlyArray<(typeof QUICK_ACTIONS)[number]>;
+}) {
+ return (
+ <div className="flex w-full flex-col gap-4 pb-8">
+ <PageHero
+ id="dashboard-title"
+ icon={Sparkles}
+ title={gymName ?? (firstName ? `Welcome, ${firstName}` : "Welcome")}
+ description="Here’s what you can do from here today."
+ />
+ <section aria-labelledby="dash-quick">
+ <h2 id="dash-quick" className="mb-3 text-xl font-semibold tracking-tight">Quick actions</h2>
+ {actions.length > 0 ? (
+ <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+ {actions.map(([title, desc, href, Icon]) => (
+ <Link
+ key={href}
+ href={href}
+ className="group flex min-h-11 items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-ring"
+ >
+ <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Icon className="size-5" aria-hidden="true" /></span>
+ <span className="min-w-0 flex-1">
+ <span className="block [overflow-wrap:anywhere] text-sm font-medium tracking-tight">{title}</span>
+ <span className="block [overflow-wrap:anywhere] text-xs text-muted-foreground">{desc}</span>
+ </span>
+ <ArrowRight className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+ </Link>
+ ))}
+ </div>
+ ) : (
+ <EmptyState
+ title="Nothing to do here yet"
+ description="Your account doesn’t include any of these actions. Use the menu, or ask the gym owner for access."
+ />
+ )}
+ </section>
  </div>
  );
 }
