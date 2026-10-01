@@ -24,12 +24,12 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#f7f8fb",
     theme_color: "#f7f8fb",
     icons: [
-      { src: "/brand/the-cult-client-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/brand/the-cult-client-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/brand/tcc-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/brand/tcc-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       // Padded onto the brand background, so Android's circle/squircle
       // masks never crop the mark.
       {
-        src: "/brand/the-cult-client-maskable-512.png",
+        src: "/brand/tcc-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

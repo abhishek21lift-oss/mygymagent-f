@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import Link from "next/link";
 import { Compass } from "lucide-react";
 
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 /**
  * The whole app's 404: the root `not-found` catches every unmatched URL,
@@ -33,14 +33,7 @@ export default function NotFound() {
           aria-hidden="true"
           className="absolute inset-0 -z-10 scale-150 rounded-full bg-violet-500/15 blur-2xl"
         />
-        <Image
-          src={PRODUCT_LOGO_SRC}
-          alt={PRODUCT_LOGO_ALT}
-          width={72}
-          height={72}
-          className="size-18 rounded-full"
-          priority
-        />
+        <BrandLogo priority sizes="200px" className="h-20" />
       </div>
 
       <div className="flex flex-col items-center gap-2">

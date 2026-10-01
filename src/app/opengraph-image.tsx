@@ -10,7 +10,7 @@ export const contentType = "image/png";
 
 /** The card a shared link shows on WhatsApp, LinkedIn, X and Slack. */
 export default async function OpengraphImage() {
-  const logo = await readFile(join(process.cwd(), "public/brand/the-cult-client-512.png"));
+  const logo = await readFile(join(process.cwd(), "public/brand/tcc-logo.png"));
   const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
 
   return new ImageResponse(
@@ -30,7 +30,20 @@ export default async function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <img src={logoSrc} width={72} height={72} alt="" style={{ borderRadius: 999 }} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 132,
+              height: 96,
+              borderRadius: 24,
+              backgroundColor: "#FBF8F2",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+            }}
+          >
+            <img src={logoSrc} width={112} height={79} alt="" />
+          </div>
           <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: -0.5 }}>{SITE.name}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>

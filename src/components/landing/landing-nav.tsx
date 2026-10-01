@@ -1,13 +1,13 @@
 "use client";
 
+import { BrandLogo } from "@/components/shared/brand-logo";
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 
 import { homeRouteFor } from "@/lib/auth/home-route";
 import { useAuth } from "@/lib/auth/auth-context";
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 export const NAV_LINKS = [
@@ -78,7 +78,7 @@ export function LandingNav() {
  )}
  >
  <Link href="/" className="flex items-center gap-2 rounded-full pr-2 outline-none focus-visible:ring-2 focus-visible:ring-ring">
- <Image src={PRODUCT_LOGO_SRC} alt={PRODUCT_LOGO_ALT} width={34} height={34} priority className="rounded-full" />
+ <BrandLogo decorative priority className="h-10" />
  <span className="text-[15px] font-bold tracking-tight text-foreground">{PRODUCT_NAME}</span>
  </Link>
  <ul className="ml-4 hidden items-center gap-1 lg:flex">

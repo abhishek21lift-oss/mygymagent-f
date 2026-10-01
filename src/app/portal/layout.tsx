@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLogo } from "@/components/shared/brand-logo";
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,8 +16,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC } from "@/lib/brand";
 import { accentForPath } from "@/lib/section-accent";
 import { useSectionAttribute } from "@/lib/use-section-attribute";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -117,14 +116,7 @@ export default function PortalLayout({
               {/* The member's half of the product is still the product.
                   Small and quiet here -- this header belongs to them, not
                   to the brand. */}
-              <Image
-                src={PRODUCT_LOGO_SRC}
-                alt={PRODUCT_LOGO_ALT}
-                width={96}
-                height={96}
-                className="size-9 shrink-0 rounded-full object-contain"
-                priority
-              />
+              <BrandLogo priority className="h-8" />
               <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase leading-snug tracking-[0.1em] text-muted-foreground [overflow-wrap:anywhere]">
                   {member?.primaryBranch?.name ?? "Your gym"}

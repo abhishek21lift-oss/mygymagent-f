@@ -1,7 +1,6 @@
+import { BrandLogo } from "@/components/shared/brand-logo";
 import * as React from "react";
-import Image from "next/image";
 
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC } from "@/lib/brand";
 import { LegalFooter } from "../(legal)/legal-ui";
 
 /**
@@ -25,15 +24,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <main className="auth-canvas relative flex min-h-svh flex-col items-center justify-center overflow-hidden p-6 md:p-10">
       <div className="relative flex w-full max-w-sm flex-col items-center gap-6">
         <div className="flex flex-col items-center gap-4">
-          <span className="brand-neon block">
-            <Image
-              src={PRODUCT_LOGO_SRC}
-              alt={PRODUCT_LOGO_ALT}
-              width={512}
-              height={512}
-              className="size-28 rounded-full object-contain sm:size-32"
-              priority
-            />
+          <span className="brand-glow">
+            <BrandLogo priority sizes="240px" className="h-24 sm:h-28" />
           </span>
           <p className="glass rounded-full px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
             Gym Management OS

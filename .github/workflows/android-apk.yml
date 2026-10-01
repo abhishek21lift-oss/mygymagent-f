@@ -47,6 +47,12 @@ jobs:
       - name: Prepare Capacitor assets directory
         run: mkdir -p android/app/src/main/assets
 
+      # The TCC launcher icons (legacy, round and adaptive) and launch
+      # screen, rendered by scripts/brand-assets.mjs, over the template's
+      # Capacitor defaults.
+      - name: Install app icon and splash
+        run: cp -R assets/android/launcher/. android/app/src/main/res/
+
       # Push needs the Firebase project's google-services.json. Store it as
       # the GOOGLE_SERVICES_JSON repository secret (raw JSON or base64).
       # Without it the APK is built without the push plugin, and the app

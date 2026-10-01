@@ -1,23 +1,18 @@
 export const PRODUCT_NAME = "THE CULT CLIENT";
 
 /**
- * The product mark, already cropped to a circle with a transparent
- * surround, so a round frame is the image's own shape rather than an
- * `overflow-hidden` wrapper that a glow behind it would then be clipped
- * by.
- *
- * Served from `public/` instead of the base64 data URI this used to be:
- * the artwork is ~40KB, and inlining it put that, plus a third again in
- * base64 overhead, into a module the root layout, the sidebar and the
- * sign-in screen all import — so every page paid for it in JavaScript.
- * As a file the browser fetches it once and caches it, and `next/image`
- * can resize it for the 40px sidebar slot.
+ * The TCC logo, on transparency, cropped to its own edges. It is wide
+ * (about 1.45:1), so give it a height and let the width follow -- see
+ * <BrandLogo>. Rendered, with every icon size, from
+ * assets/brand/tcc-logo-source.png by scripts/brand-assets.mjs.
  */
-export const PRODUCT_LOGO_SRC = "/brand/the-cult-client.webp";
+export const PRODUCT_LOGO_SRC = "/brand/tcc-logo.webp";
+/** Intrinsic size of PRODUCT_LOGO_SRC, for layout before it loads. */
+export const PRODUCT_LOGO_WIDTH = 640;
+export const PRODUCT_LOGO_HEIGHT = 453;
 
 /** PNG, for the places that are not `next/image`: browser tabs, an
- * iOS home-screen icon. Both understand WebP now, but a PNG is the one
- * that is never the reason an icon fails to draw. */
-export const PRODUCT_LOGO_ICON_SRC = "/brand/the-cult-client-192.png";
+ * iOS home-screen icon. The logo centred on the ivory app-icon tile. */
+export const PRODUCT_LOGO_ICON_SRC = "/brand/tcc-icon-192.png";
 
 export const PRODUCT_LOGO_ALT = "THE CULT CLIENT";

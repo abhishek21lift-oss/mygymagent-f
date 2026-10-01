@@ -1,8 +1,8 @@
+import { BrandLogo } from "@/components/shared/brand-logo";
 import type { ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_NAME } from "@/lib/brand";
 import { LEGAL, LEGAL_LINKS } from "@/lib/legal";
 
 /**
@@ -53,7 +53,7 @@ export function LegalPage({
     <div className="page-ambient min-h-svh">
       <header className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <Image src={PRODUCT_LOGO_SRC} alt={PRODUCT_LOGO_ALT} width={36} height={36} className="size-9 rounded-full" />
+          <BrandLogo decorative className="h-8" />
           <span className="text-sm font-semibold tracking-tight text-foreground">{PRODUCT_NAME}</span>
         </Link>
         <Link

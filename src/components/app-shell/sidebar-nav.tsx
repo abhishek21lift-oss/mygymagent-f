@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -23,7 +23,7 @@ import {
 } from "@/lib/nav-config";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { PRODUCT_LOGO_ALT, PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_LOGO_ALT, PRODUCT_NAME } from "@/lib/brand";
 
 const OPEN_GROUPS_KEY = "mygymagent:nav-open-groups";
 
@@ -461,15 +461,8 @@ export function SidebarNav({
           collapsed ? "justify-center px-1.5" : "gap-2.5",
         )}
       >
-        <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full">
-          <Image
-            src={PRODUCT_LOGO_SRC}
-            alt={PRODUCT_LOGO_ALT}
-            width={96}
-            height={96}
-            className="size-10 shrink-0 rounded-full object-contain"
-            priority
-          />
+        <span aria-hidden="true" className="flex h-10 shrink-0 items-center justify-center">
+          <BrandLogo decorative priority className={collapsed ? "h-7" : "h-9"} />
         </span>
         {!collapsed ? (
           <span className="min-w-0 truncate text-[15px] font-semibold tracking-[-0.02em] text-sidebar-foreground">
