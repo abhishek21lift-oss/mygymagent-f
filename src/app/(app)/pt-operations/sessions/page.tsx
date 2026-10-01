@@ -44,8 +44,8 @@ function SessionRow({ session }: { session: PtSession }) {
  <div className="group flex flex-col gap-4 rounded-lg border bg-card p-4 transition-colors lg:flex-row lg:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
  <div className="min-w-0">
- <p className="truncate text-sm font-semibold">{member}</p>
- <p className="truncate text-xs text-muted-foreground">{session.member?.memberCode ?? ""} · {trainer}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold">{member}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">{session.member?.memberCode ?? ""} · {trainer}</p>
  </div>
  </div>
  <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5 text-xs font-medium tabular-nums">

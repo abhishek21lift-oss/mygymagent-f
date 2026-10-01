@@ -271,8 +271,8 @@ function SlotRow({ slot, showDate }: { slot: CalendarSlot; showDate: boolean }) 
  {slot.source === "PT_SESSION" ? <Dumbbell className="size-5" /> : <UserRound className="size-5" />}
  </span>
  <span className="min-w-0 flex-1">
- <span className="block truncate text-sm font-semibold">{slot.title}</span>
- <span className="block truncate text-xs text-muted-foreground tabular-nums">
+ <span className="block [overflow-wrap:anywhere] text-sm font-semibold">{slot.title}</span>
+ <span className="block [overflow-wrap:anywhere] text-xs text-muted-foreground tabular-nums">
  {showDate ? fmtDate(new Date(slot.startTime)) + " · " : ""}{fmtTime(slot.startTime)} → {fmtTime(slot.endTime)}
  {slot.staffName ? ` · ${slot.staffName}` : ""}{slot.memberName ? ` · ${slot.memberName}` : ""}
  </span>

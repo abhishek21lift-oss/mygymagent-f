@@ -75,7 +75,7 @@ function DetailBody({ paymentId, currency }: { paymentId: string; currency: stri
       <div key={refund.id} className="flex items-start justify-between gap-3 rounded-lg border border-border px-3 py-2">
        <div className="min-w-0">
         <p className="text-sm font-bold tabular-nums">{currency} {Number(refund.amount).toLocaleString()}</p>
-        <p className="truncate text-xs text-muted-foreground">{refund.reason || "No reason recorded"}</p>
+        <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">{refund.reason || "No reason recorded"}</p>
        </div>
        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
         {new Date(refund.createdAt).toLocaleDateString()}

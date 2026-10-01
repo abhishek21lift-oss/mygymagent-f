@@ -275,8 +275,8 @@ function SegmentMembersBody({ segmentId }: { segmentId: string }) {
     {(members.data?.members ?? []).map((member) => (
      <div key={member.memberId} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
       <div className="min-w-0">
-       <p className="truncate text-sm font-bold">{member.firstName} {member.lastName}</p>
-       <p className="truncate text-xs text-muted-foreground">{member.email ?? "No email"}</p>
+       <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{member.firstName} {member.lastName}</p>
+       <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">{member.email ?? "No email"}</p>
       </div>
       <div className="flex items-center gap-2">
        <Badge variant="outline">{member.status}</Badge>
@@ -305,10 +305,10 @@ function SegmentRow({ row }: { row: SegmentSummary }) {
   <div className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
    <div className="min-w-0">
     <div className="flex items-center gap-2">
-     <p className="truncate text-sm font-bold">{row.segment.name}</p>
+     <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{row.segment.name}</p>
      {row.segment.isSystem && <Badge variant="secondary">Built in</Badge>}
     </div>
-    <p className="truncate text-xs text-muted-foreground">
+    <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">
      {row.segment.description || `${row.segment.rules.length} rule${row.segment.rules.length === 1 ? "" : "s"}`}
     </p>
    </div>

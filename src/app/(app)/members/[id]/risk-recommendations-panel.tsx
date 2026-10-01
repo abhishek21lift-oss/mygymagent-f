@@ -218,7 +218,7 @@ export function RiskRecommendationsPanel({ memberId }: { memberId: string }) {
                 className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">
+                  <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">
                     {rec.title ?? rec.actionType ?? "Recommended action"}
                   </p>
                   {rec.description && (

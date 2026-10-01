@@ -69,7 +69,7 @@ export default function PortalDocuments() {
                           rel="noopener noreferrer"
                           className="inline-flex min-h-11 max-w-full items-center gap-1.5 text-sm font-medium text-primary underline-offset-2 hover:underline"
                         >
-                          <span className="truncate">{doc.originalName}</span>
+                          <span className="min-w-0 [overflow-wrap:anywhere]">{doc.originalName}</span>
                           <ExternalLink className="size-3.5 shrink-0" aria-hidden="true" />
                           <span className="sr-only">(opens in a new tab)</span>
                         </a>

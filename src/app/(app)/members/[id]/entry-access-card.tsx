@@ -166,7 +166,7 @@ export function EntryAccessCard({
             <ul className="mt-2 divide-y divide-border">
               {rows.map((enrolment) => (
                 <li key={enrolment.id} className="flex items-center justify-between gap-3 py-2">
-                  <span className="truncate font-mono text-sm">{enrolment.externalUserId}</span>
+                  <span className="min-w-0 [overflow-wrap:anywhere] font-mono text-sm">{enrolment.externalUserId}</span>
                   {canIssue && (
                     <Button
                       variant="ghost"

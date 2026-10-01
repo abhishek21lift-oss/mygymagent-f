@@ -140,7 +140,7 @@ export default function PortalBilling() {
                   return (
                     <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
+                        <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">
                           {p.planName ??
                             (p.invoiceNumbers.length > 0
                               ? `Paid against ${p.invoiceNumbers.join(", ")}`

@@ -128,8 +128,8 @@ export function CampaignAudiencePanel({
                     key={member.id}
                     className="flex flex-wrap items-baseline justify-between gap-2 text-xs"
                   >
-                    <span className="truncate font-medium">{member.name}</span>
-                    <span className="truncate text-muted-foreground">
+                    <span className="min-w-0 [overflow-wrap:anywhere] font-medium">{member.name}</span>
+                    <span className="min-w-0 [overflow-wrap:anywhere] text-muted-foreground">
                       {member.email ?? member.phone ?? "no contact on file"}
                     </span>
                   </li>

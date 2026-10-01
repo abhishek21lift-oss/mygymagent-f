@@ -234,7 +234,7 @@ export default function BusinessOsPage() {
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">{c.name}</p>
+                            <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{c.name}</p>
                             <p className="text-xs text-muted-foreground">
                               {c.channel} · {c.status}
                             </p>

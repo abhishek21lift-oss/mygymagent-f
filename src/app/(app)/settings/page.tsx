@@ -70,8 +70,8 @@ export default function SettingsPage() {
  )}
  </div>
  <div className="min-w-0">
- <p className="truncate text-lg font-semibold tracking-tight">{orgQuery.data.name}</p>
- <p className="truncate text-sm text-muted-foreground">
+ <p className="min-w-0 [overflow-wrap:anywhere] text-lg font-semibold tracking-tight">{orgQuery.data.name}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm text-muted-foreground">
  {[orgQuery.data.contactPhone, orgQuery.data.contactEmail].filter(Boolean).join(" · ") || "Logo, contact details, branches and opening hours"}
  </p>
  <p className="text-xs text-muted-foreground">{orgQuery.data.timezone} · {orgQuery.data.currency}</p>

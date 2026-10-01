@@ -156,7 +156,7 @@ export function DataTable<T>({
  {label}
  </dt>
  )}
- <dd className="truncate text-sm">{flexRender(cell.column.columnDef.cell, cell.getContext())}</dd>
+ <dd className="min-w-0 text-sm [overflow-wrap:anywhere]">{flexRender(cell.column.columnDef.cell, cell.getContext())}</dd>
  </div>
  );
  })}

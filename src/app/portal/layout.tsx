@@ -126,10 +126,10 @@ export default function PortalLayout({
                 priority
               />
               <div className="min-w-0">
-                <p className="truncate text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+                <p className="text-[11px] font-bold uppercase leading-snug tracking-[0.1em] text-muted-foreground [overflow-wrap:anywhere]">
                   {member?.primaryBranch?.name ?? "Your gym"}
                 </p>
-                <p className="truncate text-sm font-semibold tracking-[-0.01em]">
+                <p className="text-sm font-semibold leading-snug tracking-[-0.01em] [overflow-wrap:anywhere]">
                   {member?.firstName} {member?.lastName}
                 </p>
               </div>

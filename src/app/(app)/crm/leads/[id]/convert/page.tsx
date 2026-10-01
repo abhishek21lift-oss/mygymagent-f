@@ -96,7 +96,7 @@ export default function ConvertLeadPage({ params }: { params: { id: string } }) 
  <div className="flex items-start gap-3 rounded-xl border border-blue-100/70 bg-muted/40 p-5">
  <div className="min-w-0">
  <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{lead.firstName} {lead.lastName}</h3>
- <p className="mt-0.5 truncate text-sm font-medium text-stone-600">{lead.email ?? "No email"} · {lead.phone ?? "No phone"}</p>
+ <p className="min-w-0 mt-0.5 [overflow-wrap:anywhere] text-sm font-medium text-stone-600">{lead.email ?? "No email"} · {lead.phone ?? "No phone"}</p>
  <p className="mt-1 text-xs font-medium text-stone-600">Source: {lead.source ?? "Unknown"}</p>
  </div>
  </div>

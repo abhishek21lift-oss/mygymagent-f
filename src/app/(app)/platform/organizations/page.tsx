@@ -111,7 +111,7 @@ function OrgDetailBody({ orgId }: { orgId: string }) {
     ) : (
      org.branches.map((branch) => (
       <div key={branch.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-       <span className="truncate text-sm font-bold">{branch.name}</span>
+       <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{branch.name}</span>
        <span className="shrink-0 text-xs text-muted-foreground">{branch.city ?? branch.slug}</span>
       </div>
      ))
@@ -245,10 +245,10 @@ export default function PlatformOrganizationsPage() {
       <div key={org.id} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
        <div className="min-w-0">
         <div className="flex items-center gap-2">
-         <p className="truncate font-bold">{org.name}</p>
+         <p className="min-w-0 [overflow-wrap:anywhere] font-bold">{org.name}</p>
          <Badge variant={STATUS_VARIANT[org.status]}>{org.status}</Badge>
         </div>
-        <p className="truncate text-xs text-muted-foreground tabular-nums">
+        <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground tabular-nums">
          {org.slug} · {org._count.branches} branch{org._count.branches === 1 ? "" : "es"} ·{" "}
          {org._count.users} staff · {org._count.members} members
         </p>

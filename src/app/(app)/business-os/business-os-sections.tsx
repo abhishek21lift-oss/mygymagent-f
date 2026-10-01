@@ -91,7 +91,7 @@ export function SupportSection() {
             <div key={ticket.id} className="rounded-lg border border-border px-3 py-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{ticket.subject}</p>
+                  <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{ticket.subject}</p>
                   <p className="text-xs text-muted-foreground">
                     {ticket.priority} · opened{" "}
                     {new Date(ticket.createdAt).toLocaleDateString("en-IN")}
@@ -374,7 +374,7 @@ export function ReferralsSection() {
               className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">
+                <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">
                   {referral.referrerFirstName
                     ? `${referral.referrerFirstName} ${referral.referrerLastName ?? ""}`.trim()
                     : referral.referrerMemberId}
@@ -625,7 +625,7 @@ export function AccountingSection() {
                           <TableCell className="whitespace-nowrap text-muted-foreground">
                             {new Date(entry.entryDate).toLocaleDateString("en-IN")}
                           </TableCell>
-                          <TableCell className="max-w-xs truncate font-medium">
+                          <TableCell className="min-w-0 max-w-xs [overflow-wrap:anywhere] font-medium whitespace-normal">
                             {entry.description}
                           </TableCell>
                           <TableCell className="text-muted-foreground">

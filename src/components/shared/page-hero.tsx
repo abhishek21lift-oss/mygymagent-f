@@ -160,7 +160,9 @@ export function PageHero({
             <h1
               id={headingId}
               className={cn(
-                "truncate text-2xl font-bold tracking-[-0.03em] text-foreground sm:text-[1.75rem]",
+                // Wraps rather than truncates: a gym or member name is
+                // the one thing on the screen that must be read whole.
+                "text-balance text-2xl font-bold tracking-[-0.03em] text-foreground [overflow-wrap:anywhere] sm:text-[1.75rem]",
                 resolvedEyebrow && "leading-tight",
               )}
               title={typeof title === "string" ? title : undefined}
@@ -168,7 +170,7 @@ export function PageHero({
               {title}
             </h1>
             {description ? (
-              <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{description}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
             ) : null}
           </div>
         </div>

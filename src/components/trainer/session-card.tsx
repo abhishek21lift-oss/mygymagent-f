@@ -101,7 +101,7 @@ export function SessionCard({
           <p className="mt-1 text-[1.25rem] leading-tight font-extrabold tracking-tight text-[var(--t-ink)]">
             {name}
           </p>
-          <p className="truncate text-[0.875rem] font-medium text-[var(--t-ink-muted)]">
+          <p className="min-w-0 [overflow-wrap:anywhere] text-[0.875rem] font-medium text-[var(--t-ink-muted)]">
             {subtitle}
           </p>
         </div>

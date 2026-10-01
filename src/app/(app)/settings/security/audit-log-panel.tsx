@@ -199,9 +199,9 @@ export function AuditLogPanel() {
        <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
          <Badge variant={actionTone(entry.action)}>{humanise(entry.action)}</Badge>
-         <span className="truncate text-sm font-bold">{humanise(entry.resource)}</span>
+         <span className="min-w-0 text-sm font-bold [overflow-wrap:anywhere]">{humanise(entry.resource)}</span>
         </div>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
          {/* An actor can be null: deleting a staff account nulls the
              actor rather than removing what they did. */}
          {entry.actorName ?? "A deleted account"}

@@ -85,7 +85,7 @@ export function PortalAccessCard({
             {login?.status === "ACTIVE" ? (
               <>
                 <p className="text-sm font-medium">Signed up</p>
-                <p className="truncate text-sm text-muted-foreground">
+                <p className="min-w-0 [overflow-wrap:anywhere] text-sm text-muted-foreground">
                   Signs in as {login.email} and sees their own plan,
                   membership and visits.
                 </p>
@@ -93,7 +93,7 @@ export function PortalAccessCard({
             ) : login ? (
               <>
                 <p className="text-sm font-medium">Invitation outstanding</p>
-                <p className="truncate text-sm text-muted-foreground">
+                <p className="min-w-0 [overflow-wrap:anywhere] text-sm text-muted-foreground">
                   Sent to {login.email}. They have not set a password yet.
                 </p>
               </>

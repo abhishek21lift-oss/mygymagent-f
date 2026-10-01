@@ -127,7 +127,7 @@ export default function SalesFollowUpsPage() {
  </div>
  <Link
  href={`/crm/leads/${row.lead.id}`}
- className="mt-2 block truncate text-sm font-extrabold text-stone-900 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:underline"
+ className="mt-2 block [overflow-wrap:anywhere] text-sm font-extrabold text-stone-900 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:underline"
  >
  {row.lead.firstName} {row.lead.lastName}
  </Link>

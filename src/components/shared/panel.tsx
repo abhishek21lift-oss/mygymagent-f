@@ -67,7 +67,7 @@ export function Panel({
             <h2
               id={titleId}
               data-slot="panel-title"
-              className="flex items-center gap-2 truncate text-[15px] font-semibold tracking-tight text-foreground"
+              className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-foreground"
             >
               {/* The section's hue as a dot, rather than as the text colour:
                   a sentence-case title in ink-on-card reads as a heading,
@@ -77,16 +77,18 @@ export function Panel({
                 data-slot="panel-dot"
                 className="size-2 shrink-0 rounded-full"
               />
-              <span className="truncate">{title}</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">{title}</span>
             </h2>
             {description ? (
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              <p className="mt-0.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">
                 {description}
               </p>
             ) : null}
           </div>
           {actions ? (
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
+            // max-w-full: actions wider than a phone (two date pickers and
+            // a button) wrap inside the header instead of running off it.
+            <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">
               {actions}
             </div>
           ) : null}

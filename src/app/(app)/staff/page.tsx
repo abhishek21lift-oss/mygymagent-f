@@ -79,7 +79,7 @@ function useColumns(perms: {
             <div className="flex min-w-0 items-center gap-3">
               <StaffAvatar firstName={user.firstName} lastName={user.lastName} seed={user.id} />
               <div className="flex min-w-0 flex-col">
-                <span className="flex items-center gap-1.5 truncate font-semibold text-foreground">
+                <span className="flex items-center gap-1.5 font-semibold text-foreground [overflow-wrap:anywhere]">
                   {user.firstName} {user.lastName}
                   {profile?.isTrainer && (
                     <span style={accentVars("emerald")} title="Trainer" className="text-[var(--tone-ink)]">
@@ -88,7 +88,7 @@ function useColumns(perms: {
                     </span>
                   )}
                 </span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
                   {[profile?.jobTitle, user.email ?? user.phone].filter(Boolean).join(" · ") || "—"}
                 </span>
               </div>

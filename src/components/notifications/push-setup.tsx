@@ -266,7 +266,7 @@ export function PushSetup({ audience = "staff" }: { audience?: Audience } = {}) 
                 <li key={device.id} className="flex items-center justify-between gap-3 rounded-md px-1 py-1 text-sm">
                   <span className="flex min-w-0 items-center gap-2">
                     <Smartphone className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                    <span className="truncate">
+                    <span className="min-w-0 [overflow-wrap:anywhere]">
                       {device.id === client?.deviceId ? "This device · " : ""}
                       Added {new Date(device.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
                     </span>

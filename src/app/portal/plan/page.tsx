@@ -86,9 +86,9 @@ export default function PortalPlan() {
                     return (
                       <li key={i} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{name}</p>
+                          <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{name}</p>
                           {text(ex.notes) && (
-                            <p className="truncate text-xs text-muted-foreground">
+                            <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">
                               {text(ex.notes)}
                             </p>
                           )}
@@ -129,7 +129,7 @@ function SessionRow({ session }: { session: PortalPtSession }) {
     <li className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
       <div className="min-w-0">
         <p className="text-sm font-medium">{when(session)}</p>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">
           {[session.trainerName, session.branch?.name].filter(Boolean).join(" · ") || "Personal training"}
         </p>
       </div>
@@ -238,7 +238,7 @@ function PersonalTraining() {
             {workoutSessions.map((w) => (
               <li key={w.id} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{w.planName}</p>
+                  <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{w.planName}</p>
                   <p className="text-xs text-muted-foreground">
                     {new Date(w.sessionDate).toLocaleDateString()} · {w.setCount} set
                     {w.setCount === 1 ? "" : "s"}

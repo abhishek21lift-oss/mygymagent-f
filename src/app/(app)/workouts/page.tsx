@@ -166,8 +166,8 @@ function AssignmentRow({ assignment }: { assignment: WorkoutAssignment }) {
  <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-accent hover:shadow-[0_20px_50px_-30px_rgba(244,63,94,.4)] sm:flex-row sm:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
  <div className="min-w-0">
- <p className="truncate text-sm font-extrabold text-stone-900">{member ? `${member.firstName} ${member.lastName}` : "Member unavailable"}</p>
- <p className="truncate text-xs font-medium text-stone-600">{assignment.workoutPlan?.name ?? "Workout plan"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-extrabold text-stone-900">{member ? `${member.firstName} ${member.lastName}` : "Member unavailable"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-xs font-medium text-stone-600">{assignment.workoutPlan?.name ?? "Workout plan"}</p>
  </div>
  </div>
  <Badge variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "success" : "secondary"}>{assignment.status}</Badge>
@@ -269,7 +269,7 @@ export default function WorkoutsPage() {
  <Badge variant="outline" className="border-orange-200 bg-orange-50 text-orange-800">{plan.exercises.length} exercises</Badge>
  </div>
  <h3 className="mt-4 text-sm font-extrabold tracking-tight text-stone-950">{plan.name}</h3>
- <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-stone-600">{plan.description || "Structured training program"}</p>
+ <p className="mt-1 text-xs font-medium leading-5 text-stone-600 [overflow-wrap:anywhere]">{plan.description || "Structured training program"}</p>
  <div className="mt-4 flex items-center justify-end gap-2">
  {hasPermission("workouts.create") && <WorkoutPlanEditDialog planId={plan.id} planName={plan.name} />}
  {hasPermission("workouts.assign") && <AssignDialog planId={plan.id} planName={plan.name} />}

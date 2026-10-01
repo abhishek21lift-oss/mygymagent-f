@@ -132,8 +132,8 @@ export default function MembershipLifecyclePage() {
  {(reminders.data ?? []).slice(0, 8).map(m => (
  <div key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3">
  <div className="min-w-0">
- <div className="truncate text-sm font-semibold">{m.member?.firstName} {m.member?.lastName}</div>
- <div className="mt-0.5 truncate text-xs text-muted-foreground">{m.membershipPlan?.name} · expires {new Date(m.endDate).toLocaleDateString()}</div>
+ <div className="text-sm font-semibold [overflow-wrap:anywhere]">{m.member?.firstName} {m.member?.lastName}</div>
+ <div className="mt-0.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">{m.membershipPlan?.name} · expires {new Date(m.endDate).toLocaleDateString()}</div>
  </div>
  <div className="flex items-center gap-2">
  <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-semibold uppercase text-amber-800 ring-1 ring-amber-200/60">Dues soon</span>

@@ -153,10 +153,10 @@ function PriorityRow({
  <Icon className="size-5" aria-hidden="true" />
  </span>
  <span className="min-w-0 flex-1">
- <span className="block truncate text-sm font-extrabold text-stone-900">
+ <span className="block [overflow-wrap:anywhere] text-sm font-extrabold text-stone-900">
  {title}
  </span>
- <span className="mt-0.5 block truncate text-xs font-medium text-stone-600">
+ <span className="mt-0.5 block [overflow-wrap:anywhere] text-xs font-medium text-stone-600">
  {detail}
  </span>
  </span>
@@ -216,9 +216,9 @@ function ListRow({
  return (
  <div className="flex items-center justify-between gap-3 border-b border-stone-100 py-3 last:border-0">
  <div className="min-w-0">
- <p className="truncate text-sm font-bold text-stone-900">{primary}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-900">{primary}</p>
  {secondary && (
- <p className="mt-0.5 truncate text-xs font-medium text-stone-600">
+ <p className="min-w-0 mt-0.5 [overflow-wrap:anywhere] text-xs font-medium text-stone-600">
  {secondary}
  </p>
  )}
@@ -744,7 +744,7 @@ export default function CommandCenterPage() {
  <p className="text-xs font-black uppercase tracking-[.18em] text-stone-500">
  {item.label}
  </p>
- <p className="mt-1 truncate text-2xl font-black tracking-tight text-stone-950 tabular-nums">
+ <p className="min-w-0 mt-1 [overflow-wrap:anywhere] text-2xl font-black tracking-tight text-stone-950 tabular-nums">
  {item.value}
  </p>
  {"hint" in item && item.hint ? <p className="mt-1 text-xs font-medium text-stone-600">{item.hint}</p> : null}

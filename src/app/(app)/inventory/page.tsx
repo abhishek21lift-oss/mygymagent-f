@@ -192,7 +192,7 @@ const movementColumns: ColumnDef<StockMovement>[] = [
  {
  header: "Product",
  accessorKey: "product",
- cell: ({ row }) => <span className="font-bold text-stone-900 dark:text-stone-100">{row.original.product?.name ?? "—"}</span>,
+ cell: ({ row }) => <span className="font-bold text-stone-900 [overflow-wrap:anywhere] dark:text-stone-100">{row.original.product?.name ?? "—"}</span>,
  },
  {
  header: "Type",
@@ -227,7 +227,7 @@ export default function InventoryPage() {
 
  const productColumns: ColumnDef<Product>[] = [
  { header: "SKU", accessorKey: "sku", cell: ({ row }) => <span className="font-mono text-xs font-bold text-stone-700 dark:text-stone-300">{row.original.sku}</span> },
- { header: "Name", accessorKey: "name", cell: ({ row }) => <span className="font-bold text-stone-900 dark:text-stone-100">{row.original.name}</span> },
+ { header: "Name", accessorKey: "name", cell: ({ row }) => <span className="font-bold text-stone-900 [overflow-wrap:anywhere] dark:text-stone-100">{row.original.name}</span> },
  {
  header: "Category",
  accessorKey: "category",
