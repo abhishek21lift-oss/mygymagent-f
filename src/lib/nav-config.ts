@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3, Bell, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare,
-  ClipboardList, CreditCard, Dumbbell, Gauge, HandCoins, Home, LayoutDashboard,
+  ClipboardList, CreditCard, Dumbbell, Gauge, HandCoins, Home,
   ListChecks, Megaphone, MessageCircle, MessagesSquare, MonitorSmartphone, Package,
   Receipt, Rocket, Salad, Search, Settings, ShieldCheck, ShoppingBag, Sparkles, Store,
   UserCog, UserPlus, Users, Wallet, Workflow,
@@ -145,9 +145,10 @@ export const primaryNav: NavItem[] = [
  * Tools rather than work areas: somewhere you go on purpose.
  */
 export const secondaryNav: NavItem[] = [
-  { title: "Insights", href: "/owner-os", icon: BarChart3, hue: "blue", children: [
-    { title: "Business health", href: "/owner-os", icon: BarChart3, permission: "reports.view" },
-    { title: "Command centre", href: "/command-center", icon: LayoutDashboard },
+  // Business health and the Command centre were second and third copies
+  // of Home's figures under different definitions; Home is the one now,
+  // and their addresses redirect there (next.config.ts).
+  { title: "Insights", href: "/intelligence", icon: BarChart3, hue: "blue", children: [
     { title: "Member intelligence", href: "/intelligence", icon: Brain, permission: "reports.view" },
     { title: "Business OS", href: "/business-os", icon: Gauge, permission: "reports.view" },
   ] },

@@ -268,7 +268,7 @@ export default function IntelligencePage() {
  const sales = useSalesFunnel(branch);
  const sources = useSalesSourcePerformance(branch);
  const trainers = useTrainerWorkload(branch);
- const inventory = useInventoryForecast();
+ const inventory = useInventoryForecast(branch);
  const lifecycle = useMembershipLifecycle(branch);
 
  const revenueRow = revenue.data?.revenue?.[0];
