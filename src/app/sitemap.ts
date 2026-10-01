@@ -4,8 +4,8 @@ import { LEGAL_LINKS } from "@/lib/legal";
 import { siteUrl } from "@/lib/site";
 
 /** Every public page: the landing page, sign-up and the policies. */
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const origin = await siteUrl();
+export default function sitemap(): MetadataRoute.Sitemap {
+  const origin = siteUrl();
   const at = (path: string) => new URL(path, origin).toString();
   return [
     { url: at("/"), changeFrequency: "weekly", priority: 1 },

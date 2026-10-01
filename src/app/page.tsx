@@ -42,8 +42,8 @@ import { cn } from "@/lib/utils";
  * the pointer tilt run in the browser, and the 3D scene is CSS transforms.
  */
 
-export async function generateMetadata(): Promise<Metadata> {
- const origin = await siteUrl();
+export function generateMetadata(): Metadata {
+ const origin = siteUrl();
  const title = `${SITE.title} | ${SITE.name}`;
  return {
  metadataBase: origin,
@@ -230,8 +230,8 @@ function JsonLd({ data }: { data: unknown }) {
  );
 }
 
-export default async function LandingPage() {
- const origin = (await siteUrl()).toString().replace(/\/$/, "");
+export default function LandingPage() {
+ const origin = siteUrl().toString().replace(/\/$/, "");
 
  const structuredData = [
  {

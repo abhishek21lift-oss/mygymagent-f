@@ -1,5 +1,3 @@
-import { headers } from "next/headers";
-
 import { PRODUCT_NAME } from "@/lib/brand";
 
 /**
@@ -28,29 +26,27 @@ export const SITE = {
   locale: "en_IN",
 } as const;
 
+/** Where the public site lives: the one canonical address. */
+export const DEFAULT_SITE_URL = "https://mygymagent.tech";
+
 /**
  * The site's origin, for canonical URLs, the sitemap and social cards.
  *
- * `NEXT_PUBLIC_SITE_URL` is the answer when it is set, and should be on
- * production: the app is reachable under more than one host, and only one
- * of them should be the canonical one. Without it the request's own host
- * is used, so the URLs are never wrong for the address being served.
+ * The app answers on more than one host (the VPS, a Vercel preview);
+ * every one of them names this origin as canonical, so search engines
+ * index one site rather than several copies of it. `NEXT_PUBLIC_SITE_URL`
+ * overrides it, e.g. for a staging domain.
  */
-export async function siteUrl(): Promise<URL> {
+export function siteUrl(): URL {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (configured) {
     try {
       return new URL(configured);
     } catch {
-      // Fall through to the request's host.
+      // Fall back to the default.
     }
   }
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto =
-    h.get("x-forwarded-proto")?.split(",")[0]?.trim() ??
-    (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
-  return new URL(`${proto}://${host}`);
+  return new URL(DEFAULT_SITE_URL);
 }
 
 /**
