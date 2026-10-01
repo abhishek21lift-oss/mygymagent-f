@@ -24,6 +24,7 @@ import { refreshWebPush } from "@/lib/push/web-push";
 import { listenForNativeTaps } from "@/lib/push/native-push";
 import { usePortalMe } from "@/lib/hooks/use-portal";
 import { cn } from "@/lib/utils";
+import { PullToRefresh } from "@/components/shared/pull-to-refresh";
 
 const TABS = [
   { href: "/portal", label: "Home", icon: User },
@@ -191,7 +192,7 @@ export default function PortalLayout({
       </header>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-        {children}
+        <PullToRefresh>{children}</PullToRefresh>
       </main>
     </div>
   );

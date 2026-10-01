@@ -9,6 +9,7 @@ import { MfaRequiredGate } from "@/components/security/mfa-required-gate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrainerTopBar } from "@/components/trainer/trainer-top-bar";
 import { TrainerBottomNav } from "@/components/trainer/trainer-bottom-nav";
+import { PullToRefresh } from "@/components/shared/pull-to-refresh";
 
 /**
  * The phone-shaped shell around the same authenticated session as the
@@ -72,7 +73,9 @@ export function TrainerShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="trainer-surface flex min-h-svh flex-col bg-[var(--t-page)] text-[var(--t-ink)]">
       <TrainerTopBar />
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 pt-4 pb-8">{children}</main>
+      <main className="mx-auto w-full max-w-lg flex-1 px-4 pt-4 pb-8">
+        <PullToRefresh>{children}</PullToRefresh>
+      </main>
       <TrainerBottomNav />
     </div>
   );
