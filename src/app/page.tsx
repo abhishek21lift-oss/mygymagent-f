@@ -7,10 +7,13 @@ import {
  Bell,
  Building2,
  Check,
+ Clock,
  CreditCard,
  Dumbbell,
  FileSpreadsheet,
  HandCoins,
+ IndianRupee,
+ Languages,
  LockKeyhole,
  MessageCircle,
  Package,
@@ -21,15 +24,19 @@ import {
  Sparkles,
  UserPlus,
  Users,
+ Wallet,
+ X,
  Zap,
 } from "lucide-react";
 
 import { HeroScene } from "@/components/landing/hero-scene";
 import { HeroActions, LandingNav } from "@/components/landing/landing-nav";
 import { Reveal, TiltCard } from "@/components/landing/motion";
+import { ProductTour } from "@/components/landing/product-tour";
+import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
 import styles from "@/components/landing/landing.module.css";
 import { PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
-import { LEGAL_LINKS } from "@/lib/legal";
+import { LEGAL, LEGAL_LINKS } from "@/lib/legal";
 import { PLATFORM_PLANS, SITE, siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +78,36 @@ type Feature = {
  body: string;
  gradient: string;
  wide?: boolean;
+ /** A wide card's small illustration of the feature. */
+ visual?: "membership" | "training" | "reports";
 };
+
+/** What fills the extra width of a wide feature card. Decorative. */
+function FeatureVisual({ kind }: { kind: NonNullable<Feature["visual"]> }) {
+ if (kind === "reports") {
+ const bars = [30, 44, 38, 56, 52, 68, 63, 79, 74, 90, 86, 97];
+ return (
+ <div aria-hidden="true" className="mt-6 flex h-20 items-end gap-1.5 rounded-2xl bg-black/[0.03] p-3 dark:bg-white/[0.04]">
+ {bars.map((h, i) => (
+ <span key={i} className="flex-1 rounded-t-md bg-gradient-to-t from-blue-500 to-indigo-400" style={{ height: `${h}%` }} />
+ ))}
+ </div>
+ );
+ }
+ const chips =
+ kind === "membership"
+ ? [["Freeze", "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300"], ["Extend", "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"], ["Upgrade", "bg-violet-500/15 text-violet-700 dark:text-violet-300"], ["Transfer", "bg-amber-500/15 text-amber-700 dark:text-amber-300"], ["Renew", "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300"]]
+ : [["Assign coach", "bg-violet-500/15 text-violet-700 dark:text-violet-300"], ["10-session pack", "bg-orange-500/15 text-orange-700 dark:text-orange-300"], ["Yoga · 7 AM", "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"], ["Leg day plan", "bg-rose-500/15 text-rose-700 dark:text-rose-300"], ["8 of 10 left", "bg-sky-500/15 text-sky-700 dark:text-sky-300"]];
+ return (
+ <ul aria-hidden="true" className="mt-6 flex flex-wrap gap-2">
+ {chips.map(([label, tone]) => (
+ <li key={label} className={cn("rounded-full px-3 py-1.5 text-xs font-semibold", tone)}>
+ {label}
+ </li>
+ ))}
+ </ul>
+ );
+}
 
 const FEATURES: Feature[] = [
  {
@@ -80,11 +116,12 @@ const FEATURES: Feature[] = [
  body: "Sell a plan, then freeze, extend, upgrade, downgrade, transfer or renew it in one tap. Renewals line up with the term before them, and every change is in the audit log.",
  gradient: "from-violet-500 to-fuchsia-500",
  wide: true,
+ visual: "membership",
  },
  {
  icon: MessageCircle,
  title: "WhatsApp from your own number",
- body: "Renewal and payment reminders go out on their own, and the AI answers members' questions about plans, timings and dues.",
+ body: "Renewal and payment reminders go out on their own, and members get instant answers about plans, fees, timings and classes, in English, Hindi or Hinglish.",
  gradient: "from-emerald-500 to-teal-500",
  },
  {
@@ -100,17 +137,18 @@ const FEATURES: Feature[] = [
  gradient: "from-sky-500 to-cyan-500",
  },
  {
+ icon: CreditCard,
+ title: "Payments & invoices",
+ body: "Record cash, UPI, card and bank transfers. Invoices raise themselves, dues are tracked per member, and receipts reach the member automatically.",
+ gradient: "from-amber-400 to-orange-500",
+ },
+ {
  icon: Dumbbell,
  title: "Personal training & classes",
  body: "Assign coaches, sell PT packages, book sessions and classes, and track every session used. Workout and diet plans go straight to the member's app.",
  gradient: "from-orange-500 to-rose-500",
  wide: true,
- },
- {
- icon: CreditCard,
- title: "Payments & invoices",
- body: "Record cash, UPI, card and bank transfers. Invoices raise themselves, dues are tracked per member, and receipts reach the member automatically.",
- gradient: "from-amber-400 to-orange-500",
+ visual: "training",
  },
  {
  icon: HandCoins,
@@ -129,6 +167,8 @@ const FEATURES: Feature[] = [
  title: "Reports that answer questions",
  body: "Revenue, renewals, churn risk, lead conversion and branch performance on one screen, in your gym's time zone.",
  gradient: "from-blue-500 to-indigo-500",
+ wide: true,
+ visual: "reports",
  },
 ];
 
@@ -138,7 +178,25 @@ const AUTOMATIONS = [
  { icon: Users, title: "Win back quiet members", body: "When someone stops coming, a message before they leave." },
  { icon: Dumbbell, title: "PT package expiry", body: "So sessions get renewed, not forgotten." },
  { icon: UserPlus, title: "Lead first touch & follow-up", body: "Every enquiry answered and followed up on time." },
- { icon: MessageCircle, title: "AI replies, day and night", body: "Plans, timings and dues answered from your real data." },
+ { icon: MessageCircle, title: "Instant replies, day and night", body: "Plans, fees, timings and classes answered from your real data." },
+];
+
+const INDIA: { icon: LucideIcon; title: string; body: string; gradient: string }[] = [
+ { icon: MessageCircle, title: "WhatsApp-first", body: "Reminders and replies where your members already are, from your own number.", gradient: "from-emerald-500 to-teal-500" },
+ { icon: Languages, title: "English, Hindi, Hinglish", body: "\"Fees kitna hai?\" and \"kab khulta hai?\" get an instant answer.", gradient: "from-orange-500 to-rose-500" },
+ { icon: IndianRupee, title: "Rupees and UPI", body: "Prices in ₹, and cash, UPI, card or bank transfers recorded in seconds.", gradient: "from-amber-400 to-orange-500" },
+ { icon: Clock, title: "Your time zone", body: "Reports, reminders and \"today\" follow your branch's clock, not a server's.", gradient: "from-sky-500 to-indigo-500" },
+ { icon: Smartphone, title: "Phone-first", body: "Run the front desk from a phone, and give members an Android and iPhone app.", gradient: "from-violet-500 to-fuchsia-500" },
+ { icon: Wallet, title: "Priced for Indian gyms", body: "Start free, then plans from ₹999 a month, billed monthly.", gradient: "from-pink-500 to-rose-500" },
+];
+
+const COMPARE: [string, string][] = [
+ ["Renewals tracked in a register, and missed", "Renewal reminders go out on WhatsApp by themselves"],
+ ["Calling every member about dues", "Dues tracked per member, with automatic payment reminders"],
+ ["Answering \"what are the timings?\" all day", "Instant replies to plans, fees, timings and classes"],
+ ["Attendance on paper, if at all", "QR and biometric check-in, with streaks and history"],
+ ["Spreadsheets for staff salaries", "Payroll with leave and trainer commissions"],
+ ["No idea who is about to quit", "Members at risk flagged, with a win-back message ready"],
 ];
 
 const STEPS = [
@@ -181,7 +239,7 @@ const FAQS = [
  },
  {
  q: "Can it send WhatsApp messages from my gym's own number?",
- a: "Yes. Connect your gym's WhatsApp number in Settings and renewal reminders, payment reminders and receipts go out from it. The AI can also reply to members' questions about plans, timings and their dues.",
+ a: "Yes. Connect your gym's WhatsApp number in Settings and renewal reminders, payment reminders and receipts go out from it. Members also get instant replies about plans, fees, timings and classes, in English, Hindi or Hinglish; anything else is passed to your team.",
  },
  {
  q: "Do members get an app?",
@@ -318,7 +376,7 @@ export default function LandingPage() {
 
  <main id="main">
  {/* ── Hero ───────────────────────────────────────────── */}
- <section aria-labelledby="hero-title" className="px-4 pb-10 pt-32 sm:px-6 sm:pt-40">
+ <section id="hero" aria-labelledby="hero-title" className="px-4 pb-10 pt-32 sm:px-6 sm:pt-40">
  <div className="mx-auto max-w-5xl text-center">
  <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-white/70 px-3.5 py-1.5 text-sm font-medium text-violet-700 shadow-sm backdrop-blur dark:bg-white/5 dark:text-violet-300">
  <Zap className="size-4" aria-hidden="true" />
@@ -372,7 +430,7 @@ export default function LandingPage() {
  </section>
 
  {/* ── Features ───────────────────────────────────────── */}
- <section id="features" aria-labelledby="features-title" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28">
+ <section id="features" aria-labelledby="features-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
  <SectionHeading
  id="features-title"
  eyebrow="Everything in one place"
@@ -381,7 +439,7 @@ export default function LandingPage() {
  />
  <ul className="mx-auto mt-14 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
  {FEATURES.map((f, i) => (
- <Reveal as="li" key={f.title} delay={(i % 3) * 90} className={cn(f.wide && "lg:col-span-2")}>
+ <Reveal as="li" key={f.title} delay={(i % 3) * 90} className={cn(f.wide && "sm:col-span-2")}>
  <TiltCard className="h-full">
  <article className="group relative h-full overflow-hidden rounded-[28px] border border-black/5 bg-white/75 p-6 shadow-[0_20px_50px_-25px_rgba(30,20,80,0.25)] backdrop-blur-xl sm:p-7 dark:border-white/10 dark:bg-white/[0.04]">
  <div aria-hidden="true" className={cn("pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition duration-500 group-hover:opacity-40", f.gradient)} />
@@ -391,6 +449,7 @@ export default function LandingPage() {
  </span>
  <h3 className="mt-5 text-xl font-bold tracking-tight text-foreground">{f.title}</h3>
  <p className="mt-2 text-pretty leading-relaxed text-muted-foreground">{f.body}</p>
+ {f.visual ? <FeatureVisual kind={f.visual} /> : null}
  </div>
  </article>
  </TiltCard>
@@ -399,8 +458,19 @@ export default function LandingPage() {
  </ul>
  </section>
 
+ {/* ── Product tour ───────────────────────────────────── */}
+ <section id="tour" aria-labelledby="tour-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
+ <SectionHeading
+ id="tour-title"
+ eyebrow="Take a look inside"
+ title="Designed to feel effortless"
+ body="Clean, fast and colourful, on a phone at the front desk or a laptop in the office. Here is what your day looks like."
+ />
+ <ProductTour />
+ </section>
+
  {/* ── Automation ─────────────────────────────────────── */}
- <section id="automation" aria-labelledby="automation-title" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28">
+ <section id="automation" aria-labelledby="automation-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
  <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[40px] bg-[#0d0b1d] px-6 py-16 text-white shadow-2xl sm:px-12 sm:py-20">
  <div aria-hidden="true" className="pointer-events-none absolute inset-0">
  <div className={cn("absolute -left-24 top-0 size-96 rounded-full bg-violet-600/50 blur-[110px]", styles.orb)} />
@@ -439,6 +509,29 @@ export default function LandingPage() {
  </ul>
  </div>
  </div>
+ </section>
+
+ {/* ── Made for India ─────────────────────────────────── */}
+ <section aria-labelledby="india-title" className="px-4 py-16 sm:px-6 sm:py-24">
+ <SectionHeading
+ id="india-title"
+ eyebrow="Made for India"
+ title="Built for the way Indian gyms actually run"
+ body="Not a foreign tool with rupees bolted on. Gym management software for India, from pricing to payments to the language your members message in."
+ />
+ <ul className="mx-auto mt-12 grid max-w-6xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+ {INDIA.map((item, i) => (
+ <Reveal as="li" key={item.title} delay={(i % 3) * 80}>
+ <div className="h-full rounded-[24px] border border-black/5 bg-white/75 p-5 backdrop-blur-xl sm:p-6 dark:border-white/10 dark:bg-white/[0.04]">
+ <span className={cn("flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md", item.gradient)}>
+ <item.icon className="size-5" aria-hidden="true" />
+ </span>
+ <h3 className="mt-4 font-bold tracking-tight text-foreground sm:text-lg">{item.title}</h3>
+ <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground sm:text-[15px]">{item.body}</p>
+ </div>
+ </Reveal>
+ ))}
+ </ul>
  </section>
 
  {/* ── Member app & trust ─────────────────────────────── */}
@@ -480,7 +573,7 @@ export default function LandingPage() {
  </section>
 
  {/* ── How it works ───────────────────────────────────── */}
- <section id="how-it-works" aria-labelledby="how-title" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28">
+ <section id="how-it-works" aria-labelledby="how-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
  <SectionHeading id="how-title" eyebrow="How it works" title="Up and running in an afternoon" />
  <ol className="mx-auto mt-14 grid max-w-5xl gap-4 md:grid-cols-3">
  {STEPS.map((step, i) => (
@@ -501,8 +594,41 @@ export default function LandingPage() {
  </Reveal>
  </section>
 
+ {/* ── Before / after ─────────────────────────────────── */}
+ <section aria-labelledby="compare-title" className="px-4 py-16 sm:px-6 sm:py-24">
+ <SectionHeading id="compare-title" eyebrow="The difference" title="From registers and reminders to running itself" />
+ <div className="mx-auto mt-12 grid max-w-5xl gap-4 md:grid-cols-2">
+ <Reveal>
+ <div className="h-full rounded-[28px] border border-black/5 bg-white/60 p-7 dark:border-white/10 dark:bg-white/[0.03]">
+ <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">Without it</p>
+ <ul className="mt-5 space-y-3.5">
+ {COMPARE.map(([before]) => (
+ <li key={before} className="flex items-start gap-3 text-muted-foreground">
+ <X className="mt-0.5 size-5 shrink-0 text-rose-500" aria-hidden="true" />
+ {before}
+ </li>
+ ))}
+ </ul>
+ </div>
+ </Reveal>
+ <Reveal delay={120}>
+ <div className="relative h-full overflow-hidden rounded-[28px] bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 p-7 text-white shadow-[0_30px_70px_-25px_rgba(192,38,211,0.6)]">
+ <p className="text-sm font-semibold uppercase tracking-[0.14em] text-white/80">With {PRODUCT_NAME}</p>
+ <ul className="mt-5 space-y-3.5">
+ {COMPARE.map(([, after]) => (
+ <li key={after} className="flex items-start gap-3">
+ <Check className="mt-0.5 size-5 shrink-0" strokeWidth={3} aria-hidden="true" />
+ {after}
+ </li>
+ ))}
+ </ul>
+ </div>
+ </Reveal>
+ </div>
+ </section>
+
  {/* ── Pricing ────────────────────────────────────────── */}
- <section id="pricing" aria-labelledby="pricing-title" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28">
+ <section id="pricing" aria-labelledby="pricing-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
  <SectionHeading
  id="pricing-title"
  eyebrow="Pricing"
@@ -572,7 +698,7 @@ export default function LandingPage() {
  </section>
 
  {/* ── FAQ ────────────────────────────────────────────── */}
- <section id="faq" aria-labelledby="faq-title" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-28">
+ <section id="faq" aria-labelledby="faq-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
  <SectionHeading id="faq-title" eyebrow="FAQ" title="Questions gym owners ask" />
  <div className="mx-auto mt-12 max-w-3xl space-y-3">
  {FAQS.map((f, i) => (
@@ -621,33 +747,67 @@ export default function LandingPage() {
  </section>
  </main>
 
- <footer className="border-t border-black/5 px-4 py-12 sm:px-6 dark:border-white/10">
- <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+ <MobileCtaBar startAfterId="hero" stopAtId="cta-title" />
+
+ <footer className="border-t border-black/5 px-4 pb-24 pt-14 sm:px-6 sm:pb-12 dark:border-white/10">
+ <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
  <div className="max-w-sm">
  <div className="flex items-center gap-2">
  {/* eslint-disable-next-line @next/next/no-img-element */}
- <img src={PRODUCT_LOGO_SRC} alt="" width={30} height={30} className="rounded-full" loading="lazy" />
+ <img src={PRODUCT_LOGO_SRC} alt="" width={32} height={32} className="rounded-full" loading="lazy" />
  <span className="font-bold tracking-tight">{PRODUCT_NAME}</span>
  </div>
  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
- Gym management software with WhatsApp automation and AI, for gyms and fitness studios.
+ Gym management software with WhatsApp automation and AI, for gyms and fitness studios across India.
  </p>
+ {LEGAL.supportEmail ? (
+ <a href={`mailto:${LEGAL.supportEmail}`} className="mt-4 inline-block text-sm font-medium text-violet-600 hover:underline dark:text-violet-400">
+ {LEGAL.supportEmail}
+ </a>
+ ) : null}
  </div>
- <nav aria-label="Footer" className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">
- <a href="#features" className="text-muted-foreground hover:text-foreground">Features</a>
- <a href="#pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
- <Link href="/register" className="text-muted-foreground hover:text-foreground">Start free trial</Link>
- <Link href="/login" className="text-muted-foreground hover:text-foreground">Sign in</Link>
- {LEGAL_LINKS.map((link) => (
- <Link key={link.href} href={link.href} className="text-muted-foreground hover:text-foreground">
- {link.label}
- </Link>
+ {[
+ {
+ title: "Product",
+ links: [
+ { href: "#features", label: "Features" },
+ { href: "#tour", label: "Product tour" },
+ { href: "#automation", label: "WhatsApp automation" },
+ { href: "#pricing", label: "Pricing" },
+ { href: "#faq", label: "FAQ" },
+ ],
+ },
+ {
+ title: "Get started",
+ links: [
+ { href: "/register", label: "Start free trial" },
+ { href: "/login", label: "Sign in" },
+ { href: "/contact", label: "Contact us" },
+ ],
+ },
+ { title: "Legal", links: LEGAL_LINKS.filter((l) => l.href !== "/contact").map((l) => ({ href: l.href, label: l.label })) },
+ ].map((col) => (
+ <nav key={col.title} aria-label={col.title}>
+ <p className="text-sm font-semibold text-foreground">{col.title}</p>
+ <ul className="mt-3 space-y-2.5 text-sm">
+ {col.links.map((link) => (
+ <li key={link.href}>
+ {link.href.startsWith("#") ? (
+ <a href={link.href} className="text-muted-foreground transition hover:text-foreground">{link.label}</a>
+ ) : (
+ <Link href={link.href} className="text-muted-foreground transition hover:text-foreground">{link.label}</Link>
+ )}
+ </li>
  ))}
+ </ul>
  </nav>
+ ))}
  </div>
- <div className="mx-auto mt-10 flex max-w-6xl items-center gap-2 text-xs text-muted-foreground">
- <LockKeyhole className="size-3.5" aria-hidden="true" />
- <span>© {new Date().getFullYear()} {PRODUCT_NAME}. All rights reserved.</span>
+ <div className="mx-auto mt-12 flex max-w-6xl flex-col gap-2 border-t border-black/5 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
+ <span className="flex items-center gap-2">
+ <LockKeyhole className="size-3.5" aria-hidden="true" />© {new Date().getFullYear()} {PRODUCT_NAME}. All rights reserved.
+ </span>
+ <span>Made in India 🇮🇳 for gyms everywhere</span>
  </div>
  </footer>
  </div>

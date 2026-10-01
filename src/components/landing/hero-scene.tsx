@@ -154,7 +154,7 @@ function Phone() {
 
 export function HeroScene() {
  return (
- <TiltStage className="relative mx-auto h-[340px] w-full max-w-[920px] sm:h-[500px] lg:h-[560px]">
+ <TiltStage className="relative mx-auto h-[310px] w-full max-w-[920px] sm:h-[500px] lg:h-[560px]">
  <div className={styles.layer} style={{ inset: 0, ...z(0) }}>
  <Dashboard />
  </div>
@@ -196,7 +196,7 @@ export function HeroScene() {
  </div>
 
  {/* AI insight */}
- <div className={styles.layer} style={{ left: "5%", bottom: "2%", ...z(190) }}>
+ <div className={cn(styles.layer, "hidden sm:block")} style={{ left: "5%", bottom: "2%", ...z(190) }}>
  <div className={styles.bobFast}>
  <Glass className="w-[190px] p-3 sm:w-[240px]">
  <div className="flex items-center gap-2">
