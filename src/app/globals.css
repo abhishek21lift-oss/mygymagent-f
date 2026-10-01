@@ -1228,6 +1228,29 @@
   }
   @keyframes brand-neon-turn { to { transform: rotate(1turn); } }
 
+  /* The TCC logo's halo: a warm red-and-gold bloom behind it, no rim --
+     the logo is wide, and a ring was drawn for the round mark. */
+  .brand-glow {
+    position: relative;
+    isolation: isolate;
+    display: inline-block;
+  }
+  .brand-glow::before {
+    content: "";
+    position: absolute;
+    inset: -18% -12%;
+    z-index: -1;
+    border-radius: 9999px;
+    background:
+      radial-gradient(closest-side at 38% 55%, rgb(239 68 68 / 0.28), transparent),
+      radial-gradient(closest-side at 64% 45%, rgb(234 179 8 / 0.32), transparent);
+    filter: blur(26px);
+    animation: brand-neon-breathe 8s var(--ease-out) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-glow::before { animation: none; }
+  }
+
   /* --- The sign-in canvas ---------------------------------------
      The brand's own three hues, at their fullest, much larger and much
      softer than the in-app aurora so the mark reads as the bright thing

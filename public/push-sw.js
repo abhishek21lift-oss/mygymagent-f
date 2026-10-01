@@ -38,8 +38,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: notification.body || "",
-      icon: "/brand/the-cult-client-192.png",
-      badge: "/brand/the-cult-client-192.png",
+      icon: "/brand/tcc-icon-192.png",
+      badge: "/brand/tcc-badge-96.png",
       // Same type replaces rather than stacks, so a burst of low-stock
       // alerts reads as one current notice.
       tag: data.type || undefined,

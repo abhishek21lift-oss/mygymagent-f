@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/shared/brand-logo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
@@ -35,7 +36,7 @@ import { Reveal, TiltCard } from "@/components/landing/motion";
 import { ProductTour } from "@/components/landing/product-tour";
 import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
 import styles from "@/components/landing/landing.module.css";
-import { PRODUCT_LOGO_SRC, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_NAME } from "@/lib/brand";
 import { LEGAL, LEGAL_LINKS } from "@/lib/legal";
 import { PLATFORM_PLANS, SITE, siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -298,7 +299,7 @@ export default function LandingPage() {
  "@id": `${origin}/#organization`,
  name: PRODUCT_NAME,
  url: origin,
- logo: `${origin}/brand/the-cult-client-512.png`,
+ logo: `${origin}/brand/tcc-icon-512.png`,
  },
  {
  "@context": "https://schema.org",
@@ -753,8 +754,7 @@ export default function LandingPage() {
  <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
  <div className="max-w-sm">
  <div className="flex items-center gap-2">
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img src={PRODUCT_LOGO_SRC} alt="" width={32} height={32} className="rounded-full" loading="lazy" />
+ <BrandLogo decorative className="h-8" />
  <span className="font-bold tracking-tight">{PRODUCT_NAME}</span>
  </div>
  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
