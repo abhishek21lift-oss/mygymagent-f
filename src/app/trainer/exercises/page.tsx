@@ -186,8 +186,6 @@ export default function TrainerExercisesPage() {
               />
             ) : undefined
           }
-          onRefresh={() => void exercises.refetch()}
-          refreshing={exercises.isFetching}
         />
 
         <h1 className="text-[length:var(--t-text-section)] font-extrabold tracking-tight text-[#0a0a0a]">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRefreshOnPull } from "@/components/shared/pull-to-refresh"
 import * as React from "react";
 import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
@@ -85,6 +86,8 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
       setLoading(false);
     }
   }, []);
+
+  useRefreshOnPull(() => (canRead ? load() : undefined));
 
   React.useEffect(() => {
     if (!canRead) return;

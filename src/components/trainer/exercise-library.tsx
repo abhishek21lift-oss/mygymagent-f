@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
  * The dark card that opens the exercise library.
  *
  * The reference catches this one mid-scroll, so only its top is visible:
- * a near-black field with a faint grid, a white "+ New exercise" pill and
- * a refresh button. Reproduced to that much -- inventing the rest of the
+ * a near-black field with a faint grid and a white "+ New exercise" pill
+ * (its refresh button went when pull-to-refresh came in). Reproduced to that much -- inventing the rest of the
  * card's contents from a 200px glimpse would be guessing at a screen
  * nobody has seen whole.
  *
@@ -18,15 +18,11 @@ import { cn } from "@/lib/utils";
  */
 export function ExerciseHeaderCard({
   action,
-  onRefresh,
-  refreshing,
 }: {
   /** Slot for the "new exercise" affordance. The form behind it is the
    *  staff app's, shared via `NewExerciseDialog` -- this surface only
    *  decides how the trigger looks. */
   action: React.ReactNode;
-  onRefresh: () => void;
-  refreshing: boolean;
 }) {
   return (
     <section
@@ -50,34 +46,6 @@ export function ExerciseHeaderCard({
       <div className="relative flex items-center gap-3">
         {action}
 
-        <button
-          type="button"
-          onClick={onRefresh}
-          aria-label="Refresh exercises"
-          className="inline-flex size-12 items-center justify-center rounded-[var(--t-radius-pill)] bg-white/10 text-white transition-transform active:scale-95 disabled:opacity-60"
-          disabled={refreshing}
-        >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className="size-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.25}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-            <path d="M21 3v6h-6" />
-          </svg>
-        </button>
-
-        {/* Screen-reader-only: the reference shows no caption on this card,
-            and a visible one would be my invention rather than its design.
-            Announced instead, so the refresh state is still conveyed. */}
-        <span className="sr-only" role="status">
-          {refreshing ? "Refreshing exercises" : "Exercises loaded"}
-        </span>
       </div>
     </section>
   );

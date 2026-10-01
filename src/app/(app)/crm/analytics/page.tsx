@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ArrowRight, BarChart3, CalendarDays, Clock3, Flame, ListChecks, RefreshCw, Sparkles, Target, TrendingUp, Users } from "lucide-react"
+import { ArrowRight, BarChart3, CalendarDays, Clock3, Flame, ListChecks, Sparkles, Target, TrendingUp, Users } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { PageHero } from "@/components/shared/page-hero"
@@ -175,9 +175,6 @@ export default function SalesAnalyticsPage() {
  <div>
  <h2 id="analytics-sources" className="section-title">Lead source performance</h2>
  </div>
- <Button variant="ghost" size="sm" onClick={() => { funnel.refetch(); sources.refetch(); lostReasons.refetch(); assignees.refetch() }} disabled={funnel.isFetching || sources.isFetching} className="min-h-11 w-fit rounded-xl hover:bg-cyan-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <RefreshCw className={(funnel.isFetching || sources.isFetching) ? "size-4 animate-spin" : "size-4"} aria-hidden="true" /> Refresh
- </Button>
  </div>
  <div className="p-4 sm:p-5">
  {sources.isError ? (
