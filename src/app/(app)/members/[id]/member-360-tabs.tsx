@@ -118,6 +118,8 @@ import { useMemberships, useRenewMembership, useMembershipHistory } from "@/lib/
 import { useMembershipBilling } from "@/lib/hooks/use-members";
 import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-member-screenings";
+import { ErrorState } from "@/components/shared/error-state";
+import { ptTrainerName } from "@/lib/hooks/use-pt-sessions";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
 import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
 import { useMemberWorkoutAssignments } from "@/lib/hooks/use-member-workouts";
@@ -2134,6 +2136,7 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
  const query = useMemberPtSessions(memberId);
 
  if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isError) return <ErrorState message="Couldn't load PT sessions." onRetry={() => query.refetch()} />;
 
  if (!query.data || query.data.length === 0) {
  return (
@@ -2147,32 +2150,40 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
 
  return (
  <div className="flex flex-col gap-2">
- {query.data.map((session) => (
+ {query.data.map((session) => {
+ const coach = ptTrainerName(session.trainer);
+ return (
  <div key={session.id} className="rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-3">
+ <div className="flex items-center justify-between gap-3">
+ <div className="flex min-w-0 items-center gap-3">
  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
- <Dumbbell className="size-5 text-primary" />
+ <Dumbbell className="size-5" aria-hidden="true" />
  </div>
- <div>
- <p className="font-medium">
- {new Date(session.scheduledAt).toLocaleDateString()} at {new Date(session.scheduledAt).toLocaleTimeString()}
+ <div className="min-w-0">
+ <p className="font-medium tabular-nums">
+ {new Date(session.startTime).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+ {" · "}
+ {new Date(session.startTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+ {"–"}
+ {new Date(session.endTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
  </p>
- <p className="text-sm text-stone-600">
- {session.trainer?.firstName} {session.trainer?.lastName}
- {session.workoutPlan && ` &bull; ${session.workoutPlan.name}`}
+ <p className="text-sm text-stone-600 [overflow-wrap:anywhere]">
+ {[coach ?? "No coach", session.type.replaceAll("_", " ").toLowerCase(), session.isPaid ? "paid" : null]
+ .filter(Boolean)
+ .join(" · ")}
  </p>
  </div>
  </div>
  <Badge
  variant={session.status === "COMPLETED" ? "default" : session.status === "CANCELLED" ? "secondary" : "outline"}
  >
- {session.status}
+ {session.status.replace("_", " ")}
  </Badge>
  </div>
- {session.notes && <p className="mt-2 text-sm text-stone-600">{session.notes}</p>}
+ {session.notes && <p className="mt-2 text-sm text-stone-600 [overflow-wrap:anywhere]">{session.notes}</p>}
  </div>
- ))}
+ );
+ })}
  </div>
  );
 }
@@ -3109,9 +3120,22 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
 const TAB_TRIGGER =
  "min-h-10 shrink-0 snap-start rounded-xl px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm";
 
-export function Member360Tabs({ memberId }: { memberId: string }) {
+export function Member360Tabs({
+ memberId,
+ value,
+ onValueChange,
+}: {
+ memberId: string;
+ /** Controlled by the page, so an action elsewhere (PT session history)
+ * can open a tab. Uncontrolled when omitted. */
+ value?: string;
+ onValueChange?: (value: string) => void;
+}) {
  return (
- <Tabs defaultValue="overview" className="w-full">
+ <Tabs
+ {...(value !== undefined ? { value, onValueChange } : { defaultValue: "overview" })}
+ className="w-full"
+ >
  <div className="relative">
  <TabsList className="flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  <TabsTrigger

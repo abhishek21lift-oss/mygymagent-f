@@ -59,8 +59,8 @@ export function useUnpauseMembership() { const qc = useQueryClient(); return use
 export function useFreezeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("freeze"), onSuccess: () => invalidate(qc) }); }
 export function useResumeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/resume`), onSuccess: () => invalidate(qc) }); }
 export function useExtendMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("extend"), onSuccess: () => invalidate(qc) }); }
-export function useUpgradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }>("upgrade"), onSuccess: () => invalidate(qc) }); }
-export function useDowngradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }>("downgrade"), onSuccess: () => invalidate(qc) }); }
+export function useUpgradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, ...body }: { id: string; membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }) => api.post<ChangePlanResult>(`/memberships/${id}/upgrade`, body), onSuccess: () => invalidate(qc) }); }
+export function useDowngradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, ...body }: { id: string; membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }) => api.post<ChangePlanResult>(`/memberships/${id}/downgrade`, body), onSuccess: () => invalidate(qc) }); }
 
 /** Plan change with server-side proration. Direction is derived from the
  * plan prices by the backend; the result carries the credit/amount-due

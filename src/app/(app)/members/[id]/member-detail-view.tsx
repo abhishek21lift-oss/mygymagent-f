@@ -14,13 +14,9 @@ import {
  MessageSquareText,
  Dumbbell,
  Phone,
- PlayCircle,
  Plus,
- Snowflake,
- Sparkles,
  TrendingUp,
  Wallet,
- XCircle,
  Activity,
  CheckCircle2,
  Pencil,
@@ -63,8 +59,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Label } from "@/components/ui/label";
-import { useMember, useUpdateMember, useDeleteMember } from "@/lib/hooks/use-members";
+import { useAssignableTrainers, useMember, useUpdateMember, useDeleteMember } from "@/lib/hooks/use-members";
 import { useMemberWorkoutHistory } from "@/lib/hooks/use-workout-history";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
@@ -72,19 +67,13 @@ import { useMemberMeasurements } from "@/lib/hooks/use-member-assessments";
 import { useMemberGoals } from "@/lib/hooks/use-member-goals";
 import { useMemberScreenings } from "@/lib/hooks/use-member-screenings";
 import { Member360Tabs } from "./member-360-tabs";
+import { SellMembershipDialog } from "./sell-membership-dialog";
+import { editPayload } from "./edit-member-payload";
+import { MemberActionsPanel } from "./actions/member-actions-panel";
 import { MemberAiProgress } from "./member-ai-progress";
 import { EntryAccessCard } from "./entry-access-card";
 import { PortalAccessCard } from "./portal-access-card";
-import {
- useCreateMembership,
- useFreezeMembership,
- useResumeMembership,
- useCancelMembership,
- useRenewMembership,
-} from "@/lib/hooks/use-memberships";
-import { useMembershipPlans } from "@/lib/hooks/use-membership-plans";
 import { ApiError } from "@/lib/api/client";
-import type { MembershipStatus } from "@/lib/types/gym";
 import { useCreatePayment } from "@/lib/hooks/use-payments";
 import {
  defaultPaymentMembership,
@@ -116,118 +105,6 @@ import {
 import { initials, netPaid, termProgress, visitStreak, visitSummary } from "./member-profile-stats";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { whatsappDrafts, whatsappLink, whatsappNumber } from "@/lib/whatsapp-link";
-
-function SellMembershipDialog({ memberId, trigger }: { memberId: string; trigger?: React.ReactNode }) {
- const [open, setOpen] = React.useState(false);
- const [planId, setPlanId] = React.useState("");
- const [discount, setDiscount] = React.useState(0);
- const plansQuery = useMembershipPlans({ pageSize: 100 });
- const createMembership = useCreateMembership();
-
- const selectedPlan = plansQuery.data?.items.find((p) => p.id === planId);
- const finalPrice = selectedPlan ? Math.max(0, Number(selectedPlan.price) - discount) : null;
- // The server refuses a discount above the price or below zero; say so here.
- const discountError =
- selectedPlan && (discount < 0 || discount > Number(selectedPlan.price))
- ? `Discount must be between 0 and ${selectedPlan.price}.`
- : null;
-
- async function handleSell() {
- if (!planId) return;
- try {
- await createMembership.mutateAsync({
- memberId,
- membershipPlanId: planId,
- ...(discount > 0 ? { discount } : {}),
- });
- toast.success("Membership sold successfully");
- setOpen(false);
- setPlanId("");
- setDiscount(0);
- } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Failed to sell membership");
- }
- }
-
- return (
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>
- {trigger ?? (
- <Button size="sm" className="btn-sheen min-h-11 rounded-lg bg-primary text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
- <Plus className="size-3.5" aria-hidden="true" />
- Sell Membership
- </Button>
- )}
- </DialogTrigger>
- <DialogContent className="border-border bg-card">
- <DialogHeader>
- <DialogTitle>Sell a Membership</DialogTitle>
- </DialogHeader>
- <Select value={planId} onValueChange={setPlanId}>
- <SelectTrigger className="w-full">
- <SelectValue placeholder="Select a plan" />
- </SelectTrigger>
- <SelectContent>
- {plansQuery.data?.items.map((plan) => (
- <SelectItem key={plan.id} value={plan.id}>
- {plan.name} — {plan.currency} {plan.price} / {plan.durationDays}d
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
- {selectedPlan && (
- <div className="space-y-2">
- <div className="flex items-center gap-2 rounded-lg border bg-muted/50 p-3">
- <div className="flex-1">
- <p className="text-sm font-medium">Plan Price</p>
- <p className="text-lg font-bold">{selectedPlan.currency} {selectedPlan.price}</p>
- </div>
- <div className="flex items-center gap-2">
- <div className="text-right">
- <p className="text-sm font-medium text-stone-600">Discount</p>
- <p className="text-sm font-medium text-destructive">-{selectedPlan.currency} {discount}</p>
- </div>
- </div>
- </div>
- <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
- <div className="flex-1">
- <p className="text-sm font-medium text-stone-600">Final Amount</p>
- <p className="text-xl font-bold text-primary">{selectedPlan.currency} {finalPrice}</p>
- </div>
- </div>
- <div>
- <Label>Discount Amount</Label>
- <Input
- type="number"
- min="0"
- max={Number(selectedPlan.price)}
- step="1"
- value={discount}
- onChange={(e) => setDiscount(Number(e.target.value) || 0)}
- aria-invalid={discountError ? true : undefined}
- aria-describedby={discountError ? "sell-discount-error" : undefined}
- className="mt-1"
- />
- {discountError && (
- <p id="sell-discount-error" className="mt-1 text-xs font-medium text-destructive">
- {discountError}
- </p>
- )}
- </div>
- </div>
- )}
- <DialogFooter>
- <Button
- onClick={handleSell}
- disabled={!planId || Boolean(discountError) || createMembership.isPending}
- >
- {createMembership.isPending ? "Selling..." : "Confirm Sale"}
- </Button>
- </DialogFooter>
- </DialogContent>
- </Dialog>
- );
-}
 
 function CollectPaymentDialog({
  memberId,
@@ -412,167 +289,6 @@ function CollectPaymentDialog({
  );
 }
 
-function MembershipActions({
- membershipId,
- status,
-}: {
- membershipId: string;
- status: MembershipStatus;
-}) {
- const freeze = useFreezeMembership();
- const resume = useResumeMembership();
- const cancel = useCancelMembership();
- const renew = useRenewMembership();
-
- const [freezeOpen, setFreezeOpen] = React.useState(false);
- const [freezeDays, setFreezeDays] = React.useState(7);
- const [cancelOpen, setCancelOpen] = React.useState(false);
- const [cancelReason, setCancelReason] = React.useState("");
-
- const handle = (promise: Promise<unknown>, successMsg: string, close?: () => void) =>
- promise
- .then(() => {
- toast.success(successMsg);
- close?.();
- })
- .catch((e) => toast.error(e instanceof ApiError ? e.message : "Action failed"));
-
- // Only freeze/resume/renew/cancel have real backend support today
- // (see memberships.service.ts). Activate/Pause/Extend/Upgrade-Downgrade/
- // Transfer/Payment-failure were removed here because they called
- // endpoints that don't exist server-side; PAUSED is also not a status
- // the backend's MembershipStatus enum defines.
- const live = status === "ACTIVE" || status === "FROZEN";
-
- return (
- <div className="grid auto-cols-fr grid-flow-col gap-2">
- {status === "ACTIVE" && (
- <Button
- variant="outline"
- size="sm"
- onClick={() => setFreezeOpen(true)}
- className="min-h-11 rounded-2xl"
- >
- <Snowflake className="size-3.5" />
- Freeze
- </Button>
- )}
-
- {status === "FROZEN" && (
- <Button
- variant="outline"
- size="sm"
- disabled={resume.isPending}
- onClick={() => handle(resume.mutateAsync(membershipId), "Membership resumed")}
- className="min-h-11 rounded-2xl"
- >
- <PlayCircle className="size-3.5" />
- Resume
- </Button>
- )}
-
- {live && (
- <>
- <Button
- variant="outline"
- size="sm"
- disabled={renew.isPending}
- onClick={() => handle(renew.mutateAsync({ id: membershipId }), "Membership renewed")}
- className="min-h-11 rounded-2xl"
- >
- <Sparkles className="size-3.5" />
- Renew
- </Button>
- <Button
- variant="outline"
- size="sm"
- onClick={() => setCancelOpen(true)}
- className="min-h-11 rounded-2xl text-destructive hover:text-destructive"
- >
- <XCircle className="size-3.5" />
- Cancel
- </Button>
- </>
- )}
-
- {/* Freeze dialog */}
- <Dialog open={freezeOpen} onOpenChange={setFreezeOpen}>
- <DialogContent>
- <DialogHeader>
- <DialogTitle>Freeze Membership</DialogTitle>
- </DialogHeader>
- <div className="space-y-3">
- <div>
- <Label>Freeze Days</Label>
- <Input
- type="number"
- min={1}
- value={freezeDays}
- onChange={(e) => setFreezeDays(Math.max(1, Number(e.target.value) || 1))}
- className="mt-1"
- />
- <p className="mt-1 text-xs text-stone-600">
- Frozen days are added back to the end date on resume. Counts against the plan freeze quota.
- </p>
- </div>
- </div>
- <DialogFooter>
- <Button
- disabled={freeze.isPending}
- onClick={() =>
- handle(
- freeze.mutateAsync({ id: membershipId, days: freezeDays }),
- `Membership frozen for ${freezeDays} days`,
- () => setFreezeOpen(false)
- )
- }
- >
- {freeze.isPending ? "Freezing..." : "Freeze"}
- </Button>
- </DialogFooter>
- </DialogContent>
- </Dialog>
-
- {/* Cancel dialog */}
- <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
- <DialogContent>
- <DialogHeader>
- <DialogTitle>Cancel Membership</DialogTitle>
- </DialogHeader>
- <div className="space-y-3">
- <div>
- <Label>Reason (optional)</Label>
- <Textarea
- value={cancelReason}
- onChange={(e) => setCancelReason(e.target.value)}
- placeholder="Why is this membership being cancelled?"
- className="mt-1"
- />
- </div>
- </div>
- <DialogFooter>
- <Button
- variant="destructive"
- disabled={cancel.isPending}
- onClick={() =>
- handle(
- cancel.mutateAsync({ id: membershipId, reason: cancelReason || undefined }), "Membership cancelled",
- () => {
- setCancelOpen(false);
- setCancelReason("");
- }
- )
- }
- >
- {cancel.isPending ? "Cancelling..." : "Cancel Membership"}
- </Button>
- </DialogFooter>
- </DialogContent>
- </Dialog>
- </div>
- );
-}
-
 function WorkoutProgress({ memberId }: { memberId: string }) {
  const history = useMemberWorkoutHistory(memberId, 12);
  const sessions = history.data ?? [];
@@ -705,6 +421,7 @@ function EditMemberDialog({
 }) {
  const [open, setOpen] = React.useState(false);
  const updateMember = useUpdateMember(member.id);
+ const trainers = useAssignableTrainers(member.primaryBranchId ?? undefined, open);
 
  const form = useForm<EditMemberFormData>({
  resolver: zodResolver(editMemberSchema),
@@ -737,7 +454,7 @@ function EditMemberDialog({
 
  async function onSubmit(values: EditMemberFormData) {
  try {
- await updateMember.mutateAsync(values);
+ await updateMember.mutateAsync(editPayload(values, form.formState.defaultValues ?? {}));
  toast.success("Member updated successfully");
  setOpen(false);
  } catch (error) {
@@ -1076,10 +793,27 @@ function EditMemberDialog({
  name="assignedTrainerId"
  render={({ field }) => (
  <FormItem>
- <FormLabel>Assigned Trainer ID</FormLabel>
+ <FormLabel>Coach</FormLabel>
+ <Select value={field.value || undefined} onValueChange={field.onChange} disabled={trainers.isLoading}>
  <FormControl>
- <Input {...field} />
+ <SelectTrigger className="w-full">
+ <SelectValue placeholder={trainers.isLoading ? "Loading trainers…" : "No coach"} />
+ </SelectTrigger>
  </FormControl>
+ <SelectContent>
+ {member.assignedTrainer && !trainers.data?.some((t) => t.id === member.assignedTrainer?.id) ? (
+ <SelectItem value={member.assignedTrainer.id}>
+ {member.assignedTrainer.firstName} {member.assignedTrainer.lastName}
+ </SelectItem>
+ ) : null}
+ {(trainers.data ?? []).map((t) => (
+ <SelectItem key={t.id} value={t.id}>
+ {t.firstName} {t.lastName}
+ </SelectItem>
+ ))}
+ </SelectContent>
+ </Select>
+ <FormDescription>To remove a coach, use Change PT under Actions.</FormDescription>
  <FormMessage />
  </FormItem>
  )}
@@ -1508,12 +1242,6 @@ function MembershipCard({
  </dl>
  </div>
  </div>
- <div className="mt-5">
- <MembershipActions
- membershipId={activeMembership.id}
- status={activeMembership.status as MembershipStatus}
- />
- </div>
  </>
  ) : (
  <div className="text-center">
@@ -1523,17 +1251,7 @@ function MembershipCard({
  ? `${lastEnded.membershipPlan?.name ?? "Last plan"} ended ${formatDate(lastEnded.endDate)}.`
  : "Sell a plan to get them started."}
  </p>
- <div className="mt-4">
- <SellMembershipDialog
- memberId={member.id}
- trigger={
- <Button className="h-11 w-full rounded-2xl font-semibold">
- <Plus className="size-4" aria-hidden="true" />
- Sell a plan
- </Button>
- }
- />
- </div>
+ {/* Selling is under Actions, with renewing the last plan. */}
  </div>
  )}
  {member.memberships.length > 1 ? (
@@ -1635,6 +1353,12 @@ function GlanceRow({ memberId }: { memberId: string }) {
 export function MemberDetailView({ memberId }: { memberId: string }) {
  const memberQuery = useMember(memberId);
  const [now] = React.useState(() => Date.now());
+ const [recordsTab, setRecordsTab] = React.useState("overview");
+ const recordsRef = React.useRef<HTMLElement>(null);
+ const openPtHistory = React.useCallback(() => {
+ setRecordsTab("pt-sessions");
+ recordsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+ }, []);
 
  if (memberQuery.isLoading)
  return (
@@ -1674,6 +1398,8 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
 
  <GlanceRow memberId={memberId} />
 
+ <MemberActionsPanel member={member} onOpenPtHistory={openPtHistory} />
+
  <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)] lg:gap-6">
  <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:gap-6">
  <MembershipCard member={member} activeMembership={activeMembership} daysLeft={daysLeft} now={now} />
@@ -1698,8 +1424,8 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  </div>
  </div>
 
- <section aria-label="Member records" className={cn(surfaceClass, "p-3 sm:p-6")}>
- <Member360Tabs memberId={memberId} />
+ <section ref={recordsRef} aria-label="Member records" className={cn(surfaceClass, "scroll-mt-4 p-3 sm:p-6")}>
+ <Member360Tabs memberId={memberId} value={recordsTab} onValueChange={setRecordsTab} />
  </section>
  </div>
  );

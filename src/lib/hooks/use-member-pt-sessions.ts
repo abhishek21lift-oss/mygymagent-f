@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
-import type { PtSession } from "@/lib/types/gym"
+import type { PtSession } from "@/lib/hooks/use-pt-sessions"
 import type { Paginated } from "@/lib/types/pagination"
 
 export function useMemberPtSessions(memberId: string | undefined) {

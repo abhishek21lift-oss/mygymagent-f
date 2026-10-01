@@ -34,11 +34,12 @@ export interface CreatePtPackageInput {
 
 const KEY = "pt-packages"
 
-export function usePtPackages(memberId?: string) {
+export function usePtPackages(memberId?: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [KEY, memberId],
     queryFn: () =>
       api.get<PtPackage[]>("/pt-packages", { query: memberId ? { memberId } : {} }),
+    enabled,
   })
 }
 

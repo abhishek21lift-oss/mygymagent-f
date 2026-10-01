@@ -101,10 +101,14 @@ export function useCalendarFeed(params: { from?: string; to?: string; branchId?:
   })
 }
 
-export function useAppointments(params: PaginationParams & { memberId?: string; leadId?: string; staffId?: string; branchId?: string; type?: string; from?: string; to?: string } = {}) {
+export function useAppointments(
+  params: PaginationParams & { memberId?: string; leadId?: string; staffId?: string; branchId?: string; type?: string; from?: string; to?: string } = {},
+  { enabled = true }: { enabled?: boolean } = {},
+) {
   return useQuery({
     queryKey: [KEY, params],
     queryFn: () => api.get<Paginated<Appointment>>("/appointments", { query: params }),
+    enabled,
   })
 }
 
