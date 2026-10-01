@@ -77,8 +77,8 @@ function RolesBody({ user }: { user: StaffUser }) {
       {user.userRoles.map((grant) => (
        <div key={grant.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
         <div className="min-w-0">
-         <p className="truncate text-sm font-bold">{grant.role.name}</p>
-         <p className="truncate text-xs text-muted-foreground">
+         <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{grant.role.name}</p>
+         <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">
           {/* A grant is either org-wide or scoped to one branch, and
               which it is decides what the person can actually reach. */}
           {grant.branchId ? `${branchName(grant.branchId)} only` : "All branches"}

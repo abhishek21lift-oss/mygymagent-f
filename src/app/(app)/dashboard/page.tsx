@@ -336,8 +336,8 @@ export default function DashboardPage() {
  <div className="w-full rounded-full bg-primary/70" style={{ height: `${Math.round(a.value * 100)}%` }} />
  </div>
  <div className="min-w-0 flex-1">
- <p className="truncate text-sm font-medium">{a.label}</p>
- <p className="truncate text-xs text-muted-foreground">{a.time} · {a.detail}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{a.label}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">{a.time} · {a.detail}</p>
  </div>
  </li>
  ))}
@@ -374,7 +374,7 @@ export default function DashboardPage() {
  <li key={item.title}>
  <Link href={item.href} className="group flex items-center gap-3 rounded-lg border border-transparent px-3 py-3 transition-colors hover:border-border hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-ring">
  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"><Icon className="size-5" aria-hidden="true" /></span>
- <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{item.title}</span><span className="mt-0.5 block truncate text-xs text-muted-foreground">{item.detail}</span></span>
+ <span className="min-w-0 flex-1"><span className="block [overflow-wrap:anywhere] text-sm font-medium">{item.title}</span><span className="mt-0.5 block [overflow-wrap:anywhere] text-xs text-muted-foreground">{item.detail}</span></span>
  <span className="hidden items-center gap-1 text-xs font-medium text-primary sm:flex">{item.action}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></span>
  </Link>
  </li>
@@ -420,8 +420,8 @@ export default function DashboardPage() {
  >
  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform group-hover:scale-105"><Icon className="size-5" aria-hidden="true" /></span>
  <span className="min-w-0 flex-1">
- <span className="block truncate text-sm font-medium tracking-tight">{title}</span>
- <span className="block truncate text-xs text-muted-foreground">{desc}</span>
+ <span className="block [overflow-wrap:anywhere] text-sm font-medium tracking-tight">{title}</span>
+ <span className="block [overflow-wrap:anywhere] text-xs text-muted-foreground">{desc}</span>
  </span>
  <ArrowRight className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
  </Link>

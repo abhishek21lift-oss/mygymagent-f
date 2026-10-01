@@ -1288,7 +1288,7 @@ function MemberHero({
  />
  </div>
  <div className="min-w-0 flex-1 sm:pt-[3.75rem]">
- <h1 id="member-title" className="truncate text-[26px] font-semibold leading-tight tracking-tight text-foreground sm:text-[30px]">
+ <h1 id="member-title" className="text-balance text-[26px] font-semibold leading-tight tracking-tight text-foreground sm:text-[30px] [overflow-wrap:anywhere]">
  {member.firstName} {member.lastName}
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">{meta.join(" · ")}</p>
@@ -1493,7 +1493,7 @@ function MembershipCard({
  remaining={1 - termProgress(activeMembership.startDate, activeMembership.endDate, now)}
  />
  <div className="min-w-0 flex-1">
- <p className="truncate text-lg font-semibold tracking-tight text-foreground">
+ <p className="text-lg font-semibold tracking-tight text-foreground [overflow-wrap:anywhere]">
  {activeMembership.membershipPlan?.name ?? "Membership"}
  </p>
  <dl className="mt-2 space-y-1 text-sm">

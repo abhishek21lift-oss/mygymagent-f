@@ -94,7 +94,7 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
             <p className="text-xs font-black uppercase tracking-[.14em] text-stone-500 dark:text-stone-400">
               Check-in devices
             </p>
-            <p className="truncate text-sm font-bold text-stone-700 dark:text-stone-300">
+            <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-700 dark:text-stone-300">
               {devices.isPending
                 ? "Loading…"
                 : devices.isError
@@ -166,7 +166,7 @@ export function BranchDevicesRow({ branchId }: { branchId: string }) {
                           <MonitorSmartphone className="size-4 shrink-0 text-cyan-600" aria-hidden="true" />
                         )}
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-bold">{device.name}</p>
+                          <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{device.name}</p>
                           <p className="text-xs text-muted-foreground">{KIND_LABEL[device.kind]}</p>
                         </div>
                       </div>

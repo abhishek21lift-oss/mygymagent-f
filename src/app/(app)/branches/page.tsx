@@ -247,7 +247,7 @@ export default function BranchesPage() {
  <span className={`flex size-11 shrink-0 items-center justify-center rounded-lg text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${tile}`}>
  <Building2 className="size-5" aria-hidden="true" />
  </span>
- <h3 className="truncate text-base font-extrabold tracking-tight text-stone-950 dark:text-white">{branch.name}</h3>
+ <h3 className="text-base font-extrabold tracking-tight [overflow-wrap:anywhere] text-stone-950 dark:text-white">{branch.name}</h3>
  </div>
  <Badge variant={branch.status === "ACTIVE" ? "default" : "secondary"} className={branch.status === "ACTIVE" ? "shrink-0 rounded-full bg-emerald-500 text-white shadow-sm" : "shrink-0 rounded-full"}>
  {branch.status}
@@ -256,7 +256,7 @@ export default function BranchesPage() {
  <div className="flex flex-col gap-1.5 px-5 py-5 text-sm font-medium text-stone-600 sm:px-6 dark:text-stone-400">
  {(branch.addressLine1 || branch.city) && <p className="inline-flex items-start gap-2"><MapPin className="mt-0.5 size-4 shrink-0 text-cyan-600" aria-hidden="true" />{[branch.addressLine1, branch.city, branch.country].filter(Boolean).join(", ")}</p>}
  {branch.phone && <p className="inline-flex items-center gap-2 tabular-nums"><Phone className="size-4 shrink-0 text-cyan-600" aria-hidden="true" />{branch.phone}</p>}
- {branch.email && <p className="inline-flex min-w-0 items-center gap-2"><Mail className="size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span className="truncate">{branch.email}</span></p>}
+ {branch.email && <p className="inline-flex min-w-0 items-center gap-2"><Mail className="size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span className="min-w-0 [overflow-wrap:anywhere]">{branch.email}</span></p>}
  {readableWeek(branch.openingHours).length > 0 && <p className="inline-flex items-start gap-2"><Clock className="mt-0.5 size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span>{readableWeek(branch.openingHours).join(" · ")}</span></p>}
  {!branch.addressLine1 && !branch.city && !branch.phone && !branch.email && <p className="text-xs">No contact details yet.</p>}
  {hasPermission("branches.update") && <div className="pt-2"><BranchEditDialog branch={branch} /></div>}

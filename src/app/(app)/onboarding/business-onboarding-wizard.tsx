@@ -760,7 +760,7 @@ function ReviewCard({
  {items.map((item) => (
  <div key={item.label} className="flex justify-between gap-4 text-sm">
  <span className="font-medium text-stone-600">{item.label}</span>
- <span className="truncate font-bold text-stone-900">{item.value}</span>
+ <span className="min-w-0 font-bold text-stone-900 [overflow-wrap:anywhere]">{item.value}</span>
  </div>
  ))}
  </div>

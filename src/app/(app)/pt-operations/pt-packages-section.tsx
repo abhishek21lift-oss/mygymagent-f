@@ -112,7 +112,7 @@ export function PtPackagesSection() {
  {items.slice(0, 8).map((p) => (
  <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-stone-200/70 bg-card p-3">
  <div className="min-w-0 flex-1">
- <p className="truncate text-sm font-extrabold text-stone-900">{p.name}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-extrabold text-stone-900">{p.name}</p>
  <p className="text-xs text-stone-500">{p.remainingSessions} of {p.totalSessions} sessions left · ends {new Date(p.endDate).toLocaleDateString()}</p>
  </div>
  <Badge variant={p.status === "ACTIVE" ? "default" : "secondary"}>{p.status}</Badge>

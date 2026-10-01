@@ -70,11 +70,11 @@ export default function PortalNutrition() {
                   {meals.map((m, i) => (
                     <li key={i} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
+                        <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">
                           {text(m.meal) ?? text(m.name) ?? `Meal ${i + 1}`}
                         </p>
                         {text(m.notes) && (
-                          <p className="truncate text-xs text-muted-foreground">{text(m.notes)}</p>
+                          <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">{text(m.notes)}</p>
                         )}
                       </div>
                       {text(m.calories) && (

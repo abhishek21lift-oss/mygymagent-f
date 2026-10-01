@@ -101,7 +101,7 @@ export function SupportTicketDialog({
         <DialogHeader className="border-b border-border px-6 py-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <DialogTitle className="truncate text-lg font-semibold tracking-tight">
+              <DialogTitle className="min-w-0 [overflow-wrap:anywhere] text-lg font-semibold tracking-tight">
                 {ticket.subject}
               </DialogTitle>
               <DialogDescription className="mt-0.5">

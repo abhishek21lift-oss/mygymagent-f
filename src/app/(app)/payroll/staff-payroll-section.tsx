@@ -158,10 +158,10 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
                 className="flex flex-col gap-3 px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="min-w-0 lg:w-56">
-                  <p className="truncate text-sm font-semibold">
+                  <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold">
                     {row.user.firstName} {row.user.lastName}
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">
                     {row.jobTitle ?? row.user.email}
                   </p>
                 </div>

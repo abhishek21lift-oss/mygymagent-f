@@ -209,7 +209,7 @@ export default function MembershipPlansPage() {
  <span className={`flex size-11 shrink-0 items-center justify-center rounded-lg text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${tile}`}>
  <Tag className="size-5" aria-hidden="true" />
  </span>
- <h3 className="truncate text-base font-extrabold tracking-tight text-stone-950 dark:text-white">{plan.name}</h3>
+ <h3 className="text-base font-extrabold tracking-tight [overflow-wrap:anywhere] text-stone-950 dark:text-white">{plan.name}</h3>
  </div>
  {!plan.isActive && <Badge variant="secondary" className="shrink-0 rounded-full">Inactive</Badge>}
  </div>

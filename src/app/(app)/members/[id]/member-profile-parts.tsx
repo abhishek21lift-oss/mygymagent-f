@@ -77,7 +77,7 @@ export function GlanceTile({
       />
       <div className="flex items-center gap-2">
         <GlyphBadge icon={icon} />
-        <span className="truncate text-[13px] font-medium text-muted-foreground">{label}</span>
+        <span className="min-w-0 text-[13px] font-medium text-muted-foreground [overflow-wrap:anywhere]">{label}</span>
       </div>
       {isLoading ? (
         <>
@@ -86,10 +86,10 @@ export function GlanceTile({
         </>
       ) : (
         <>
-          <p className="mt-3 truncate text-[26px] font-semibold leading-none tracking-tight tabular-nums text-foreground sm:text-[28px]">
+          <p className="mt-3 text-[26px] font-semibold leading-tight tracking-tight tabular-nums text-foreground sm:text-[28px] [overflow-wrap:anywhere]">
             {value}
           </p>
-          {caption ? <p className="mt-2 truncate text-xs text-muted-foreground">{caption}</p> : null}
+          {caption ? <p className="mt-2 text-xs text-muted-foreground [overflow-wrap:anywhere]">{caption}</p> : null}
         </>
       )}
     </div>

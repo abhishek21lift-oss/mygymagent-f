@@ -143,8 +143,8 @@ export default function WorkoutSessionsPage() {
  {activeAssignments.map((a) => (
  <div key={a.id} className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition duration-200 hover:-translate-y-px hover:border-rose-200 hover:bg-rose-50/50 hover:shadow-md">
  <div className="min-w-0 flex-1">
- <p className="truncate text-sm font-bold text-stone-900">{a.member ? `${a.member.firstName} ${a.member.lastName}` : "Member"}</p>
- <p className="truncate text-xs font-medium text-stone-600">{a.workoutPlan?.name ?? "Workout plan"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-900">{a.member ? `${a.member.firstName} ${a.member.lastName}` : "Member"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-xs font-medium text-stone-600">{a.workoutPlan?.name ?? "Workout plan"}</p>
  </div>
  <Button size="sm" className="btn-sheen min-h-11 rounded-xl bg-primary text-primary-foreground shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" onClick={() => startSession(a.id)} disabled={start.isPending}>
  <Play className="size-3.5" aria-hidden="true" />{start.isPending ? "Starting" : "Start"}
@@ -177,8 +177,8 @@ export default function WorkoutSessionsPage() {
  >
  <span className="flex w-full items-center justify-between gap-3">
  <span className="min-w-0">
- <span className="block truncate text-sm font-semibold">{s.firstName} {s.lastName}</span>
- <span className="block truncate text-xs text-muted-foreground">{s.workoutPlanName}</span>
+ <span className="block [overflow-wrap:anywhere] text-sm font-semibold">{s.firstName} {s.lastName}</span>
+ <span className="block [overflow-wrap:anywhere] text-xs text-muted-foreground">{s.workoutPlanName}</span>
  </span>
  <Badge variant={s.status === "COMPLETED" ? "success" : "default"}>{s.status.replace("_", " ")}</Badge>
  </span>

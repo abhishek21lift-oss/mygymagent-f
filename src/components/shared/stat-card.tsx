@@ -65,13 +65,13 @@ export function StatCard({
 
  return (
  <div
- className={cn( "stat-tile min-w-0 overflow-hidden rounded-2xl border border-border px-5 py-4",
+ className={cn( "stat-tile @container min-w-0 overflow-hidden rounded-2xl border border-border px-5 py-4",
  flagged && "before:absolute before:inset-y-3 before:left-0 before:w-1 before:rounded-full before:content-['']",
  TONE_RULE[effectiveTone],
  )}
  >
  <p
- className="truncate text-[11px] font-bold uppercase tracking-[0.1em]"
+ className="text-[11px] font-bold uppercase leading-snug tracking-[0.1em] [overflow-wrap:anywhere]"
  style={{ color: "var(--section-ink)" }}
  >
  {title}
@@ -83,7 +83,7 @@ export function StatCard({
  />
  ) : isError ? (
  <p
- className="mt-1 truncate text-[1.75rem] font-bold leading-tight tracking-[-0.03em] text-muted-foreground"
+ className="mt-1 text-[1.75rem] font-bold leading-tight tracking-[-0.03em] text-muted-foreground"
  title={`${title} could not be loaded`}
  >
  <span aria-hidden="true">&mdash;</span>
@@ -91,16 +91,25 @@ export function StatCard({
  </p>
  ) : (
  <p
- className={cn( "mt-1 truncate text-[1.75rem] font-bold leading-tight tracking-[-0.03em] tabular-nums",
+ // Sized to the tile, never cut: a two-column phone grid gave
+ // "₹ 1,55,073.99" about 130px, and `truncate` showed "₹ 1,55,0…".
+ // The figure shrinks with the tile's own width (container query
+ // units) and, as a last resort, wraps rather than hides.
+ className={cn( "mt-1 font-bold leading-tight tracking-[-0.03em] tabular-nums [overflow-wrap:anywhere]",
+ // A long figure starts smaller so it stays on one line.
+ String(value ?? 0).length > 9
+ ? "text-[clamp(1rem,9cqi,1.75rem)]"
+ : "text-[clamp(1.125rem,11cqi,1.75rem)]",
  effectiveTone === "destructive" && "text-destructive",
  effectiveTone === "warning" && "text-warning",
  )}
  >
- {value ?? 0}
+ {/* Keep a currency sign with its amount if it ever wraps. */}
+ {typeof value === "string" ? value.replace(/^(\D{1,3}) (?=\d)/, "$1\u00a0") : (value ?? 0)}
  </p>
  )}
  {hint ? (
- <p className="mt-0.5 truncate text-xs text-muted-foreground">{hint}</p>
+ <p className="mt-0.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">{hint}</p>
  ) : null}
  </div>
  );

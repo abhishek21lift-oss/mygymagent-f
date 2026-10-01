@@ -94,8 +94,8 @@ export function LeadSelectionStep({ onSelectLead, onSkip }: LeadSelectionStepPro
  {lead.firstName?.[0]}{lead.lastName?.[0]}
  </span>
  <div className="min-w-0">
- <p className="truncate font-bold text-stone-900">{lead.firstName} {lead.lastName}</p>
- <p className="truncate text-xs font-medium text-stone-600">
+ <p className="font-bold text-stone-900 [overflow-wrap:anywhere]">{lead.firstName} {lead.lastName}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-xs font-medium text-stone-600">
  {lead.email || lead.phone || "No contact"}
  </p>
  </div>

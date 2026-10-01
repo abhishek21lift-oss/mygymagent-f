@@ -95,7 +95,7 @@ function LiveBoards() {
  <section aria-labelledby="attendance-inside" className="overflow-hidden rounded-xl border border-border bg-card [animation-delay:125ms] dark:bg-card">
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
  <div className="flex min-w-0 items-center gap-3">
- <h2 id="attendance-inside" className="truncate text-sm font-semibold tracking-tight text-foreground">Who&apos;s inside</h2>
+ <h2 id="attendance-inside" className="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold tracking-tight text-foreground">Who&apos;s inside</h2>
  </div>
  <span aria-label={`${inside.length} inside now`} className="shrink-0 rounded-full bg-emerald-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-emerald-500/20">
  {live.isLoading ? "…" : inside.length}
@@ -112,7 +112,7 @@ function LiveBoards() {
  <ul className="flex flex-col gap-2">
  {inside.map((entry) => (
  <li key={entry.id} className="flex items-center justify-between gap-3 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:bg-card">
- <span className="min-w-0 truncate text-sm font-bold text-stone-900 dark:text-stone-100">
+ <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-900 dark:text-stone-100">
  {entry.member ? `${entry.member.firstName} ${entry.member.lastName}` : "Unknown member"}
  </span>
  <span className="shrink-0 font-mono text-xs font-medium tabular-nums text-stone-500 dark:text-stone-400">
@@ -128,7 +128,7 @@ function LiveBoards() {
  <section aria-labelledby="attendance-denied" className="overflow-hidden rounded-xl border border-border bg-card [animation-delay:140ms] dark:bg-card">
  <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-rose-950/40 dark:via-stone-950 dark:to-orange-950/20">
  <div className="flex min-w-0 items-center gap-3">
- <h2 id="attendance-denied" className="truncate text-sm font-semibold tracking-tight text-foreground">Denied today</h2>
+ <h2 id="attendance-denied" className="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold tracking-tight text-foreground">Denied today</h2>
  </div>
  <span aria-label={`${denied.length} denied today`} className="shrink-0 rounded-full bg-rose-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-rose-500/20">
  {live.isLoading ? "…" : denied.length}
@@ -145,7 +145,7 @@ function LiveBoards() {
  <ul className="flex flex-col gap-2">
  {denied.map((entry) => (
  <li key={entry.id} className="flex flex-col gap-1 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:bg-card">
- <span className="truncate text-sm font-bold text-stone-900 dark:text-stone-100">
+ <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-900 dark:text-stone-100">
  {entry.member ? `${entry.member.firstName} ${entry.member.lastName}` : "Unknown member"}
  </span>
  <span className="text-xs font-medium text-stone-500 dark:text-stone-400">

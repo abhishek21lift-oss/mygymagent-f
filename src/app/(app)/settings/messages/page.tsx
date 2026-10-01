@@ -215,7 +215,7 @@ export default function MessageTemplatesPage() {
                   <TableCell>
                     <Badge variant="secondary">{template.channel}</Badge>
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">
+                  <TableCell className="min-w-0 max-w-xs [overflow-wrap:anywhere] whitespace-normal">
                     {template.subject ?? <span className="text-muted-foreground">—</span>}
                   </TableCell>
                   <TableCell className="text-right">
@@ -288,7 +288,7 @@ export default function MessageTemplatesPage() {
                   </TableCell>
                   <TableCell className="font-mono text-xs">{entry.templateKey}</TableCell>
                   <TableCell>{entry.channel}</TableCell>
-                  <TableCell className="max-w-[14rem] truncate">{entry.recipient}</TableCell>
+                  <TableCell className="max-w-[14rem] whitespace-normal [overflow-wrap:anywhere]">{entry.recipient}</TableCell>
                   <TableCell>
                     <Badge
                       variant={

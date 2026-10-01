@@ -215,8 +215,8 @@ function Assignment({ item }: { item: DietAssignment }) {
  <div className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-accent hover:shadow-[0_20px_50px_-30px_rgba(16,185,129,.45)] sm:flex-row sm:items-center">
  <div className="flex min-w-0 flex-1 items-center gap-3">
  <div className="min-w-0">
- <p className="truncate text-sm font-extrabold text-stone-900">{item.member ? `${item.member.firstName} ${item.member.lastName}` : "Member unavailable"}</p>
- <p className="truncate text-xs font-medium text-stone-600">{item.dietPlan?.name ?? "Diet plan"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-extrabold text-stone-900">{item.member ? `${item.member.firstName} ${item.member.lastName}` : "Member unavailable"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-xs font-medium text-stone-600">{item.dietPlan?.name ?? "Diet plan"}</p>
  </div>
  </div>
  <Badge variant={item.status === "ACTIVE" ? "default" : item.status === "COMPLETED" ? "success" : "secondary"}>{item.status}</Badge>
@@ -326,7 +326,7 @@ export default function NutritionPage() {
  <Badge variant="outline" className="border-emerald-200 bg-emerald-50 font-mono tabular-nums text-emerald-800">{plan.targetCalories ?? "—"} kcal</Badge>
  </div>
  <h3 className="mt-4 text-sm font-extrabold tracking-tight text-stone-950">{plan.name}</h3>
- <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-stone-600">{plan.description || "Structured nutrition plan"}</p>
+ <p className="mt-1 text-xs font-medium leading-5 text-stone-600 [overflow-wrap:anywhere]">{plan.description || "Structured nutrition plan"}</p>
  <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Meal slots">
  {MEALS.filter((m) => plan.items.some((i) => i.mealSlot === m)).slice(0, 4).map((m) => (
  <span key={m} className={`rounded-full border px-2 py-0.5 text-xs font-extrabold ${MEAL_STYLES[m]}`}>{m}</span>

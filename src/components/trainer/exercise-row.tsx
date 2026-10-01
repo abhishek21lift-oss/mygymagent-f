@@ -57,11 +57,11 @@ export function ExerciseRow({
       </span>
 
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-[1.625rem] font-extrabold tracking-tight text-[#111827]">
+        <h3 className="min-w-0 [overflow-wrap:anywhere] text-[1.625rem] font-extrabold tracking-tight text-[#111827]">
           {exercise.name}
         </h3>
         <p className="mt-0.5 flex items-center gap-1.5 text-[1.0625rem] leading-tight">
-          <span className="truncate font-extrabold text-[#0d9488]">
+          <span className="min-w-0 [overflow-wrap:anywhere] font-extrabold text-[#0d9488]">
             {exercise.primaryMuscle}
           </span>
           {exercise.secondaryMuscle ? (
@@ -69,7 +69,7 @@ export function ExerciseRow({
               <span aria-hidden="true" className="text-[var(--t-ink-faint)]">
                 &middot;
               </span>
-              <span className="truncate font-medium text-[var(--t-ink-faint)]">
+              <span className="min-w-0 [overflow-wrap:anywhere] font-medium text-[var(--t-ink-faint)]">
                 {exercise.secondaryMuscle}
               </span>
             </>
@@ -118,7 +118,7 @@ export function ExerciseRow({
             into an ellipsis. Showing it once, as the chip, loses nothing
             and leaves this line for the prescription. */}
         <div className="mt-3 flex items-baseline justify-between gap-3">
-          <p className="truncate text-[1rem] font-medium text-[#6b7280]">
+          <p className="min-w-0 [overflow-wrap:anywhere] text-[1rem] font-medium text-[#6b7280]">
             {exercise.prescription}
           </p>
           {exercise.updatedLabel ? (

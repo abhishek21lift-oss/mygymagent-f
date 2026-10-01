@@ -56,8 +56,8 @@ function BookingRow({ booking, sessionId }: { booking: ClassBooking; sessionId: 
  return (
   <div className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
    <div className="min-w-0">
-    <p className="truncate text-sm font-bold">{booking.memberName}</p>
-    <p className="truncate text-xs text-muted-foreground">
+    <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{booking.memberName}</p>
+    <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">
      {booking.memberCode}
      {booking.memberPhone ? ` · ${booking.memberPhone}` : ""}
      {booking.status === "WAITLISTED" && booking.waitlistPosition !== null

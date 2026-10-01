@@ -1361,7 +1361,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  </div>
  )}
  <div className="min-w-0">
- <p className="truncate text-sm font-medium">{doc.originalName ?? "Unknown"}</p>
+ <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{doc.originalName ?? "Unknown"}</p>
  <div className="flex items-center gap-2 flex-wrap text-xs text-stone-600">
  <Badge variant="outline">{DOCUMENT_CATEGORY_LABELS[doc.category]}</Badge>
  <Badge variant={statusVariant[doc.status]}>{doc.status}</Badge>

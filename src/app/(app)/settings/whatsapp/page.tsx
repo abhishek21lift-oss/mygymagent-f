@@ -387,7 +387,7 @@ function TemplatesCard() {
  {template.subject && (
  <p className="mt-2 text-sm font-bold text-stone-900 dark:text-stone-100">{template.subject}</p>
  )}
- <p className="mt-1 line-clamp-2 text-sm font-medium text-stone-600 dark:text-stone-400">{template.body}</p>
+ <p className="mt-1 whitespace-pre-line text-sm font-medium text-stone-600 [overflow-wrap:anywhere] dark:text-stone-400">{template.body}</p>
  </li>
  ))}
  </ul>
@@ -440,7 +440,7 @@ function DeliveryLogCard() {
  <TableCell>
  <Badge variant={statusVariant(log.status)} className="rounded-full">{log.status}</Badge>
  {log.status === "FAILED" && log.errorMessage && (
- <p title={log.errorMessage} className="mt-1 max-w-56 truncate text-xs font-medium text-rose-600 dark:text-rose-400">
+ <p title={log.errorMessage} className="min-w-0 mt-1 max-w-56 [overflow-wrap:anywhere] text-xs font-medium text-rose-600 dark:text-rose-400 whitespace-normal">
  {log.errorMessage}
  </p>
  )}
