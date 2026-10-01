@@ -16,6 +16,7 @@ import { Topbar } from "@/components/app-shell/topbar";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { BottomTabBar } from "@/components/app-shell/bottom-tab-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PullToRefresh } from "@/components/shared/pull-to-refresh";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, mfaEnrolment, user } = useAuth();
@@ -25,6 +26,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useSectionAttribute(pathname);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const mainRef = React.useRef<HTMLElement | null>(null);
 
   // A gym member has no staff permissions at all, so this shell would
   // render a sidebar of pages that would all 403. Send them to the portal
@@ -121,11 +123,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
         />
-        <main className="relative min-h-0 flex-1 overflow-y-auto">
-          <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pb-24 pt-2 sm:px-5 md:pb-8 lg:px-8">
-            <MfaGraceBanner />
-            {children}
-          </div>
+        <main ref={mainRef} className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+          <PullToRefresh scrollRef={mainRef}>
+            <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pb-24 pt-2 sm:px-5 md:pb-8 lg:px-8">
+              <MfaGraceBanner />
+              {children}
+            </div>
+          </PullToRefresh>
         </main>
         <BottomTabBar onOpenMore={() => setMobileNavOpen(true)} />
       </div>
