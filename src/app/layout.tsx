@@ -25,6 +25,9 @@ import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
  * the right face.
  */
 export const metadata: Metadata = {
+  // The canonical origin, when set, for every route's social cards; the
+  // landing page works its own out per request (see src/lib/site.ts).
+  ...(process.env.NEXT_PUBLIC_SITE_URL ? { metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL) } : {}),
   title: PRODUCT_NAME,
   description: "AI-driven gym management and personal training platform",
   applicationName: PRODUCT_NAME,
