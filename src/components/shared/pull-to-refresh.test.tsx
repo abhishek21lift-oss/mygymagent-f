@@ -132,4 +132,37 @@ describe("PullToRefresh", () => {
     expect(mockRefetch).toHaveBeenCalledWith({ type: "active" });
     expect(load).toHaveBeenCalledTimes(1);
   });
+
+  it("never makes an ordinary scroll wait on JavaScript", async () => {
+    const onRefresh = jest.fn().mockResolvedValue(undefined);
+    const { getByTestId } = render(<Harness onRefresh={onRefresh} />);
+    const scroller = getByTestId("scroller");
+    const add = jest.spyOn(scroller, "addEventListener");
+    Object.defineProperty(scroller, "scrollTop", { value: 240, configurable: true });
+    fireEvent.touchStart(scroller, { touches: [{ clientX: 100, clientY: 100 }] });
+    // Scrolled down: no blocking touchmove listener is ever added.
+    expect(add.mock.calls.filter(([type]) => type === "touchmove")).toEqual([]);
+
+    Object.defineProperty(scroller, "scrollTop", { value: 0, configurable: true });
+    fireEvent.touchStart(scroller, { touches: [{ clientX: 100, clientY: 100 }] });
+    expect(add).toHaveBeenCalledWith("touchmove", expect.any(Function), { passive: false });
+    // And it is taken away again once the gesture turns out to be a scroll.
+    const remove = jest.spyOn(scroller, "removeEventListener");
+    fireEvent.touchMove(scroller, { touches: [{ clientX: 100, clientY: 60 }] });
+    expect(remove).toHaveBeenCalledWith("touchmove", expect.any(Function));
+  });
+
+  it("leaves the page itself still while pulling", async () => {
+    const onRefresh = jest.fn().mockResolvedValue(undefined);
+    const { getByTestId } = render(<Harness onRefresh={onRefresh} />);
+    const scroller = getByTestId("scroller");
+    fireEvent.touchStart(scroller, { touches: [{ clientX: 100, clientY: 100 }] });
+    fireEvent.touchMove(scroller, { touches: [{ clientX: 100, clientY: 160 }] });
+    fireEvent.touchMove(scroller, { touches: [{ clientX: 100, clientY: 260 }] });
+    // Moving the page repainted every glass card on it each frame.
+    expect(getByTestId("content").closest("[style*='translate']")).toBeNull();
+    await act(async () => {
+      fireEvent.touchEnd(scroller, { touches: [] });
+    });
+  });
 });
