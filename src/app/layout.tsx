@@ -6,6 +6,7 @@ import { AuthProvider } from "@/lib/auth/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
+import { siteUrl } from "@/lib/site";
 
 /**
  * No webfont.
@@ -25,6 +26,8 @@ import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
  * the right face.
  */
 export const metadata: Metadata = {
+  // The canonical origin, for every route's social cards (src/lib/site.ts).
+  metadataBase: siteUrl(),
   title: PRODUCT_NAME,
   description: "AI-driven gym management and personal training platform",
   applicationName: PRODUCT_NAME,
