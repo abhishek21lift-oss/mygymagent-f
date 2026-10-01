@@ -204,3 +204,34 @@ export function useDeleteMember() {
     },
   });
 }
+
+export interface AssignableTrainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+/** Trainers a member at `branchId` may be given -- the same rule the server
+ * enforces on assignment, readable without access to the staff directory. */
+export function useAssignableTrainers(branchId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: [KEY, "assignable-trainers", branchId],
+    queryFn: () =>
+      api.get<AssignableTrainer[]>("/members/assignable-trainers", { query: { branchId } }),
+    enabled: enabled && Boolean(branchId),
+    staleTime: 5 * 60_000,
+  });
+}
+
+/** Give a member a coach, change it, or clear it (`trainerId: null`). */
+export function useAssignTrainer(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (trainerId: string | null) =>
+      api.patch<Member>(`/members/${memberId}/trainer`, { trainerId }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [KEY] });
+      void queryClient.invalidateQueries({ queryKey: ["member-details", memberId] });
+    },
+  });
+}

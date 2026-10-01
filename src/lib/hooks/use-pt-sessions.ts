@@ -21,8 +21,15 @@ export type PtSession = {
   createdAt: string
   updatedAt: string
   member?: { id: string; firstName: string; lastName: string; memberCode: string }
-  trainer?: { id: string; firstName: string; lastName: string; user?: { firstName: string; lastName: string } }
+  /** A StaffProfile: the name is on its user. */
+  trainer?: { id: string; user?: { firstName: string; lastName: string } | null } | null
   branch?: { id: string; name: string }
+}
+
+/** The coach's name, or null when the session has none. */
+export function ptTrainerName(trainer: PtSession["trainer"]): string | null {
+  const user = trainer?.user
+  return user ? `${user.firstName} ${user.lastName}`.trim() : null
 }
 
 export type BookPtSessionInput = {

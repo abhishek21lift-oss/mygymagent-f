@@ -14,7 +14,7 @@ import { useBranches } from "@/lib/hooks/use-branches"
 import { useMembers } from "@/lib/hooks/use-members"
 import { useStaff } from "@/lib/hooks/use-staff"
 import { ApiError } from "@/lib/api/client"
-import { useBookPtSession, usePtSessionAction, usePtSessions, type PtSession, type PtSessionType } from "@/lib/hooks/use-pt-sessions"
+import { ptTrainerName, useBookPtSession, usePtSessionAction, usePtSessions, type PtSession, type PtSessionType } from "@/lib/hooks/use-pt-sessions"
 import { StatCard, toStatTone } from "@/components/shared/stat-card";
 
 function statusVariant(status: string) {
@@ -29,7 +29,7 @@ function SessionRow({ session }: { session: PtSession }) {
  const noShow = usePtSessionAction("no-show")
  const busy = complete.isPending || cancel.isPending || noShow.isPending
  const member = session.member ? `${session.member.firstName} ${session.member.lastName}` : "Member unavailable"
- const trainer = session.trainer ? `${session.trainer.firstName} ${session.trainer.lastName}` : "Unassigned"
+ const trainer = ptTrainerName(session.trainer) ?? "Unassigned"
  async function run(action: "complete" | "cancel" | "no-show") {
  try {
  if (action === "complete") await complete.mutateAsync({ id: session.id })
