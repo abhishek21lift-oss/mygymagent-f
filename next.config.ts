@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       { source: "/whatsapp/inbox", destination: "/settings/whatsapp", permanent: false },
       { source: "/pt/sessions/:id", destination: "/pt-operations/sessions", permanent: false },
       { source: "/inventory/products/:id((?!new$)[^/]+)", destination: "/inventory/reorder", permanent: false },
+      // Retired copies of the owner home: one place for the day's figures.
+      { source: "/owner-os", destination: "/dashboard", permanent: false },
+      { source: "/command-center", destination: "/dashboard", permanent: false },
     ];
   },
   async headers() {

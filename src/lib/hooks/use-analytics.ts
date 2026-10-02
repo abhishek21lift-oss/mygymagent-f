@@ -130,14 +130,14 @@ export function useRevenueTrend(months: number = 6, branchId?: string, { enabled
 export function useAtRiskMembers(branchId?: string) {
   return useQuery({
     queryKey: ["analytics", "at-risk-members", branchId],
-    queryFn: async () => asArray<AtRiskMember>(await api.get<AtRiskMember[]>("/analytics/members/at-risk")),
+    queryFn: async () => asArray<AtRiskMember>(await api.get<AtRiskMember[]>("/analytics/members/at-risk", { query: { branchId } })),
   })
 }
 
 export function useMemberStatusBreakdown(branchId?: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["analytics", "member-status-breakdown", branchId],
-    queryFn: async () => asArray<MemberStatusBreakdown>(await api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown")),
+    queryFn: async () => asArray<MemberStatusBreakdown>(await api.get<MemberStatusBreakdown[]>("/analytics/members/status-breakdown", { query: { branchId } })),
     enabled,
   })
 }
@@ -146,7 +146,7 @@ export function useSalesFunnel(branchId?: string, params: SalesDateQueryParams =
   return useQuery({
     queryKey: ["analytics", "sales-funnel", branchId, params],
     queryFn: async (): Promise<SalesFunnel> => {
-      const data = await api.get<SalesFunnelApi>("/analytics/sales/funnel", { query: params as QueryParams })
+      const data = await api.get<SalesFunnelApi>("/analytics/sales/funnel", { query: { ...params, branchId } as QueryParams })
       const followUps = data?.followUps ?? {}
       return {
         ...data,
@@ -166,7 +166,7 @@ export function useSalesFunnel(branchId?: string, params: SalesDateQueryParams =
 export function useSalesSourcePerformance(branchId?: string, params: SalesDateQueryParams = {}) {
   return useQuery({
     queryKey: ["analytics", "sales-sources", branchId, params],
-    queryFn: async () => asArray<SalesSourcePerformance>(await api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: params as QueryParams })),
+    queryFn: async () => asArray<SalesSourcePerformance>(await api.get<SalesSourcePerformance[]>("/analytics/sales/sources", { query: { ...params, branchId } as QueryParams })),
   })
 }
 
@@ -178,7 +178,7 @@ export interface SalesLostReason {
 export function useSalesLostReasons(branchId?: string, params: SalesDateQueryParams = {}) {
   return useQuery({
     queryKey: ["analytics", "sales-lost-reasons", branchId, params],
-    queryFn: async () => asArray<SalesLostReason>(await api.get<SalesLostReason[]>("/analytics/sales/lost-reasons", { query: params as QueryParams })),
+    queryFn: async () => asArray<SalesLostReason>(await api.get<SalesLostReason[]>("/analytics/sales/lost-reasons", { query: { ...params, branchId } as QueryParams })),
   })
 }
 
@@ -197,7 +197,7 @@ export function useSalesAssigneePerformance(branchId?: string, params: SalesDate
     queryKey: ["analytics", "sales-assignees", branchId, params],
     queryFn: async () =>
       asArray<SalesAssigneePerformance>(
-        (await api.get<SalesAssigneePerformance[]>("/analytics/sales/assignees", { query: params as QueryParams })).map((row) => ({
+        (await api.get<SalesAssigneePerformance[]>("/analytics/sales/assignees", { query: { ...params, branchId } as QueryParams })).map((row) => ({
           ...row,
           totalLeads: Number(row.totalLeads ?? 0),
           wonLeads: Number(row.wonLeads ?? 0),
@@ -236,11 +236,11 @@ interface InventoryForecastApi {
   daysUntilStockout: number | null
 }
 
-export function useInventoryForecast() {
+export function useInventoryForecast(branchId?: string) {
   return useQuery({
-    queryKey: ["analytics", "inventory-forecast"],
+    queryKey: ["analytics", "inventory-forecast", branchId],
     queryFn: async () => {
-      const data = await api.get<InventoryForecastApi[]>("/analytics/inventory/forecast")
+      const data = await api.get<InventoryForecastApi[]>("/analytics/inventory/forecast", { query: { branchId } })
       return asArray<InventoryForecastApi>(data).map((item) => ({
         productId: item.productId,
         productName: item.productName ?? item.name ?? "Unknown product",

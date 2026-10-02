@@ -325,7 +325,7 @@ export default function InventoryPage() {
  <h2 id="inventory-movements" className="section-title">Stock movements</h2>
  </div>
  </div>
- <Link href="/command-center" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Link href="/inventory/reorder" className="hidden min-h-11 items-center gap-1 rounded-xl px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-500/10 sm:inline-flex focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  Watchlist <ArrowRight className="size-3.5" aria-hidden="true" />
  </Link>
  </div>

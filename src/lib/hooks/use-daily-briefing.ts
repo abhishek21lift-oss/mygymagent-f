@@ -48,14 +48,18 @@ export interface DailyBriefing {
   /** Open lead follow-ups due by the end of today, on any open lead.
    * Optional only for the window where an older API is still deployed. */
   followUpsDue?: { count: number; overdue: number };
+  /** Running terms ending within `withinDays` that nobody has renewed. */
+  expiringSoon?: { count: number; withinDays: number };
 }
 
 /** Needs `reports.view`; pass `enabled: false` for anyone without it,
  * or the request is a guaranteed 403. */
-export function useDailyBriefing({ enabled = true }: { enabled?: boolean } = {}) {
+export function useDailyBriefing({ enabled = true, branchId }: { enabled?: boolean; branchId?: string } = {}) {
   return useQuery({
-    queryKey: ["daily-briefing"],
-    queryFn: () => api.get<DailyBriefing>("/briefing/daily"),
+    // The branch is part of the key: the briefing for one branch is not
+    // the briefing for the gym, and must never be served from its cache.
+    queryKey: ["daily-briefing", branchId ?? "all"],
+    queryFn: () => api.get<DailyBriefing>("/briefing/daily", { query: { branchId } }),
     staleTime: 60_000,
     enabled,
   });

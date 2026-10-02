@@ -7,10 +7,11 @@ import type { CreateBranchInput } from "@/lib/validation/gym";
 
 const KEY = "branches";
 
-export function useBranches(params: PaginationParams = {}) {
+export function useBranches(params: PaginationParams = {}, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [KEY, params],
     queryFn: () => api.get<Paginated<Branch>>("/branches", { query: params }),
+    enabled,
   });
 }
 
