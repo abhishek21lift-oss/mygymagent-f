@@ -1,4 +1,5 @@
-import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, type LucideIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ export function StatCard({
  isError,
  hint,
  tone = "primary",
+ href,
 }: {
  title: string;
  /** Kept for the existing call sites; no longer rendered. The label is
@@ -50,6 +52,9 @@ export function StatCard({
  isError?: boolean;
  hint?: string;
  tone?: "primary" | "success" | "warning" | "destructive";
+ /** The list behind the figure. The whole tile becomes the link, so a
+  * number that needs acting on is one tap from the rows it counts. */
+ href?: string;
 }) {
  // A zero is not a problem, whatever tone the page asked for.
  // "Expired: 0", "Low stock: 0" and "Refunded: \u20b9 0.00" were each
@@ -63,9 +68,10 @@ export function StatCard({
  isZero && (tone === "warning" || tone === "destructive") ? "primary" : tone;
  const flagged = effectiveTone === "warning" || effectiveTone === "destructive";
 
- return (
+ const tile = (
  <div
  className={cn( "stat-tile @container min-w-0 overflow-hidden rounded-2xl border border-border px-5 py-4",
+ href && "h-full pr-9",
  flagged && "before:absolute before:inset-y-3 before:left-0 before:w-1 before:rounded-full before:content-['']",
  TONE_RULE[effectiveTone],
  )}
@@ -111,7 +117,22 @@ export function StatCard({
  {hint ? (
  <p className="mt-0.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">{hint}</p>
  ) : null}
+ {href ? (
+ <ChevronRight
+ className="absolute right-3 top-4 size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+ aria-hidden="true"
+ />
+ ) : null}
  </div>
+ );
+ if (!href) return tile;
+ return (
+ <Link
+ href={href}
+ className="group block min-w-0 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+ >
+ {tile}
+ </Link>
  );
 }
 

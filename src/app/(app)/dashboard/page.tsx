@@ -13,8 +13,10 @@ import {
  Megaphone,
  Package,
  Sparkles,
+ UserCheck,
  UserPlus,
  Wallet,
+ type LucideIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -123,8 +125,35 @@ export default function DashboardPage() {
 
  // Each priority is shown only to someone who can act on it: an alert
  // that links to a page that will refuse you is noise.
- const priorities = data
- ? [
+ const memberFollowUps = data?.memberFollowUpsDue
+ const priorities: Priority[] = data
+ ? ([
+ memberFollowUps &&
+ memberFollowUps.count > 0 &&
+ hasPermission(["members.read", "members.read_assigned"]) && {
+ icon: UserCheck,
+ title:
+ memberFollowUps.renewalRequests > 0
+ ? `${memberFollowUps.renewalRequests} member${memberFollowUps.renewalRequests === 1 ? "" : "s"} asked to renew`
+ : `${memberFollowUps.count} member follow-up${memberFollowUps.count === 1 ? "" : "s"} due today`,
+ detail: [
+ memberFollowUps.renewalRequests > 0 && memberFollowUps.count > memberFollowUps.renewalRequests
+ ? `${memberFollowUps.count} member follow-ups due in all`
+ : null,
+ memberFollowUps.overdue > 0 ? `${memberFollowUps.overdue} overdue` : null,
+ ]
+ .filter(Boolean)
+ .join(" · ") || "From the member app and your team — due today.",
+ // A row per member: there is no gym-wide list of these yet, and
+ // each one is handled on that member's page.
+ people: memberFollowUps.top.slice(0, 3).map((f) => ({
+ key: f.id,
+ href: `/members/${f.memberId}`,
+ name: `${f.firstName} ${f.lastName}`,
+ what: f.isRenewalRequest ? f.title.replace(/^Renewal requested: /, "Renew onto ") : f.title,
+ })),
+ more: Math.max(0, memberFollowUps.count - 3),
+ },
  (data.expiringSoon?.count ?? 0) > 0 &&
  hasPermission(["memberships.read", "memberships.read_assigned"]) && {
  icon: CalendarClock,
@@ -149,8 +178,9 @@ export default function DashboardPage() {
  icon: AlertTriangle,
  title: `${data.atRiskMembers.count} paying member${data.atRiskMembers.count === 1 ? " hasn’t" : "s haven’t"} visited in 14 days`,
  detail: "A personal message now is cheaper than a win-back later.",
- href: "/members",
- action: "Review members",
+ // The list of who, with days since each last came in.
+ href: "/intelligence",
+ action: "See who",
  },
  data.lowStock.count > 0 &&
  hasPermission("inventory.read") && {
@@ -168,7 +198,7 @@ export default function DashboardPage() {
  href: "/ai-actions",
  action: "Review",
  },
- ].filter((item): item is Exclude<typeof item, false> => Boolean(item))
+ ] as Array<Priority | false | undefined>).filter((item): item is Priority => Boolean(item))
  : [];
 
  const { weeklyData, chartCurrency } = React.useMemo(
@@ -254,6 +284,7 @@ export default function DashboardPage() {
  isLoading={briefing.isLoading}
  isError={briefing.isError}
  tone="primary"
+ href={hasPermission(["attendance.read", "attendance.read_assigned"]) ? "/attendance" : undefined}
  />
  <StatCard
  icon={Wallet}
@@ -263,6 +294,7 @@ export default function DashboardPage() {
  isLoading={briefing.isLoading}
  isError={briefing.isError}
  tone="success"
+ href={hasPermission("payments.read") ? "/billing" : undefined}
  />
  <StatCard
  icon={Wallet}
@@ -276,6 +308,7 @@ export default function DashboardPage() {
  isLoading={briefing.isLoading}
  isError={briefing.isError}
  tone="warning"
+ href={hasPermission("payments.read") ? "/billing" : undefined}
  />
  <StatCard
  icon={AlertTriangle}
@@ -285,6 +318,7 @@ export default function DashboardPage() {
  isLoading={briefing.isLoading}
  isError={briefing.isError}
  tone="warning"
+ href="/intelligence"
  />
  </div>
  </section>
@@ -305,29 +339,11 @@ export default function DashboardPage() {
  <ErrorState message="Could not load today's priorities." onRetry={() => void briefing.refetch()} />
  ) : priorities.length ? (
  <ul className="flex flex-col gap-1">
- {priorities.map((item) => {
- const Icon = item.icon;
- return (
- <li key={item.href}>
- <Link
- href={item.href}
- className="group flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 py-3 transition-colors hover:border-border hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-ring"
- >
- <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-warning">
- <Icon className="size-5" aria-hidden="true" />
- </span>
- <span className="min-w-0 flex-1">
- <span className="block [overflow-wrap:anywhere] text-sm font-medium">{item.title}</span>
- {item.detail && <span className="mt-0.5 block [overflow-wrap:anywhere] text-xs text-muted-foreground">{item.detail}</span>}
- </span>
- <span className="hidden items-center gap-1 text-xs font-medium text-primary sm:flex">
- {item.action}
- <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
- </span>
- </Link>
+ {priorities.map((item) => (
+ <li key={item.href ?? item.title}>
+ <PriorityRow item={item} />
  </li>
- );
- })}
+ ))}
  </ul>
  ) : (
  <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-5 py-10 text-center">
@@ -473,6 +489,74 @@ export default function DashboardPage() {
 
  <QuickActions actions={visibleActions} />
  </div>
+ );
+}
+
+type Priority = {
+ icon: LucideIcon;
+ title: string;
+ detail?: string;
+ /** Where to act, for a row about one list. */
+ href?: string;
+ action?: string;
+ /** Or one link per person, for a row about people handled one by one. */
+ people?: { key: string; href: string; name: string; what: string }[];
+ more?: number;
+};
+
+const ROW_ICON = "flex size-10 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-warning";
+
+function PriorityRow({ item }: { item: Priority }) {
+ const Icon = item.icon;
+ const text = (
+ <span className="min-w-0 flex-1">
+ <span className="block [overflow-wrap:anywhere] text-sm font-medium">{item.title}</span>
+ {item.detail && <span className="mt-0.5 block [overflow-wrap:anywhere] text-xs text-muted-foreground">{item.detail}</span>}
+ </span>
+ );
+ if (item.people) {
+ return (
+ <div className="flex gap-3 rounded-lg px-3 py-3">
+ <span className={ROW_ICON}>
+ <Icon className="size-5" aria-hidden="true" />
+ </span>
+ <div className="min-w-0 flex-1">
+ {text}
+ <ul className="mt-2 flex flex-col">
+ {item.people.map((person) => (
+ <li key={person.key}>
+ <Link
+ href={person.href}
+ className="group -mx-2 flex min-h-11 items-center gap-2 rounded-md px-2 text-sm transition-colors hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-ring"
+ >
+ <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+ <span className="font-medium">{person.name}</span>
+ <span className="text-muted-foreground"> · {person.what}</span>
+ </span>
+ <ChevronRight className="size-3.5 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+ </Link>
+ </li>
+ ))}
+ </ul>
+ {item.more ? <p className="mt-1 text-xs text-muted-foreground">and {item.more} more</p> : null}
+ </div>
+ </div>
+ );
+ }
+ return (
+ <Link
+ href={item.href!}
+ className="group flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 py-3 transition-colors hover:border-border hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-ring"
+ >
+ <span className={ROW_ICON}>
+ <Icon className="size-5" aria-hidden="true" />
+ </span>
+ {text}
+ <span className="hidden items-center gap-1 text-xs font-medium text-primary sm:flex">
+ {item.action}
+ <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+ </span>
+ </Link>
  );
 }
 

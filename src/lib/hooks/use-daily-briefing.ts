@@ -50,6 +50,23 @@ export interface DailyBriefing {
   followUpsDue?: { count: number; overdue: number };
   /** Running terms ending within `withinDays` that nobody has renewed. */
   expiringSoon?: { count: number; withinDays: number };
+  /** Open member follow-ups due by the end of today -- including the
+   * renewal requests members send from the member app, which otherwise
+   * sit unseen on that member's own page. Most urgent first. */
+  memberFollowUpsDue?: {
+    count: number;
+    overdue: number;
+    renewalRequests: number;
+    top: Array<{
+      id: string;
+      memberId: string;
+      firstName: string;
+      lastName: string;
+      title: string;
+      dueAt: string | null;
+      isRenewalRequest: boolean;
+    }>;
+  };
 }
 
 /** Needs `reports.view`; pass `enabled: false` for anyone without it,

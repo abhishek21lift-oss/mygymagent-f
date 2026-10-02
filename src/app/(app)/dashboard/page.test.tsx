@@ -53,6 +53,16 @@ const BRIEFING = {
   pendingAiActions: 4,
   followUpsDue: { count: 2, overdue: 1 },
   expiringSoon: { count: 5, withinDays: 7 },
+  memberFollowUpsDue: {
+    count: 4,
+    overdue: 1,
+    renewalRequests: 2,
+    top: [
+      { id: "f1", memberId: "m1", firstName: "Ravi", lastName: "Kumar", title: "Renewal requested: Quarterly", dueAt: "2026-10-02T04:00:00.000Z", isRenewalRequest: true },
+      { id: "f2", memberId: "m2", firstName: "Neha", lastName: "Shah", title: "Call about knee injury", dueAt: "2026-10-01T04:00:00.000Z", isRenewalRequest: false },
+      { id: "f3", memberId: "m3", firstName: "Arjun", lastName: "Rao", title: "Renewal requested: Monthly", dueAt: "2026-10-02T04:00:00.000Z", isRenewalRequest: true },
+    ],
+  },
 }
 
 const BRANCH_A = "11111111-1111-4111-8111-111111111111"
@@ -127,7 +137,7 @@ describe("DashboardPage", () => {
     routes({ "/briefing/daily": { ...BRIEFING, followUpsDue: { count: 0, overdue: 0 } } })
     renderPage()
     expect(await screen.findByText("12")).toBeInTheDocument()
-    expect(screen.queryByText(/follow-ups?\b.*\bdue/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/lead follow-ups?\b.*\bdue/i)).not.toBeInTheDocument()
   })
 
   it("says how many members were turned away beside today's check-ins", async () => {
@@ -168,7 +178,7 @@ describe("DashboardPage", () => {
     expect(await screen.findByText("12")).toBeInTheDocument()
     expect(screen.queryByText(/AI proposals?/)).not.toBeInTheDocument()
     expect(screen.queryByText(/reorder level/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/follow-ups? due/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/lead follow-ups? due/)).not.toBeInTheDocument()
     expect(screen.queryByText(/end within/)).not.toBeInTheDocument()
   })
 
@@ -200,6 +210,39 @@ describe("DashboardPage", () => {
     renderPage()
     expect(await screen.findByText("Indiranagar")).toBeInTheDocument()
     expect(screen.queryByRole("combobox", { name: "Branch" })).not.toBeInTheDocument()
+  })
+
+  it("puts renewal requests from the member app in front of the desk, one link per member", async () => {
+    renderPage()
+    expect(await screen.findByText("2 members asked to renew")).toBeInTheDocument()
+    expect(screen.getByText("4 member follow-ups due in all · 1 overdue")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /Ravi Kumar · Renew onto Quarterly/ })).toHaveAttribute("href", "/members/m1")
+    expect(screen.getByRole("link", { name: /Neha Shah · Call about knee injury/ })).toHaveAttribute("href", "/members/m2")
+    expect(screen.getByText("and 1 more")).toBeInTheDocument()
+  })
+
+  it("keeps member requests from someone who cannot open members", async () => {
+    mockPermissions = ["reports.view"]
+    renderPage()
+    expect(await screen.findByText("12")).toBeInTheDocument()
+    expect(screen.queryByText(/asked to renew/)).not.toBeInTheDocument()
+  })
+
+  it("makes each figure a way into the list behind it, where this person may go", async () => {
+    mockPermissions = [...ALL, "attendance.read"]
+    renderPage()
+    const tile = async (name: RegExp) => (await screen.findByText(name)).closest("a")
+    expect(await tile(/^Checked in today$/)).toHaveAttribute("href", "/attendance")
+    expect(await tile(/^Net revenue$/)).toHaveAttribute("href", "/billing")
+    expect(await tile(/^Members at risk$/)).toHaveAttribute("href", "/intelligence")
+  })
+
+  it("leaves a figure plain when its list would refuse this person", async () => {
+    mockPermissions = ["reports.view"]
+    renderPage()
+    expect(await screen.findByText("12")).toBeInTheDocument()
+    expect(screen.getByText(/^Checked in today$/).closest("a")).toBeNull()
+    expect(screen.getByText(/^Net revenue$/).closest("a")).toBeNull()
   })
 
   it("has retired the duplicate panels and pages", async () => {
