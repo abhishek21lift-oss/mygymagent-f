@@ -1,10 +1,26 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
-const BACKEND_URL =
-  process.env.MYGYMAGENT_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://mygymagent-b.onrender.com"
+/** The backend origin, or null when unconfigured. Read live rather than
+ * captured in a module constant so the production guard below reports the
+ * environment as it actually is when a request arrives. */
+function configuredBackendUrl(): string | null {
+  return process.env.MYGYMAGENT_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? null
+}
+
+// No production fallback. This used to resolve to a hardcoded host, so a
+// deployment missing its env var proxied every login somewhere plausible
+// and silently authenticated against the wrong backend -- while
+// `src/lib/api/client.ts`, the other half of this request path, refused to
+// guess at all. They now agree: no guessing, ever.
+//
+// Unlike client.ts this is a per-request 503 rather than a throw at module
+// load. Both files' constants are evaluated during `next build`, and a build
+// runs without NEXT_PUBLIC_API_URL set (it is inlined into the client bundle
+// instead), so throwing here failed the entire build over a variable only
+// this handler needs. A 503 naming the missing variable keeps the rest of the
+// app serving and points at the actual misconfiguration.
+const BACKEND_URL = configuredBackendUrl() ?? "http://localhost:4000"
 
 // `mfa/verify` is two segments, which is why this route is a catch-all:
 // it completes a login and sets the same refresh cookie /auth/login does,
@@ -113,6 +129,16 @@ export async function POST(
   const contentType = request.headers.get("content-type")
   if (contentType) headers.set("content-type", contentType)
 
+  // Forward the caller's access token. `logout-all` is the reason this is
+  // here: it is not `@Public()`, it reads `@CurrentUser()`, so without a
+  // bearer token the backend 401s and revokes nothing -- "sign out
+  // everywhere" silently signed the caller out of their own browser and
+  // left every other device signed in. The token goes to the same backend
+  // the browser would have called directly; the allowlist above and the
+  // same-origin check decide what can be proxied at all.
+  const authorization = request.headers.get("authorization")
+  if (authorization) headers.set("authorization", authorization)
+
   // Never forward the browser Origin/Referer to the backend. The BFF is the
   // trusted same-origin boundary and forwards the refresh cookie server-side.
   if (refreshToken) headers.set("cookie", "refresh_token=" + refreshToken)
@@ -133,6 +159,21 @@ export async function POST(
 
   let upstream: Response
   try {
+    if (!configuredBackendUrl() && process.env.NODE_ENV === "production") {
+      // Named explicitly rather than falling through to the 503 below,
+      // which would report the backend as down when it is simply
+      // unconfigured.
+      return NextResponse.json(
+        {
+          error: {
+            code: "AUTH_BACKEND_UNCONFIGURED",
+            message:
+              "Authentication service is not configured: set MYGYMAGENT_API_URL (or NEXT_PUBLIC_API_URL).",
+          },
+        },
+        { status: 503 },
+      )
+    }
     upstream = await fetch(BACKEND_URL + "/auth/" + action, {
       method: "POST",
       headers,
@@ -156,7 +197,16 @@ export async function POST(
   }
 
   if (action !== "logout" && upstream.ok) {
-    await copyRefreshCookie(upstream.headers.get("set-cookie"))
+    // `logout-all` revoked every refresh token this account holds,
+    // including this browser's, and the backend's clearing Set-Cookie
+    // carries an empty value that `copyRefreshCookie` cannot extract. Drop
+    // the local copy here so the next bootstrap does not present a dead
+    // token and eat a pointless 401.
+    if (action === "logout-all") {
+      await clearRefreshCookie()
+    } else {
+      await copyRefreshCookie(upstream.headers.get("set-cookie"))
+    }
   }
   // A 401 from mfa/verify means the *challenge* was wrong or expired; it
   // says nothing about a refresh cookie this browser may already hold for
