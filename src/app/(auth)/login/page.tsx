@@ -219,17 +219,21 @@ export default function LoginPage() {
  <section aria-labelledby="login-title" className="overflow-hidden rounded-xl">
  <div className="border-b px-6 py-5">
  <h1 id="login-title" className="text-xl font-semibold tracking-tight">Welcome back</h1>
- {/* One form for both. The old copy ("manage members, billing and
- operations") told a gym member they were in the wrong place, which
- was the only thing standing between them and their own portal --
- the server already knows which app the session opens. */}
+ {/* One form for both, and the server already knows which app the session
+ opens. The old copy described that outcome ("you will land in the right
+ place") without ever mentioning there are two ways in, which is what left a
+ member unsure whether "Password" applied to them. */}
 <p className="mt-1 text-sm text-muted-foreground">
- Members and staff sign in here. You will land in the right place automatically.
+ Gym staff or member? Pick how you sign in — we&apos;ll take you to the right place.
 </p>
  </div>
  <div className="p-6">
  <div role="tablist" aria-label="How to sign in" className="mb-5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
- {([["password", "Password"], ["sms", "SMS code"]] as const).map(([value, label]) => (
+ {/* Labelled by who is signing in, not by what to type. "Password" and
+ "SMS code" described the credential and left a member unable to tell that
+ "Password" was not for them — which is the only question this page has to
+ answer. The credential itself is still stated in the subcopy below. */}
+ {([["password", "Gym staff"], ["sms", "Member"]] as const).map(([value, label]) => (
  <button
  key={value}
  type="button"
@@ -242,6 +246,14 @@ export default function LoginPage() {
  </button>
  ))}
  </div>
+
+ {/* The tab names the person; this still names the credential, so nothing
+ the old labels said is lost — it is just said where it is useful. */}
+ <p className="mb-4 text-sm text-muted-foreground">
+ {mode === "sms"
+ ? "Sign in with your phone number and we'll text you a code."
+ : "Sign in with the email and password your gym set up."}
+ </p>
 
  {mode === "sms" ? (
  <form onSubmit={otpSent ? onSubmitOtp : onRequestOtp} className="flex flex-col gap-4" noValidate>
