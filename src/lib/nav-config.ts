@@ -167,6 +167,11 @@ export const comingSoonNav: NavItem[] = [];
  */
 export const platformNav: NavItem[] = [
   { title: "Organizations", href: "/platform/organizations", icon: Building2, platformOnly: true },
+  // Lead the group: a platform operator's first question is "is anything
+  // broken", not "which gyms exist". `platformOnly` because the server
+  // refuses the route without a platformRole, and this is only about not
+  // offering a link that could never load.
+  { title: "Command Center", href: "/platform/command-center", icon: Gauge, platformOnly: true },
 ];
 
 export const settingsNav: NavItem = { title: "Settings", href: "/settings", icon: Settings, hue: "orange", children: [
