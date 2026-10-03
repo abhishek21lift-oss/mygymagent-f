@@ -21,6 +21,7 @@ jest.mock("@/lib/auth/auth-context", () => ({
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: jest.fn(), push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 describe("LoginPage tabs", () => {
@@ -61,6 +62,19 @@ describe("LoginPage tabs", () => {
     expect(
       screen.getByRole("tablist", { name: /how to sign in/i }),
     ).toBeInTheDocument();
+  });
+
+  it("offers a visible route into the Command Center", () => {
+    render(<LoginPage />);
+
+    // Platform staff use the same email+password form as gym staff, so
+    // there is no third form to add -- only the intent has to be visible,
+    // and carried through ?next= since the page itself is auth-gated.
+    const link = screen.getByRole("link", { name: /platform staff sign-in/i });
+    expect(link).toHaveAttribute(
+      "href",
+      "/login?next=%2Fplatform%2Fcommand-center",
+    );
   });
 
   it("tells the reader there is a choice to make", () => {

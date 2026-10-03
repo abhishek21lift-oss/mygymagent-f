@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, KeyRound, Lock, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
+import { safeNext } from "@/lib/auth/safe-next";
 import { ApiError } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
  * codes issued at enrolment; the backend accepts both in the same field. */
 const MIN_SECOND_FACTOR_LENGTH = 6;
 
-export default function LoginPage() {
+function LoginForm({ requestedNext }: { requestedNext: string | null }) {
  const router = useRouter();
  const { login, completeMfaLogin, requestOtp, loginWithOtp } = useAuth();
  const [email, setEmail] = React.useState("");
@@ -64,8 +66,10 @@ export default function LoginPage() {
  }
  // Gym members and staff sign in through this same form; the server
  // says which app the session belongs to, so a member is never
- // dropped into the staff app where every request would 403.
- router.replace(homeRouteFor(result.user));
+ // dropped into the staff app where every request would 403. A validated
+ // `?next=` wins over that default, which is how "Platform staff
+ // sign-in" reaches the Command Center.
+ router.replace(requestedNext ?? homeRouteFor(result.user));
  } catch (err) {
  setError(
  describe(err, "Unable to sign in. Please check your credentials and try again."),
@@ -107,7 +111,7 @@ export default function LoginPage() {
  setIsSubmitting(true);
  try {
  const session = await loginWithOtp(phone.trim(), otpCode.trim());
- router.replace(homeRouteFor(session.user));
+ router.replace(requestedNext ?? homeRouteFor(session.user));
  } catch (err) {
  setError(describe(err, "That code is not valid. Please try again."));
  setOtpCode("");
@@ -129,7 +133,7 @@ export default function LoginPage() {
  setIsSubmitting(true);
  try {
  const session = await completeMfaLogin(mfaToken, trimmed);
- router.replace(homeRouteFor(session.user));
+ router.replace(requestedNext ?? homeRouteFor(session.user));
  } catch (err) {
  // The challenge is single-use on success only, so a wrong code can be
  // retried against the same token until it expires. An expired or
@@ -315,11 +319,56 @@ export default function LoginPage() {
  </Button>
  </form>
  )}
+ {/* Platform staff sign in with the same email and password as anyone
+  else, so there is nothing to make visible except where they land. This
+  says so and carries the intent through `?next=`; the Command Center
+  itself is auth-gated, so linking straight at it would bounce a signed-out
+  visitor straight back here. */}
+ <p className="mt-4 text-center text-sm text-muted-foreground">
+ <Link
+ href="/login?next=%2Fplatform%2Fcommand-center"
+ className="font-medium text-primary hover:underline"
+ >
+ Platform staff sign-in
+ </Link>
+ </p>
  <p className="mt-5 text-center text-sm text-muted-foreground">
  Setting up a new gym?{" "}
  <Link href="/register" className="font-medium text-primary hover:underline">Create an account</Link>
  </p>
  </div>
  </section>
+ );
+}
+
+/**
+ * Reads `?next=` and hands it down.
+ *
+ * `useSearchParams()` opts a client component out of static rendering, so
+ * Next.js refuses to prerender it unless a Suspense boundary sits ABOVE
+ * the component that calls it. Hence the split: this component calls the
+ * hook, `LoginPage` below only provides the boundary.
+ *
+ * `requestedNext` is validated here, at the edge of the untrusted input,
+ * so the redirect decision is made once and not re-derived from the URL
+ * deeper in the tree.
+ */
+function LoginWithNext() {
+ const searchParams = useSearchParams();
+ const requestedNext = safeNext(searchParams.get("next"));
+ return <LoginForm requestedNext={requestedNext} />;
+}
+
+/**
+ * The boundary is scoped to this page rather than put in
+ * `(auth)/layout.tsx` deliberately: it keeps the CSR bailout confined to
+ * `/login`, so the other auth pages stay statically rendered and
+ * `/login` keeps its own prerendered shell.
+ */
+export default function LoginPage() {
+ return (
+ <Suspense fallback={null}>
+ <LoginWithNext />
+ </Suspense>
  );
 }
