@@ -1752,3 +1752,589 @@
     transform: perspective(1600px) rotateY(-18deg) rotateX(8deg) translate3d(40px, 20px, -60px);
   }
 }
+
+/* ============================================================
+   PREMIUM SAAS DASHBOARD — Vibrant Hero Banners, KPI Cards,
+   Donut Charts, Gradient Icon Tiles
+   ------------------------------------------------------------
+   These utilities layer on top of the existing design tokens.
+   They spend MORE of the section hue on large, intentional
+   surfaces — the hero banner, the KPI icon tile — and introduce
+   the SVG donut chart ring. Contrast is re-verified per rule:
+   the banner text always runs on a surface dark enough to
+   score 4.5:1; the icon tile label runs on --section-tint.
+   ============================================================ */
+@layer utilities {
+
+  /* --- Hero Banner -------------------------------------------
+     A full-width gradient banner that replaces the minimal radial
+     hint in PageHero. The band is taller and bolder: it uses the
+     section's two solved gradient steps at full opacity, overlaid
+     with a fine dot-mesh pattern for depth, and a frosted bottom
+     edge so the content below doesn't hard-cut against it. */
+  .hero-banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      linear-gradient(
+        135deg,
+        var(--section-grad-1) 0%,
+        color-mix(in oklab, var(--section-grad-1) 60%, var(--section-grad-2)) 42%,
+        var(--section-grad-2) 100%
+      );
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      0 8px 32px -8px color-mix(in oklab, var(--section-grad-1) 55%, transparent);
+    color: var(--section-on);
+  }
+
+  /* Dot mesh overlay — a translucent repeating-radial-gradient
+     creates a fine grid of white specks at low opacity. Purely
+     decorative, pointer-events: none so it never eats a click. */
+  .hero-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle, rgb(255 255 255 / 0.18) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.55;
+  }
+
+  /* Bright highlight arc at the top-right — the "light source" */
+  .hero-banner::after {
+    content: "";
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 55%;
+    height: 200%;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at 50% 50%,
+      rgb(255 255 255 / 0.18) 0%,
+      transparent 72%
+    );
+  }
+
+  .hero-banner > * { position: relative; z-index: 1; }
+
+  /* Banner content area */
+  .hero-banner-body {
+    padding: 1.75rem 2rem 1.75rem;
+  }
+  @media (max-width: 640px) {
+    .hero-banner-body { padding: 1.25rem 1.25rem 1.5rem; }
+  }
+
+  .hero-banner-eyebrow {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.75);
+    margin-bottom: 0.35rem;
+  }
+  .hero-banner-title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+    color: #fff;
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.15);
+  }
+  .hero-banner-subtitle {
+    font-size: 0.875rem;
+    font-weight: 450;
+    color: rgb(255 255 255 / 0.82);
+    margin-top: 0.35rem;
+    line-height: 1.5;
+  }
+  .hero-banner-actions {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    align-items: center;
+  }
+
+  /* A light ghost button variant for inside hero banners */
+  .hero-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+  .hero-banner-btn:active { transform: scale(0.97); }
+
+  .hero-banner-btn-primary {
+    background: rgb(255 255 255 / 0.96);
+    color: var(--section-fill);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+  }
+  .hero-banner-btn-primary:hover {
+    background: #fff;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.24);
+  }
+  .hero-banner-btn-ghost {
+    background: rgb(255 255 255 / 0.16);
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.32);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+  }
+  .hero-banner-btn-ghost:hover {
+    background: rgb(255 255 255 / 0.24);
+  }
+
+  /* Decorative icon tile inside the banner (top-right) */
+  .hero-banner-icon-tile {
+    width: 5rem;
+    height: 5rem;
+    border-radius: var(--radius-2xl);
+    background: rgb(255 255 255 / 0.2);
+    border: 1px solid rgb(255 255 255 / 0.3);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* --- KPI Card with Gradient Icon Tile ----------------------
+     Each KPI card has:
+     - a coloured gradient icon tile (top-left)
+     - a large metric number
+     - a trend chip (up/down with arrow)
+     - a subtle section-tinted top cap
+     All depth is shadow + top highlight; no gradient fill on the
+     whole card surface (keeps numbers readable). */
+  .kpi-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-card);
+    padding: 1.25rem;
+    overflow: hidden;
+    transition:
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
+    container-type: inline-size;
+  }
+
+  /* Top-cap gradient strip */
+  .kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      var(--kpi-grad-1, var(--section-grad-1)) 0%,
+      var(--kpi-grad-2, var(--section-grad-2)) 60%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Subtle ambient glow in the background of the card */
+  .kpi-card::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 60%;
+    height: 60%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 8%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .kpi-card > * { position: relative; z-index: 1; }
+
+  .kpi-card:hover {
+    border-color: color-mix(in oklab, var(--kpi-grad-1, var(--section)) 28%, var(--border));
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-2px);
+  }
+
+  /* The gradient icon tile */
+  .kpi-icon-tile {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-xl);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(
+      135deg,
+      var(--kpi-grad-1, var(--section-grad-1)) 0%,
+      var(--kpi-grad-2, var(--section-grad-2)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 4px 12px -4px color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 60%, transparent);
+  }
+
+  /* Trend chip */
+  .kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+  .kpi-trend-up {
+    background: var(--success-tint);
+    color: var(--success);
+  }
+  .kpi-trend-down {
+    background: var(--destructive-tint);
+    color: var(--destructive);
+  }
+  .kpi-trend-neutral {
+    background: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  .kpi-value {
+    font-size: clamp(1.5rem, 10cqi, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--foreground);
+    tabular-nums: normal;
+  }
+  .kpi-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--section-ink);
+    line-height: 1.3;
+  }
+  .kpi-hint {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    margin-top: 0.15rem;
+  }
+
+  /* Accent overrides for per-card colours */
+  .kpi-indigo  { --kpi-grad-1: var(--a-indigo-grad-1);  --kpi-grad-2: var(--a-indigo-grad-2); }
+  .kpi-violet  { --kpi-grad-1: var(--a-violet-grad-1);  --kpi-grad-2: var(--a-violet-grad-2); }
+  .kpi-emerald { --kpi-grad-1: var(--a-emerald-grad-1); --kpi-grad-2: var(--a-emerald-grad-2); }
+  .kpi-amber   { --kpi-grad-1: var(--a-amber-grad-1);   --kpi-grad-2: var(--a-amber-grad-2); }
+  .kpi-cyan    { --kpi-grad-1: var(--a-cyan-grad-1);    --kpi-grad-2: var(--a-cyan-grad-2); }
+  .kpi-rose    { --kpi-grad-1: var(--a-rose-grad-1);    --kpi-grad-2: var(--a-rose-grad-2); }
+  .kpi-blue    { --kpi-grad-1: var(--a-blue-grad-1);    --kpi-grad-2: var(--a-blue-grad-2); }
+  .kpi-orange  { --kpi-grad-1: var(--a-orange-grad-1);  --kpi-grad-2: var(--a-orange-grad-2); }
+
+  /* --- Donut Chart -------------------------------------------
+     CSS-only donut using conic-gradient. The ring is built from
+     a <svg> rendered by the DonutChart component; these are helper
+     classes for the legend and center label. */
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .donut-center-value {
+    font-size: 1.625rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--foreground);
+  }
+  .donut-center-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-top: 0.2rem;
+  }
+
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .donut-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+  .donut-legend-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+  }
+  .donut-legend-name {
+    flex: 1;
+    color: var(--foreground);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .donut-legend-val {
+    font-weight: 700;
+    color: var(--foreground);
+    tabular-nums: normal;
+  }
+  .donut-legend-pct {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    min-width: 2.5rem;
+    text-align: right;
+    tabular-nums: normal;
+  }
+
+  /* --- Gradient category section headers ----------------------
+     A compact heading strip with a vivid left-border gradient
+     accent and a light wash behind it. Used to group KPI cards
+     by domain category (Members, Finance, Operations…). */
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 12%, var(--card)) 0%,
+      transparent 80%
+    );
+    border-left: 3px solid transparent;
+    border-image: linear-gradient(
+      180deg,
+      var(--kpi-grad-1, var(--section-grad-1)),
+      var(--kpi-grad-2, var(--section-grad-2))
+    ) 1;
+    margin-bottom: 0.75rem;
+  }
+  .category-header-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      135deg,
+      var(--kpi-grad-1, var(--section-grad-1)),
+      var(--kpi-grad-2, var(--section-grad-2))
+    );
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .category-header-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+
+  /* --- Quick action tile ---------------------------------------
+     A card-style button with a gradient icon tile, used in the
+     quick-actions grid on the dashboard. */
+  .quick-action-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    padding: 1rem 1rem 0.875rem;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    text-align: left;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+    overflow: hidden;
+  }
+  .quick-action-tile::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      var(--kpi-grad-1, var(--section-grad-1)) 0%,
+      var(--kpi-grad-2, var(--section-grad-2)) 60%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .quick-action-tile:hover::before { opacity: 1; }
+  .quick-action-tile:hover {
+    border-color: color-mix(in oklab, var(--kpi-grad-1, var(--section)) 28%, var(--border));
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-2px);
+  }
+  .quick-action-tile:active { transform: scale(0.98); }
+
+  .quick-action-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    background: linear-gradient(
+      135deg,
+      var(--kpi-grad-1, var(--section-grad-1)) 0%,
+      var(--kpi-grad-2, var(--section-grad-2)) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 3px 8px -3px color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 55%, transparent);
+  }
+
+  /* --- Activity feed row --------------------------------------
+     A row in the activity / recent-events feed. */
+  .activity-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-row:last-child { border-bottom: none; }
+
+  .activity-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    margin-top: 0.35rem;
+    background: linear-gradient(135deg, var(--section-grad-1), var(--section-grad-2));
+  }
+
+  /* --- Sidebar premium nav items ------------------------------
+     Enhanced sidebar item with gradient active pill, coloured icon. */
+  .nav-item-premium {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-xl);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--sidebar-foreground);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-item-premium:hover {
+    background: color-mix(in oklab, var(--nav-accent) 10%, var(--sidebar-accent));
+    color: var(--nav-ink);
+  }
+  .nav-item-premium[aria-current="page"] {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--nav-accent) 16%, var(--card)) 0%,
+      color-mix(in oklab, var(--nav-accent) 10%, var(--card)) 100%
+    );
+    color: var(--nav-ink);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--nav-accent) 20%, transparent);
+  }
+
+  .nav-icon-tile {
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+    background: color-mix(in oklab, var(--nav-accent) 10%, transparent);
+    color: var(--nav-ink);
+  }
+  [aria-current="page"] .nav-icon-tile {
+    background: linear-gradient(
+      135deg,
+      var(--nav-fill) 0%,
+      color-mix(in oklab, var(--nav-fill) 80%, var(--nav-accent)) 100%
+    );
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 2px 6px -2px color-mix(in oklab, var(--nav-fill) 55%, transparent);
+  }
+
+  /* --- Bottom tab bar premium ---------------------------------
+     Active tab gets a gradient pill behind it instead of a plain
+     colour dot. */
+  .bottom-tab-pill {
+    position: absolute;
+    inset: 0.25rem 0.5rem;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--nav-accent) 16%, var(--card)) 0%,
+      color-mix(in oklab, var(--nav-accent) 10%, var(--card)) 100%
+    );
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--nav-accent) 22%, transparent);
+    z-index: 0;
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kpi-card:hover,
+    .quick-action-tile:hover { transform: none; }
+    .hero-banner::before,
+    .hero-banner::after { animation: none; }
+  }
+}
