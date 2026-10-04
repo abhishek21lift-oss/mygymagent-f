@@ -63,15 +63,19 @@ export function DonutChart({
 
   const resolvedCenter = centerValue ?? (total > 0 ? total.toLocaleString() : "—");
 
-  // Build per-segment arc data
-  let cumulativeFraction = 0;
-  const arcs = segments.map((seg) => {
+  // Build per-segment arc data.
+  // Uses reduce (not map + let mutation) to accumulate the running
+  // fraction without reassigning a variable during render — the
+  // react-compiler eslint rule disallows that pattern.
+  const arcs = segments.reduce<
+    Array<DonutSegment & { dashLength: number; offset: number; fraction: number }>
+  >((acc, seg) => {
     const fraction = total > 0 ? seg.value / total : 0;
     const dashLength = Math.max(0, fraction * circumference - gap);
-    const offset = -cumulativeFraction * circumference;
-    cumulativeFraction += fraction;
-    return { ...seg, dashLength, offset, fraction };
-  });
+    const cumulative = acc.reduce((sum, a) => sum + a.fraction, 0);
+    const offset = -cumulative * circumference;
+    return [...acc, { ...seg, dashLength, offset, fraction }];
+  }, []);
 
   // Accessible summary for the SVG
   const ariaLabel = [
@@ -155,7 +159,7 @@ export function DonutChart({
             opacity={0.6}
           />
 
-          {arcs.map((arc, i) => (
+          {arcs.map((arc) => (
             <React.Fragment key={arc.label}>
               <circle
                 cx={center}
