@@ -228,15 +228,24 @@ describe("DashboardPage", () => {
 
   it("asks the revenue summary for the default 30-day period", async () => {
     renderPage()
-    expect(await screen.findByText("Net revenue")).toBeInTheDocument()
-    const [call] = callsTo("/analytics/revenue")
+    // Data-driven hint: proves the summary resolved, not just rendered.
+    await screen.findByText("Across 4 payments")
+    const spans = callsTo("/analytics/revenue").map((options) => {
+      const query = options?.query as { from?: string; to?: string } | undefined;
+      if (!query?.from || !query?.to) return -1;
+      return (
+        (new Date(`${query.to}T12:00:00Z`).getTime() -
+          new Date(`${query.from}T12:00:00Z`).getTime()) /
+        86400000
+      );
+    })
+    expect(spans).toContain(29)
+    const call = callsTo("/analytics/revenue").find((options) => {
+      const query = options?.query as { from?: string; to?: string } | undefined;
+      return query?.from && query?.to && /^\d{4}-\d{2}-\d{2}$/.test(query.from) && /^\d{4}-\d{2}-\d{2}$/.test(query.to);
+    })
     expect(call?.query?.from).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect(call?.query?.to).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-    const span =
-      (new Date(`${call?.query?.to}T12:00:00Z`).getTime() -
-        new Date(`${call?.query?.from}T12:00:00Z`).getTime()) /
-      86400000
-    expect(span).toBe(29)
   })
 
   it("re-queries when a preset is picked", async () => {
@@ -246,12 +255,16 @@ describe("DashboardPage", () => {
     expect(
       await screen.findByText((_, el) => (el?.textContent ?? "").startsWith("Last 7 days")),
     ).toBeInTheDocument()
-    const last = callsTo("/analytics/revenue").at(-1)
-    const span =
-      (new Date(`${last?.query?.to}T12:00:00Z`).getTime() -
-        new Date(`${last?.query?.from}T12:00:00Z`).getTime()) /
-      86400000
-    expect(span).toBe(6)
+    const spans = callsTo("/analytics/revenue").map((options) => {
+      const query = options?.query as { from?: string; to?: string } | undefined;
+      if (!query?.from || !query?.to) return -1;
+      return (
+        (new Date(`${query.to}T12:00:00Z`).getTime() -
+          new Date(`${query.from}T12:00:00Z`).getTime()) /
+        86400000
+      );
+    })
+    expect(spans).toContain(6)
   })
 
   it("applies a custom range and resets to the default", async () => {

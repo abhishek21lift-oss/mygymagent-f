@@ -154,7 +154,13 @@ export default function DashboardPage() {
   const briefing      = useDailyBriefing({ enabled: canViewReports, branchId: branchFilter });
 
 
-  const organization  = useOrganization({ enabled: hasPermission("organizations.read") });
+  const canReadOrg    = hasPermission("organizations.read");
+  const organization  = useOrganization({ enabled: canReadOrg });
+  /* Date windows are computed in the gym's timezone. Firing the queries
+     before it loads would request (and flash) a wrong-timezone day, then
+     refire — so date-driven queries wait for it. Without the permission
+     the org never loads and local time is the only option. */
+  const tzReady = !canReadOrg || organization.isFetched;
   const revenueTrend  = useRevenueTrend(6, branchFilter, { enabled: canViewReports });
   const statusBreakdown = useMemberStatusBreakdown(branchFilter, { enabled: canViewReports });
 
@@ -181,7 +187,7 @@ export default function DashboardPage() {
   }, [financePreset, customRange, timezone]);
   const financeSummary = useRevenueSummary(
     { from: financeRange.from, to: financeRange.to, ...(branchFilter ? { branchId: branchFilter } : {}) },
-    { enabled: canViewReports },
+    { enabled: canViewReports && tzReady },
   );
   const summaryRow =
     financeSummary.data?.revenue.find((r) => r.currency === currencyCode) ?? financeSummary.data?.revenue[0];
@@ -203,24 +209,24 @@ export default function DashboardPage() {
   );
   const todayCollection = useRevenueSummary(
     { from: todayStr, to: todayStr, ...(branchFilter ? { branchId: branchFilter } : {}) },
-    { enabled: canViewReports },
+    { enabled: canViewReports && tzReady },
   );
   const todayCollectionRow =
     todayCollection.data?.revenue.find((r) => r.currency === currencyCode) ?? todayCollection.data?.revenue[0];
   const newMembers = useMembers(
     { joinedFrom: todayStr, joinedTo: tomorrowStr, pageSize: 1, ...(branchFilter ? { branchId: [branchFilter] } : {}) },
-    { enabled: canViewReports && canReadMembers },
+    { enabled: canViewReports && canReadMembers && tzReady },
   );
   const todayMemberships = useMemberships(
     { createdFrom: todayStr, createdTo: todayStr, pageSize: 100 },
-    { enabled: canViewReports && canReadMemberships },
+    { enabled: canViewReports && canReadMemberships && tzReady },
   );
   const renewalsToday = (todayMemberships.data?.items ?? []).filter((m) => m.previousMembershipId).length;
   const todayLeads = useLeads(
     { createdFrom: todayStr, createdTo: todayStr, pageSize: 1 },
-    { enabled: canViewReports && canReadLeads },
+    { enabled: canViewReports && canReadLeads && tzReady },
   );
-  const todaySessions = useTodayWorkoutSessions({ enabled: canViewReports && canReadWorkouts });
+  const todaySessions = useTodayWorkoutSessions({ enabled: canViewReports && canReadWorkouts && tzReady });
   const summaryOutstanding =
     financeSummary.data?.outstanding.find((r) => r.currency === currencyCode) ?? financeSummary.data?.outstanding[0];
   const rangeLabel =
@@ -400,7 +406,7 @@ export default function DashboardPage() {
             title="Collection"
             value={todayCollection.data ? displayCurrencyAmount(todayCollectionRow?.grossRevenue ?? "0.00", todayCollectionRow?.currency ?? currencyCode) : undefined}
             hint={todayCollectionRow && todayCollectionRow.paymentCount > 0
-              ? `Across ${todayCollectionRow.paymentCount} payments`
+              ? `Today · across ${todayCollectionRow.paymentCount} payments`
               : "No collections yet"}
             isLoading={todayCollection.isLoading}
             isError={todayCollection.isError}
