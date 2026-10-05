@@ -55,12 +55,18 @@ export const createBranchSchema = z.object({
 export type CreateBranchInput = z.infer<typeof createBranchSchema>
 
 export const createMembershipPlanSchema = z.object({
-  name: z.string().min(1, "Plan name is required"),
+  name: z.string().trim().min(1, "Plan name is required").max(120),
+  code: z.string().trim().max(40).optional().or(z.literal("")),
+  category: z.string().trim().max(60).optional().or(z.literal("")),
   description: z.string().optional().or(z.literal("")),
+  branchId: z.string().optional().or(z.literal("")),
   durationDays: z.coerce.number().int().positive("Must be a positive number of days"),
   price: z.coerce.number().positive("Price must be greater than 0"),
   currency: z.string().min(1),
+  benefits: z.array(z.string().trim().min(1).max(80)).max(20),
   maxFreezeDays: z.coerce.number().int().min(0),
+  isFeatured: z.boolean(),
+  isPublic: z.boolean(),
 })
 export type CreateMembershipPlanInput = z.infer<typeof createMembershipPlanSchema>
 

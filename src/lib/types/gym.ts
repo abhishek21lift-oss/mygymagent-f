@@ -311,6 +311,8 @@ export interface MembershipPlan {
   organizationId: string
   branchId: string | null
   name: string
+  code: string | null
+  category: string | null
   description: string | null
   durationDays: number
   price: string
@@ -318,6 +320,8 @@ export interface MembershipPlan {
   benefits: string[]
   maxFreezeDays: number
   isActive: boolean
+  isFeatured: boolean
+  isPublic: boolean
   createdAt: string
   updatedAt: string
 }
