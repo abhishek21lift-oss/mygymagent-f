@@ -51,6 +51,30 @@ export function usePtPackage(id: string | null) {
   })
 }
 
+export interface PtWalletTotals {
+  total: number
+  used: number
+  remaining: number
+  scheduled: number
+  completed: number
+  cancelled: number
+  noShow: number
+}
+
+export interface PtWallet {
+  package: PtPackage
+  totals: PtWalletTotals
+  ledger: { sessionId: string; date: string; status: string; sessions: number }[]
+}
+
+export function usePtWallet(id: string | null, { enabled = true }: { enabled?: boolean } = {}) {
+  return useQuery({
+    queryKey: [KEY, id, "wallet"],
+    queryFn: () => api.get<PtWallet>(`/pt-packages/${id}/wallet`),
+    enabled: Boolean(id) && enabled,
+  })
+}
+
 export function useCreatePtPackage() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -17,6 +17,7 @@ export function ProgressRing({
   label,
   centerLabel,
   className,
+  tone = "auto",
 }: {
   /** Current value (clamped to [0, max]). */
   value: number;
@@ -28,6 +29,8 @@ export function ProgressRing({
   /** Small caption under the % — defaults to the % itself. */
   centerLabel?: string;
   className?: string;
+  /** "light" renders white track + white text for dark surfaces. */
+  tone?: "auto" | "light";
 }) {
   const safeMax = Math.max(1, max);
   const fraction = Math.min(1, Math.max(0, value / safeMax));
@@ -35,6 +38,7 @@ export function ProgressRing({
   const circumference = 2 * Math.PI * radius;
   const center = size / 2;
 
+  const light = tone === "light";
   return (
     <div className={cn("relative inline-flex shrink-0 items-center justify-center", className)}>
       <svg
@@ -50,7 +54,7 @@ export function ProgressRing({
           cy={center}
           r={radius}
           fill="none"
-          stroke="var(--border)"
+          stroke={light ? "rgb(255 255 255 / 0.25)" : "var(--border)"}
           strokeWidth={strokeWidth * 0.45}
           opacity={0.7}
         />
@@ -74,11 +78,21 @@ export function ProgressRing({
         </defs>
       </svg>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg font-extrabold tabular-nums tracking-tight text-foreground">
+        <span
+          className={cn(
+            "text-lg font-extrabold tabular-nums tracking-tight",
+            light ? "text-white" : "text-foreground",
+          )}
+        >
           {Math.round(fraction * 100)}%
         </span>
         {centerLabel && (
-          <span className="max-w-[5rem] truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span
+            className={cn(
+              "max-w-[5rem] truncate text-[10px] font-semibold uppercase tracking-wider",
+              light ? "text-white/70" : "text-muted-foreground",
+            )}
+          >
             {centerLabel}
           </span>
         )}

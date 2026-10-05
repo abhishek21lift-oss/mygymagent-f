@@ -66,6 +66,9 @@ export interface TrainerWorkload {
   assignedMemberCount: number
   workoutPlansAssignedLast30Days: number
   dietPlansAssignedLast30Days: number
+  sessionsCompleted30d: number
+  sessionsNoShow30d: number
+  sessionCompletionPct: number | null
 }
 
 export interface TrainerWorkloadResponse {
@@ -288,5 +291,159 @@ export function useMembershipLifecycle(branchId?: string) {
         outstandingByCurrency: asArray<MembershipLifecycleAnalytics["outstandingByCurrency"][number]>(data?.outstandingByCurrency),
       }
     },
+  })
+}
+
+export interface RenewalPipelineItem {
+  membershipId: string
+  memberId: string
+  firstName: string
+  lastName: string
+  planName: string
+  price: string
+  currency: string
+  endDate: string
+  daysUntilExpiry: number
+}
+
+export interface RenewalPipeline {
+  upcoming: RenewalPipelineItem[]
+  overdue: RenewalPipelineItem[]
+  highValue: RenewalPipelineItem[]
+  counts: { upcoming: number; overdue: number }
+}
+
+export function useRenewalPipeline(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "renewal-pipeline", branchId],
+    queryFn: () =>
+      api.get<RenewalPipeline>("/analytics/memberships/renewal-pipeline", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}
+
+export interface PtOpportunity {
+  packageId: string
+  memberId: string
+  firstName: string
+  lastName: string
+  packageName: string
+  sessionsRemaining: number
+  daysLeft: number
+  reason: "EXPIRING_WITH_SESSIONS" | "NEVER_STARTED"
+}
+
+export interface PtOpportunities {
+  expiring: PtOpportunity[]
+  neverStarted: PtOpportunity[]
+  counts: { expiring: number; neverStarted: number; activePackages: number }
+}
+
+export function usePtOpportunities(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "pt-opportunities", branchId],
+    queryFn: () =>
+      api.get<PtOpportunities>("/analytics/trainers/pt-opportunities", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}
+
+export interface SalesPriorityItem {
+  leadId: string
+  firstName: string
+  lastName: string
+  source: string | null
+  status: string
+  severity: "hot" | "warm" | "watch"
+  reasons: string[]
+  followUpDueAt: string | null
+  overdueFollowUps: number
+}
+
+export interface SalesPriority {
+  items: SalesPriorityItem[]
+  counts: { hot: number; warm: number; watch: number }
+}
+
+export function useSalesPriority(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "sales-priority", branchId],
+    queryFn: () =>
+      api.get<SalesPriority>("/analytics/sales/priority", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}
+
+export type WinBackTier = "HIGH" | "MEDIUM" | "LOW"
+
+export interface WinBackCandidate {
+  memberId: string
+  firstName: string
+  lastName: string
+  daysSinceExpiry: number
+  lifetimePaid: string
+  currency: string
+  tenureDays: number
+  lastVisitAt: string | null
+  priorPtPackages: number
+  tier: WinBackTier
+  reasons: string[]
+}
+
+export interface WinBackList {
+  items: WinBackCandidate[]
+  counts: { high: number; medium: number; low: number }
+}
+
+export function useWinBack(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "win-back", branchId],
+    queryFn: () =>
+      api.get<WinBackList>("/analytics/members/win-back", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}
+
+export interface PtAdherence {
+  memberId: string
+  windowDays: number
+  ptAdherencePct: number | null
+  workoutsCompleted30d: number
+  visits30d: number
+  weeklyStreak: number
+  insufficientData: boolean
+}
+
+export function usePtAdherence(
+  memberId: string | null,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "pt-adherence", memberId],
+    queryFn: () =>
+      api.get<PtAdherence>("/analytics/pt-adherence", {
+        query: { memberId: memberId ?? undefined },
+      }),
+    enabled: Boolean(memberId) && enabled,
   })
 }

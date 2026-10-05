@@ -28,6 +28,14 @@ import { cn } from "@/lib/utils";
  */
 type HeroAccent = Accent;
 
+/** Shared noir banner paint (deep-black + red wash), so bespoke heroes match PageHero. */
+export const NOIR_BANNER_STYLE: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(120deg, #0b0b0d 0%, color-mix(in oklab, var(--a-rose-fill) 42%, #0b0b0d) 72%, color-mix(in oklab, var(--a-rose-fill) 58%, #0b0b0d) 100%)",
+  boxShadow:
+    "inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 40px -12px color-mix(in oklab, var(--a-rose-fill) 45%, transparent)",
+};
+
 export function PageHero({
   id,
   eyebrow,
@@ -85,19 +93,8 @@ export function PageHero({
         : "header"
     }`;
 
-  // Noir: deep-black base with a sophisticated red wash. The black stop
-  // is fixed (not a theme token) so the banner stays dark in both themes
-  // and white text on it is always legible; only the red wash follows
-  // the section tokens. Heavily mixed toward black: glow, never neon.
-  const noir =
-    tone === "noir"
-      ? ({
-          backgroundImage:
-            "linear-gradient(120deg, #0b0b0d 0%, color-mix(in oklab, var(--a-rose-fill) 42%, #0b0b0d) 72%, color-mix(in oklab, var(--a-rose-fill) 58%, #0b0b0d) 100%)",
-          boxShadow:
-            "inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 40px -12px color-mix(in oklab, var(--a-rose-fill) 45%, transparent)",
-        } as CSSProperties)
-      : undefined;
+  // Noir paint lives in NOIR_BANNER_STYLE above so bespoke heroes reuse it.
+  const noir = tone === "noir" ? NOIR_BANNER_STYLE : undefined;
 
   return (
     <header

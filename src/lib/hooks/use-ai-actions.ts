@@ -25,11 +25,12 @@ interface Paginated<T> {
   pageSize: number;
 }
 
-export function useAiActions(status?: AiActionStatus) {
+export function useAiActions(status?: AiActionStatus, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["ai-actions", status],
     queryFn: () => api.get<Paginated<AiAction>>(`/ai-actions${status ? `?status=${encodeURIComponent(status)}` : ""}`),
     staleTime: 15_000,
+    enabled,
   });
 }
 
