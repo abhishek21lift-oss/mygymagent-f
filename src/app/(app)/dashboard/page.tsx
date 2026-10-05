@@ -3,18 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  AlertTriangle,
   Building2,
   CalendarCheck,
-  CalendarClock,
   CalendarDays,
-  CheckCircle2,
-  ChevronRight,
   Dumbbell,
   HandCoins,
   Megaphone,
   RefreshCw,
-  Package,
   Scale,
   Settings,
   ShieldCheck,
@@ -32,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
 import { useMemberStatusBreakdown, useRevenueSummary, useRevenueTrend } from "@/lib/hooks/use-analytics";
+import { useGymHealth } from "@/lib/hooks/use-gym-health";
 import { useLeads } from "@/lib/hooks/use-leads";
 import { useMembers } from "@/lib/hooks/use-members";
 import { useMemberships } from "@/lib/hooks/use-memberships";
@@ -40,6 +36,8 @@ import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { PageHero } from "@/components/shared/page-hero";
 import { BentoGrid, QuickActionCard, SectionHeader } from "@/components/shared/bento";
+import { GymHealthHero, GymHealthPanels } from "./gym-health";
+import { PriorityActions } from "./priority-actions";
 import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
 import { DonutChart } from "@/components/shared/donut-chart";
@@ -81,15 +79,6 @@ function readStoredBranch(): string {
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
-function formatToday(timeZone: string | null | undefined) {
-  const options: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long" };
-  try {
-    return new Intl.DateTimeFormat(undefined, { ...options, ...(timeZone ? { timeZone } : {}) }).format(new Date());
-  } catch {
-    return new Intl.DateTimeFormat(undefined, options).format(new Date());
-  }
-}
-
 /* ─── Finance period ─────────────────────────────────────────────── */
 type FinancePreset = "today" | "7d" | "15d" | "30d" | "90d" | "custom";
 const FINANCE_PRESETS: ReadonlyArray<{ value: Exclude<FinancePreset, "custom">; label: string; days: number }> = [
@@ -162,6 +151,10 @@ export default function DashboardPage() {
      the org never loads and local time is the only option. */
   const tzReady = !canReadOrg || organization.isFetched;
   const revenueTrend  = useRevenueTrend(6, branchFilter, { enabled: canViewReports });
+  const gymHealth     = useGymHealth(
+    { ...(branchFilter ? { branchId: branchFilter } : {}) },
+    { enabled: canViewReports && tzReady },
+  );
   const statusBreakdown = useMemberStatusBreakdown(branchFilter, { enabled: canViewReports });
 
   const data          = briefing.data;
@@ -241,59 +234,6 @@ export default function DashboardPage() {
 
   const visibleActions = QUICK_ACTIONS.filter(([,,,, permission]) => hasPermission(permission as string));
 
-  /* Priorities / attention items */
-  const priorities = data
-    ? [
-        (data.expiringSoon?.count ?? 0) > 0 &&
-          hasPermission(["memberships.read", "memberships.read_assigned"]) && {
-            icon: CalendarClock,
-            title: `${data.expiringSoon!.count} membership${data.expiringSoon!.count === 1 ? "" : "s"} end within ${data.expiringSoon!.withinDays} days`,
-            detail: "Not renewed yet — a call before the end date keeps them.",
-            href: "/memberships",
-            action: "Renewals",
-            color: "amber" as Accent,
-          },
-        (data.followUpsDue?.count ?? 0) > 0 &&
-          hasPermission("leads.read") && {
-            icon: Megaphone,
-            title: `${data.followUpsDue!.count} lead follow-up${data.followUpsDue!.count === 1 ? "" : "s"} due today`,
-            detail: data.followUpsDue!.overdue > 0
-              ? `${data.followUpsDue!.overdue} overdue — call those first.`
-              : "Due by the end of today.",
-            href: "/crm",
-            action: "Open Sales",
-            color: "rose" as Accent,
-          },
-        data.atRiskMembers.count > 0 &&
-          hasPermission(["members.read", "members.read_assigned"]) && {
-            icon: AlertTriangle,
-            title: `${data.atRiskMembers.count} paying member${data.atRiskMembers.count === 1 ? " hasn't" : "s haven't"} visited in 14 days`,
-            detail: "A personal message now is cheaper than a win-back later.",
-            href: "/members",
-            action: "Review members",
-            color: "orange" as Accent,
-          },
-        data.lowStock.count > 0 &&
-          hasPermission("inventory.read") && {
-            icon: Package,
-            title: `${data.lowStock.count} product${data.lowStock.count === 1 ? " is" : "s are"} below reorder level`,
-            detail: data.lowStock.top.slice(0, 3).map((p) => p.name).join(", "),
-            href: "/inventory",
-            action: "Inventory",
-            color: "cyan" as Accent,
-          },
-        data.pendingAiActions > 0 &&
-          hasPermission("ai.approve") && {
-            icon: Sparkles,
-            title: `${data.pendingAiActions} AI proposal${data.pendingAiActions === 1 ? "" : "s"} awaiting approval`,
-            detail: "Review proposed actions before they run.",
-            href: "/ai-actions",
-            action: "Review",
-            color: "violet" as Accent,
-          },
-      ].filter((item): item is Exclude<typeof item, false> => Boolean(item))
-    : [];
-
   /* Revenue chart data */
   const { weeklyData, chartCurrency } = React.useMemo(
     () => revenueChart(revenueTrend.data ?? [], currencyCode),
@@ -336,30 +276,26 @@ export default function DashboardPage() {
     );
   }
 
-  const today     = formatToday(organization.data?.timezone);
-
   return (
     <div className="flex w-full flex-col gap-6 pb-8">
 
-      {/* ── Hero Banner ─────────────────────────────────────────── */}
-      <PageHero
-        id="dashboard-title"
-        eyebrow=""
-        title={gymName}
-        description={today}
-        compact
-        centered
-        tone="noir"
-        actions={
-          hasPermission("ai.generate") ? (
-            <Button asChild size="sm" className="hero-banner-btn hero-banner-btn-ghost">
-              <Link href="/ai">
-                <Sparkles className="size-4" aria-hidden="true" />
-                Ask AI
-              </Link>
-            </Button>
-          ) : undefined
-        }
+      {/* ── Gym Health hero ───────────────────────────────────────── */}
+      <GymHealthHero
+        gymName={gymName}
+        health={gymHealth.data}
+        isLoading={gymHealth.isLoading}
+        isError={gymHealth.isError}
+        onRetry={() => void gymHealth.refetch()}
+        canAskAi={hasPermission("ai.generate")}
+        canReviewActions={hasPermission("ai.approve")}
+        pendingActions={data?.pendingAiActions ?? 0}
+      />
+
+      <GymHealthPanels
+        health={gymHealth.data}
+        isLoading={gymHealth.isLoading}
+        isError={gymHealth.isError}
+        onRetry={() => void gymHealth.refetch()}
       />
 
       {/* ── Branch picker (drives every figure below) ─────────────── */}
@@ -790,65 +726,14 @@ export default function DashboardPage() {
         aria-label="Needs attention and quick actions"
         className="grid gap-4 xl:grid-cols-[1fr_1fr]"
       >
-        {/* Needs attention panel */}
-        <Card>
-          <CardHeader className="border-b pb-4">
-            <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em]">
-              Needs attention
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3">
-            {briefing.isLoading ? (
-              <div className="space-y-2" role="status" aria-label="Loading priorities">
-                {[1, 2, 3].map((k) => <Skeleton key={k} className="h-16 w-full rounded-xl" />)}
-              </div>
-            ) : briefing.isError ? (
-              <ErrorState message="Could not load today's priorities." onRetry={() => void briefing.refetch()} />
-            ) : priorities.length ? (
-              <ul className="flex flex-col gap-1">
-                {priorities.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className="group flex min-h-11 items-center gap-3 rounded-xl border border-transparent px-3 py-3 transition-all hover:border-border hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring"
-                      >
-                        <span
-                          className="flex size-10 shrink-0 items-center justify-center rounded-xl text-white"
-                          style={{
-                            background: `linear-gradient(135deg, var(--a-${item.color}-grad-1), var(--a-${item.color}-grad-2))`,
-                            boxShadow: `0 3px 8px -3px color-mix(in oklab, var(--a-${item.color}-grad-1) 55%, transparent)`,
-                          }}
-                        >
-                          <Icon className="size-4.5" aria-hidden="true" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block [overflow-wrap:anywhere] text-sm font-medium">{item.title}</span>
-                          {item.detail && (
-                            <span className="mt-0.5 block [overflow-wrap:anywhere] text-xs text-muted-foreground">{item.detail}</span>
-                          )}
-                        </span>
-                        <span className="hidden items-center gap-1 text-xs font-semibold text-primary sm:flex">
-                          {item.action}
-                          <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-5 py-10 text-center">
-                <span className="flex size-12 items-center justify-center rounded-2xl bg-success/10 text-success">
-                  <CheckCircle2 className="size-6" aria-hidden="true" />
-                </span>
-                <p className="text-sm font-semibold">You&apos;re all caught up</p>
-                <p className="text-xs text-muted-foreground">Nothing needs attention right now.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <PriorityActions
+          branchFilter={branchFilter}
+          outstandingBalance={summaryOutstanding?.outstandingBalance}
+          outstandingCount={summaryOutstanding?.membershipsWithBalance ?? 0}
+          currencyCode={summaryOutstanding?.currency ?? currencyCode}
+          atRiskCount={data?.atRiskMembers.count ?? 0}
+          pendingAiActions={data?.pendingAiActions ?? 0}
+        />
 
         {/* Quick actions grid */}
         <section aria-labelledby="dash-quick">

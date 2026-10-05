@@ -96,6 +96,47 @@ function routes(overrides: Record<string, unknown> = {}) {
       totalPages: 1,
     },
     "/leads": { items: [], total: 5, page: 1, pageSize: 1, totalPages: 5 },
+    "/analytics/memberships/renewal-pipeline": {
+      upcoming: [{ membershipId: "ms1", memberId: "mem1", firstName: "Ravi", lastName: "K", planName: "Monthly", price: "5000.00", currency: "INR", endDate: new Date(Date.now() + 5 * 86400000).toISOString(), daysUntilExpiry: 5 }],
+      overdue: [],
+      highValue: [{ membershipId: "ms1", memberId: "mem1", firstName: "Ravi", lastName: "K", planName: "Monthly", price: "5000.00", currency: "INR", endDate: new Date(Date.now() + 5 * 86400000).toISOString(), daysUntilExpiry: 5 }],
+      counts: { upcoming: 1, overdue: 0 },
+    },
+    "/analytics/sales/priority": {
+      items: [{ leadId: "l1", firstName: "Sana", lastName: "P", source: "Walk-in", status: "NEW", severity: "hot", reasons: ["Follow-up overdue by 2 days"], followUpDueAt: new Date(Date.now() - 2 * 86400000).toISOString(), overdueFollowUps: 1 }],
+      counts: { hot: 1, warm: 0, watch: 0 },
+    },
+    "/analytics/trainers/pt-opportunities": {
+      expiring: [{ packageId: "p1", memberId: "mem2", firstName: "Dev", lastName: "M", packageName: "PT-10", sessionsRemaining: 6, daysLeft: 5, reason: "EXPIRING_WITH_SESSIONS" }],
+      neverStarted: [],
+      counts: { expiring: 1, neverStarted: 0, activePackages: 4 },
+    },
+    "/analytics/members/win-back": {
+      items: [{ memberId: "mem9", firstName: "Ex", lastName: "Member", daysSinceExpiry: 60, lifetimePaid: "45000.00", currency: "INR", tenureDays: 210, lastVisitAt: null, priorPtPackages: 0, tier: "HIGH", reasons: ["Paid 45,000 INR over 210 days"] }],
+      counts: { high: 1, medium: 0, low: 0 },
+    },
+    "/ai-actions?status=EXECUTED": { items: [], total: 2, page: 1, pageSize: 1, totalPages: 2 },
+    "/ai-actions?status=REJECTED": { items: [], total: 1, page: 1, pageSize: 1, totalPages: 1 },
+    "/analytics/gym-health": {
+      score: 82,
+      status: "healthy",
+      opportunity: "collections",
+      components: [
+        { key: "revenue", label: "Revenue", score: 92, weight: 30, value: "Net vs gross", explanation: "Kept after refunds.", source: "GET /analytics/revenue" },
+        { key: "collections", label: "Collections", score: 72, weight: 25, value: "Outstanding share", explanation: "Money in hand.", source: "GET /analytics/revenue" },
+        { key: "retention", label: "Retention", score: 78, weight: 20, value: "10 of 100 at risk", explanation: "No visit in 14 days.", source: "GET /analytics/members/at-risk" },
+        { key: "sales", label: "Sales", score: 86, weight: 15, value: "40 leads", explanation: "Conversion rate.", source: "GET /analytics/sales/funnel" },
+        { key: "inventory", label: "Inventory", score: 90, weight: 10, value: "2 of 20 low", explanation: "Share of products with healthy stock levels.", source: "GET /analytics/inventory/forecast" },
+      ],
+      branchId: null,
+      computedAt: "2026-10-06T04:00:00.000Z",
+      revenueAtRisk: {
+        totalMRR: 100000,
+        atRiskMRR: 8420,
+        atRiskPercentage: 8.42,
+        bySegment: [{ riskLevel: "HIGH", mrr: 8420, memberCount: 3 }],
+      },
+    },
     ...overrides,
   }
   mockGet.mockImplementation(async (path: string) => {
@@ -136,18 +177,19 @@ describe("DashboardPage", () => {
     expect(mockGet).not.toHaveBeenCalled()
   })
 
-  it("shows follow-ups that are due today, not every follow-up on this month's leads", async () => {
+  it("shows hot leads with evidence", async () => {
     renderPage()
-    expect(await screen.findByText("2 lead follow-ups due today")).toBeInTheDocument()
-    expect(screen.getByText("1 overdue — call those first.")).toBeInTheDocument()
-    expect(screen.queryByText(/40 follow-ups/)).not.toBeInTheDocument()
+    expect(await screen.findByText("Sana P — Follow-up overdue by 2 days")).toBeInTheDocument()
+    expect(screen.getByText("via Walk-in")).toBeInTheDocument()
   })
 
-  it("raises no follow-up alert when nothing is due, however many follow-ups exist", async () => {
-    routes({ "/briefing/daily": { ...BRIEFING, followUpsDue: { count: 0, overdue: 0 } } })
+  it("shows no lead rows when nothing is hot", async () => {
+    routes({
+      "/analytics/sales/priority": { items: [], counts: { hot: 0, warm: 0, watch: 2 } },
+    })
     renderPage()
     expect(await screen.findByText("12")).toBeInTheDocument()
-    expect(screen.queryByText(/follow-ups?\b.*\bdue/i)).not.toBeInTheDocument()
+    expect(screen.queryByText("Sana P")).not.toBeInTheDocument()
   })
 
   it("says how many members were turned away beside today's check-ins", async () => {
@@ -226,6 +268,21 @@ describe("DashboardPage", () => {
     expect(await screen.findByText("PT Sessions")).toBeInTheDocument()
   })
 
+  it("shows the gym health hero with score, status and opportunity", async () => {
+    renderPage()
+    expect(await screen.findByRole("heading", { name: "Gym Health" })).toBeInTheDocument()
+    // Data-driven wait: the ring only carries the score once resolved.
+    expect(await screen.findByRole("img", { name: "Gym health 82 out of 100, Healthy" })).toBeInTheDocument()
+    expect(screen.getByText("82 · Healthy")).toBeInTheDocument()
+    expect(screen.getByText(/Collections is the biggest opportunity today/)).toBeInTheDocument()
+    expect(screen.getByText("Why this score")).toBeInTheDocument()
+    expect(screen.getByText(/Kept after refunds/)).toBeInTheDocument()
+    expect(screen.getByText("Revenue at risk")).toBeInTheDocument()
+    expect(screen.getByText("At-risk MRR")).toBeInTheDocument()
+    const healthCalls = callsTo("/analytics/gym-health")
+    expect(healthCalls).toHaveLength(1)
+  })
+
   it("asks the revenue summary for the default 30-day period", async () => {
     renderPage()
     // Data-driven hint: proves the summary resolved, not just rendered.
@@ -295,27 +352,45 @@ describe("DashboardPage", () => {
     expect(span).toBe(29)
   })
 
-  it("brings Owner OS's renewal alert home, and only for someone who can act on it", async () => {
+  it("brings renewals home with evidence, only for someone who can act on it", async () => {
+    mockPermissions = [...ALL, "workouts.read"]
     renderPage()
-    expect(await screen.findByText("5 memberships end within 7 days")).toBeInTheDocument()
+    expect(await screen.findByText("Ravi K — Monthly ends in 5d")).toBeInTheDocument()
+    expect(screen.getByText(/at stake/)).toBeInTheDocument()
+    expect(await screen.findByText("Dev M — 6 sessions, 5d left")).toBeInTheDocument()
   })
 
   it("shows each priority only to someone who can act on it", async () => {
-    // No ai.approve, no inventory.read, no leads.read in this set.
+    // members.read only: at-risk members stay, everything gated disappears.
     mockPermissions = ["reports.view", "members.read"]
+    routes({
+      "/briefing/daily": {
+        ...BRIEFING,
+        atRiskMembers: { count: 2, top: [] },
+      },
+    })
     renderPage()
     expect(await screen.findByText("12")).toBeInTheDocument()
+    expect(screen.getByText("Review risk")).toBeInTheDocument()
     expect(screen.queryByText(/AI proposals?/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/reorder level/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/follow-ups? due/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/end within/)).not.toBeInTheDocument()
+    expect(screen.queryByText("Ravi K")).not.toBeInTheDocument()
+    expect(screen.queryByText("Sana P")).not.toBeInTheDocument()
+    expect(screen.queryByText("Dev M")).not.toBeInTheDocument()
+    expect(screen.queryByText("Collect")).not.toBeInTheDocument()
   })
 
-  it("lists AI proposals for an approver, and low stock by name", async () => {
+  it("surfaces high-value win-back candidates with evidence", async () => {
+    renderPage()
+    expect(await screen.findByText("1 high-value win-back")).toBeInTheDocument()
+    expect(screen.getByText(/Paid 45,000 INR over 210 days/)).toBeInTheDocument()
+  })
+
+  it("lists AI proposals and outcome counts for an approver", async () => {
     mockPermissions = [...ALL, "ai.approve"]
     renderPage()
     expect(await screen.findByText("4 AI proposals awaiting approval")).toBeInTheDocument()
-    expect(screen.getByText("Whey 1kg")).toBeInTheDocument()
+    expect(await screen.findByText(/2 AI actions executed/)).toBeInTheDocument()
+    expect(screen.getByText("Action history")).toBeInTheDocument()
   })
 
   it("asks for the branch remembered on this device, and keys the cache on it", async () => {
