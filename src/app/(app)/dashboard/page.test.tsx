@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 
 import DashboardPage from "./page"
+import { fireEvent } from "@testing-library/react"
 
 jest.mock("next/navigation", () => ({ usePathname: () => "/dashboard" }))
 
@@ -76,6 +77,13 @@ function routes(overrides: Record<string, unknown> = {}) {
       { status: "EXPIRED", count: 7 },
       { status: "NO_MEMBERSHIP", count: 2 },
     ],
+    "/analytics/revenue": {
+      period: { from: "", to: "" },
+      branchId: null,
+      revenue: [{ currency: "INR", paymentCount: 4, grossRevenue: "8000.00", membershipRevenue: "8000.00", otherRevenue: "0.00", productRevenue: "500.00", refunded: "0.00", netRevenue: "8000.00" }],
+      outstanding: [{ currency: "INR", membershipsWithBalance: 3, outstandingBalance: "4500.00" }],
+      notComputable: [],
+    },
     ...overrides,
   }
   mockGet.mockImplementation(async (path: string) => {
@@ -150,10 +158,69 @@ describe("DashboardPage", () => {
     expect(screen.queryByText("EXPIRED")).not.toBeInTheDocument()
   })
 
-  it("shows outstanding dues beside revenue", async () => {
+  it("shows the four period-driven finance KPIs from the revenue summary", async () => {
     renderPage()
-    expect(await screen.findByText("On 3 memberships")).toBeInTheDocument()
-    expect(screen.getByText("Outstanding dues")).toBeInTheDocument()
+    expect(await screen.findByText("Net revenue")).toBeInTheDocument()
+    expect(screen.getByText("Collected amount")).toBeInTheDocument()
+    expect(screen.getByText("Outstanding amount")).toBeInTheDocument()
+    expect(screen.getByText("Inventory sale")).toBeInTheDocument()
+    expect(await screen.findByText("On 3 memberships · live balance")).toBeInTheDocument()
+  })
+
+  it("asks the revenue summary for the default 30-day period", async () => {
+    renderPage()
+    expect(await screen.findByText("Net revenue")).toBeInTheDocument()
+    const [call] = callsTo("/analytics/revenue")
+    expect(call?.query?.from).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(call?.query?.to).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    const span =
+      (new Date(`${call?.query?.to}T12:00:00Z`).getTime() -
+        new Date(`${call?.query?.from}T12:00:00Z`).getTime()) /
+      86400000
+    expect(span).toBe(29)
+  })
+
+  it("re-queries when a preset is picked", async () => {
+    renderPage()
+    expect(await screen.findByText("Net revenue")).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "7D" }))
+    expect(
+      await screen.findByText((_, el) => (el?.textContent ?? "").startsWith("Last 7 days")),
+    ).toBeInTheDocument()
+    const last = callsTo("/analytics/revenue").at(-1)
+    const span =
+      (new Date(`${last?.query?.to}T12:00:00Z`).getTime() -
+        new Date(`${last?.query?.from}T12:00:00Z`).getTime()) /
+      86400000
+    expect(span).toBe(6)
+  })
+
+  it("applies a custom range and resets to the default", async () => {
+    renderPage()
+    expect(await screen.findByText("Net revenue")).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "Custom" }))
+    fireEvent.change(await screen.findByLabelText("Start date"), {
+      target: { value: "2026-09-01" },
+    })
+    fireEvent.change(screen.getByLabelText("End date"), {
+      target: { value: "2026-09-15" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }))
+    expect(
+      await screen.findByText((_, el) => (el?.textContent ?? "").startsWith("Custom")),
+    ).toBeInTheDocument()
+    expect(callsTo("/analytics/revenue").at(-1)?.query).toMatchObject({
+      from: "2026-09-01",
+      to: "2026-09-15",
+    })
+    fireEvent.click(screen.getByRole("button", { name: /Sep/ }))
+    fireEvent.click(screen.getByRole("button", { name: "Reset" }))
+    const last = callsTo("/analytics/revenue").at(-1)
+    const span =
+      (new Date(`${last?.query?.to}T12:00:00Z`).getTime() -
+        new Date(`${last?.query?.from}T12:00:00Z`).getTime()) /
+      86400000
+    expect(span).toBe(29)
   })
 
   it("brings Owner OS's renewal alert home, and only for someone who can act on it", async () => {
@@ -195,11 +262,13 @@ describe("DashboardPage", () => {
     expect(screen.getByRole("combobox", { name: "Branch" })).toBeInTheDocument()
   })
 
-  it("names the branch a restricted manager is held to, and offers no picker", async () => {
+  it("scopes a restricted manager without showing a picker or a location line", async () => {
     routes({ "/briefing/daily": { ...BRIEFING, branchId: BRANCH_A } })
     renderPage()
-    expect(await screen.findByText("Indiranagar")).toBeInTheDocument()
+    expect(await screen.findByText("12")).toBeInTheDocument()
     expect(screen.queryByRole("combobox", { name: "Branch" })).not.toBeInTheDocument()
+    expect(screen.queryByText("Indiranagar")).not.toBeInTheDocument()
+    expect(callsTo("/briefing/daily")[0]?.query).toEqual({ branchId: undefined })
   })
 
   it("has retired the duplicate panels and pages", async () => {

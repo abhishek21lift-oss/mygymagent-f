@@ -7,27 +7,30 @@ import {
   Building2,
   CalendarCheck,
   CalendarClock,
+  CalendarDays,
   CheckCircle2,
   ChevronRight,
   Dumbbell,
+  HandCoins,
   Megaphone,
   Package,
+  Scale,
   Settings,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
-  TrendingUp,
   UserPlus,
   Users,
   Wallet,
-  Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
-import { useMemberStatusBreakdown, useRevenueTrend } from "@/lib/hooks/use-analytics";
+import { useMemberStatusBreakdown, useRevenueSummary, useRevenueTrend } from "@/lib/hooks/use-analytics";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { PageHero } from "@/components/shared/page-hero";
@@ -82,12 +85,44 @@ function formatToday(timeZone: string | null | undefined) {
   }
 }
 
-function formatTime(iso: string, timeZone: string | null | undefined) {
-  const options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
+/* ─── Finance period ─────────────────────────────────────────────── */
+type FinancePreset = "today" | "7d" | "15d" | "30d" | "90d" | "custom";
+const FINANCE_PRESETS: ReadonlyArray<{ value: Exclude<FinancePreset, "custom">; label: string; days: number }> = [
+  { value: "today", label: "Today", days: 1 },
+  { value: "7d", label: "7D", days: 7 },
+  { value: "15d", label: "15D", days: 15 },
+  { value: "30d", label: "30D", days: 30 },
+  { value: "90d", label: "90D", days: 90 },
+];
+
+/** YYYY-MM-DD in the gym's timezone — what the revenue endpoint bounds by day. */
+function isoDay(date: Date, timeZone: string | null | undefined) {
   try {
-    return new Intl.DateTimeFormat(undefined, { ...options, ...(timeZone ? { timeZone } : {}) }).format(new Date(iso));
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: timeZone ?? undefined,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date);
   } catch {
-    return new Intl.DateTimeFormat(undefined, options).format(new Date(iso));
+    return new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date);
+  }
+}
+
+function shortDay(iso: string, timeZone: string | null | undefined) {
+  const [y, m, d] = iso.split("-").map(Number);
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      timeZone: timeZone ?? undefined,
+      month: "short",
+      day: "numeric",
+    }).format(new Date(y, (m ?? 1) - 1, d ?? 1));
+  } catch {
+    return iso;
   }
 }
 
@@ -112,21 +147,48 @@ export default function DashboardPage() {
       : undefined;
 
   const briefing      = useDailyBriefing({ enabled: canViewReports, branchId: branchFilter });
+
+
   const organization  = useOrganization({ enabled: hasPermission("organizations.read") });
   const revenueTrend  = useRevenueTrend(6, branchFilter, { enabled: canViewReports });
   const statusBreakdown = useMemberStatusBreakdown(branchFilter, { enabled: canViewReports });
 
   const data          = briefing.data;
   const scopedBranchId = data?.branchId && data.branchId !== branchFilter ? data.branchId : null;
-  const branchName    = (id: string | null | undefined) => branchItems.find((b) => b.id === id)?.name;
 
   const gymName       = organization.data?.name ?? "Dashboard";
   const currencyCode  = organization.data?.currency ?? "INR";
 
-  const revenueRow    =
-    data?.revenue.revenue.find((r) => r.currency === currencyCode) ?? data?.revenue.revenue[0];
-  const revenue       = revenueRow?.netRevenue ?? "0.00";
-  const revenueCurrency = revenueRow?.currency ?? currencyCode;
+  /* Finance period: presets or a custom range; always drives the summary below. */
+  const [financePreset, setFinancePreset] = React.useState<FinancePreset>("30d");
+  const [customRange, setCustomRange] = React.useState<{ from: string; to: string } | null>(null);
+  const [customOpen, setCustomOpen] = React.useState(false);
+  const [draftFrom, setDraftFrom] = React.useState("");
+  const [draftTo, setDraftTo] = React.useState("");
+  const timezone = organization.data?.timezone;
+  const financeRange = React.useMemo(() => {
+    if (financePreset === "custom" && customRange) return customRange;
+    const days = FINANCE_PRESETS.find((preset) => preset.value === financePreset)?.days ?? 30;
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - (days - 1));
+    return { from: isoDay(from, timezone), to: isoDay(to, timezone) };
+  }, [financePreset, customRange, timezone]);
+  const financeSummary = useRevenueSummary(
+    { from: financeRange.from, to: financeRange.to, ...(branchFilter ? { branchId: branchFilter } : {}) },
+    { enabled: canViewReports },
+  );
+  const summaryRow =
+    financeSummary.data?.revenue.find((r) => r.currency === currencyCode) ?? financeSummary.data?.revenue[0];
+  const summaryOutstanding =
+    financeSummary.data?.outstanding.find((r) => r.currency === currencyCode) ?? financeSummary.data?.outstanding[0];
+  const rangeLabel =
+    financePreset === "custom" && customRange
+      ? `Custom · ${shortDay(customRange.from, timezone)} – ${shortDay(customRange.to, timezone)}`
+      : financePreset === "today"
+        ? `Today · ${shortDay(financeRange.to, timezone)}`
+        : `Last ${FINANCE_PRESETS.find((preset) => preset.value === financePreset)?.days ?? 30} days · ${shortDay(financeRange.from, timezone)} – ${shortDay(financeRange.to, timezone)}`;
+
   const outstandingRow =
     data?.revenue.outstanding.find((r) => r.currency === currencyCode) ?? data?.revenue.outstanding[0];
 
@@ -228,7 +290,6 @@ export default function DashboardPage() {
   }
 
   const today     = formatToday(organization.data?.timezone);
-  const updatedAt = data ? formatTime(data.generatedAt, organization.data?.timezone) : null;
 
   return (
     <div className="flex w-full flex-col gap-6 pb-8">
@@ -254,11 +315,9 @@ export default function DashboardPage() {
         }
       />
 
-      {/* ── Branch picker + freshness row ───────────────────────── */}
-      <div className="-mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
-        {scopedBranchId ? (
-          <span className="font-medium text-foreground">{branchName(scopedBranchId) ?? "Your branch"}</span>
-        ) : branchItems.length > 1 ? (
+      {/* ── Branch picker (drives every figure below) ─────────────── */}
+      {branchItems.length > 1 && !scopedBranchId && (
+        <div className="-mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
           <Select value={branchFilter ?? ALL_BRANCHES} onValueChange={chooseBranch}>
             <SelectTrigger aria-label="Branch" className="h-8 w-auto min-w-40 rounded-xl bg-card text-sm">
               <SelectValue />
@@ -270,16 +329,8 @@ export default function DashboardPage() {
               ))}
             </SelectContent>
           </Select>
-        ) : (
-          <span className="font-medium text-foreground">{branchItems[0]?.name ?? "All branches"}</span>
-        )}
-        {updatedAt && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>Updated {updatedAt}</span>
-          </>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ── KPI Grid ────────────────────────────────────────────── */}
       <section aria-labelledby="dash-kpis">
@@ -335,55 +386,169 @@ export default function DashboardPage() {
           />
         </BentoGrid>
 
-        {/* Category header: Finance */}
-        <div className="category-header kpi-emerald mb-3">
-          <span className="category-header-icon">
-            <Wallet className="size-3.5" aria-hidden="true" />
-          </span>
-          <span className="category-header-label">Finance this month</span>
+        <SectionHeader
+          title="Finance"
+          action={
+            <span className="kpi-trend kpi-trend-neutral" role="status">
+              {financeSummary.isLoading ? "Loading…" : rangeLabel}
+            </span>
+          }
+        />
+        {/* Period selector: presets plus a custom range. Every choice
+            re-queries the revenue summary, so the four KPIs below always
+            reflect the selected period — except Outstanding, which is a
+            live balance by definition (see its hint). */}
+        <div className="mb-3 flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Segmented presets: plain buttons with pressed state, so the
+                control works identically with mouse, touch, keyboard and
+                assistive tech — no menu library needed for five options. */}
+            <div
+              role="group"
+              aria-label="Finance period"
+              className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-xl border border-border bg-surface-sunken p-1"
+            >
+              {FINANCE_PRESETS.map((preset) => {
+                const active = financePreset === preset.value;
+                return (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setFinancePreset(preset.value)}
+                    className={active
+                      ? "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-card px-3.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-all duration-200 touch-manipulation"
+                      : "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-all duration-200 hover:text-foreground touch-manipulation"}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+            <Button
+              variant={financePreset === "custom" ? "default" : "outline"}
+              size="sm"
+              className="min-h-11 rounded-xl"
+              aria-expanded={customOpen}
+              onClick={() => setCustomOpen((open) => !open)}
+            >
+              <CalendarDays className="size-4" aria-hidden="true" />
+              {financePreset === "custom" && customRange
+                ? `${shortDay(customRange.from, timezone)} – ${shortDay(customRange.to, timezone)}`
+                : "Custom"}
+            </Button>
+          </div>
+          {customOpen && (
+            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+              <p className="mb-3 text-sm font-semibold tracking-tight">Custom range</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label htmlFor="finance-from" className="mb-1 block text-xs font-semibold text-muted-foreground">
+                    Start date
+                  </label>
+                  <Input
+                    id="finance-from"
+                    type="date"
+                    value={draftFrom}
+                    max={draftTo || undefined}
+                    onChange={(e) => setDraftFrom(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="finance-to" className="mb-1 block text-xs font-semibold text-muted-foreground">
+                    End date
+                  </label>
+                  <Input
+                    id="finance-to"
+                    type="date"
+                    value={draftTo}
+                    min={draftFrom || undefined}
+                    onChange={(e) => setDraftTo(e.target.value)}
+                  />
+                </div>
+              </div>
+              {!draftFrom || !draftTo ? (
+                <p className="mt-2 text-xs text-muted-foreground">Pick a start and an end date.</p>
+              ) : draftFrom > draftTo ? (
+                <p className="mt-2 text-xs font-semibold text-destructive" role="alert">
+                  Start date must be on or before the end date.
+                </p>
+              ) : null}
+              <div className="mt-3 flex gap-2">
+                <Button
+                  size="sm"
+                  className="min-h-11 flex-1"
+                  disabled={!draftFrom || !draftTo || draftFrom > draftTo}
+                  onClick={() => {
+                    setCustomRange({ from: draftFrom, to: draftTo });
+                    setFinancePreset("custom");
+                    setCustomOpen(false);
+                  }}
+                >
+                  Apply
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => {
+                    setDraftFrom("");
+                    setDraftTo("");
+                    setCustomRange(null);
+                    setFinancePreset("30d");
+                    setCustomOpen(false);
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
         <BentoGrid columns={4} label="Finance figures">
           <StatCard
             icon={Wallet}
             title="Net revenue"
-            value={data ? displayCurrencyAmount(revenue, revenueCurrency) : undefined}
+            value={financeSummary.data ? displayCurrencyAmount(summaryRow?.netRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint="After refunds"
-            isLoading={briefing.isLoading}
-            isError={briefing.isError}
+            isLoading={financeSummary.isLoading}
+            isError={financeSummary.isError}
             tone="success"
             accent="emerald"
           />
           <StatCard
-            icon={TrendingUp}
-            title="Outstanding dues"
-            value={data ? displayCurrencyAmount(outstandingRow?.outstandingBalance ?? "0.00", outstandingRow?.currency ?? currencyCode) : undefined}
-            hint={outstandingRow && outstandingRow.membershipsWithBalance > 0
-              ? `On ${outstandingRow.membershipsWithBalance} memberships`
+            icon={HandCoins}
+            title="Collected amount"
+            value={financeSummary.data ? displayCurrencyAmount(summaryRow?.grossRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
+            hint={summaryRow && summaryRow.paymentCount > 0
+              ? `Across ${summaryRow.paymentCount} payments`
+              : "No collections yet"}
+            isLoading={financeSummary.isLoading}
+            isError={financeSummary.isError}
+            tone="primary"
+            accent="cyan"
+          />
+          <StatCard
+            icon={Scale}
+            title="Outstanding amount"
+            value={financeSummary.data ? displayCurrencyAmount(summaryOutstanding?.outstandingBalance ?? "0.00", summaryOutstanding?.currency ?? currencyCode) : undefined}
+            hint={summaryOutstanding && summaryOutstanding.membershipsWithBalance > 0
+              ? `On ${summaryOutstanding.membershipsWithBalance} memberships · live balance`
               : "Nothing owed"}
-            isLoading={briefing.isLoading}
-            isError={briefing.isError}
+            isLoading={financeSummary.isLoading}
+            isError={financeSummary.isError}
             tone="warning"
             accent="amber"
           />
           <StatCard
-            icon={Zap}
-            title="Pending AI actions"
-            value={data?.pendingAiActions}
-            hint="Awaiting approval"
-            isLoading={briefing.isLoading}
-            isError={briefing.isError}
+            icon={ShoppingBag}
+            title="Inventory sale"
+            value={financeSummary.data ? displayCurrencyAmount(summaryRow?.productRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
+            hint="Product sales in period"
+            isLoading={financeSummary.isLoading}
+            isError={financeSummary.isError}
             tone="primary"
             accent="violet"
-          />
-          <StatCard
-            icon={Package}
-            title="Low-stock items"
-            value={data?.lowStock.count}
-            hint={hasPermission("inventory.read") ? "At or below reorder level" : undefined}
-            isLoading={briefing.isLoading}
-            isError={briefing.isError}
-            tone="warning"
-            accent="rose"
           />
         </BentoGrid>
       </section>

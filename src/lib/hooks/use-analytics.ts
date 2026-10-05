@@ -4,7 +4,7 @@ import { api } from "@/lib/api/client"
 export interface RevenueSummary {
   period: { from: string; to: string }
   branchId: string | null
-  revenue: Array<{ currency: string; paymentCount: number; grossRevenue: string; membershipRevenue: string; otherRevenue: string; refunded: string; netRevenue: string }>
+  revenue: Array<{ currency: string; paymentCount: number; grossRevenue: string; membershipRevenue: string; otherRevenue: string; productRevenue: string; refunded: string; netRevenue: string }>
   outstanding: Array<{ currency: string; membershipsWithBalance: number; outstandingBalance: string }>
   notComputable: Array<{ key: string; reason: string }>
 }
@@ -101,7 +101,7 @@ function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : []
 }
 
-export function useRevenueSummary(params: RevenueQueryParams = {}) {
+export function useRevenueSummary(params: RevenueQueryParams = {}, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["analytics", "revenue", params],
     queryFn: async () => {
@@ -113,6 +113,7 @@ export function useRevenueSummary(params: RevenueQueryParams = {}) {
         notComputable: asArray<RevenueSummary["notComputable"][number]>(data?.notComputable),
       }
     },
+    enabled,
   })
 }
 
