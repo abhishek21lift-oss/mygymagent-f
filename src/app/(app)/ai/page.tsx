@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAiChat } from "@/lib/hooks/use-ai-chat";
 import { PageHero } from "@/components/shared/page-hero";
+import { QuickActionCard } from "@/components/shared/bento";
 import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, ChatToolCall } from "@/lib/types/ai";
@@ -19,9 +20,9 @@ interface DisplayMessage extends ChatMessage {
 }
 
 const PROMPTS = [
- { icon: Users, label: "Who hasn't visited in 2 weeks?", tint: "hover:border-rose-200 hover:bg-rose-50/60" },
- { icon: Dumbbell, label: "Draft a 4-day hypertrophy split", tint: "hover:border-violet-200 hover:bg-violet-50/60" },
- { icon: CalendarCheck, label: "Summarize today's attendance", tint: "hover:border-cyan-200 hover:bg-cyan-50/60" },
+ { icon: Users, label: "Who hasn't visited in 2 weeks?", accent: "rose" as const },
+ { icon: Dumbbell, label: "Draft a 4-day hypertrophy split", accent: "violet" as const },
+ { icon: CalendarCheck, label: "Summarize today's attendance", accent: "cyan" as const },
 ];
 
 function ToolCallChips({ toolCalls }: { toolCalls: ChatToolCall[] }) {
@@ -104,11 +105,11 @@ export default function AiPage() {
  {notConfigured ? (
  <Card className="overflow-hidden border-border bg-card shadow-sm">
  <CardContent className="flex flex-col items-center gap-2 px-6 py-14 text-center">
- <span className="flex size-14 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/30">
+ <span className="flex size-14 items-center justify-center rounded-2xl text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
  <Sparkles className="size-6" aria-hidden="true" />
  </span>
  <p className="mt-2 text-base font-semibold text-foreground">AI isn&apos;t configured yet</p>
- <p className="max-w-sm text-sm font-medium text-stone-600">
+ <p className="max-w-sm text-sm font-medium text-muted-foreground">
  An administrator needs to set an OpenRouter API key on the backend before the
  assistant can respond.
  </p>
@@ -116,35 +117,33 @@ export default function AiPage() {
  </Card>
  ) : (
  <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
- <section aria-label="Conversation" className="flex min-h-[480px] flex-col overflow-hidden rounded-xl border border-border bg-card">
+ <section aria-label="Conversation" className="flex min-h-[480px] flex-col overflow-hidden rounded-3xl border border-border bg-card">
  <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-4">
- <span className="flex size-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md">
+ <span className="flex size-10 items-center justify-center rounded-xl text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
  <Sparkles className="size-5" aria-hidden="true" />
  </span>
  <div>
  <h2 className="section-title">Conversation</h2>
  </div>
- {chat.isPending && <span className="ml-auto rounded-full bg-violet-500/10 px-3 py-1 text-xs font-black text-violet-700">THINKING…</span>}
+ {chat.isPending && <span className="ml-auto rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">THINKING…</span>}
  </div>
  <div className="h-[420px] flex-1 overflow-y-auto p-4 sm:p-5" role="log" aria-live="polite" aria-label="AI conversation">
  {messages.length === 0 ? (
  <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
- <span className="flex size-14 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg shadow-violet-500/30">
+ <span className="flex size-14 items-center justify-center rounded-2xl text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
  <Sparkles className="size-6" aria-hidden="true" />
  </span>
- <p className="max-w-sm font-semibold text-lg font-semibold text-stone-900">What should we solve today?</p>
+ <p className="max-w-sm text-lg font-semibold text-foreground">What should we solve today?</p>
  <div className="mt-2 grid w-full max-w-md gap-2">
  {PROMPTS.map((p) => (
- <Button
+ <QuickActionCard
  key={p.label}
- type="button"
- variant="outline"
+ icon={p.icon}
+ label={p.label}
+ accent={p.accent}
  onClick={() => void handleSend(p.label)}
- className={`h-auto min-h-11 w-full justify-start rounded-lg px-4 py-3 text-left text-xs ${p.tint}`}
- >
- <p.icon className="size-4 shrink-0" aria-hidden="true" />
- {p.label}
- </Button>
+ className="w-full"
+ />
  ))}
  </div>
  </div>
@@ -156,11 +155,12 @@ export default function AiPage() {
  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
  >
  <div
- className={cn( "max-w-[80%] rounded-xl px-4 py-3 text-sm leading-6 shadow-sm",
+ className={cn( "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
  m.role === "user"
- ? "bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] text-white shadow-violet-500/25"
- : "border border-violet-100/80 bg-muted/40 text-stone-900",
+ ? "text-white"
+ : "border border-border bg-muted/40 text-foreground",
  )}
+ style={m.role === "user" ? { backgroundImage: "var(--brand-grad)" } : undefined}
  >
  <p className="whitespace-pre-wrap">{m.content}</p>
  {m.toolCalls && <ToolCallChips toolCalls={m.toolCalls} />}
@@ -169,8 +169,8 @@ export default function AiPage() {
  ))}
  {chat.isPending && (
  <div className="flex justify-start">
- <div className="flex items-center gap-2 rounded-xl border border-violet-100 bg-violet-50/60 px-4 py-3 text-sm font-bold text-violet-700">
- <span className="size-2 animate-pulse rounded-full bg-violet-500" aria-hidden="true" />
+ <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted px-4 py-3 text-sm font-bold text-foreground">
+ <span className="size-2 animate-pulse rounded-full" style={{ background: "var(--ai)" }} aria-hidden="true" />
  Thinking…
  </div>
  </div>
@@ -194,7 +194,7 @@ export default function AiPage() {
  }}
  placeholder="Ask the assistant..."
  rows={2}
- className="min-h-11 resize-none rounded-lg border-stone-200 bg-card focus-visible:ring-violet-600"
+ className="min-h-11 resize-none rounded-xl bg-card"
  />
  <Button
  onClick={() => void handleSend()}
@@ -205,25 +205,25 @@ export default function AiPage() {
  <Send className="size-4" aria-hidden="true" />
  </Button>
  </div>
- <p className="mt-2 text-xs font-medium text-stone-600">Enter to send · Shift + Enter for a new line.</p>
+ <p className="mt-2 text-xs font-medium text-muted-foreground">Enter to send · Shift + Enter for a new line.</p>
  </div>
  </section>
 
  <aside aria-label="AI tips" className="flex flex-col gap-4">
- <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(145deg,#172554,#3730a3_45%,#a21caf)] p-4 text-white shadow-[0_28px_75px_-38px_rgba(79,70,229,.78)] sm:p-5">
+ <div className="relative overflow-hidden rounded-3xl p-4 text-white sm:p-5" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
- <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
+ <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />
  <h2 className="relative text-sm font-semibold tracking-tight">Grounded answers</h2>
  <Link
  href="/ai-actions"
- className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-xs font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+ className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-xs font-extrabold text-foreground shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  >
  Open approval queue <ArrowRight className="size-4" aria-hidden="true" />
  </Link>
  </div>
  <Card className="border-border bg-card">
  <CardContent className="space-y-3 p-5">
- <h2 className="text-xs font-black uppercase tracking-[.18em] text-stone-500">Power prompts</h2>
+ <h2 className="text-xs font-black uppercase tracking-[.18em] text-muted-foreground">Power prompts</h2>
  {["Flag members likely to churn this week", "Write a win-back message for lapsed members", "Plan tomorrow's floor staffing from attendance"].map((tip) => (
  <Button
  key={tip}

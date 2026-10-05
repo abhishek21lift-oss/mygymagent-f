@@ -2,64 +2,22 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CalendarCheck, Dumbbell, KeyRound, MailCheck, UserRoundX, Users, type LucideIcon } from "lucide-react";
+import { CalendarCheck, Dumbbell, KeyRound, MailCheck, PauseCircle, UserRoundX, Users } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
+import { BentoCard, BentoGrid, SectionHeader } from "@/components/shared/bento";
+import { DonutChart } from "@/components/shared/donut-chart";
+import { ErrorState } from "@/components/shared/error-state";
+import { StatCard } from "@/components/shared/stat-card";
 import { PageHero } from "@/components/shared/page-hero";
 import { useAuth } from "@/lib/auth/auth-context";
 import { staffAccessState, useStaff, useStaffStats } from "@/lib/hooks/use-staff";
-import type { Accent } from "@/lib/section-accent";
 import type { StaffUser } from "@/lib/types/gym";
-import { cn } from "@/lib/utils";
 import { AddStaffDialog } from "./add-staff-dialog";
 import { ManageRolesDialog } from "./manage-roles-dialog";
 import { StaffRowActions } from "./staff-row-actions";
 import { AccessBadge, RolePill, StaffAvatar, accentVars } from "./staff-visuals";
-
-function StatTile({
-  icon: Icon,
-  label,
-  value,
-  accent,
-  loading,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: number | undefined;
-  accent: Accent;
-  loading: boolean;
-}) {
-  return (
-    <div
-      style={accentVars(accent)}
-      className="relative overflow-hidden rounded-2xl border bg-card p-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none"
-    >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-6 -top-8 size-24 rounded-full opacity-25 blur-2xl"
-        style={{ backgroundImage: "linear-gradient(135deg, var(--tone-grad-1), var(--tone-grad-2))" }}
-      />
-      <div className="relative flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex size-10 items-center justify-center rounded-xl shadow-sm"
-          style={{ backgroundImage: "linear-gradient(135deg, var(--tone-grad-1), var(--tone-grad-2))", color: "var(--tone-on)" }}
-        >
-          <Icon className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-xs font-semibold leading-tight text-muted-foreground">{label}</p>
-          {loading ? (
-            <span className="mt-1 block h-6 w-10 animate-pulse rounded bg-muted" />
-          ) : (
-            <p className="text-2xl font-bold tabular-nums tracking-tight">{value ?? 0}</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function useColumns(perms: {
   canUpdate: boolean;
@@ -160,12 +118,19 @@ export default function StaffPage() {
     canManageRoles: hasPermission("users.manage_roles"),
   });
 
-  const tiles: { icon: LucideIcon; label: string; value: number | undefined; accent: Accent }[] = [
-    { icon: Users, label: "Team", value: stats.data?.total, accent: "violet" },
-    { icon: KeyRound, label: "Can sign in", value: stats.data?.active, accent: "emerald" },
-    { icon: MailCheck, label: "Invite pending", value: stats.data?.invited, accent: "amber" },
-    { icon: Dumbbell, label: "Trainers", value: stats.data?.trainers, accent: "blue" },
-    { icon: UserRoundX, label: "No app access", value: stats.data?.noAccess, accent: "rose" },
+  const total = stats.data?.total ?? 0;
+  const active = stats.data?.active ?? 0;
+  const invited = stats.data?.invited ?? 0;
+  const noAccess = stats.data?.noAccess ?? 0;
+  const trainers = stats.data?.trainers ?? 0;
+  // DISABLED / SUSPENDED accounts sit in none of the three buckets above
+  // (verified against users.service stats), so the remainder is "switched off".
+  const switchedOff = Math.max(0, total - active - invited - noAccess);
+  const accountSegments = [
+    { label: "Can sign in", value: active, color: "var(--a-emerald)" },
+    { label: "Invite pending", value: invited, color: "var(--a-amber)" },
+    { label: "No app access", value: noAccess, color: "var(--a-violet)" },
+    { label: "Switched off", value: switchedOff, color: "var(--a-rose)" },
   ];
 
   return (
@@ -174,8 +139,9 @@ export default function StaffPage() {
         <PageHero
           id="staff-title"
           icon={Users}
-          title="Staff"
-          description="Your team, their roles and how they sign in."
+          eyebrow="Users"
+          title="Directory"
+          description="Every account on the team — roles, sign-in state and access."
           actions={
             <>
               {canCreate && <AddStaffDialog />}
@@ -189,15 +155,56 @@ export default function StaffPage() {
           }
         />
 
-        {!stats.isError && (
-          <section aria-label="Team at a glance" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {tiles.map((tile, i) => (
-              <div key={tile.label} className={cn(i === tiles.length - 1 && "col-span-2 sm:col-span-1")}>
-                <StatTile {...tile} loading={stats.isLoading} />
+        {/* ── Accounts ──────────────────────────────────────────── */}
+        <section aria-label="Accounts">
+          <SectionHeader title="Accounts" />
+          <BentoCard>
+            {stats.isLoading ? (
+              <DonutChart segments={[]} isLoading size={160} />
+            ) : stats.isError ? (
+              <ErrorState message="Could not load account totals." onRetry={() => void stats.refetch()} />
+            ) : (
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+                <DonutChart
+                  segments={accountSegments}
+                  centerValue={total.toLocaleString()}
+                  centerLabel="Accounts"
+                  size={160}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-3">
+                    <span className="kpi-icon-tile kpi-blue" aria-hidden="true">
+                      <Dumbbell className="size-5" strokeWidth={2} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="kpi-value">{trainers.toLocaleString()}</p>
+                      <p className="kpi-label">Trainers</p>
+                    </div>
+                    {total > 0 && (
+                      <span className="kpi-trend kpi-trend-neutral ml-auto shrink-0">
+                        {Math.round((trainers / total) * 100)}% of accounts
+                      </span>
+                    )}
+                  </div>
+                  <p className="kpi-hint mt-3">
+                    Roles are assigned per person and listed on each row below.
+                  </p>
+                </div>
               </div>
-            ))}
-          </section>
-        )}
+            )}
+          </BentoCard>
+        </section>
+
+        {/* ── State ─────────────────────────────────────────────── */}
+        <section aria-label="Account state">
+          <SectionHeader title="State" />
+          <BentoGrid columns={4} label="Accounts by sign-in state">
+            <StatCard icon={KeyRound} title="Can sign in" value={stats.data?.active} hint="Password set" isLoading={stats.isLoading} isError={stats.isError} tone="primary" accent="emerald" />
+            <StatCard icon={MailCheck} title="Invite pending" value={stats.data?.invited} hint="Yet to accept" isLoading={stats.isLoading} isError={stats.isError} tone="primary" accent="amber" />
+            <StatCard icon={UserRoundX} title="No app access" value={stats.data?.noAccess} hint="Works without sign-in" isLoading={stats.isLoading} isError={stats.isError} tone="primary" accent="violet" />
+            <StatCard icon={PauseCircle} title="Switched off" value={stats.data ? switchedOff : undefined} hint="Disabled accounts" isLoading={stats.isLoading} isError={stats.isError} tone="primary" accent="rose" />
+          </BentoGrid>
+        </section>
 
         <section aria-labelledby="staff-roster" className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">

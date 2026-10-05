@@ -93,7 +93,7 @@ function MyTwoStepSection() {
  if (!status.data.enabled) {
  return (
  <div className="flex flex-col gap-4">
- <div className="flex items-center gap-2 text-sm font-medium text-stone-600">
+ <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
  <ShieldOff className="size-5" aria-hidden="true" />
  Two-step verification is off
  </div>
@@ -104,7 +104,7 @@ function MyTwoStepSection() {
 
  return (
  <div className="flex flex-col gap-4">
- <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+ <div className="flex items-center gap-2 text-sm font-medium text-success">
  <ShieldCheck className="size-5" aria-hidden="true" />
  Two-step verification is on
  </div>
@@ -290,14 +290,14 @@ function PolicySection() {
  onRetry={() => void report.refetch()}
  />
  ) : (
- <div className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-stone-50/70 p-4">
+ <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface-sunken p-4">
  <div className="flex flex-wrap items-center gap-4 text-sm">
  <span className="font-semibold">
  {report.data.summary.enrolled} of {report.data.summary.total} covered
  users protected
  </span>
  {pending > 0 ? (
- <span className="inline-flex items-center gap-1.5 text-amber-700">
+ <span className="inline-flex items-center gap-1.5 text-warning">
  <TriangleAlert className="size-4" aria-hidden="true" />
  {pending} still to enrol
  </span>
@@ -316,11 +316,11 @@ function PolicySection() {
  </span>
  </span>
  {user.mfaEnabled ? (
- <span className="inline-flex items-center gap-1.5 font-medium text-emerald-700">
+ <span className="inline-flex items-center gap-1.5 font-medium text-success">
  <ShieldCheck className="size-4" aria-hidden="true" /> Protected
  </span>
  ) : (
- <span className="inline-flex items-center gap-1.5 font-medium text-amber-700">
+ <span className="inline-flex items-center gap-1.5 font-medium text-warning">
  <ShieldAlert className="size-4" aria-hidden="true" /> Not enrolled
  </span>
  )}

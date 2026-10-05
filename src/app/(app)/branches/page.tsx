@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Building2, Clock, Mail, MapPin, Phone, Plus, Sparkles } from "lucide-react";
 
 import { BranchEditDialog } from "@/components/branches/branch-edit-dialog";
+import { BentoGrid, GradientIcon } from "@/components/shared/bento";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHero } from "@/components/shared/page-hero";
 import { ErrorState } from "@/components/shared/error-state";
@@ -37,12 +38,12 @@ import { BranchDevicesRow } from "./branch-devices-row";
 import { ApiError } from "@/lib/api/client";
 import { readableWeek } from "@/lib/opening-hours";
 import { createBranchSchema, type CreateBranchInput } from "@/lib/validation/gym";
+import { accentClass } from "@/lib/design-tokens";
+import type { Accent } from "@/lib/section-accent";
+import { cn } from "@/lib/utils";
 
-const BRANCH_TOPS = [ "bg-cyan-400", "bg-teal-400", "bg-violet-600",
-];
-
-const BRANCH_TILES = [ "bg-cyan-500 shadow-cyan-500/25", "bg-teal-500 shadow-teal-500/25", "bg-violet-600 shadow-violet-500/25",
-];
+/* One accent per card, cycling — the cap, glow and tile all follow it. */
+const BRANCH_ACCENTS = ["blue", "cyan", "violet", "emerald"] as const satisfies readonly Accent[];
 
 function slugify(input: string) {
  return input
@@ -207,7 +208,7 @@ export default function BranchesPage() {
  actions={
  <>
  {hasPermission("branches.create") && <CreateBranchDialog />}
- <Link href="/staff" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Link href="/staff" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-foreground shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Sparkles className="size-4" aria-hidden="true" /> Staff
  </Link>
  </>
@@ -220,44 +221,40 @@ export default function BranchesPage() {
  <h2 id="branches-grid-title" className="section-title">All locations</h2>
  </div>
  {!branchesQuery.isLoading && !branchesQuery.isError && branchesQuery.data && branchesQuery.data.items.length > 0 && (
- <span className="rounded-full bg-cyan-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-cyan-500/20">{branchesQuery.data.items.length}</span>
+ <span className="rounded-full px-3 py-1 font-mono text-xs font-black tabular-nums" style={{ background: "var(--section-fill)", color: "var(--section-on)" }}>{branchesQuery.data.items.length}</span>
  )}
  </div>
 
  {branchesQuery.isLoading ? (
  <TableSkeleton />
  ) : branchesQuery.isError ? (
- <div className="overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm dark:bg-card">
+ <div className="overflow-hidden rounded-3xl border border-border bg-card p-4 shadow-sm dark:bg-card">
  <ErrorState onRetry={() => branchesQuery.refetch()} />
  </div>
  ) : !branchesQuery.data || branchesQuery.data.items.length === 0 ? (
- <div className="overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm dark:bg-card">
+ <div className="overflow-hidden rounded-3xl border border-border bg-card p-4 shadow-sm dark:bg-card">
  <EmptyState title="No branches yet" />
  </div>
  ) : (
- <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+ <BentoGrid columns={3} label="Branches">
  {branchesQuery.data.items.map((branch, index) => {
- const top = BRANCH_TOPS[index % BRANCH_TOPS.length];
- const tile = BRANCH_TILES[index % BRANCH_TILES.length];
+ const accent = BRANCH_ACCENTS[index % BRANCH_ACCENTS.length];
  return (
- <article key={branch.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_20px_60px_-38px_rgba(79,70,229,.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_-38px_rgba(79,70,229,.42)] dark:bg-card">
- <span className={`absolute inset-x-0 top-0 h-1.5 ${top}`} aria-hidden="true" />
- <div className="flex flex-row items-center justify-between gap-3 px-5 pt-5 sm:px-6">
+ <article key={branch.id} className={cn("kpi-card", accentClass[accent], "group flex flex-col")}>
+ <div className="flex flex-row items-center justify-between gap-3">
  <div className="flex min-w-0 items-center gap-3">
- <span className={`flex size-11 shrink-0 items-center justify-center rounded-lg text-white shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${tile}`}>
- <Building2 className="size-5" aria-hidden="true" />
- </span>
- <h3 className="text-base font-extrabold tracking-tight [overflow-wrap:anywhere] text-stone-950 dark:text-white">{branch.name}</h3>
+ <GradientIcon icon={Building2} accent={accent} />
+ <h3 className="text-base font-extrabold tracking-tight [overflow-wrap:anywhere] text-foreground">{branch.name}</h3>
  </div>
- <Badge variant={branch.status === "ACTIVE" ? "default" : "secondary"} className={branch.status === "ACTIVE" ? "shrink-0 rounded-full bg-emerald-500 text-white shadow-sm" : "shrink-0 rounded-full"}>
+ <Badge variant={branch.status === "ACTIVE" ? "success" : "secondary"} className="shrink-0 rounded-full">
  {branch.status}
  </Badge>
  </div>
- <div className="flex flex-col gap-1.5 px-5 py-5 text-sm font-medium text-stone-600 sm:px-6 dark:text-stone-400">
- {(branch.addressLine1 || branch.city) && <p className="inline-flex items-start gap-2"><MapPin className="mt-0.5 size-4 shrink-0 text-cyan-600" aria-hidden="true" />{[branch.addressLine1, branch.city, branch.country].filter(Boolean).join(", ")}</p>}
- {branch.phone && <p className="inline-flex items-center gap-2 tabular-nums"><Phone className="size-4 shrink-0 text-cyan-600" aria-hidden="true" />{branch.phone}</p>}
- {branch.email && <p className="inline-flex min-w-0 items-center gap-2"><Mail className="size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span className="min-w-0 [overflow-wrap:anywhere]">{branch.email}</span></p>}
- {readableWeek(branch.openingHours).length > 0 && <p className="inline-flex items-start gap-2"><Clock className="mt-0.5 size-4 shrink-0 text-cyan-600" aria-hidden="true" /><span>{readableWeek(branch.openingHours).join(" · ")}</span></p>}
+ <div className="flex flex-col gap-1.5 pt-4 text-sm font-medium text-muted-foreground">
+ {(branch.addressLine1 || branch.city) && <p className="inline-flex items-start gap-2"><MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" style={{ color: "var(--section-ink)" }} />{[branch.addressLine1, branch.city, branch.country].filter(Boolean).join(", ")}</p>}
+ {branch.phone && <p className="inline-flex items-center gap-2 tabular-nums"><Phone className="size-4 shrink-0" aria-hidden="true" style={{ color: "var(--section-ink)" }} />{branch.phone}</p>}
+ {branch.email && <p className="inline-flex min-w-0 items-center gap-2"><Mail className="size-4 shrink-0" aria-hidden="true" style={{ color: "var(--section-ink)" }} /><span className="min-w-0 [overflow-wrap:anywhere]">{branch.email}</span></p>}
+ {readableWeek(branch.openingHours).length > 0 && <p className="inline-flex items-start gap-2"><Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" style={{ color: "var(--section-ink)" }} /><span>{readableWeek(branch.openingHours).join(" · ")}</span></p>}
  {!branch.addressLine1 && !branch.city && !branch.phone && !branch.email && <p className="text-xs">No contact details yet.</p>}
  {hasPermission("branches.update") && <div className="pt-2"><BranchEditDialog branch={branch} /></div>}
  </div>
@@ -265,7 +262,7 @@ export default function BranchesPage() {
  </article>
  );
  })}
- </div>
+ </BentoGrid>
  )}
  </section>
  </div>

@@ -3,10 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { CalendarCheck, LogIn, LogOut, Sparkles } from "lucide-react";
+import { CalendarCheck, LogIn, LogOut, ShieldAlert, Sparkles, Users } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/shared/data-table";
+import { BentoGrid } from "@/components/shared/bento";
+import { StatCard } from "@/components/shared/stat-card";
 import { PageHero } from "@/components/shared/page-hero";
 import { BranchSelect } from "@/components/shared/branch-select";
 import { MemberPicker } from "@/components/shared/member-picker";
@@ -49,17 +51,17 @@ function CheckInForm() {
  }
 
  return (
- <section aria-labelledby="attendance-checkin" className="overflow-hidden rounded-lg border border-border bg-card">
+ <section aria-labelledby="attendance-checkin" className="overflow-hidden rounded-3xl border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
  <h2 id="attendance-checkin" className="section-title">Manual check-in</h2>
  </div>
  <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:p-6">
  <div className="flex-1">
- <p className="mb-1.5 text-sm font-bold text-stone-700 dark:text-stone-300">Branch</p>
+ <p className="mb-1.5 text-sm font-bold text-foreground">Branch</p>
  <BranchSelect value={branchId} onChange={setBranchId} />
  </div>
  <div className="flex-1">
- <p className="mb-1.5 text-sm font-bold text-stone-700 dark:text-stone-300">Member</p>
+ <p className="mb-1.5 text-sm font-bold text-foreground">Member</p>
  <MemberPicker value={member} onChange={setMember} />
  </div>
  <Button onClick={handleCheckIn} disabled={checkIn.isPending} className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
@@ -85,19 +87,25 @@ function CheckInForm() {
  );
 }
 
-function LiveBoards() {
+function LiveBoards({ logTotal, logLoading }: { logTotal?: number; logLoading: boolean }) {
  const live = useAttendanceLive();
  const inside = live.data?.inside ?? [];
  const denied = live.data?.deniedToday ?? [];
 
  return (
- <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
- <section aria-labelledby="attendance-inside" className="overflow-hidden rounded-xl border border-border bg-card [animation-delay:125ms] dark:bg-card">
- <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-emerald-950/40 dark:via-stone-950 dark:to-teal-950/30">
+ <div className="flex flex-col gap-4">
+ <BentoGrid columns={3} label="Live occupancy figures">
+ <StatCard icon={Users} title="Inside now" value={live.data ? inside.length : undefined} hint="Checked in" isLoading={live.isLoading} isError={live.isError} tone="primary" accent="emerald" />
+ <StatCard icon={ShieldAlert} title="Denied today" value={live.data ? denied.length : undefined} hint="Turned away at the door" isLoading={live.isLoading} isError={live.isError} tone="primary" accent="rose" />
+ <StatCard icon={CalendarCheck} title="Logged visits" value={logTotal} hint="In the visit log" isLoading={logLoading} tone="primary" accent="cyan" />
+ </BentoGrid>
+ <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+ <section aria-labelledby="attendance-inside" className="overflow-hidden rounded-3xl border border-border bg-card dark:bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex min-w-0 items-center gap-3">
  <h2 id="attendance-inside" className="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold tracking-tight text-foreground">Who&apos;s inside</h2>
  </div>
- <span aria-label={`${inside.length} inside now`} className="shrink-0 rounded-full bg-emerald-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-emerald-500/20">
+ <span aria-label={`${inside.length} inside now`} className="shrink-0 rounded-full px-3 py-1 font-mono text-xs font-black tabular-nums" style={{ background: "var(--a-emerald-fill)", color: "var(--a-emerald-on)" }}>
  {live.isLoading ? "…" : inside.length}
  </span>
  </div>
@@ -111,8 +119,8 @@ function LiveBoards() {
  ) : (
  <ul className="flex flex-col gap-2">
  {inside.map((entry) => (
- <li key={entry.id} className="flex items-center justify-between gap-3 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:bg-card">
- <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-900 dark:text-stone-100">
+ <li key={entry.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-2.5 dark:bg-card">
+ <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-foreground">
  {entry.member ? `${entry.member.firstName} ${entry.member.lastName}` : "Unknown member"}
  </span>
  <span className="shrink-0 font-mono text-xs font-medium tabular-nums text-stone-500 dark:text-stone-400">
@@ -125,12 +133,12 @@ function LiveBoards() {
  </div>
  </section>
 
- <section aria-labelledby="attendance-denied" className="overflow-hidden rounded-xl border border-border bg-card [animation-delay:140ms] dark:bg-card">
- <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5 dark:from-rose-950/40 dark:via-stone-950 dark:to-orange-950/20">
+ <section aria-labelledby="attendance-denied" className="overflow-hidden rounded-3xl border border-border bg-card dark:bg-card">
+ <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 sm:px-5">
  <div className="flex min-w-0 items-center gap-3">
  <h2 id="attendance-denied" className="min-w-0 [overflow-wrap:anywhere] text-sm font-semibold tracking-tight text-foreground">Denied today</h2>
  </div>
- <span aria-label={`${denied.length} denied today`} className="shrink-0 rounded-full bg-rose-500 px-3 py-1 font-mono text-xs font-black text-white tabular-nums shadow-md shadow-rose-500/20">
+ <span aria-label={`${denied.length} denied today`} className="shrink-0 rounded-full px-3 py-1 font-mono text-xs font-black tabular-nums" style={{ background: "var(--a-rose-fill)", color: "var(--a-rose-on)" }}>
  {live.isLoading ? "…" : denied.length}
  </span>
  </div>
@@ -144,8 +152,8 @@ function LiveBoards() {
  ) : (
  <ul className="flex flex-col gap-2">
  {denied.map((entry) => (
- <li key={entry.id} className="flex flex-col gap-1 rounded-lg border border-stone-200/70 bg-card px-4 py-2.5 dark:bg-card">
- <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-stone-900 dark:text-stone-100">
+ <li key={entry.id} className="flex flex-col gap-1 rounded-2xl border border-border bg-card px-4 py-2.5 dark:bg-card">
+ <span className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold text-foreground">
  {entry.member ? `${entry.member.firstName} ${entry.member.lastName}` : "Unknown member"}
  </span>
  <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
@@ -159,6 +167,7 @@ function LiveBoards() {
  )}
  </div>
  </section>
+ </div>
  </div>
  );
 }
@@ -174,18 +183,18 @@ const columns: ColumnDef<Attendance>[] = [
  : a.staffUser
  ? `${a.staffUser.firstName} ${a.staffUser.lastName} (staff)`
  : "—";
- return <span className="font-bold text-stone-900 dark:text-stone-100">{label}</span>;
+ return <span className="font-bold text-foreground">{label}</span>;
  },
  },
  {
  header: "Method",
  accessorKey: "method",
- cell: ({ row }) => <Badge variant="outline" className="rounded-full border-cyan-200/70 bg-cyan-50/60 font-bold text-cyan-800">{row.original.method}</Badge>,
+ cell: ({ row }) => <Badge variant="outline">{row.original.method}</Badge>,
  },
  {
  header: "Check-in",
  accessorKey: "checkInAt",
- cell: ({ row }) => <span className="font-medium tabular-nums text-stone-700 dark:text-stone-300">{new Date(row.original.checkInAt).toLocaleString()}</span>,
+ cell: ({ row }) => <span className="font-medium tabular-nums text-muted-foreground">{new Date(row.original.checkInAt).toLocaleString()}</span>,
  },
  {
  header: "Check-out",
@@ -196,7 +205,7 @@ const columns: ColumnDef<Attendance>[] = [
 
 function CheckOutCell({ attendance }: { attendance: Attendance }) {
  const checkOut = useCheckOut();
- if (attendance.checkOutAt) return <span className="font-medium tabular-nums text-stone-600 dark:text-stone-400">{new Date(attendance.checkOutAt).toLocaleString()}</span>;
+ if (attendance.checkOutAt) return <span className="font-medium tabular-nums text-muted-foreground">{new Date(attendance.checkOutAt).toLocaleString()}</span>;
  return (
  <Button
  variant="ghost"
@@ -234,7 +243,7 @@ export default function AttendancePage() {
  <Link href="/members" className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <CalendarCheck className="size-4" aria-hidden="true" /> Members
  </Link>
- <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-cyan-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-foreground shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
  </Link>
  </>
@@ -243,9 +252,9 @@ export default function AttendancePage() {
 
  {hasPermission("attendance.create") && <CheckInForm />}
 
- <LiveBoards />
+ <LiveBoards logTotal={attendanceQuery.data?.total} logLoading={attendanceQuery.isLoading} />
 
- <section aria-labelledby="attendance-log" className="overflow-hidden rounded-lg border border-border bg-card">
+ <section aria-labelledby="attendance-log" className="overflow-hidden rounded-3xl border border-border bg-card">
  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 sm:px-5">
  <h2 id="attendance-log" className="section-title">Visit log</h2>
  </div>

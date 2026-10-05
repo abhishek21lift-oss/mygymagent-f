@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
+  Building2,
   CalendarCheck,
   CalendarClock,
   CheckCircle2,
@@ -12,6 +12,8 @@ import {
   Dumbbell,
   Megaphone,
   Package,
+  Settings,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   UserPlus,
@@ -29,6 +31,7 @@ import { useMemberStatusBreakdown, useRevenueTrend } from "@/lib/hooks/use-analy
 import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { PageHero } from "@/components/shared/page-hero";
+import { BentoGrid, QuickActionCard, SectionHeader } from "@/components/shared/bento";
 import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
 import { DonutChart } from "@/components/shared/donut-chart";
@@ -47,16 +50,16 @@ const QUICK_ACTIONS = [
   ["Add a lead",       "Track a new prospect",        "/crm",          Megaphone,    "leads.manage",     "rose"]    as const,
 ];
 
-/* ─── Donut colour palette ───────────────────────────────────────── */
+/* ─── Donut colours: section tokens, never hardcoded ─────────────────── */
 const DONUT_COLORS = [
-  "oklch(0.529 0.191 278)",  // indigo
-  "oklch(0.615 0.213 312)",  // violet
-  "oklch(0.73 0.194 147)",   // emerald
-  "oklch(0.765 0.175 63)",   // amber
-  "oklch(0.7 0.111 213)",    // cyan
-  "oklch(0.65 0.238 18)",    // rose
-  "oklch(0.603 0.218 257)",  // blue
-  "oklch(0.654 0.232 29)",   // orange
+  "var(--a-indigo)",
+  "var(--a-violet)",
+  "var(--a-emerald)",
+  "var(--a-amber)",
+  "var(--a-cyan)",
+  "var(--a-rose)",
+  "var(--a-blue)",
+  "var(--a-orange)",
 ];
 
 /* ─── Branch storage ─────────────────────────────────────────────── */
@@ -202,6 +205,18 @@ export default function DashboardPage() {
   );
   const totalMembers = memberDonutSegments.reduce((sum, s) => sum + s.value, 0);
 
+  /* Jump-to bento: one tile per work area, gated like the rail, with live
+     counts only from data this page already loads — never new requests. */
+  const jumpItems = [
+    { title: "Branches", desc: "Locations, kiosks and stock", href: "/branches", icon: Building2, accent: "blue" as Accent, permission: "branches.read", badge: branchItems.length > 0 ? branchItems.length : undefined },
+    { title: "Members", desc: "Directory and memberships", href: "/members", icon: Users, accent: "cyan" as Accent, permission: ["members.read", "members.read_assigned"], badge: totalMembers > 0 ? totalMembers : undefined },
+    { title: "Revenue", desc: "Payments and invoices", href: "/billing", icon: Wallet, accent: "emerald" as Accent, permission: "payments.read", badge: outstandingRow && outstandingRow.membershipsWithBalance > 0 ? outstandingRow.membershipsWithBalance : undefined },
+    { title: "AI", desc: "Agent and approvals", href: "/ai", icon: Sparkles, accent: "violet" as Accent, permission: "ai.generate", badge: data?.pendingAiActions ? data.pendingAiActions : undefined },
+    { title: "Operations", desc: "Attendance and inventory", href: "/attendance", icon: CalendarCheck, accent: "orange" as Accent, permission: ["attendance.read", "attendance.read_assigned"], badge: data && data.today.checkIns > 0 ? data.today.checkIns : undefined },
+    { title: "Security", desc: "Access and audit", href: "/settings/security", icon: ShieldCheck, accent: "rose" as Accent, permission: ["organizations.update", "audit.read"], badge: undefined as number | undefined },
+    { title: "Control", desc: "Gym settings", href: "/settings", icon: Settings, accent: "indigo" as Accent, permission: "organizations.read", badge: undefined as number | undefined },
+  ].filter((item) => hasPermission(item.permission));
+
   if (!canViewReports) {
     return (
       <StaffHome
@@ -274,7 +289,7 @@ export default function DashboardPage() {
           </span>
           <span className="category-header-label">Today</span>
         </div>
-        <div className="grid grid-cols-2 gap-3 mb-6 xl:grid-cols-4">
+        <BentoGrid columns={4} label="Today's key figures" className="mb-6">
           <StatCard
             icon={CalendarCheck}
             title="Checked in today"
@@ -315,7 +330,7 @@ export default function DashboardPage() {
             tone="warning"
             accent="orange"
           />
-        </div>
+        </BentoGrid>
 
         {/* Category header: Finance */}
         <div className="category-header kpi-emerald mb-3">
@@ -324,7 +339,7 @@ export default function DashboardPage() {
           </span>
           <span className="category-header-label">Finance this month</span>
         </div>
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <BentoGrid columns={4} label="Finance figures">
           <StatCard
             icon={Wallet}
             title="Net revenue"
@@ -367,8 +382,28 @@ export default function DashboardPage() {
             tone="warning"
             accent="rose"
           />
-        </div>
+        </BentoGrid>
       </section>
+
+      {/* ── Jump to ─────────────────────────────────────────────── */}
+      {jumpItems.length > 0 && (
+        <div>
+          <SectionHeader title="Jump to" />
+          <BentoGrid columns={3} label="Jump to a section">
+            {jumpItems.map((item) => (
+              <QuickActionCard
+                key={item.href}
+                icon={item.icon}
+                label={item.title}
+                hint={item.desc}
+                accent={item.accent}
+                href={item.href}
+                badge={item.badge}
+              />
+            ))}
+          </BentoGrid>
+        </div>
+      )}
 
       {/* ── Charts row ──────────────────────────────────────────── */}
       <section
@@ -577,31 +612,18 @@ export default function DashboardPage() {
             Quick actions
           </h2>
           {visibleActions.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+            <BentoGrid columns={2} label="Quick actions">
               {visibleActions.map(([title, desc, href, Icon, , color]) => (
-                <Link
+                <QuickActionCard
                   key={href}
+                  icon={Icon}
+                  label={title}
+                  hint={desc}
+                  accent={color}
                   href={href}
-                  className={`quick-action-tile kpi-${color}`}
-                >
-                  <span className="quick-action-icon">
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <span className="min-w-0 w-full">
-                    <span className="block [overflow-wrap:anywhere] text-sm font-semibold tracking-tight">
-                      {title}
-                    </span>
-                    <span className="block [overflow-wrap:anywhere] text-xs text-muted-foreground mt-0.5">
-                      {desc}
-                    </span>
-                  </span>
-                  <ArrowRight
-                    className="size-4 shrink-0 text-muted-foreground absolute bottom-3 right-3 opacity-0 transition-opacity group-hover:opacity-100"
-                    aria-hidden="true"
-                  />
-                </Link>
+                />
               ))}
-            </div>
+            </BentoGrid>
           ) : (
             <EmptyState
               title="Nothing to do here yet"
@@ -640,19 +662,18 @@ function StaffHome({
           Quick actions
         </h2>
         {actions.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <BentoGrid columns={3} label="Quick actions">
             {actions.map(([title, desc, href, Icon, , color]) => (
-              <Link key={href} href={href} className={`quick-action-tile kpi-${color}`}>
-                <span className="quick-action-icon">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <span className="min-w-0 w-full">
-                  <span className="block text-sm font-semibold">{title}</span>
-                  <span className="block text-xs text-muted-foreground mt-0.5">{desc}</span>
-                </span>
-              </Link>
+              <QuickActionCard
+                key={href}
+                icon={Icon}
+                label={title}
+                hint={desc}
+                accent={color}
+                href={href}
+              />
             ))}
-          </div>
+          </BentoGrid>
         ) : (
           <EmptyState
             title="Nothing to do here yet"
