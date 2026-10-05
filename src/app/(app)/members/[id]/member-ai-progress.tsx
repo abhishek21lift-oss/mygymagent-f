@@ -12,14 +12,20 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
  const ai = useAiChat();
  const [insight, setInsight] = React.useState<string | null>(null);
  const [error, setError] = React.useState<string | null>(null);
+ const [mode, setMode] = React.useState<"progress" | "prep" | null>(null);
 
- async function analyze() {
+ async function run(kind: "progress" | "prep") {
  setError(null);
  setInsight(null);
+ setMode(kind);
  try {
  const response = await ai.mutateAsync({
  message:
- `Analyze workout progress for member ${memberId}. Use only verified workout execution history available through your tools. ` +
+ kind === "prep"
+ ? `Prepare today's PT session brief for member ${memberId}. Use the prepare_session_brief tool for profile, program, adherence and follow-ups. ` +
+ `Then give: client goal, recent progress in one line, last session focus, adherence state, risk if any, and exactly 3 focus points for today. ` +
+ `State only what the brief supports. Distinguish observed facts from coaching recommendations.`
+ : `Analyze workout progress for member ${memberId}. Use only verified workout execution history available through your tools. ` +
  `Identify adherence, completed-session trend, logged volume trend, exercise progression when exercise-level data is available, ` +
  `plateaus or regressions, and 2-3 actionable coaching recommendations. Do not invent missing data. ` +
  `Clearly distinguish observed facts from coaching recommendations.`,
@@ -28,8 +34,13 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
  setInsight(response.reply);
  } catch (e) {
  setError(e instanceof ApiError ? e.message : "Unable to generate workout insight.");
+ } finally {
+ setMode(null);
  }
  }
+
+ async function analyze() { await run("progress"); }
+ async function prepare() { await run("prep"); }
 
  return (
  <Card className="panel-premium overflow-hidden rounded-3xl border-border/60 bg-card">
@@ -57,10 +68,16 @@ export function MemberAiProgress({ memberId }: { memberId: string }) {
  The assistant will inspect available workout history before making recommendations.
  </p>
  </div>
+ <div className="flex flex-wrap items-center gap-2">
  <Button onClick={() => void analyze()} disabled={ai.isPending} className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 font-extrabold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <TrendingUp className="size-4" aria-hidden="true" />
- {ai.isPending ? "Analyzing..." : "Analyze progress"}
+ {mode === "progress" && ai.isPending ? "Analyzing..." : "Analyze progress"}
  </Button>
+ <Button variant="outline" onClick={() => void prepare()} disabled={ai.isPending} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-5 font-extrabold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Sparkles className="size-4" aria-hidden="true" />
+ {mode === "prep" && ai.isPending ? "Preparing..." : "Prepare session"}
+ </Button>
+ </div>
  </div>
  )}
 

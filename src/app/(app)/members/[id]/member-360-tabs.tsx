@@ -121,6 +121,7 @@ import { useMemberScreenings, useCreateMemberScreening } from "@/lib/hooks/use-m
 import { ErrorState } from "@/components/shared/error-state";
 import { ptTrainerName } from "@/lib/hooks/use-pt-sessions";
 import { useMemberPtSessions } from "@/lib/hooks/use-member-pt-sessions";
+import { PtAdherenceStrip, PtWalletCard } from "./pt-wellness-cards";
 import { useMemberDietAssignments } from "@/lib/hooks/use-member-diet";
 import { useMemberWorkoutAssignments } from "@/lib/hooks/use-member-workouts";
 import { useMemberTimeline } from "@/lib/hooks/use-member-360";
@@ -2135,20 +2136,22 @@ function WorkoutsPanel({ memberId }: { memberId: string }) {
 function PtSessionsPanel({ memberId }: { memberId: string }) {
  const query = useMemberPtSessions(memberId);
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
- if (query.isError) return <ErrorState message="Couldn't load PT sessions." onRetry={() => query.refetch()} />;
-
- if (!query.data || query.data.length === 0) {
  return (
+ <div className="flex flex-col gap-3">
+ <PtWalletCard memberId={memberId} />
+ <PtAdherenceStrip memberId={memberId} />
+
+ {query.isLoading ? (
+ <Skeleton className="h-24 w-full" />
+ ) : query.isError ? (
+ <ErrorState message="Couldn't load PT sessions." onRetry={() => query.refetch()} />
+ ) : !query.data || query.data.length === 0 ? (
  <EmptyState
  icon={Dumbbell}
  title="No PT sessions"
  description="Book a personal training session to get started."
  />
- );
- }
-
- return (
+ ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((session) => {
  const coach = ptTrainerName(session.trainer);
@@ -2185,8 +2188,12 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
  );
  })}
  </div>
+ )}
+ </div>
  );
 }
+
+
 
 // -- Nutrition Panel
 function NutritionPanel({ memberId }: { memberId: string }) {
