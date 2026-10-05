@@ -237,8 +237,12 @@ export default function DashboardPage() {
       <PageHero
         id="dashboard-title"
         icon={Sparkles}
+        eyebrow=""
         title={gymName}
         description={today}
+        compact
+        centered
+        tone="noir"
         actions={
           hasPermission("ai.generate") ? (
             <Button asChild size="sm" className="hero-banner-btn hero-banner-btn-primary">
@@ -653,8 +657,12 @@ function StaffHome({
       <PageHero
         id="dashboard-title"
         icon={Sparkles}
+        eyebrow=""
         title={gymName ?? (firstName ? `Welcome, ${firstName}` : "Welcome")}
         description="Here's what you can do from here today."
+        compact
+        centered
+        tone="noir"
       />
 
       <section aria-labelledby="dash-quick">

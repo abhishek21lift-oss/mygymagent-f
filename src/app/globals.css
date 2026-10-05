@@ -1863,6 +1863,30 @@
     align-items: center;
   }
 
+  /* --- Centered brand hero --------------------------------------
+     Stacked, text-centered, and NEVER row-split: the title stays
+     exactly centered and the actions sit below it in full, so a CTA
+     can never be squeezed or clipped beside the heading on any
+     viewport. Higher specificity than the sm:row utilities. */
+  .hero-centered .hero-banner-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .hero-centered .hero-banner-body > div:first-child {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .hero-centered .hero-banner-actions {
+    justify-content: center;
+    margin-top: 0.875rem;
+    max-width: 100%;
+  }
+  @media (max-width: 640px) {
+    .hero-centered .hero-banner-body { padding: 1.1rem 1.25rem 1.35rem; }
+  }
+
   /* A light ghost button variant for inside hero banners */
   .hero-banner-btn {
     display: inline-flex;

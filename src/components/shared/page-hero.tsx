@@ -38,6 +38,8 @@ export function PageHero({
   accent,
   children,
   compact = false,
+  centered = false,
+  tone = "section",
 }: {
   id?: string;
   eyebrow?: string;
@@ -52,6 +54,10 @@ export function PageHero({
   align?: "left" | "center";
   /** Compact variant: shorter banner for less important pages */
   compact?: boolean;
+  /** Centered brand moment: stacked, text-centered, never row-splits. */
+  centered?: boolean;
+  /** "noir" repaints the banner deep-black/red from tokens; section default otherwise. */
+  tone?: "section" | "noir";
 }) {
   const pathname = usePathname();
   const resolvedEyebrow = eyebrow ?? sectionForPath(pathname);
@@ -79,13 +85,27 @@ export function PageHero({
         : "header"
     }`;
 
+  // Noir: deep-black base with a sophisticated red wash, built only from
+  // tokens (page ink + solved rose fill, heavily mixed toward black so it
+  // reads as a glow, never neon). Inline style so only opt-in heroes change.
+  const noir =
+    tone === "noir"
+      ? ({
+          backgroundImage:
+            "linear-gradient(120deg, var(--foreground) 0%, color-mix(in oklab, var(--a-rose-fill) 42%, var(--foreground)) 72%, color-mix(in oklab, var(--a-rose-fill) 58%, var(--foreground)) 100%)",
+          boxShadow:
+            "inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 40px -12px color-mix(in oklab, var(--a-rose-fill) 45%, transparent)",
+        } as CSSProperties)
+      : undefined;
+
   return (
     <header
       aria-labelledby={headingId}
-      style={override}
+      style={{ ...override, ...noir }}
       className={cn(
         "hero-banner -mx-4 mb-5 sm:-mx-5 lg:-mx-8",
         compact ? "mb-4" : "mb-6",
+        centered && "hero-centered",
       )}
     >
       {/* All direct children of .hero-banner are positioned z-index:1
@@ -102,7 +122,10 @@ export function PageHero({
           {Icon && (
             <span
               aria-hidden="true"
-              className="flex size-14 shrink-0 items-center justify-center rounded-2xl"
+              className={cn(
+                "flex shrink-0 items-center justify-center rounded-2xl",
+                centered ? "size-12" : "size-14",
+              )}
               style={{
                 background: "rgb(255 255 255 / 0.2)",
                 border: "1px solid rgb(255 255 255 / 0.32)",
@@ -110,7 +133,7 @@ export function PageHero({
                 color: "#fff",
               }}
             >
-              <Icon className="size-7" strokeWidth={1.75} />
+              <Icon className={centered ? "size-6" : "size-7"} strokeWidth={1.75} />
             </span>
           )}
 
