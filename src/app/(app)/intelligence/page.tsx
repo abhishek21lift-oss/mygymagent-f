@@ -58,6 +58,8 @@ import {
 import { useBranches } from "@/lib/hooks/use-branches";
 import { PageHero } from "@/components/shared/page-hero";
 import { RiskSection } from "./risk-section";
+import { RenewalsSection } from "./renewals-section";
+import { WinbackSection } from "./winback-section";
 import { SegmentsSection } from "./segments-section";
 import { StatCard, toStatTone } from "@/components/shared/stat-card";
 import { ErrorState } from "@/components/shared/error-state";
@@ -164,7 +166,7 @@ function TrainerList({ data, error, onRetry }: { data: TrainerWorkloadResponse |
  if (!data) return <Skeleton className="h-32 w-full rounded-xl" />;
  const trainers = data.trainers ?? [];
  if (!trainers.length) return <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-violet-200 bg-muted/40 py-12 text-center"><Dumbbell className="size-9 text-violet-600" aria-hidden="true" /><p className="text-sm font-extrabold text-stone-900">No trainers assigned</p></div>;
- return <div className="flex flex-col gap-2">{trainers.map((trainer) => <div key={trainer.userId} className="flex items-center justify-between gap-3 rounded-xl border border-stone-100 bg-card p-3"><div className="flex min-w-0 items-center gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-md"><Dumbbell className="size-4" aria-hidden="true" /></div><div className="min-w-0"><p className="text-sm font-bold text-stone-900 [overflow-wrap:anywhere]">{trainer.firstName} {trainer.lastName}</p><p className="text-xs font-medium text-stone-600">{trainer.assignedMemberCount} assigned members</p></div></div><div className="text-right"><p className="font-mono text-sm font-bold text-stone-900">{trainer.workoutPlansAssignedLast30Days + trainer.dietPlansAssignedLast30Days}</p><p className="text-xs uppercase tracking-wider text-stone-500">plans / 30d</p></div></div>)}{(data.notComputable?.length ?? 0) > 0 ? <p className="pt-2 text-xs text-stone-500">Not shown: {data.notComputable!.map((n) => n.key).join(", ")}</p> : null}</div>;
+ return <div className="flex flex-col gap-2">{trainers.map((trainer) => <div key={trainer.userId} className="flex items-center justify-between gap-3 rounded-xl border border-stone-100 bg-card p-3"><div className="flex min-w-0 items-center gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-md"><Dumbbell className="size-4" aria-hidden="true" /></div><div className="min-w-0"><p className="text-sm font-bold text-stone-900 [overflow-wrap:anywhere]">{trainer.firstName} {trainer.lastName}</p><p className="text-xs font-medium text-stone-600">{trainer.assignedMemberCount} assigned members · {trainer.sessionsCompleted30d} sessions / 30d{trainer.sessionsNoShow30d > 0 ? ` · ${trainer.sessionsNoShow30d} no-show` : ""}</p></div></div><div className="text-right"><p className="font-mono text-sm font-bold text-stone-900">{trainer.workoutPlansAssignedLast30Days + trainer.dietPlansAssignedLast30Days}</p><p className="text-xs uppercase tracking-wider text-stone-500">plans / 30d</p>{trainer.sessionCompletionPct !== null && trainer.sessionCompletionPct !== undefined && <p className="mt-0.5 font-mono text-xs font-bold text-emerald-700">{trainer.sessionCompletionPct}% done</p>}</div></div>)}{(data.notComputable?.length ?? 0) > 0 ? <p className="pt-2 text-xs text-stone-500">Not shown: {data.notComputable!.map((n) => n.key).join(", ")}</p> : null}</div>;
 }
 
 function SalesFunnel({ data, error, onRetry }: { data: SalesFunnel | undefined; error?: boolean; onRetry?: () => void }) {
@@ -325,6 +327,9 @@ export default function IntelligencePage() {
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="pb-2"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">Expiring soon</CardTitle></div><div className="flex size-11 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg"><Calendar className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-0"><div className="flex h-40 flex-col items-center justify-center rounded-xl bg-muted/40 text-center ring-1 ring-amber-100"><p className="font-mono text-4xl font-black text-amber-700 tabular-nums">{lifecycle.data?.expiringWithin30Days ?? "—"}</p><p className="mt-1 text-xs font-medium text-stone-600">memberships expire within 30 days</p></div></CardContent></Card>
  </div>
  </section>
+
+ <RenewalsSection branchId={branch} />
+ <WinbackSection branchId={branch} />
 
  <section aria-labelledby="intel-queue">
  <SectionHeader title="Signals that need a decision" action={<Link href="/members"><Button variant="outline" className="min-h-11 rounded-full border-stone-200 bg-card">Members <ArrowRight className="ml-2 size-4" aria-hidden="true" /></Button></Link>} />
