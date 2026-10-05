@@ -5,6 +5,7 @@ import { ArrowRight, Building2, MessageCircle, Settings2, ShieldCheck, Store } f
 
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHero } from "@/components/shared/page-hero";
+import { GradientIcon } from "@/components/shared/bento";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,9 +30,9 @@ export default function SettingsPage() {
  // two-step verification is the signed-in user's own account setting,
  // so every role has to be able to reach it.
  <div className="flex flex-wrap gap-2">
- <Link href="/settings/security" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> <ShieldCheck className="size-4" aria-hidden="true" /> Security </Link>
+ <Link href="/settings/security" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> <ShieldCheck className="size-4" aria-hidden="true" /> Security </Link>
  {canManageSettings ? (
- <><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/messages" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Message templates </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-5 py-3 text-sm font-bold text-stone-900 transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/messages" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> Message templates </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" style={{ backgroundImage: "linear-gradient(135deg, var(--a-orange-grad-1), var(--a-orange-grad-2))" }}>
  <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp setup <ArrowRight className="size-4" aria-hidden="true" />
  </Link></>
  ) : null}
@@ -43,9 +44,7 @@ export default function SettingsPage() {
  <section aria-labelledby="settings-org">
  <Card className="overflow-hidden border-border bg-card">
  <div className="flex items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
- <span className="flex size-11 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-lg">
- <Building2 className="size-5" aria-hidden="true" />
- </span>
+ <GradientIcon icon={Building2} accent="indigo" />
  <div>
  <h2 id="settings-org" className="section-title">Gym profile</h2>
  </div>
@@ -88,11 +87,11 @@ export default function SettingsPage() {
 
  <section aria-label="Integrations" className="flex flex-col gap-4">
  {canManageSettings && (
- <Card className="relative overflow-hidden border-0 bg-[linear-gradient(145deg,#064e3b,#059669_55%,#06b6d4)] text-white shadow-[0_28px_75px_-38px_rgba(16,185,129,.7)]">
+ <Card className="relative overflow-hidden border-0 text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-emerald-grad-1), var(--a-emerald-grad-2))" }}>
  <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-card blur-3xl" aria-hidden="true" />
  <CardContent className="relative flex items-center justify-between gap-4 p-5 sm:p-6">
  <div className="flex min-w-0 items-center gap-3">
- <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-border"><MessageCircle className="size-6" aria-hidden="true" /></span>
+ <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: "rgb(255 255 255 / 0.2)", border: "1px solid rgb(255 255 255 / 0.3)" }}><MessageCircle className="size-6" aria-hidden="true" /></span>
  <div className="min-w-0">
  <div className="font-semibold text-lg font-semibold tracking-tight">WhatsApp Business</div>
  </div>

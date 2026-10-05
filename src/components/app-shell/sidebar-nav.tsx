@@ -123,7 +123,15 @@ function LeafLink({
           ? "font-semibold text-sidebar-foreground"
           : "font-medium text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground",
       )}
-      style={active ? { background: "color-mix(in oklab, var(--nav-accent) 13%, transparent)" } : undefined}
+      style={
+        active
+          ? {
+              background:
+                "linear-gradient(135deg, color-mix(in oklab, var(--nav-accent) 16%, var(--card)) 0%, color-mix(in oklab, var(--nav-accent) 10%, var(--card)) 100%)",
+              boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--nav-accent) 22%, transparent)",
+            }
+          : undefined
+      }
     >
       <IconTile item={item} filled={active} />
       {!collapsed ? (
@@ -310,9 +318,23 @@ function RailGroup({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children, accent }: { children: React.ReactNode; accent?: Accent | "ai" }) {
   return (
-    <div className="mb-1.5 mt-1 flex items-center gap-2 px-3">
+    <div
+      className="mb-1.5 mt-1 flex items-center gap-2 px-3"
+      data-nav-accent={accent}
+    >
+      {accent && accent !== "ai" ? (
+        /* Colored dot matching the section hue */
+        <span
+          aria-hidden="true"
+          className="size-1.5 shrink-0 rounded-full"
+          style={{
+            background: "linear-gradient(135deg, var(--nav-accent), var(--nav-accent))",
+            opacity: 0.75,
+          }}
+        />
+      ) : null}
       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-muted">{children}</span>
       <span aria-hidden="true" className="h-px flex-1 bg-sidebar-border" />
     </div>
