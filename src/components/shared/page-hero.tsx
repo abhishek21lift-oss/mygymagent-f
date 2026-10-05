@@ -85,14 +85,15 @@ export function PageHero({
         : "header"
     }`;
 
-  // Noir: deep-black base with a sophisticated red wash, built only from
-  // tokens (page ink + solved rose fill, heavily mixed toward black so it
-  // reads as a glow, never neon). Inline style so only opt-in heroes change.
+  // Noir: deep-black base with a sophisticated red wash. The black stop
+  // is fixed (not a theme token) so the banner stays dark in both themes
+  // and white text on it is always legible; only the red wash follows
+  // the section tokens. Heavily mixed toward black: glow, never neon.
   const noir =
     tone === "noir"
       ? ({
           backgroundImage:
-            "linear-gradient(120deg, var(--foreground) 0%, color-mix(in oklab, var(--a-rose-fill) 42%, var(--foreground)) 72%, color-mix(in oklab, var(--a-rose-fill) 58%, var(--foreground)) 100%)",
+            "linear-gradient(120deg, #0b0b0d 0%, color-mix(in oklab, var(--a-rose-fill) 42%, #0b0b0d) 72%, color-mix(in oklab, var(--a-rose-fill) 58%, #0b0b0d) 100%)",
           boxShadow:
             "inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 40px -12px color-mix(in oklab, var(--a-rose-fill) 45%, transparent)",
         } as CSSProperties)

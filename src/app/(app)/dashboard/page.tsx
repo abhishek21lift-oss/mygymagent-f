@@ -236,7 +236,6 @@ export default function DashboardPage() {
       {/* ── Hero Banner ─────────────────────────────────────────── */}
       <PageHero
         id="dashboard-title"
-        icon={Sparkles}
         eyebrow=""
         title={gymName}
         description={today}
@@ -245,7 +244,7 @@ export default function DashboardPage() {
         tone="noir"
         actions={
           hasPermission("ai.generate") ? (
-            <Button asChild size="sm" className="hero-banner-btn hero-banner-btn-primary">
+            <Button asChild size="sm" className="hero-banner-btn hero-banner-btn-ghost">
               <Link href="/ai">
                 <Sparkles className="size-4" aria-hidden="true" />
                 Ask AI
@@ -656,7 +655,6 @@ function StaffHome({
     <div className="flex w-full flex-col gap-6 pb-8">
       <PageHero
         id="dashboard-title"
-        icon={Sparkles}
         eyebrow=""
         title={gymName ?? (firstName ? `Welcome, ${firstName}` : "Welcome")}
         description="Here's what you can do from here today."
