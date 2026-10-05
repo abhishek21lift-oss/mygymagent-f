@@ -21,8 +21,11 @@ export interface LeadFollowUpRow extends LeadFollowUp {
   createdByUser?: { id: string; firstName: string; lastName: string } | null
 }
 
-export function useLeads(params: PaginationParams & { status?: LeadStatus } = {}) {
-  return useQuery({ queryKey: [KEY, params], queryFn: () => api.get<Paginated<Lead>>("/leads", { query: params }) })
+export function useLeads(
+  params: PaginationParams & { status?: LeadStatus; createdFrom?: string; createdTo?: string } = {},
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({ queryKey: [KEY, params], queryFn: () => api.get<Paginated<Lead>>("/leads", { query: params }), enabled })
 }
 
 export function useLead(id: string | null) {

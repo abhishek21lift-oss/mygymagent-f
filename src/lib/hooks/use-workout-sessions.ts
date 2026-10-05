@@ -41,9 +41,10 @@ export type WorkoutSession = WorkoutSessionSummary & {
 
 const KEY = "workout-sessions"
 
-export function useTodayWorkoutSessions() {
+export function useTodayWorkoutSessions({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [KEY, "today"],
+    enabled,
     queryFn: () => api.get<WorkoutSessionSummary[]>("/workout-sessions/today"),
   })
 }

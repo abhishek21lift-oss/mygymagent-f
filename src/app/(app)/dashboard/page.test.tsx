@@ -84,6 +84,18 @@ function routes(overrides: Record<string, unknown> = {}) {
       outstanding: [{ currency: "INR", membershipsWithBalance: 3, outstandingBalance: "4500.00" }],
       notComputable: [],
     },
+    "/members": { items: [], total: 3, page: 1, pageSize: 1, totalPages: 3 },
+    "/memberships": {
+      items: [
+        { id: "m1", previousMembershipId: "m0" },
+        { id: "m2", previousMembershipId: null },
+      ],
+      total: 2,
+      page: 1,
+      pageSize: 100,
+      totalPages: 1,
+    },
+    "/leads": { items: [], total: 5, page: 1, pageSize: 1, totalPages: 5 },
     ...overrides,
   }
   mockGet.mockImplementation(async (path: string) => {
@@ -165,6 +177,53 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Outstanding amount")).toBeInTheDocument()
     expect(screen.getByText("Inventory sale")).toBeInTheDocument()
     expect(await screen.findByText("On 3 memberships · live balance")).toBeInTheDocument()
+  })
+
+  it("shows the six Today KPIs from their authoritative sources", async () => {
+    renderPage()
+    expect(await screen.findByText("Net revenue")).toBeInTheDocument()
+    for (const title of ["Check In", "Collection", "New Members", "Renewals", "Leads"]) {
+      expect(screen.getByText(title)).toBeInTheDocument()
+    }
+    // Renewals counts only rows linked to a previous membership.
+    expect(await screen.findByText("Of 2 started today")).toBeInTheDocument()
+    // PT Sessions needs workouts.read, which this permission set lacks.
+    expect(screen.queryByText("PT Sessions")).not.toBeInTheDocument()
+    const memberCalls = callsTo("/members").filter((options) => options?.query?.joinedFrom)
+    expect(memberCalls).toHaveLength(1)
+    expect(memberCalls[0]?.query).toMatchObject({ pageSize: 1 })
+    // joinedTo is lte-start-of-day server-side, so the window ends tomorrow.
+    // Computed in the org timezone, exactly like the page under test.
+    const inKolkata = (d: Date) =>
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(d);
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    expect(memberCalls[0]?.query?.joinedFrom).toBe(inKolkata(now))
+    expect(memberCalls[0]?.query?.joinedTo).toBe(inKolkata(tomorrow))
+    const leadCalls = callsTo("/leads")
+    expect(leadCalls).toHaveLength(1)
+    expect(leadCalls[0]?.query).toMatchObject({ pageSize: 1 })
+    expect(leadCalls[0]?.query?.createdFrom).toBe(leadCalls[0]?.query?.createdTo)
+    const membershipCalls = callsTo("/memberships")
+    expect(membershipCalls).toHaveLength(1)
+    expect(membershipCalls[0]?.query?.createdFrom).toBe(membershipCalls[0]?.query?.createdTo)
+    const summaries = callsTo("/analytics/revenue")
+    expect(summaries.length).toBeGreaterThanOrEqual(2)
+    expect(summaries).toContainEqual(
+      expect.objectContaining({ query: expect.objectContaining({ from: summaries[0]?.query?.from }) }),
+    )
+  })
+
+  it("shows PT Sessions for someone who can read workouts", async () => {
+    mockPermissions = [...ALL, "workouts.read"]
+    renderPage()
+    expect(await screen.findByText("PT Sessions")).toBeInTheDocument()
   })
 
   it("asks the revenue summary for the default 30-day period", async () => {

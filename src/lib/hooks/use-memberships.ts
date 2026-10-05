@@ -15,9 +15,12 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
   return queryClient.invalidateQueries({ queryKey: [KEY] });
 }
 
-export function useMemberships(params: PaginationParams & { memberId?: string } = {}) {
+export function useMemberships(
+  params: PaginationParams & { memberId?: string; createdFrom?: string; createdTo?: string } = {},
+  { enabled = true }: { enabled?: boolean } = {},
+) {
   const { memberId, ...query } = params;
-  return useQuery({ queryKey: [KEY, query, memberId], queryFn: () => api.get<Paginated<Membership>>("/memberships", { query: { ...query, memberId } }) });
+  return useQuery({ queryKey: [KEY, query, memberId], queryFn: () => api.get<Paginated<Membership>>("/memberships", { query: { ...query, memberId } }), enabled });
 }
 
 export function useMembershipAnalytics() {

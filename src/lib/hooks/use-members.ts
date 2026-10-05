@@ -37,11 +37,12 @@ type MemberDetailPayload = Member & {
   memberships?: unknown;
 };
 
-export function useMembers(params: MemberFilters = {}) {
+export function useMembers(params: MemberFilters = {}, { enabled = true }: { enabled?: boolean } = {}) {
   const { branchId } = params;
 
   return useQuery({
     queryKey: [KEY, params],
+    enabled,
     queryFn: () => {
       const query: Record<string, string | number | boolean | string[] | undefined> = {
         ...(params.page !== undefined && { page: params.page }),

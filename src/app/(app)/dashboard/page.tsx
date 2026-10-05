@@ -13,6 +13,7 @@ import {
   Dumbbell,
   HandCoins,
   Megaphone,
+  RefreshCw,
   Package,
   Scale,
   Settings,
@@ -31,6 +32,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
 import { useMemberStatusBreakdown, useRevenueSummary, useRevenueTrend } from "@/lib/hooks/use-analytics";
+import { useLeads } from "@/lib/hooks/use-leads";
+import { useMembers } from "@/lib/hooks/use-members";
+import { useMemberships } from "@/lib/hooks/use-memberships";
+import { useTodayWorkoutSessions } from "@/lib/hooks/use-workout-sessions";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { PageHero } from "@/components/shared/page-hero";
@@ -180,6 +185,42 @@ export default function DashboardPage() {
   );
   const summaryRow =
     financeSummary.data?.revenue.find((r) => r.currency === currencyCode) ?? financeSummary.data?.revenue[0];
+
+  /* Today section: six KPIs, each from its authoritative source. New members
+     use the members joined-filter; renewals are today's memberships linked
+     to a previous row; leads and PT sessions come from their own endpoints.
+     Every query is permission-gated so nobody asks the API for what it
+     would refuse. */
+  const canReadMembers = hasPermission(["members.read", "members.read_assigned"]);
+  const canReadMemberships = hasPermission(["memberships.read", "memberships.read_assigned"]);
+  const canReadLeads = hasPermission("leads.read");
+  const canReadWorkouts = hasPermission(["workouts.read", "workouts.read_assigned"]);
+  const todayStr = React.useMemo(() => isoDay(new Date(), timezone), [timezone]);
+  // members joinedTo is lte-start-of-day server-side, so tomorrow bounds today.
+  const tomorrowStr = React.useMemo(
+    () => isoDay(new Date(new Date().setDate(new Date().getDate() + 1)), timezone),
+    [timezone],
+  );
+  const todayCollection = useRevenueSummary(
+    { from: todayStr, to: todayStr, ...(branchFilter ? { branchId: branchFilter } : {}) },
+    { enabled: canViewReports },
+  );
+  const todayCollectionRow =
+    todayCollection.data?.revenue.find((r) => r.currency === currencyCode) ?? todayCollection.data?.revenue[0];
+  const newMembers = useMembers(
+    { joinedFrom: todayStr, joinedTo: tomorrowStr, pageSize: 1, ...(branchFilter ? { branchId: [branchFilter] } : {}) },
+    { enabled: canViewReports && canReadMembers },
+  );
+  const todayMemberships = useMemberships(
+    { createdFrom: todayStr, createdTo: todayStr, pageSize: 100 },
+    { enabled: canViewReports && canReadMemberships },
+  );
+  const renewalsToday = (todayMemberships.data?.items ?? []).filter((m) => m.previousMembershipId).length;
+  const todayLeads = useLeads(
+    { createdFrom: todayStr, createdTo: todayStr, pageSize: 1 },
+    { enabled: canViewReports && canReadLeads },
+  );
+  const todaySessions = useTodayWorkoutSessions({ enabled: canViewReports && canReadWorkouts });
   const summaryOutstanding =
     financeSummary.data?.outstanding.find((r) => r.currency === currencyCode) ?? financeSummary.data?.outstanding[0];
   const rangeLabel =
@@ -343,47 +384,79 @@ export default function DashboardPage() {
           </span>
           <span className="category-header-label">Today</span>
         </div>
-        <BentoGrid columns={4} label="Today's key figures" className="mb-6">
+        <BentoGrid columns={6} label="Today's key figures" className="mb-6">
           <StatCard
             icon={CalendarCheck}
-            title="Checked in today"
+            title="Check In"
             value={data?.today.checkIns}
-            hint={data?.today.deniedCheckIns ? `${data.today.deniedCheckIns} turned away at the door` : undefined}
+            hint={data?.today.deniedCheckIns ? `${data.today.deniedCheckIns} turned away at the door` : "Visits today"}
             isLoading={briefing.isLoading}
             isError={briefing.isError}
             tone="primary"
             accent="cyan"
           />
           <StatCard
-            icon={Users}
-            title="Active members"
-            value={data?.atRiskMembers ? totalMembers - data.atRiskMembers.count : totalMembers}
-            hint="Current memberships active"
-            isLoading={briefing.isLoading || statusBreakdown.isLoading}
-            isError={briefing.isError}
-            tone="primary"
-            accent="indigo"
+            icon={HandCoins}
+            title="Collection"
+            value={todayCollection.data ? displayCurrencyAmount(todayCollectionRow?.grossRevenue ?? "0.00", todayCollectionRow?.currency ?? currencyCode) : undefined}
+            hint={todayCollectionRow && todayCollectionRow.paymentCount > 0
+              ? `Across ${todayCollectionRow.paymentCount} payments`
+              : "No collections yet"}
+            isLoading={todayCollection.isLoading}
+            isError={todayCollection.isError}
+            tone="success"
+            accent="emerald"
           />
-          <StatCard
-            icon={UserPlus}
-            title="At-risk members"
-            value={data?.atRiskMembers.count}
-            hint="No visit in 14 days"
-            isLoading={briefing.isLoading}
-            isError={briefing.isError}
-            tone="warning"
-            accent="amber"
-          />
-          <StatCard
-            icon={AlertTriangle}
-            title="Expiring soon"
-            value={data?.expiringSoon?.count}
-            hint={`Within ${data?.expiringSoon?.withinDays ?? 7} days`}
-            isLoading={briefing.isLoading}
-            isError={briefing.isError}
-            tone="warning"
-            accent="orange"
-          />
+          {canReadMembers && (
+            <StatCard
+              icon={UserPlus}
+              title="New Members"
+              value={newMembers.data?.total}
+              hint="Joined today"
+              isLoading={newMembers.isLoading}
+              isError={newMembers.isError}
+              tone="primary"
+              accent="violet"
+            />
+          )}
+          {canReadMemberships && (
+            <StatCard
+              icon={RefreshCw}
+              title="Renewals"
+              value={todayMemberships.data ? renewalsToday : undefined}
+              hint={todayMemberships.data && todayMemberships.data.total > 0
+                ? `Of ${todayMemberships.data.total} started today`
+                : "None renewed today"}
+              isLoading={todayMemberships.isLoading}
+              isError={todayMemberships.isError}
+              tone="primary"
+              accent="amber"
+            />
+          )}
+          {canReadLeads && (
+            <StatCard
+              icon={Megaphone}
+              title="Leads"
+              value={todayLeads.data?.total}
+              hint="New enquiries today"
+              isLoading={todayLeads.isLoading}
+              isError={todayLeads.isError}
+              tone="primary"
+              accent="rose"
+            />
+          )}
+          {canReadWorkouts && (
+            <StatCard
+              icon={Dumbbell}
+              title="PT Sessions"
+              value={todaySessions.data?.length}
+              hint="On today's floor"
+              isLoading={todaySessions.isLoading}
+              isError={todaySessions.isError}
+              tone="primary"
+              accent="blue"
+            />
+          )}
         </BentoGrid>
 
         <SectionHeader
