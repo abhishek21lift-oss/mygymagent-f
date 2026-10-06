@@ -97,4 +97,33 @@ describe("AI Infrastructure page", () => {
     const paths = mockGet.mock.calls.map((c) => String(c[0]));
     expect(paths.join("\n")).not.toMatch(/reveal|export|api-key\/regenerate|download|restore|premium|conversations/);
   });
+
+  it("explains an offline gateway with actionable checks instead of a JSON dump", async () => {
+    const base = mockGet.getMockImplementation()!;
+    mockGet.mockImplementation(async (path: string, options?: unknown) => {
+      if (path === "/admin/ai/gateway") {
+        return {
+          state: "Offline",
+          live: { status: "unavailable", reason: "FreeLLMAPI is unreachable" },
+          ready: { status: "unavailable", reason: "FreeLLMAPI is unreachable" },
+          ping: null,
+          providers: null,
+          diagnosis: {
+            credentialsConfigured: true,
+            loopbackBaseUrl: true,
+            providersError: "FreeLLMAPI is unreachable",
+          },
+        };
+      }
+      return base(path, options);
+    });
+    renderPage();
+    expect(await screen.findByText("Gateway is offline")).toBeInTheDocument();
+    expect(screen.getByText("What to check")).toBeInTheDocument();
+    expect(screen.getByText(/FREELLM_BASE_URL is still the localhost default/)).toBeInTheDocument();
+    // The raw payload is folded away, not the first thing on the page.
+    for (const summary of screen.getAllByText("Raw response")) {
+      expect(summary.closest("details")).not.toHaveAttribute("open");
+    }
+  });
 });

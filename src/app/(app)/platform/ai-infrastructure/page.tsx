@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Activity, Brain, Database, KeyRound, Network, ShieldAlert, Sparkles, Workflow } from "lucide-react";
+import { Activity, Brain, CheckCircle2, Database, KeyRound, Network, PlugZap, ShieldAlert, Sparkles, Workflow, XCircle, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { ApiError } from "@/lib/api/client";
@@ -48,20 +48,161 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DataView, RawDisclosure, StatusPill } from "@/components/ai-infra/data-view";
+import { cn } from "@/lib/utils";
 
 const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : "Request failed");
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <Card className="glass rounded-3xl">
-      <CardHeader className="pb-2"><CardTitle className="text-base">{title}</CardTitle></CardHeader>
-      <CardContent className="space-y-3">{children}</CardContent>
+    <Card className="min-w-0 rounded-[1.75rem]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{title}</CardTitle>
+        {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
+      </CardHeader>
+      <CardContent className="space-y-4">{children}</CardContent>
     </Card>
   );
 }
 
-function Json({ value }: { value: unknown }) {
-  return <pre className="max-h-72 overflow-auto rounded-2xl bg-black/5 p-3 text-xs dark:bg-white/5">{JSON.stringify(value, null, 2)}</pre>;
+type GatewayPayload = {
+  state?: string;
+  live?: { status?: string; reason?: string } | null;
+  ready?: { status?: string; reason?: string } | null;
+  ping?: unknown;
+  providers?: unknown;
+  diagnosis?: { credentialsConfigured?: boolean; loopbackBaseUrl?: boolean; providersError?: string | null };
+};
+
+const STATE_TONE: Record<string, "success" | "warning" | "danger" | "neutral"> = {
+  Healthy: "success",
+  Warning: "warning",
+  Critical: "danger",
+  Offline: "danger",
+};
+
+/** One probe: what it checks, and whether it passed. */
+function Probe({ icon: Icon, label, ok, detail }: { icon: LucideIcon; label: string; ok: boolean | null; detail: string }) {
+  return (
+    <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-border/60 bg-card/70 p-3.5">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-xl text-white",
+          ok === null ? "bg-muted-foreground/60" : ok ? "bg-gradient-to-br from-emerald-500 to-teal-600" : "bg-gradient-to-br from-rose-500 to-orange-500",
+        )}
+      >
+        <Icon className="size-4.5" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground [overflow-wrap:anywhere]">{detail}</p>
+      </div>
+    </div>
+  );
+}
+
+/** A diagnosis line: a check the operator can act on. */
+function Check({ ok, title, fix }: { ok: boolean; title: string; fix: string }) {
+  return (
+    <li className="flex items-start gap-3">
+      {ok ? (
+        <CheckCircle2 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success" />
+      ) : (
+        <XCircle aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-destructive" />
+      )}
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-foreground">{title}</p>
+        {!ok ? <p className="text-xs text-muted-foreground">{fix}</p> : null}
+      </div>
+    </li>
+  );
+}
+
+function GatewayPanel({ data }: { data: GatewayPayload }) {
+  const state = data.state ?? "Unknown";
+  const liveOk = data.live?.status === "ok";
+  const readyOk = data.ready?.status === "ok";
+  const providerCount = Array.isArray(data.providers) ? data.providers.length : null;
+  const d = data.diagnosis;
+  const headline =
+    state === "Healthy"
+      ? "Gateway is healthy"
+      : state === "Warning"
+        ? "Gateway is up, but a provider is rate limited"
+        : state === "Critical"
+          ? "Gateway is running but not ready to serve"
+          : state === "Offline"
+            ? "Gateway is offline"
+            : "Gateway state unknown";
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "flex size-12 items-center justify-center rounded-2xl text-white shadow-[var(--shadow-card)]",
+            STATE_TONE[state] === "success"
+              ? "bg-gradient-to-br from-emerald-500 to-teal-600"
+              : STATE_TONE[state] === "warning"
+                ? "bg-gradient-to-br from-amber-500 to-orange-500"
+                : STATE_TONE[state] === "danger"
+                  ? "bg-gradient-to-br from-rose-500 to-orange-500"
+                  : "bg-muted-foreground/60",
+          )}
+        >
+          <PlugZap className="size-6" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-lg font-bold tracking-tight text-foreground">{headline}</p>
+          <p className="text-xs text-muted-foreground">MyGymAgent probes FreeLLMAPI server-side; this browser never contacts it.</p>
+        </div>
+      </div>
+
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+        <Probe icon={Activity} label="Liveness" ok={liveOk} detail={liveOk ? "Process is running" : data.live?.reason ?? "No answer"} />
+        <Probe icon={CheckCircle2} label="Readiness" ok={readyOk} detail={readyOk ? "Ready to serve" : data.ready?.reason ?? "Not ready"} />
+        <Probe icon={Network} label="Ping" ok={data.ping ? true : liveOk ? null : false} detail={data.ping ? "Responding" : "No reply"} />
+        <Probe
+          icon={KeyRound}
+          label="Providers"
+          ok={providerCount === null ? false : providerCount > 0}
+          detail={providerCount === null ? d?.providersError ?? "Could not list providers" : `${providerCount} configured`}
+        />
+      </div>
+
+      {state !== "Healthy" && d ? (
+        <div className="rounded-2xl border border-warning/40 bg-warning/8 p-4">
+          <p className="mb-3 text-sm font-bold text-foreground">What to check</p>
+          <ul className="space-y-3">
+            <Check
+              ok={Boolean(d.credentialsConfigured)}
+              title="Admin credentials are set"
+              fix="Set FREELLM_EMAIL and FREELLM_PASSWORD on the API service (Render → Environment), then redeploy."
+            />
+            <Check
+              ok={!d.loopbackBaseUrl}
+              title="Base URL points at the FreeLLMAPI service"
+              fix="FREELLM_BASE_URL is still the localhost default. Set it to the URL where FreeLLMAPI is deployed."
+            />
+            <Check
+              ok={liveOk}
+              title="FreeLLMAPI answers health probes"
+              fix={`The API could not reach it (${data.live?.reason ?? "no answer"}). Confirm the service is running and reachable from the API's network.`}
+            />
+            <Check
+              ok={!d.providersError}
+              title="Signed-in requests succeed"
+              fix={d.providersError ?? "Signed-in requests are failing."}
+            />
+          </ul>
+        </div>
+      ) : null}
+
+      <RawDisclosure value={data} />
+    </div>
+  );
 }
 
 export default function AiInfrastructurePage() {
@@ -122,18 +263,17 @@ export default function AiInfrastructurePage() {
   }
 
   const state = (gateway.data as { state?: string } | undefined)?.state ?? "Unknown";
-  const stateColor = state === "Healthy" ? "default" : state === "Warning" ? "secondary" : "destructive";
 
   const mutate = async (fn: () => Promise<unknown>, ok: string) => {
     try { await fn(); toast.success(ok); } catch (e) { toast.error(errMsg(e)); }
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <PageHero icon={Sparkles} title="AI Infrastructure" description="Secure operational control plane for FreeLLMAPI. Browser talks only to MyGymAgent — never to FreeLLMAPI directly." eyebrow="Platform" actions={<Badge variant={stateColor as never}>{state}</Badge>} />
+    <div className="flex w-full flex-col gap-6 pb-10">
+      <PageHero icon={Sparkles} title="AI Infrastructure" description="Control plane for FreeLLMAPI. Your browser only talks to MyGymAgent — never to FreeLLMAPI directly." eyebrow="Platform" actions={<StatusPill value={state} tone={STATE_TONE[state] ?? "neutral"} />} />
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="flex flex-wrap">
+        <TabsList className="flex h-auto w-full justify-start overflow-x-auto [scrollbar-width:none]">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="keys">Providers & Keys</TabsTrigger>
           <TabsTrigger value="models">Models</TabsTrigger>
@@ -149,12 +289,12 @@ export default function AiInfrastructurePage() {
         <TabsContent value="overview" className="space-y-4">
           <Section title="Gateway status">
             <DataState isLoading={gateway.isLoading} isError={gateway.isError} onRetry={() => gateway.refetch()} isEmpty={!gateway.data} emptyTitle="No gateway data" emptyDescription="FreeLLMAPI may be unconfigured.">
-              <Json value={gateway.data} />
+              {gateway.data ? <GatewayPanel data={gateway.data as GatewayPayload} /> : null}
             </DataState>
           </Section>
-          <Section title="Incident panel">
+          <Section title="Incident panel" description="Provider health as FreeLLMAPI reports it.">
             <DataState isLoading={health.isLoading} isError={health.isError} onRetry={() => health.refetch()} isEmpty={!health.data} emptyTitle="No health data" emptyDescription="Providers report through /api/health.">
-              <Json value={health.data} />
+              <DataView value={health.data} />
             </DataState>
           </Section>
         </TabsContent>
@@ -162,12 +302,32 @@ export default function AiInfrastructurePage() {
         <TabsContent value="keys" className="space-y-4">
           <Section title="Providers">
             <DataState isLoading={providers.isLoading} isError={providers.isError} onRetry={() => providers.refetch()} isEmpty={Array.isArray(providers.data) && providers.data.length === 0} emptyTitle="No providers" emptyDescription="Add a provider key below.">
-              <Json value={providers.data} />
+              <DataView value={providers.data} />
             </DataState>
           </Section>
           <Section title="API keys (masked only — reveal/export unsupported in V1)">
             <DataState isLoading={keys.isLoading} isError={keys.isError} onRetry={() => keys.refetch()} isEmpty={Array.isArray(keys.data) && keys.data.length === 0} emptyTitle="No keys" emptyDescription="No provider keys configured.">
-              <Json value={keys.data} />
+              <ul className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/70">
+                {Array.isArray(keys.data) && keys.data.slice(0, 25).map((k) => {
+                  const row = k as Record<string, unknown>;
+                  const enabled = Boolean((row as { enabled?: boolean }).enabled);
+                  return (
+                    <li key={String(row.id)} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3.5 py-3 text-sm">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-foreground">{String(row.platform ?? "?")} <span className="font-normal text-muted-foreground">#{String(row.id ?? "?")}</span></p>
+                        <p className="truncate font-mono text-xs text-muted-foreground">{String((row as { maskedKey?: string }).maskedKey ?? (row as { label?: string }).label ?? "")}</p>
+                      </div>
+                      <StatusPill value={enabled ? "Enabled" : "Disabled"} tone={enabled ? "success" : "neutral"} />
+                      <div className="flex flex-wrap gap-1.5">
+                        <Button size="sm" variant="outline" onClick={() => mutate(() => checkKey.mutateAsync(String(row.id)), "Probe sent")}>Check</Button>
+                        <Button size="sm" variant="outline" onClick={() => mutate(() => patchKey.mutateAsync({ id: String(row.id), body: { enabled: !enabled } }), "Key toggled")}>{enabled ? "Disable" : "Enable"}</Button>
+                        <Button size="sm" variant="outline" onClick={() => mutate(() => clearCd.mutateAsync(String(row.id)), "Cooldowns cleared")}>Clear cooldowns</Button>
+                        <Button size="sm" variant="destructive" onClick={() => { if (window.confirm(`Delete key ${String(row.id)}? This is destructive.`)) mutate(() => deleteKey.mutateAsync(String(row.id)), "Key deleted"); }}>Delete</Button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             </DataState>
             <div className="flex flex-wrap gap-2">
               <Input placeholder="platform (e.g. openai)" value={newPlatform} onChange={(e) => setNewPlatform(e.target.value)} className="max-w-52" />
@@ -175,19 +335,6 @@ export default function AiInfrastructurePage() {
               <Button disabled={!newPlatform.trim() || createKey.isPending} onClick={() => mutate(() => createKey.mutateAsync({ platform: newPlatform.trim(), label: newLabel.trim() || undefined }), "Key created")}>Add key</Button>
               <Button variant="outline" disabled={checkAll.isPending} onClick={() => mutate(() => checkAll.mutateAsync(), "Health re-check queued")}><Activity className="size-4" />Check all</Button>
             </div>
-            {Array.isArray(keys.data) && keys.data.slice(0, 10).map((k) => {
-              const row = k as Record<string, unknown>;
-              return (
-                <div key={String(row.id)} className="flex flex-wrap items-center gap-2 rounded-2xl border p-2 text-sm">
-                  <Badge variant="outline">{String(row.platform ?? "?")} #{String(row.id ?? "?")}</Badge>
-                  <span className="text-muted-foreground">{String((row as { maskedKey?: string }).maskedKey ?? (row as { label?: string }).label ?? "")}</span>
-                  <Button size="sm" variant="outline" onClick={() => mutate(() => checkKey.mutateAsync(String(row.id)), "Probe sent")}>Check</Button>
-                  <Button size="sm" variant="outline" onClick={() => mutate(() => patchKey.mutateAsync({ id: String(row.id), body: { enabled: !(row as { enabled?: boolean }).enabled } }), "Key toggled")}>{(row as { enabled?: boolean }).enabled ? "Disable" : "Enable"}</Button>
-                  <Button size="sm" variant="outline" onClick={() => mutate(() => clearCd.mutateAsync(String(row.id)), "Cooldowns cleared")}>Clear cooldowns</Button>
-                  <Button size="sm" variant="destructive" onClick={() => { if (window.confirm(`Delete key ${String(row.id)}? This is destructive.`)) mutate(() => deleteKey.mutateAsync(String(row.id)), "Key deleted"); }}>Delete</Button>
-                </div>
-              );
-            })}
             <p className="text-xs text-muted-foreground">Raw key reveal, export, and preview are intentionally unavailable in V1 (PLATFORM_OWNER future capability).</p>
           </Section>
         </TabsContent>
@@ -195,15 +342,22 @@ export default function AiInfrastructurePage() {
         <TabsContent value="models" className="space-y-4">
           <Section title="Models">
             <DataState isLoading={models.isLoading} isError={models.isError} onRetry={() => models.refetch()} isEmpty={Array.isArray(models.data) && models.data.length === 0} emptyTitle="No models" emptyDescription="No models registered in FreeLLMAPI.">
-              <div className="space-y-2">
-                {Array.isArray(models.data) && (models.data as Record<string, unknown>[]).slice(0, 25).map((m) => (
-                  <div key={String(m.id)} className="flex flex-wrap items-center gap-2 rounded-2xl border p-2 text-sm">
-                    <Badge><Brain className="size-3" />{String(m.modelId ?? m.id)}</Badge>
-                    <span className="text-muted-foreground">{String(m.displayName ?? m.platform ?? "")}</span>
-                    <Button size="sm" variant="outline" onClick={() => mutate(() => patchModel.mutateAsync({ id: String(m.id), body: { enabled: !(m as { enabled?: boolean }).enabled } }), "Model updated")}>{(m as { enabled?: boolean }).enabled ? "Disable" : "Enable"}</Button>
-                  </div>
-                ))}
-              </div>
+              <ul className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/70">
+                {Array.isArray(models.data) && (models.data as Record<string, unknown>[]).slice(0, 25).map((m) => {
+                  const enabled = Boolean((m as { enabled?: boolean }).enabled);
+                  return (
+                    <li key={String(m.id)} className="flex flex-wrap items-center gap-3 px-3.5 py-3 text-sm">
+                      <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white"><Brain className="size-4" /></span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-foreground">{String(m.modelId ?? m.id)}</p>
+                        <p className="truncate text-xs text-muted-foreground">{String(m.displayName ?? m.platform ?? "")}</p>
+                      </div>
+                      <StatusPill value={enabled ? "Enabled" : "Disabled"} tone={enabled ? "success" : "neutral"} />
+                      <Button size="sm" variant="outline" onClick={() => mutate(() => patchModel.mutateAsync({ id: String(m.id), body: { enabled: !enabled } }), "Model updated")}>{enabled ? "Disable" : "Enable"}</Button>
+                    </li>
+                  );
+                })}
+              </ul>
             </DataState>
           </Section>
         </TabsContent>
@@ -211,7 +365,7 @@ export default function AiInfrastructurePage() {
         <TabsContent value="routing" className="space-y-4">
           <Section title="Routing (only strategies FreeLLMAPI supports)">
             <DataState isLoading={routing.isLoading} isError={routing.isError} onRetry={() => routing.refetch()} isEmpty={!routing.data} emptyTitle="No routing config" emptyDescription="FreeLLMAPI did not return routing.">
-              <Json value={routing.data} />
+              <DataView value={routing.data} />
             </DataState>
             <div className="flex flex-wrap gap-2">
               {(["priority", "balanced", "smartest", "fastest", "reliable"] as const).map((s) => (
@@ -221,7 +375,7 @@ export default function AiInfrastructurePage() {
           </Section>
           <Section title="Fallback chain">
             <DataState isLoading={fallback.isLoading} isError={fallback.isError} onRetry={() => fallback.refetch()} isEmpty={Array.isArray(fallback.data) && fallback.data.length === 0} emptyTitle="Empty chain" emptyDescription="No fallback rows.">
-              <Json value={Array.isArray(fallback.data) ? (fallback.data as unknown[]).slice(0, 25) : fallback.data} />
+              <DataView value={Array.isArray(fallback.data) ? (fallback.data as unknown[]).slice(0, 25) : fallback.data} />
             </DataState>
             <p className="text-xs text-muted-foreground">Chain edits are validated server-side (duplicate modelDbId rejected, max 500 rows). Full reorder UI is a future enhancement — current rows shown read-only with enable/disable via Models.</p>
             <Button size="sm" variant="outline" disabled={updateFallback.isPending} onClick={() => toast.message("Reorder editor not in V1 — chain shown read-only to prevent invalid chains.")}><Workflow className="size-4" />Edit chain (future)</Button>
@@ -231,12 +385,12 @@ export default function AiInfrastructurePage() {
         <TabsContent value="health" className="space-y-4">
           <Section title="Health probes">
             <DataState isLoading={health.isLoading} isError={health.isError} onRetry={() => health.refetch()} isEmpty={!health.data} emptyTitle="No health data" emptyDescription="Nothing to report.">
-              <Json value={health.data} />
+              <DataView value={health.data} />
             </DataState>
           </Section>
           <Section title="Quota / rate limits (as reported — never fabricated)">
             <DataState isLoading={quota.isLoading} isError={quota.isError} onRetry={() => quota.refetch()} isEmpty={!quota.data} emptyTitle="No quota data" emptyDescription="FreeLLMAPI exposes only counters it tracks.">
-              <Json value={quota.data} />
+              <DataView value={quota.data} />
             </DataState>
           </Section>
         </TabsContent>
@@ -244,17 +398,17 @@ export default function AiInfrastructurePage() {
         <TabsContent value="analytics" className="space-y-4">
           <Section title="Summary (7d)">
             <DataState isLoading={summary.isLoading} isError={summary.isError} onRetry={() => summary.refetch()} isEmpty={!summary.data} emptyTitle="No analytics" emptyDescription="No traffic in range.">
-              <Json value={summary.data} />
+              <DataView value={summary.data} />
             </DataState>
           </Section>
           <Section title="By model / platform / timeline">
             <DataState isLoading={byModel.isLoading || byPlatform.isLoading || timeline.isLoading} isError={byModel.isError || byPlatform.isError || timeline.isError} onRetry={() => { byModel.refetch(); byPlatform.refetch(); timeline.refetch(); }} isEmpty={false} emptyTitle="—" emptyDescription="">
-              <Json value={{ byModel: byModel.data, byPlatform: byPlatform.data, timeline: timeline.data }} />
+              <DataView value={{ byModel: byModel.data, byPlatform: byPlatform.data, timeline: timeline.data }} />
             </DataState>
           </Section>
           <Section title="Request rows (sanitized: no clientIp/UA, truncated errors)">
             <DataState isLoading={requests.isLoading} isError={requests.isError} onRetry={() => requests.refetch()} isEmpty={(requests.data?.rows?.length ?? 0) === 0} emptyTitle="No requests" emptyDescription="No requests in the last 24h.">
-              <Json value={requests.data} />
+              <DataView value={requests.data} />
             </DataState>
           </Section>
         </TabsContent>
@@ -262,7 +416,7 @@ export default function AiInfrastructurePage() {
         <TabsContent value="logs" className="space-y-4">
           <Section title="Server logs (cursor view — clear unsupported in V1)">
             <DataState isLoading={logs.isLoading} isError={logs.isError} onRetry={() => logs.refetch()} isEmpty={!logs.data} emptyTitle="No logs" emptyDescription="No server log entries.">
-              <Json value={logs.data} />
+              <DataView value={logs.data} />
             </DataState>
           </Section>
         </TabsContent>
@@ -270,7 +424,7 @@ export default function AiInfrastructurePage() {
         <TabsContent value="settings" className="space-y-4">
           <Section title="Settings (allowlisted sections only)">
             <DataState isLoading={settings.isLoading} isError={settings.isError} onRetry={() => settings.refetch()} isEmpty={!settings.data} emptyTitle="No settings" emptyDescription="FreeLLMAPI returned nothing.">
-              <Json value={settings.data} />
+              <DataView value={settings.data} />
             </DataState>
             <p className="text-xs text-muted-foreground">Writable in V1: compression, fusion, anthropic-map, gemini-map, agent-compatibility, guardrails, headroom, output-limit, unify, update-check. Secrets (api-key, proxy token, url-tokens) are never writable here.</p>
             <div className="flex flex-wrap gap-2">
@@ -283,7 +437,7 @@ export default function AiInfrastructurePage() {
         <TabsContent value="clients" className="space-y-4">
           <Section title="Client profiles (show-once secrets)">
             <DataState isLoading={profiles.isLoading} isError={profiles.isError} onRetry={() => profiles.refetch()} isEmpty={Array.isArray(profiles.data) && profiles.data.length === 0} emptyTitle="No client profiles" emptyDescription="Create one for a scoped integration key.">
-              <Json value={Array.isArray(profiles.data) ? (profiles.data as Record<string, unknown>[]).map((row) => { const { key: _omit, ...r } = row; void _omit; return r; }) : profiles.data} />
+              <DataView value={Array.isArray(profiles.data) ? (profiles.data as Record<string, unknown>[]).map((row) => { const { key: _omit, ...r } = row; void _omit; return r; }) : profiles.data} />
             </DataState>
             {onceKey && (
               <div className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm dark:bg-amber-950">
@@ -317,7 +471,7 @@ export default function AiInfrastructurePage() {
           </Section>
           <Section title="Embeddings / media usage">
             <DataState isLoading={embeddings.isLoading || media.isLoading} isError={embeddings.isError || media.isError} onRetry={() => { embeddings.refetch(); media.refetch(); }} isEmpty={false} emptyTitle="—" emptyDescription="">
-              <Json value={{ embeddings: embeddings.data, media: media.data }} />
+              <DataView value={{ embeddings: embeddings.data, media: media.data }} />
             </DataState>
           </Section>
         </TabsContent>
@@ -325,7 +479,7 @@ export default function AiInfrastructurePage() {
         <TabsContent value="backups" className="space-y-4">
           <Section title="Backups (V1: list + create only — download/restore unsupported)">
             <DataState isLoading={backups.isLoading} isError={backups.isError} onRetry={() => backups.refetch()} isEmpty={!backups.data} emptyTitle="No backups" emptyDescription="No backups yet.">
-              <Json value={backups.data} />
+              <DataView value={backups.data} />
             </DataState>
             <Button disabled={createBackup.isPending} onClick={() => { if (window.confirm("Create a FreeLLMAPI backup now?")) mutate(() => createBackup.mutateAsync({}), "Backup created"); }}><Database className="size-4" />Create backup</Button>
             <p className="text-xs text-muted-foreground">Download and restore are intentionally unavailable in V1 (PLATFORM_OWNER future capability with audit).</p>
