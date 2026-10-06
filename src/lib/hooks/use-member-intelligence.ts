@@ -43,6 +43,8 @@ export interface RevenueAtRisk {
   atRiskMRR: number
   atRiskPercentage: number
   bySegment: { riskLevel: RiskLevel; mrr: number; memberCount: number }[]
+  byCurrency: { currency: string; totalMRR: number; atRiskMRR: number }[]
+  mixed: boolean
 }
 
 export interface BranchRiskSummary {
@@ -349,7 +351,10 @@ export function useDeleteSegment() {
  */
 export function useSegmentInsights() {
   return useMutation({
-    mutationFn: (input: { segmentId?: string; rules?: unknown }) =>
-      api.post<{ summary?: string; [k: string]: unknown }>("/analytics/segments/insights", input),
+    mutationFn: (input: { segmentName: string; memberIds: string[] }) =>
+      api.post<{ summary?: string; detail?: string; confidence?: string; fallback?: boolean; [k: string]: unknown }>(
+        "/analytics/segments/insights",
+        input,
+      ),
   })
 }

@@ -447,3 +447,115 @@ export function usePtAdherence(
     enabled: Boolean(memberId) && enabled,
   })
 }
+
+export type CapacityBand =
+  | "UNDERUTILIZED"
+  | "HEALTHY"
+  | "HIGH_DEMAND"
+  | "OVERBOOKED_RISK"
+  | "UNKNOWN"
+
+export interface ClassCapacitySession {
+  sessionId: string
+  programName: string
+  startTime: string
+  capacity: number | null
+  booked: number
+  waitlisted: number
+  utilizationPct: number | null
+  band: CapacityBand
+}
+
+export interface ProgramDemand {
+  programId: string
+  programName: string
+  avgUtilizationPct: number | null
+  sessionsCount: number
+}
+
+export interface ClassCapacity {
+  upcoming: ClassCapacitySession[]
+  demand: ProgramDemand[]
+}
+
+export interface SchedulingConflict {
+  type: "INSTRUCTOR_DOUBLE_BOOKING"
+  userId: string
+  name: string
+  items: {
+    kind: "CLASS" | "PT" | "APPOINTMENT"
+    id: string
+    title: string
+    startTime: string
+    endTime: string
+  }[]
+}
+
+export type OperationsHealthStatus =
+  | "healthy"
+  | "stable"
+  | "needs-attention"
+  | "critical"
+  | "unknown"
+
+export interface OperationsComponent {
+  key: string
+  label: string
+  score: number | null
+  weight: number
+  value: string
+  explanation: string
+  source: string
+}
+
+export interface OperationsHealth {
+  score: number | null
+  status: OperationsHealthStatus
+  opportunity: string | null
+  components: OperationsComponent[]
+  staffAway: { name: string; type: string }[]
+  branchId: string | null
+  computedAt: string
+}
+
+export function useOperationsHealth(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "operations-health", branchId],
+    queryFn: () =>
+      api.get<OperationsHealth>("/analytics/operations-health", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}
+
+export function useClassCapacity(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "class-capacity", branchId],
+    queryFn: () =>
+      api.get<ClassCapacity>("/analytics/classes/capacity", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}
+
+export function useSchedulingConflicts(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["analytics", "scheduling-conflicts", branchId],
+    queryFn: () =>
+      api.get<SchedulingConflict[]>("/analytics/scheduling/conflicts", {
+        query: { branchId },
+      }),
+    enabled,
+  })
+}

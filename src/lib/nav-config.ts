@@ -124,6 +124,7 @@ export const primaryNav: NavItem[] = [
   ] },
 
   { title: "Operations", href: "/attendance", icon: Store, hue: "cyan", children: [
+    { title: "Overview", href: "/operations", icon: Gauge, permission: "reports.view" },
     { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: ["attendance.read", "attendance.read_assigned"] },
     { title: "Check-in kiosk", href: "/kiosk", icon: MonitorSmartphone, permission: ["kiosk.manage", "attendance.create"], external: true },
     { title: "Inventory", href: "/inventory", icon: Package, permission: "inventory.read" },
@@ -155,6 +156,7 @@ export const secondaryNav: NavItem[] = [
   { title: "AI agent", href: "/ai", icon: Sparkles, accent: "ai", children: [
     { title: "Ask the agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
     { title: "Action queue", href: "/ai-actions", icon: CheckSquare, permission: "ai.generate", accent: "ai" },
+    { title: "COO briefing", href: "/coo", icon: Gauge, permission: "ai.generate", accent: "ai" },
   ] },
   { title: "Search", href: "/search", icon: Search, permission: "search.read" },
 ];
