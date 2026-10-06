@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { AlertTriangle, Sparkles } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { BentoCard, BentoGrid, SectionHeader } from "@/components/shared/bento";
 import { StatCard } from "@/components/shared/stat-card";
@@ -57,9 +56,10 @@ function bandGradient(score: number): string {
 }
 
 /**
- * Gym Health hero: brand, score ring, status, one-line read-out and the
- * two CTAs. Compact and centered by construction — the same noir banner
- * language as PageHero, composed for a metric instead of a title.
+ * Gym Health hero: the gym's name in big type, centered, with the
+ * health ring beneath it. Compact and centered by construction —
+ * the same noir banner language as PageHero, composed for a metric
+ * instead of a title.
  */
 export function GymHealthHero({
   gymName,
@@ -67,18 +67,12 @@ export function GymHealthHero({
   isLoading,
   isError,
   onRetry,
-  canAskAi,
-  canReviewActions,
-  pendingActions,
 }: {
   gymName: string;
   health: GymHealth | undefined;
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
-  canAskAi: boolean;
-  canReviewActions: boolean;
-  pendingActions: number;
 }) {
   const meta = STATUS_META[health?.status ?? "unknown"];
 
@@ -89,9 +83,8 @@ export function GymHealthHero({
       className="hero-banner hero-centered -mx-4 mb-5 sm:-mx-5 lg:-mx-8"
     >
       <div className="hero-banner-body relative">
-        <p className="hero-banner-eyebrow">{gymName}</p>
-        <h1 id="dashboard-title" className="sr-only">
-          Gym Health
+        <h1 id="dashboard-title" className="hero-banner-title">
+          {gymName}
         </h1>
         {isError && !isLoading ? (
           <div className="flex flex-col items-center gap-2">
@@ -107,42 +100,7 @@ export function GymHealthHero({
             </button>
           </div>
         ) : (
-          <div className="flex w-full items-end justify-between gap-3">
-            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-2">
-              {canAskAi && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="hero-banner-btn hero-banner-btn-ghost"
-                >
-                  <Link href="/ai">
-                    <Sparkles className="size-4" aria-hidden="true" />
-                    Ask AI
-                  </Link>
-                </Button>
-              )}
-              {canReviewActions && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="hero-banner-btn hero-banner-btn-ghost"
-                >
-                  <Link href="/ai-actions">
-                    View Actions
-                    {pendingActions > 0 && (
-                      <span
-                        aria-label={`${pendingActions} pending`}
-                        className="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold tabular-nums"
-                        style={{ color: "#0b0b0d" }}
-                      >
-                        {pendingActions}
-                      </span>
-                    )}
-                  </Link>
-                </Button>
-              )}
-            </div>
-            <div className="shrink-0">
+          <div className="shrink-0">
               {isLoading ? (
                 <div
                   className="rounded-full bg-white/20 animate-pulse"
@@ -164,7 +122,6 @@ export function GymHealthHero({
                 />
               )}
             </div>
-          </div>
         )}
       </div>
     </section>
@@ -220,9 +177,9 @@ function ComponentRow({ component }: { component: HealthComponent }) {
 }
 
 /**
- * "Why is my score X?" breakdown plus the revenue-at-risk strip, both from
- * the same gym-health request. Nothing here is computed in the browser
- * beyond formatting — the backend owns every number.
+ * "Why is my score X?" breakdown, from the same gym-health request.
+ * Nothing here is computed in the browser beyond formatting — the
+ * backend owns every number.
  */
 export function GymHealthPanels({
   health,
@@ -270,12 +227,8 @@ export function GymHealthPanels({
     );
   }
 
-  const segments = (health.revenueAtRisk.bySegment ?? []).filter(
-    (segment) => segment.mrr > 0,
-  );
   return (
-    <>
-      <section aria-label="Why this score">
+    <section aria-label="Why this score">
         <SectionHeader
           title="Why this score"
           action={
@@ -310,52 +263,82 @@ export function GymHealthPanels({
           )}
         </BentoCard>
       </section>
+  );
+}
 
+/**
+ * Revenue at risk strip — extracted from GymHealthPanels so the
+ * dashboard can slot it directly under Finance while the score
+ * breakdown stays lower on the page.
+ */
+export function GymHealthRevenueRisk({
+  health,
+  isLoading,
+}: {
+  health: GymHealth | undefined;
+  isLoading: boolean;
+}) {
+  if (isLoading) {
+    return (
       <section aria-label="Revenue at risk">
         <SectionHeader title="Revenue at risk" />
         <BentoGrid columns={2} label="Revenue at risk">
-          <StatCard
-            icon={AlertTriangle}
-            title="At-risk MRR"
-            value={displayCurrencyAmount(health.revenueAtRisk.atRiskMRR)}
-            hint={
-              health.revenueAtRisk.mixed
-                ? "Mixed currencies — total indicative"
-                : `${Math.round(health.revenueAtRisk.atRiskPercentage)}% of ${displayCurrencyAmount(health.revenueAtRisk.totalMRR)} MRR`
-            }
-            isLoading={false}
-            tone="primary"
-            accent="rose"
-          />
-          <BentoCard>
-            {segments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No membership value sits on at-risk accounts right now.
-              </p>
-            ) : (
-              <ul className="flex flex-col gap-2.5">
-                {segments.map((segment) => (
-                  <li
-                    key={segment.riskLevel}
-                    className="flex items-baseline justify-between gap-2 text-sm"
-                  >
-                    <span className="font-semibold capitalize">
-                      {segment.riskLevel.toLowerCase()}
-                      <span className="ml-1.5 font-normal tabular-nums text-muted-foreground">
-                        {segment.memberCount} member
-                        {segment.memberCount === 1 ? "" : "s"}
-                      </span>
-                    </span>
-                    <span className="shrink-0 font-bold tabular-nums">
-                      {displayCurrencyAmount(segment.mrr)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </BentoCard>
+          <Skeleton className="h-24 w-full rounded-xl" aria-label="Loading revenue at risk" />
+          <Skeleton className="h-24 w-full rounded-xl" aria-hidden="true" />
         </BentoGrid>
       </section>
-    </>
+    );
+  }
+  if (!health) return null;
+
+  const segments = (health.revenueAtRisk.bySegment ?? []).filter(
+    (segment) => segment.mrr > 0,
+  );
+  return (
+    <section aria-label="Revenue at risk">
+      <SectionHeader title="Revenue at risk" />
+      <BentoGrid columns={2} label="Revenue at risk">
+        <StatCard
+          icon={AlertTriangle}
+          title="At-risk MRR"
+          value={displayCurrencyAmount(health.revenueAtRisk.atRiskMRR)}
+          hint={
+            health.revenueAtRisk.mixed
+              ? "Mixed currencies — total indicative"
+              : `${Math.round(health.revenueAtRisk.atRiskPercentage)}% of ${displayCurrencyAmount(health.revenueAtRisk.totalMRR)} MRR`
+          }
+          isLoading={false}
+          tone="primary"
+          accent="rose"
+        />
+        <BentoCard>
+          {segments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No membership value sits on at-risk accounts right now.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2.5">
+              {segments.map((segment) => (
+                <li
+                  key={segment.riskLevel}
+                  className="flex items-baseline justify-between gap-2 text-sm"
+                >
+                  <span className="font-semibold capitalize">
+                    {segment.riskLevel.toLowerCase()}
+                    <span className="ml-1.5 font-normal tabular-nums text-muted-foreground">
+                      {segment.memberCount} member
+                      {segment.memberCount === 1 ? "" : "s"}
+                    </span>
+                  </span>
+                  <span className="shrink-0 font-bold tabular-nums">
+                    {displayCurrencyAmount(segment.mrr)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </BentoCard>
+      </BentoGrid>
+    </section>
   );
 }

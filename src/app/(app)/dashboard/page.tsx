@@ -36,7 +36,7 @@ import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { PageHero } from "@/components/shared/page-hero";
 import { BentoGrid, QuickActionCard, SectionHeader } from "@/components/shared/bento";
-import { GymHealthHero, GymHealthPanels } from "./gym-health";
+import { GymHealthHero, GymHealthPanels, GymHealthRevenueRisk } from "./gym-health";
 import { PriorityActions } from "./priority-actions";
 import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { StatCard } from "@/components/shared/stat-card";
@@ -282,16 +282,6 @@ export default function DashboardPage() {
       {/* ── Gym Health hero ───────────────────────────────────────── */}
       <GymHealthHero
         gymName={gymName}
-        health={gymHealth.data}
-        isLoading={gymHealth.isLoading}
-        isError={gymHealth.isError}
-        onRetry={() => void gymHealth.refetch()}
-        canAskAi={hasPermission("ai.generate")}
-        canReviewActions={hasPermission("ai.approve")}
-        pendingActions={data?.pendingAiActions ?? 0}
-      />
-
-      <GymHealthPanels
         health={gymHealth.data}
         isLoading={gymHealth.isLoading}
         isError={gymHealth.isError}
@@ -567,6 +557,19 @@ export default function DashboardPage() {
           />
         </BentoGrid>
       </section>
+
+      {/* ── Revenue at risk (same gym-health request as the hero) ─── */}
+      <GymHealthRevenueRisk
+        health={gymHealth.data}
+        isLoading={gymHealth.isLoading}
+      />
+
+      <GymHealthPanels
+        health={gymHealth.data}
+        isLoading={gymHealth.isLoading}
+        isError={gymHealth.isError}
+        onRetry={() => void gymHealth.refetch()}
+      />
 
       {/* ── Jump to ─────────────────────────────────────────────── */}
       {jumpItems.length > 0 && (
