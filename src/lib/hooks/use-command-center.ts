@@ -85,10 +85,87 @@ export interface AiCard {
   }
 }
 
+export interface WhatsappAttentionRow {
+  organizationId: string
+  organizationName: string
+  channel: "cloud-api" | "web"
+  status: string
+  lastError: string | null
+  since: string
+}
+
+export interface WhatsappCard {
+  connectedGyms: number
+  cloudApi: {
+    connected: number
+    disconnected: number
+    error: number
+    notConnected: number
+    tokensExpiringSoon: number
+  }
+  web: {
+    connected: number
+    pairing: number
+    loggedOut: number
+    disconnected: number
+    sendingEnabled: number
+  }
+  messages: ChannelCounts
+  inbound: { received: number; matchedToMember: number }
+  windowMs: number
+  attention: WhatsappAttentionRow[]
+}
+
+export interface ChannelCounts {
+  pending: number
+  sent: number
+  delivered: number
+  read: number
+  failed: number
+  total: number
+  /** failed / settled. Null when nothing settled -- never a fake 0%. */
+  failureRate: number | null
+}
+
+export type MessagingChannel = "EMAIL" | "WHATSAPP" | "SMS" | "PUSH"
+
+export interface MessagingCard {
+  channels: Record<MessagingChannel, ChannelCounts>
+  totals: ChannelCounts
+  windowMs: number
+}
+
+export interface AutomationCard {
+  sent: number
+  skipped: number
+  failed: number
+  windowMs: number
+  byKey: { key: string; sent: number; skipped: number; failed: number }[]
+}
+
+export interface TenantsCard {
+  total: number
+  trial: number
+  active: number
+  suspended: number
+  cancelled: number
+  newLast7Days: number
+}
+
+/**
+ * The four cards added after the console first shipped are optional: an
+ * API deployed before them simply does not send them, and the page shows
+ * "not reported by this API version" rather than inventing a reading.
+ */
 export interface CommandCenterSnapshot {
   readiness: CardResult<ReadinessCard>
   queues: CardResult<QueuesCard>
   ai: CardResult<AiCard>
+  http?: CardResult<HttpSummary>
+  whatsapp?: CardResult<WhatsappCard>
+  messaging?: CardResult<MessagingCard>
+  automation?: CardResult<AutomationCard>
+  tenants?: CardResult<TenantsCard>
   collectedAt: string
   durationMs: number
 }
@@ -117,18 +194,6 @@ export function useCommandCenterSnapshot(options: { enabled?: boolean } = {}) {
     // The console is a monitoring surface: a stale reading is worse than an
     // error, so keep trying rather than settling for the last good value.
     retry: 2,
-  })
-}
-
-/** Forces a re-probe, bypassing the server's 10s snapshot cache. */
-export function useRefreshCommandCenter() {
-  return useQuery({
-    queryKey: [KEY, "refresh"],
-    queryFn: () =>
-      api.get<CommandCenterSnapshot>("/platform/command-center/snapshot", {
-        query: { refresh: "true" },
-      }),
-    enabled: false,
   })
 }
 
