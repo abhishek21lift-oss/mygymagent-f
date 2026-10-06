@@ -54,8 +54,9 @@ function writeOpenGroups(value: Record<string, boolean>) {
 }
 
 /**
- * The glyph tile. Resting, it is the hue at low strength; when the row
- * holds the page you are on it fills with the hue's gradient, so the
+ * The glyph tile: an app-icon squircle in the item's hue, the way iOS
+ * Settings colours every row. Resting it is the solid gradient; the row
+ * that holds the page you are on lifts it with a coloured shadow, so the
  * rail says where you are in colour before you read a word.
  */
 function IconTile({ item, filled, size = "md" }: { item: NavItem; filled: boolean; size?: "sm" | "md" }) {
@@ -65,24 +66,20 @@ function IconTile({ item, filled, size = "md" }: { item: NavItem; filled: boolea
     <span
       aria-hidden="true"
       className={cn(
-        "relative flex shrink-0 items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        size === "md" ? "size-9 rounded-xl" : "size-7 rounded-lg",
+        "relative flex shrink-0 items-center justify-center text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        size === "md" ? "size-9 rounded-[0.8rem]" : "size-7 rounded-[0.6rem]",
         isAi && "ai-glyph",
-        filled && !isAi && "shadow-[0_6px_16px_-6px_var(--nav-accent)]",
+        !isAi && (filled
+          ? "scale-105 shadow-[0_8px_18px_-6px_var(--nav-accent)]"
+          : "shadow-[0_3px_8px_-4px_var(--nav-accent)] group-hover:scale-105"),
       )}
       style={
         isAi
           ? undefined
-          : filled
-            ? {
-                backgroundImage:
-                  "linear-gradient(140deg, color-mix(in oklab, var(--nav-accent) 92%, white), color-mix(in oklab, var(--nav-accent) 100%, black 18%))",
-                color: "white",
-              }
-            : {
-                background: "color-mix(in oklab, var(--nav-accent) 12%, transparent)",
-                color: "var(--nav-accent)",
-              }
+          : {
+              backgroundImage:
+                "radial-gradient(80% 70% at 30% 15%, rgb(255 255 255 / 0.28), transparent 60%), linear-gradient(150deg, color-mix(in oklab, var(--nav-accent) 88%, white), color-mix(in oklab, var(--nav-accent) 100%, black 22%))",
+            }
       }
     >
       <Icon className={cn(size === "md" ? "size-[1.05rem]" : "size-3.5", "shrink-0")} aria-hidden="true" />

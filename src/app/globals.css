@@ -1141,16 +1141,20 @@
     position: relative;
     isolation: isolate;
     background:
-      radial-gradient(64rem 40rem at 6% -10%, color-mix(in oklab, var(--section-grad-1) 12%, transparent), transparent 62%),
-      radial-gradient(52rem 36rem at 98% 4%, color-mix(in oklab, var(--section-grad-2) 10%, transparent), transparent 64%),
-      radial-gradient(56rem 44rem at 50% 108%, color-mix(in oklab, var(--section) 8%, transparent), transparent 66%),
+      radial-gradient(64rem 40rem at 6% -10%, color-mix(in oklab, var(--section-grad-1) 15%, transparent), transparent 62%),
+      radial-gradient(52rem 36rem at 98% 4%, color-mix(in oklab, var(--section-grad-2) 13%, transparent), transparent 64%),
+      radial-gradient(44rem 34rem at 88% 70%, color-mix(in oklab, var(--a-cyan-grad-1) 7%, transparent), transparent 66%),
+      radial-gradient(40rem 30rem at 8% 80%, color-mix(in oklab, var(--a-rose-grad-1) 6%, transparent), transparent 66%),
+      radial-gradient(56rem 44rem at 50% 110%, color-mix(in oklab, var(--section) 9%, transparent), transparent 66%),
       var(--background);
   }
   .dark .page-ambient {
     background:
-      radial-gradient(64rem 40rem at 6% -10%, color-mix(in oklab, var(--section-grad-1) 17%, transparent), transparent 62%),
-      radial-gradient(52rem 36rem at 98% 4%, color-mix(in oklab, var(--section-grad-2) 15%, transparent), transparent 64%),
-      radial-gradient(56rem 44rem at 50% 108%, color-mix(in oklab, var(--section) 12%, transparent), transparent 66%),
+      radial-gradient(64rem 40rem at 6% -10%, color-mix(in oklab, var(--section-grad-1) 20%, transparent), transparent 62%),
+      radial-gradient(52rem 36rem at 98% 4%, color-mix(in oklab, var(--section-grad-2) 17%, transparent), transparent 64%),
+      radial-gradient(44rem 34rem at 88% 70%, color-mix(in oklab, var(--a-cyan-grad-1) 10%, transparent), transparent 66%),
+      radial-gradient(40rem 30rem at 8% 80%, color-mix(in oklab, var(--a-rose-grad-1) 9%, transparent), transparent 66%),
+      radial-gradient(56rem 44rem at 50% 110%, color-mix(in oklab, var(--section) 13%, transparent), transparent 66%),
       var(--background);
   }
 
@@ -1288,10 +1292,12 @@
      1px top highlight that does the actual lifting. */
   [data-slot="card"] {
     position: relative;
-    background: var(--card);
+    background:
+      radial-gradient(120% 70% at 100% 0%, color-mix(in oklab, var(--section-grad-2) 7%, transparent), transparent 55%),
+      var(--card);
     color: var(--card-foreground);
     border: 1px solid var(--border);
-    border-radius: var(--radius-2xl);
+    border-radius: 1.5rem;
     box-shadow: var(--shadow-card);
     transition:
       box-shadow var(--duration-base) var(--ease-out),
@@ -1299,19 +1305,14 @@
       border-color var(--duration-base) var(--ease-out);
   }
   [data-slot="card"]::after { content: none; }
+  /* A 1px top sheen, the light catching the card's edge. Colour now
+     comes from the corner glow above, not a painted cap. */
   [data-slot="card"]::before {
     content: "";
     position: absolute;
-    inset: 0 0 auto;
-    height: 3px;
-    border-radius: inherit;
-    background: linear-gradient(
-      90deg,
-      var(--section-grad-1) 0%,
-      var(--section-grad-2) 55%,
-      transparent 100%
-    );
-    opacity: 0.85;
+    inset: 0 1.25rem auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--section-grad-1) 45%, transparent), transparent);
     pointer-events: none;
   }
   [data-slot="card"]:hover {
@@ -1329,7 +1330,7 @@
      still wins -- the previous system used a box-shadow bevel for
      exactly that reason, and ~40 buttons carry their own fill. */
   [data-slot="button"] {
-    border-radius: var(--radius-lg);
+    border-radius: 9999px;
     font-weight: 600;
     letter-spacing: -0.01em;
     transition:
@@ -1413,12 +1414,12 @@
   [data-slot="tabs-list"] {
     background: var(--surface-sunken);
     border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
+    border-radius: 9999px;
     padding: 4px;
     box-shadow: none;
   }
   [data-slot="tabs-trigger"] {
-    border-radius: var(--radius-lg);
+    border-radius: 9999px;
     color: var(--muted-foreground);
     font-weight: 600;
     text-shadow: none;
@@ -1511,7 +1512,7 @@
      control and as a skeleton. Given the section hue it reads as
      the top of this table rather than as an absence. */
   [data-slot="table-container"] {
-    border-radius: var(--radius-xl);
+    border-radius: 1.25rem;
     overflow-x: auto;
     border: 1px solid var(--border);
     background: var(--card);
@@ -1628,12 +1629,18 @@
      a dashed grey box said the second. */
   .empty-premium {
     background:
-      radial-gradient(26rem 12rem at 50% 0%, color-mix(in oklab, var(--section) 10%, var(--card)), transparent 70%),
+      radial-gradient(26rem 12rem at 50% 0%, color-mix(in oklab, var(--section-grad-1) 12%, var(--card)), transparent 70%),
+      radial-gradient(18rem 10rem at 85% 100%, color-mix(in oklab, var(--section-grad-2) 8%, transparent), transparent 70%),
       var(--card);
   }
   .empty-premium [data-slot="empty-glyph"] {
-    background: var(--section-tint);
-    color: var(--section-ink);
+    color: #fff;
+    background:
+      radial-gradient(80% 70% at 30% 15%, rgb(255 255 255 / 0.28), transparent 60%),
+      linear-gradient(150deg, var(--section-grad-1), var(--section-grad-2));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.32),
+      0 10px 20px -10px color-mix(in oklab, var(--section-grad-1) 75%, transparent);
   }
 
   .metric-number { @apply tracking-tight font-semibold tabular-nums; }
@@ -1766,94 +1773,102 @@
    ============================================================ */
 @layer utilities {
 
-  /* --- Hero Banner -------------------------------------------
-     A full-width gradient banner that replaces the minimal radial
-     hint in PageHero. The band is taller and bolder: it uses the
-     section's two solved gradient steps at full opacity, overlaid
-     with a fine dot-mesh pattern for depth, and a frosted bottom
-     edge so the content below doesn't hard-cut against it. */
+  /* --- Hero Banner (Aurora) -----------------------------------
+     The page masthead. A light card with four soft fields of colour
+     drifting behind frosted glass: the section's own two hues lead,
+     with violet, rose and cyan in support. Text sits on the frosted
+     veil, so contrast never depends on the hue behind it: ink for the
+     eyebrow, foreground for the title, muted for the description.
+     The same material as the dashboard hero, so every page opens the
+     same way. */
   .hero-banner {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    background:
-      linear-gradient(
-        135deg,
-        var(--section-grad-1) 0%,
-        color-mix(in oklab, var(--section-grad-1) 60%, var(--section-grad-2)) 42%,
-        var(--section-grad-2) 100%
-      );
-    border-radius: var(--radius-2xl);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.22),
-      0 8px 32px -8px color-mix(in oklab, var(--section-grad-1) 55%, transparent);
-    color: var(--section-on);
+    border-radius: 1.75rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: var(--shadow-raised);
+    color: var(--foreground);
   }
-
-  /* Dot mesh overlay — a translucent repeating-radial-gradient
-     creates a fine grid of white specks at low opacity. Purely
-     decorative, pointer-events: none so it never eats a click. */
   .hero-banner::before {
     content: "";
     position: absolute;
-    inset: 0;
-    z-index: 0;
+    inset: -40%;
+    z-index: -2;
     pointer-events: none;
-    background-image:
-      radial-gradient(circle, rgb(255 255 255 / 0.18) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.55;
+    background:
+      radial-gradient(32% 42% at 14% 26%, color-mix(in oklab, var(--section-grad-1) 62%, transparent), transparent 70%),
+      radial-gradient(30% 38% at 80% 14%, color-mix(in oklab, var(--section-grad-2) 54%, transparent), transparent 70%),
+      radial-gradient(32% 40% at 72% 86%, color-mix(in oklab, var(--a-cyan-grad-1) 40%, transparent), transparent 70%),
+      radial-gradient(28% 34% at 34% 90%, color-mix(in oklab, var(--a-rose-grad-1) 36%, transparent), transparent 70%),
+      radial-gradient(22% 28% at 52% 40%, color-mix(in oklab, var(--a-amber-grad-1) 16%, transparent), transparent 70%);
+    filter: blur(28px) saturate(135%);
+    animation: aurora-drift 28s ease-in-out infinite alternate;
   }
-
-  /* Bright highlight arc at the top-right — the "light source" */
   .hero-banner::after {
     content: "";
     position: absolute;
-    top: -30%;
-    right: -10%;
-    width: 55%;
-    height: 200%;
-    z-index: 0;
+    inset: 0;
+    z-index: -1;
     pointer-events: none;
-    background: radial-gradient(
-      ellipse at 50% 50%,
-      rgb(255 255 255 / 0.18) 0%,
-      transparent 72%
-    );
+    background: color-mix(in oklab, var(--card) 46%, transparent);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+  /* Dark: the gradient steps are deep by design (they carry white
+     type), so behind glass they vanish. The aurora uses the brighter
+     solid steps instead, and the veil lets more of it through. */
+  .dark .hero-banner::before {
+    background:
+      radial-gradient(32% 42% at 14% 26%, color-mix(in oklab, var(--section) 55%, transparent), transparent 70%),
+      radial-gradient(30% 38% at 80% 14%, color-mix(in oklab, var(--a-violet) 45%, transparent), transparent 70%),
+      radial-gradient(32% 40% at 72% 86%, color-mix(in oklab, var(--a-cyan) 34%, transparent), transparent 70%),
+      radial-gradient(28% 34% at 34% 90%, color-mix(in oklab, var(--a-rose) 30%, transparent), transparent 70%);
+  }
+  .dark .hero-banner::after {
+    background: color-mix(in oklab, var(--card) 40%, transparent);
+  }
+  @keyframes aurora-drift {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+    100% { transform: translate3d(4%, -3%, 0) rotate(8deg); }
   }
 
   .hero-banner > * { position: relative; z-index: 1; }
 
-  /* Banner content area */
   .hero-banner-body {
-    padding: 1.75rem 2rem 1.75rem;
+    padding: 1.75rem 2rem;
   }
   @media (max-width: 640px) {
-    .hero-banner-body { padding: 1.25rem 1.25rem 1.5rem; }
+    .hero-banner-body { padding: 1.25rem 1.25rem 1.4rem; }
   }
 
   .hero-banner-eyebrow {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.75);
+    color: var(--section-ink);
     margin-bottom: 0.35rem;
   }
   .hero-banner-title {
-    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-size: clamp(1.6rem, 3.2vw, 2.4rem);
     font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.12;
-    color: #fff;
-    text-shadow: 0 1px 4px rgb(0 0 0 / 0.15);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    background: linear-gradient(120deg, var(--foreground) 0%, var(--foreground) 50%, var(--section-ink) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    overflow-wrap: anywhere;
   }
   .hero-banner-subtitle {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 450;
-    color: rgb(255 255 255 / 0.82);
-    margin-top: 0.35rem;
+    color: var(--muted-foreground);
+    margin-top: 0.4rem;
     line-height: 1.5;
+    max-width: 46rem;
   }
   .hero-banner-actions {
     margin-top: 1.25rem;
@@ -1861,6 +1876,23 @@
     flex-wrap: wrap;
     gap: 0.625rem;
     align-items: center;
+  }
+
+  /* The masthead glyph: an app-icon squircle in the section's
+     gradient, lit from the top-left. */
+  .hero-banner-glyph {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.15rem;
+    color: #fff;
+    background:
+      radial-gradient(80% 70% at 30% 15%, rgb(255 255 255 / 0.3), transparent 60%),
+      linear-gradient(150deg, var(--section-grad-1), var(--section-grad-2));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      0 12px 24px -12px color-mix(in oklab, var(--section-grad-1) 80%, transparent);
   }
 
   /* --- Centered brand hero --------------------------------------
@@ -1894,9 +1926,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    height: 2.25rem;
-    padding: 0 1rem;
-    border-radius: var(--radius-lg);
+    height: 2.5rem;
+    padding: 0 1.1rem;
+    border-radius: 9999px;
     font-size: 0.8125rem;
     font-weight: 600;
     cursor: pointer;
@@ -1908,22 +1940,24 @@
   .hero-banner-btn:active { transform: scale(0.97); }
 
   .hero-banner-btn-primary {
-    background: rgb(255 255 255 / 0.96);
-    color: var(--section-fill);
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+    background-image: linear-gradient(135deg, var(--section-grad-1), var(--section-grad-2));
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      0 8px 18px -8px color-mix(in oklab, var(--section-grad-1) 70%, transparent);
   }
   .hero-banner-btn-primary:hover {
-    background: #fff;
-    box-shadow: 0 4px 14px rgb(0 0 0 / 0.24);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 12px 24px -10px color-mix(in oklab, var(--section-grad-1) 75%, transparent);
   }
   .hero-banner-btn-ghost {
-    background: rgb(255 255 255 / 0.16);
-    color: #fff;
-    border: 1px solid rgb(255 255 255 / 0.32);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+    background: color-mix(in oklab, var(--card) 72%, transparent);
+    color: var(--foreground);
+    border: 1px solid var(--border);
   }
   .hero-banner-btn-ghost:hover {
-    background: rgb(255 255 255 / 0.24);
+    background: var(--card);
   }
 
   /* Decorative icon tile inside the banner (top-right) */
@@ -1951,9 +1985,12 @@
      whole card surface (keeps numbers readable). */
   .kpi-card {
     position: relative;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-2xl);
+    min-width: 0;
+    background:
+      radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--kpi-grad-2, var(--section-grad-2)) 15%, transparent), transparent 60%),
+      linear-gradient(165deg, color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 9%, var(--card)) 0%, var(--card) 72%);
+    border: 1px solid color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 16%, var(--border));
+    border-radius: 1.5rem;
     box-shadow: var(--shadow-card);
     padding: 1.25rem;
     overflow: hidden;
@@ -1966,7 +2003,7 @@
 
   /* Top-cap gradient strip */
   .kpi-card::before {
-    content: "";
+    content: none;
     position: absolute;
     inset: 0 0 auto 0;
     height: 3px;
@@ -2009,7 +2046,7 @@
   .kpi-icon-tile {
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: var(--radius-xl);
+    border-radius: 0.95rem;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -2203,9 +2240,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.625rem;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-2xl);
+    background:
+      radial-gradient(110% 80% at 100% 0%, color-mix(in oklab, var(--kpi-grad-2, var(--section-grad-2)) 12%, transparent), transparent 60%),
+      linear-gradient(165deg, color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 7%, var(--card)) 0%, var(--card) 75%);
+    border: 1px solid color-mix(in oklab, var(--kpi-grad-1, var(--section-grad-1)) 14%, var(--border));
+    border-radius: 1.5rem;
     padding: 1rem 1rem 0.875rem;
     box-shadow: var(--shadow-card);
     cursor: pointer;
