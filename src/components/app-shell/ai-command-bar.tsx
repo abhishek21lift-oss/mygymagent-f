@@ -99,7 +99,7 @@ export function AICommandBar() {
         >
           <Sparkles className="size-3.5" />
         </span>
-        <span className="hidden flex-1 truncate sm:inline">Ask anything about your gym…</span>
+        <span className="hidden flex-1 truncate sm:inline">Search your gym…</span>
         <kbd className="hidden shrink-0 rounded-lg border border-border bg-card px-1.5 py-0.5 font-sans text-[11px] font-semibold text-muted-foreground lg:inline">
           ⌘K
         </kbd>
@@ -143,7 +143,7 @@ export function AICommandBar() {
                   setActiveIndex(0);
                 }}
                 onKeyDown={onInputKeyDown}
-                placeholder="Ask about members, revenue, churn…"
+                placeholder="Search members, revenue, churn…"
                 role="combobox"
                 aria-expanded="true"
                 aria-controls={listId}

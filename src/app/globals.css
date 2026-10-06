@@ -311,7 +311,7 @@
 
   /* — Layout & motion. One decelerating curve for everything, so the
        whole app settles at the same tempo. — */
-  --header-height: 4rem;
+  --header-height: 3.5rem;
   --sidebar-width: 17rem;
   --sidebar-collapsed-width: 4.5rem;
   --content-max-width: 96rem;

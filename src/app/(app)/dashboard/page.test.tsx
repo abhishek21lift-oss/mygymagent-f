@@ -268,13 +268,15 @@ describe("DashboardPage", () => {
     expect(await screen.findByText("PT Sessions")).toBeInTheDocument()
   })
 
-  it("shows the gym health hero with score, status and opportunity", async () => {
+  it("shows the slim gym health hero with brand, ring and no alert copy", async () => {
     renderPage()
-    expect(await screen.findByRole("heading", { name: "Gym Health" })).toBeInTheDocument()
+    // Brand only in the hero eyebrow — no "MyGymAgent ·" prefix, no visible title.
+    expect(await screen.findByText("619 Fitness Studio")).toBeInTheDocument()
     // Data-driven wait: the ring only carries the score once resolved.
     expect(await screen.findByRole("img", { name: "Gym health 82 out of 100, Healthy" })).toBeInTheDocument()
-    expect(screen.getByText("82 · Healthy")).toBeInTheDocument()
-    expect(screen.getByText(/Collections is the biggest opportunity today/)).toBeInTheDocument()
+    // Alert copy lives in the breakdown card now, not the hero.
+    expect(screen.queryByText("82 · Healthy")).not.toBeInTheDocument()
+    expect(screen.queryByText(/biggest opportunity today/)).not.toBeInTheDocument()
     expect(screen.getByText("Why this score")).toBeInTheDocument()
     expect(screen.getByText(/Kept after refunds/)).toBeInTheDocument()
     expect(screen.getByText("Revenue at risk")).toBeInTheDocument()

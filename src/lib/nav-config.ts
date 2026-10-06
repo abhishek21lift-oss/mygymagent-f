@@ -174,6 +174,7 @@ export const platformNav: NavItem[] = [
   // refuses the route without a platformRole, and this is only about not
   // offering a link that could never load.
   { title: "Command Center", href: "/platform/command-center", icon: Gauge, platformOnly: true },
+  { title: "AI Infrastructure", href: "/platform/ai-infrastructure", icon: Sparkles, platformOnly: true },
 ];
 
 export const settingsNav: NavItem = { title: "Settings", href: "/settings", icon: Settings, hue: "orange", children: [

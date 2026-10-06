@@ -48,11 +48,12 @@ const STATUS_META: Record<
   },
 };
 
-function bandFill(score: number): string {
-  if (score >= 80) return "var(--success)";
-  if (score >= 60) return "var(--info)";
-  if (score >= 40) return "var(--warning)";
-  return "var(--destructive)";
+/** Vibrant Apple-style gradient per band for pills and bars. */
+function bandGradient(score: number): string {
+  if (score >= 80) return "linear-gradient(135deg,#10b981,#0d9488)";
+  if (score >= 60) return "linear-gradient(135deg,#3b82f6,#8b5cf6)";
+  if (score >= 40) return "linear-gradient(135deg,#f59e0b,#f97316)";
+  return "linear-gradient(135deg,#f43f5e,#ef4444)";
 }
 
 /**
@@ -80,13 +81,6 @@ export function GymHealthHero({
   pendingActions: number;
 }) {
   const meta = STATUS_META[health?.status ?? "unknown"];
-  const opportunity = health?.components.find(
-    (c) => c.key === health.opportunity,
-  );
-  const summary =
-    health?.status === "unknown" || !opportunity
-      ? meta.line
-      : `${meta.line} ${opportunity.label} is the biggest opportunity today.`;
 
   return (
     <section
@@ -94,90 +88,84 @@ export function GymHealthHero({
       style={NOIR_BANNER_STYLE}
       className="hero-banner hero-centered -mx-4 mb-5 sm:-mx-5 lg:-mx-8"
     >
-      <div className="hero-banner-body">
-        <p className="hero-banner-eyebrow">MyGymAgent{gymName ? ` · ${gymName}` : ""}</p>
-        <div className="flex flex-col items-center gap-2">
-          {isLoading ? (
-            <div
-              className="rounded-full bg-white/20 animate-pulse"
-              style={{ width: 112, height: 112 }}
-              aria-label="Loading gym health"
-            />
-          ) : isError ? (
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-sm font-semibold text-white">
-                Could not load gym health.
-              </p>
-              <button
-                type="button"
-                onClick={onRetry}
-                className="hero-banner-btn hero-banner-btn-ghost"
-              >
-                Retry
-              </button>
-            </div>
-          ) : (
-            <>
-              <ProgressRing
-                value={health?.score ?? 0}
-                size={112}
-                strokeWidth={12}
-                tone="light"
-                label={
-                  health?.score === null || health?.score === undefined
-                    ? "Gym health unavailable"
-                    : `Gym health ${health.score} out of 100, ${meta.label}`
-                }
-              />
-              <span
-                className="rounded-full px-3 py-1 text-xs font-bold text-white"
-                style={{ background: meta.fill }}
-              >
-                {health?.score ?? "—"} · {meta.label}
-              </span>
-            </>
-          )}
-        </div>
-        <h1 id="dashboard-title" className="hero-banner-title">
+      <div className="hero-banner-body relative">
+        <p className="hero-banner-eyebrow">{gymName}</p>
+        <h1 id="dashboard-title" className="sr-only">
           Gym Health
         </h1>
-        {!isLoading && !isError && (
-          <p className="hero-banner-subtitle">{summary}</p>
+        {isError && !isLoading ? (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm font-semibold text-white">
+              Could not load gym health.
+            </p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="hero-banner-btn hero-banner-btn-ghost"
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <div className="flex w-full items-end justify-between gap-3">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-2">
+              {canAskAi && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="hero-banner-btn hero-banner-btn-ghost"
+                >
+                  <Link href="/ai">
+                    <Sparkles className="size-4" aria-hidden="true" />
+                    Ask AI
+                  </Link>
+                </Button>
+              )}
+              {canReviewActions && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="hero-banner-btn hero-banner-btn-ghost"
+                >
+                  <Link href="/ai-actions">
+                    View Actions
+                    {pendingActions > 0 && (
+                      <span
+                        aria-label={`${pendingActions} pending`}
+                        className="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold tabular-nums"
+                        style={{ color: "#0b0b0d" }}
+                      >
+                        {pendingActions}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+              )}
+            </div>
+            <div className="shrink-0">
+              {isLoading ? (
+                <div
+                  className="rounded-full bg-white/20 animate-pulse"
+                  style={{ width: 72, height: 72 }}
+                  aria-label="Loading gym health"
+                />
+              ) : (
+                <ProgressRing
+                  value={health?.score ?? 0}
+                  size={72}
+                  strokeWidth={8}
+                  tone="light"
+                  centerLabel={meta.label}
+                  label={
+                    health?.score === null || health?.score === undefined
+                      ? "Gym health unavailable"
+                      : `Gym health ${health.score} out of 100, ${meta.label}`
+                  }
+                />
+              )}
+            </div>
+          </div>
         )}
-        <div className="hero-banner-actions">
-          {canAskAi && (
-            <Button
-              asChild
-              size="sm"
-              className="hero-banner-btn hero-banner-btn-ghost"
-            >
-              <Link href="/ai">
-                <Sparkles className="size-4" aria-hidden="true" />
-                Ask AI
-              </Link>
-            </Button>
-          )}
-          {canReviewActions && (
-            <Button
-              asChild
-              size="sm"
-              className="hero-banner-btn hero-banner-btn-ghost"
-            >
-              <Link href="/ai-actions">
-                View Actions
-                {pendingActions > 0 && (
-                  <span
-                    aria-label={`${pendingActions} pending`}
-                    className="rounded-full bg-white px-2 py-0.5 text-[11px] font-extrabold tabular-nums"
-                    style={{ color: "#0b0b0d" }}
-                  >
-                    {pendingActions}
-                  </span>
-                )}
-              </Link>
-            </Button>
-          )}
-        </div>
       </div>
     </section>
   );
@@ -185,7 +173,7 @@ export function GymHealthHero({
 
 function ComponentRow({ component }: { component: HealthComponent }) {
   return (
-    <li className="flex flex-col gap-1.5 py-3 first:pt-0 last:pb-0">
+    <li className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold tracking-tight text-foreground">
           {component.label}
@@ -195,7 +183,7 @@ function ComponentRow({ component }: { component: HealthComponent }) {
         </span>
         <span
           className={cn(
-            "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums",
+            "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums shadow-sm",
             component.score === null
               ? "bg-muted text-muted-foreground"
               : "text-white",
@@ -203,7 +191,7 @@ function ComponentRow({ component }: { component: HealthComponent }) {
           style={
             component.score === null
               ? undefined
-              : { background: bandFill(component.score) }
+              : { backgroundImage: bandGradient(component.score) }
           }
         >
           {component.score ?? "—"}
@@ -218,12 +206,12 @@ function ComponentRow({ component }: { component: HealthComponent }) {
             className="h-full rounded-full"
             style={{
               width: `${component.score}%`,
-              background: bandFill(component.score),
+              backgroundImage: bandGradient(component.score),
             }}
           />
         )}
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="line-clamp-2 text-xs text-muted-foreground">
         {component.explanation}{" "}
         <span className="font-mono">[{component.source}]</span>
       </p>
