@@ -136,12 +136,14 @@ export function StatCard({
 
       {/* Icon tile + label row */}
       <div className="flex items-start justify-between gap-3 mb-3">
+        {/* No glyph, no tile: an empty coloured square reads as a
+            missing icon, not as decoration. */}
         {Icon ? (
           <span className="kpi-icon-tile" aria-hidden="true">
             <Icon className="size-5" strokeWidth={2} />
           </span>
         ) : (
-          <span className="kpi-icon-tile" aria-hidden="true" />
+          <span aria-hidden="true" />
         )}
 
         {/* Trend chip (shown if trendValue is provided) */}

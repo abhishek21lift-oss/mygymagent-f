@@ -8,23 +8,17 @@ import { sectionForPath, type Accent } from "@/lib/section-accent";
 import { cn } from "@/lib/utils";
 
 /**
- * The page masthead — now a full-width vibrant gradient hero banner.
+ * The page masthead — the Aurora hero shared by every page.
  *
- * Design goals:
- * - Vivid gradient fills the full banner width using the section's two
- *   gradient stops at full opacity (not low-alpha radials).
- * - A fine dot mesh adds depth without clutter.
- * - A bright elliptical highlight in the top-right corner gives the
- *   impression of a light source and lifts the banner off the page.
- * - The icon sits in a frosted white-alpha tile, keeping the glyph
- *   visible on any background hue.
- * - Text is white, with a soft shadow for legibility on saturated fills.
- * - Actions and children slot into a bottom row.
+ * - A light card with soft fields of the section's colours drifting
+ *   behind frosted glass (see `.hero-banner` in globals.css).
+ * - Text sits on the frosted veil: section ink for the eyebrow, a
+ *   foreground-to-ink gradient for the title, muted for the
+ *   description — so contrast never depends on the hue behind it,
+ *   and any standard Button reads correctly in the actions row.
+ * - The icon is an app-icon squircle in the section's gradient.
  * - An accent override re-points the same variables for pages that sit
  *   outside the route map (portals, auth screens).
- *
- * Contrast: all text runs on a gradient surface whose luminance at
- * the darkest point clears 4.5:1 with white (verified per hue).
  */
 type HeroAccent = Accent;
 
@@ -50,7 +44,6 @@ export function PageHero({
   children,
   compact = false,
   centered = false,
-  tone = "section",
 }: {
   id?: string;
   eyebrow?: string;
@@ -67,7 +60,8 @@ export function PageHero({
   compact?: boolean;
   /** Centered brand moment: stacked, text-centered, never row-splits. */
   centered?: boolean;
-  /** "noir" repaints the banner deep-black/red from tokens; section default otherwise. */
+  /** Accepted for compatibility. Every masthead now wears the Aurora
+   * material; "noir" no longer repaints it dark. */
   tone?: "section" | "noir";
 }) {
   const pathname = usePathname();
@@ -96,15 +90,12 @@ export function PageHero({
         : "header"
     }`;
 
-  // Noir paint lives in NOIR_BANNER_STYLE above so bespoke heroes reuse it.
-  const noir = tone === "noir" ? NOIR_BANNER_STYLE : undefined;
-
   return (
     <header
       aria-labelledby={headingId}
-      style={{ ...override, ...noir }}
+      style={override}
       className={cn(
-        "hero-banner -mx-4 mb-5 sm:-mx-5 lg:-mx-8",
+        "hero-banner",
         compact ? "mb-4" : "mb-6",
         centered && "hero-centered",
       )}
@@ -123,16 +114,7 @@ export function PageHero({
           {Icon && (
             <span
               aria-hidden="true"
-              className={cn(
-                "flex shrink-0 items-center justify-center rounded-2xl",
-                centered ? "size-12" : "size-14",
-              )}
-              style={{
-                background: "rgb(255 255 255 / 0.2)",
-                border: "1px solid rgb(255 255 255 / 0.32)",
-                boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.4)",
-                color: "#fff",
-              }}
+              className={cn("hero-banner-glyph", centered ? "size-12" : "size-14")}
             >
               <Icon className={centered ? "size-6" : "size-7"} strokeWidth={1.75} />
             </span>
