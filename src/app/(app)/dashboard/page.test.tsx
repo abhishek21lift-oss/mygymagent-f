@@ -115,8 +115,7 @@ function routes(overrides: Record<string, unknown> = {}) {
       items: [{ memberId: "mem9", firstName: "Ex", lastName: "Member", daysSinceExpiry: 60, lifetimePaid: "45000.00", currency: "INR", tenureDays: 210, lastVisitAt: null, priorPtPackages: 0, tier: "HIGH", reasons: ["Paid 45,000 INR over 210 days"] }],
       counts: { high: 1, medium: 0, low: 0 },
     },
-    "/ai-actions?status=EXECUTED": { items: [], total: 2, page: 1, pageSize: 1, totalPages: 2 },
-    "/ai-actions?status=REJECTED": { items: [], total: 1, page: 1, pageSize: 1, totalPages: 1 },
+    "/ai-actions/effectiveness": { total: 7, pending: 4, approved: 0, executed: 2, rejected: 1, failed: 0, acceptanceRate: 0.67, executionRate: 1 },
     "/analytics/gym-health": {
       score: 82,
       status: "healthy",
@@ -229,8 +228,8 @@ describe("DashboardPage", () => {
     }
     // Renewals counts only rows linked to a previous membership.
     expect(await screen.findByText("Of 2 started today")).toBeInTheDocument()
-    // PT Sessions needs workouts.read, which this permission set lacks.
-    expect(screen.queryByText("PT Sessions")).not.toBeInTheDocument()
+    // Workouts needs workouts.read, which this permission set lacks.
+    expect(screen.queryByText("Workouts")).not.toBeInTheDocument()
     const memberCalls = callsTo("/members").filter((options) => options?.query?.joinedFrom)
     expect(memberCalls).toHaveLength(1)
     expect(memberCalls[0]?.query).toMatchObject({ pageSize: 1 })
@@ -262,10 +261,14 @@ describe("DashboardPage", () => {
     )
   })
 
-  it("shows PT Sessions for someone who can read workouts", async () => {
+  it("shows today's workouts for someone who can read workouts, narrowed to the picked branch", async () => {
     mockPermissions = [...ALL, "workouts.read"]
+    window.localStorage.setItem("mygymagent:dashboard-branch", BRANCH_B)
+    routes({ "/workout-sessions/today": [{ id: "s1" }, { id: "s2" }] })
     renderPage()
-    expect(await screen.findByText("PT Sessions")).toBeInTheDocument()
+    expect(await screen.findByText("Workouts")).toBeInTheDocument()
+    expect(await screen.findByText("Training sessions today")).toBeInTheDocument()
+    expect(callsTo("/workout-sessions/today")[0]?.query).toEqual({ branchId: BRANCH_B })
   })
 
   it("shows the slim gym health hero with brand, ring and no alert copy", async () => {
@@ -288,7 +291,7 @@ describe("DashboardPage", () => {
   it("asks the revenue summary for the default 30-day period", async () => {
     renderPage()
     // Data-driven hint: proves the summary resolved, not just rendered.
-    await screen.findByText("Across 4 payments")
+    await screen.findByText("Across 4 payments + product sales")
     const spans = callsTo("/analytics/revenue").map((options) => {
       const query = options?.query as { from?: string; to?: string } | undefined;
       if (!query?.from || !query?.to) return -1;
@@ -428,5 +431,80 @@ describe("DashboardPage", () => {
     for (const link of screen.getAllByRole("link")) {
       expect(link.getAttribute("href")).not.toMatch(/command-center|owner-os/)
     }
+  })
+
+  it("keeps the priority list when the AI outcome counts fail to load", async () => {
+    mockPermissions = [...ALL, "ai.approve"]
+    const base = mockGet.getMockImplementation()!
+    mockGet.mockImplementation(async (path: string, options?: unknown) => {
+      if (path === "/ai-actions/effectiveness") throw new Error("boom")
+      return base(path, options)
+    })
+    renderPage()
+    expect(await screen.findByText("4 AI proposals awaiting approval")).toBeInTheDocument()
+    expect(screen.queryByText(/Outcomes so far/)).not.toBeInTheDocument()
+  })
+
+  it("says when a priority source failed instead of claiming all caught up", async () => {
+    routes({
+      "/briefing/daily": { ...BRIEFING, pendingAiActions: 0 },
+      "/analytics/revenue": {
+        period: { from: "", to: "" }, branchId: null, revenue: [], outstanding: [], notComputable: [],
+      },
+      "/analytics/sales/priority": { items: [], counts: { hot: 0, warm: 0, watch: 0 } },
+      "/analytics/trainers/pt-opportunities": { expiring: [], neverStarted: [], counts: { expiring: 0, neverStarted: 0, activePackages: 0 } },
+      "/analytics/members/win-back": { items: [], counts: { high: 0, medium: 0, low: 0 } },
+    })
+    const base = mockGet.getMockImplementation()!
+    mockGet.mockImplementation(async (path: string, options?: unknown) => {
+      if (path === "/analytics/memberships/renewal-pipeline") throw new Error("boom")
+      return base(path, options)
+    })
+    renderPage()
+    expect(await screen.findByText(/Some priorities could not be loaded/)).toBeInTheDocument()
+    expect(screen.queryByText(/all caught up/i)).not.toBeInTheDocument()
+  })
+
+  it("ignores a remembered branch for someone who cannot pick branches", async () => {
+    mockPermissions = ALL.filter((p) => p !== "branches.read")
+    window.localStorage.setItem("mygymagent:dashboard-branch", BRANCH_B)
+    renderPage()
+    expect(await screen.findByText("12")).toBeInTheDocument()
+    expect(callsTo("/branches")).toHaveLength(0)
+    expect(callsTo("/briefing/daily")[0]?.query).toEqual({ branchId: undefined })
+  })
+
+  it("drops a remembered branch that no longer exists", async () => {
+    window.localStorage.setItem("mygymagent:dashboard-branch", "33333333-3333-4333-8333-333333333333")
+    renderPage()
+    expect(await screen.findByText("12")).toBeInTheDocument()
+    for (const options of callsTo("/briefing/daily")) {
+      expect(options?.query).toEqual({ branchId: undefined })
+    }
+  })
+
+  it("narrows every Today figure to the picked branch", async () => {
+    window.localStorage.setItem("mygymagent:dashboard-branch", BRANCH_A)
+    renderPage()
+    expect(await screen.findByText("Of 2 started today")).toBeInTheDocument()
+    expect(callsTo("/memberships")[0]?.query).toMatchObject({ branchId: BRANCH_A })
+    expect(callsTo("/leads")[0]?.query).toMatchObject({ branchId: BRANCH_A })
+    // Members narrows through the branch option (sent as a header), not the query.
+    const memberCall = callsTo("/members").find((o) => o?.query?.joinedFrom) as { branchId?: string[] } | undefined
+    expect(memberCall?.branchId).toEqual([BRANCH_A])
+  })
+
+  it("never draws a missing health score as a zero", async () => {
+    routes({
+      "/analytics/gym-health": {
+        score: null, status: "unknown", opportunity: null, components: [], branchId: null,
+        computedAt: "2026-10-06T04:00:00.000Z", mixedCurrencies: false,
+        revenueAtRisk: { totalMRR: 0, atRiskMRR: 0, atRiskPercentage: 0, bySegment: [], byCurrency: [], mixed: false },
+      },
+    })
+    renderPage()
+    expect(await screen.findByRole("img", { name: "Gym health unavailable" })).toBeInTheDocument()
+    expect(screen.queryByText("0%")).not.toBeInTheDocument()
+    expect(screen.queryByText(/GET \/analytics/)).not.toBeInTheDocument()
   })
 })

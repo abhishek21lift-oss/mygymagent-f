@@ -16,7 +16,7 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 export function useMemberships(
-  params: PaginationParams & { memberId?: string; createdFrom?: string; createdTo?: string } = {},
+  params: PaginationParams & { memberId?: string; createdFrom?: string; createdTo?: string; branchId?: string } = {},
   { enabled = true }: { enabled?: boolean } = {},
 ) {
   const { memberId, ...query } = params;

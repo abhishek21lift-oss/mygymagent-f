@@ -19,7 +19,6 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -34,12 +33,11 @@ import { useMemberships } from "@/lib/hooks/use-memberships";
 import { useTodayWorkoutSessions } from "@/lib/hooks/use-workout-sessions";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
-import { PageHero } from "@/components/shared/page-hero";
-import { BentoGrid, QuickActionCard, SectionHeader } from "@/components/shared/bento";
 import { GymHealthHero, GymHealthPanels, GymHealthRevenueRisk } from "./gym-health";
 import { PriorityActions } from "./priority-actions";
-import { currencySymbol, displayCurrencyAmount } from "@/lib/utils";
-import { StatCard } from "@/components/shared/stat-card";
+import { AppIconLink, DashSection, Segmented, Tile } from "./dashboard-ui";
+import styles from "./dashboard.module.css";
+import { cn, currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { DonutChart } from "@/components/shared/donut-chart";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -72,14 +70,20 @@ const DONUT_COLORS = [
 const ALL_BRANCHES = "all";
 const BRANCH_STORAGE_KEY = "mygymagent:dashboard-branch";
 
-function readStoredBranch(): string {
+/** Per user, so a shared device never hands one account another's
+ * branch (or another gym's). The bare key is only a fallback for a
+ * session with no user id. */
+function branchStorageKey(userId: string | undefined): string {
+  return userId ? `${BRANCH_STORAGE_KEY}:${userId}` : BRANCH_STORAGE_KEY;
+}
+
+function readStoredBranch(key: string): string {
   if (typeof window === "undefined") return ALL_BRANCHES;
-  try { return window.localStorage.getItem(BRANCH_STORAGE_KEY) || ALL_BRANCHES; }
+  try { return window.localStorage.getItem(key) || ALL_BRANCHES; }
   catch { return ALL_BRANCHES; }
 }
 
-/* ─── Helpers ────────────────────────────────────────────────────── */
-/* ─── Finance period ─────────────────────────────────────────────── */
+/* ─── Calendar helpers (gym timezone) ───────────────────────────── */
 type FinancePreset = "today" | "7d" | "15d" | "30d" | "90d" | "custom";
 const FINANCE_PRESETS: ReadonlyArray<{ value: Exclude<FinancePreset, "custom">; label: string; days: number }> = [
   { value: "today", label: "Today", days: 1 },
@@ -89,35 +93,50 @@ const FINANCE_PRESETS: ReadonlyArray<{ value: Exclude<FinancePreset, "custom">; 
   { value: "90d", label: "90D", days: 90 },
 ];
 
-/** YYYY-MM-DD in the gym's timezone — what the revenue endpoint bounds by day. */
+/** YYYY-MM-DD in the gym's timezone — what the API bounds by day. */
 function isoDay(date: Date, timeZone: string | null | undefined) {
+  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
   try {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: timeZone ?? undefined,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(date);
+    return new Intl.DateTimeFormat("en-CA", { ...options, timeZone: timeZone ?? undefined }).format(date);
   } catch {
-    return new Intl.DateTimeFormat("en-CA", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(date);
+    return new Intl.DateTimeFormat("en-CA", options).format(date);
   }
 }
 
-function shortDay(iso: string, timeZone: string | null | undefined) {
+/** Pure calendar arithmetic on a YYYY-MM-DD string — no clock, no
+ * timezone, so a DST day can never make "tomorrow" equal "today". */
+function addDays(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, (m ?? 1) - 1, (d ?? 1) + days)).toISOString().slice(0, 10);
+}
+
+/** "Oct 6" for a YYYY-MM-DD. Formatted as a UTC calendar date: the
+ * string is already the gym's day, and re-zoning it shifted the label a
+ * day whenever the browser sat east of the gym. */
+function shortDay(iso: string) {
   const [y, m, d] = iso.split("-").map(Number);
   try {
-    return new Intl.DateTimeFormat(undefined, {
-      timeZone: timeZone ?? undefined,
-      month: "short",
-      day: "numeric",
-    }).format(new Date(y, (m ?? 1) - 1, d ?? 1));
+    return new Intl.DateTimeFormat(undefined, { timeZone: "UTC", month: "short", day: "numeric" }).format(
+      new Date(Date.UTC(y, (m ?? 1) - 1, d ?? 1)),
+    );
   } catch {
     return iso;
   }
+}
+
+/** Today in the gym's timezone, re-checked every minute so a dashboard
+ * left open overnight moves to the new day by itself. */
+function useGymToday(timeZone: string | null | undefined): string {
+  const [stamp, setStamp] = React.useState(() => Date.now());
+  React.useEffect(() => {
+    const id = window.setInterval(() => {
+      setStamp((previous) =>
+        isoDay(new Date(previous), timeZone) === isoDay(new Date(), timeZone) ? previous : Date.now(),
+      );
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [timeZone]);
+  return React.useMemo(() => isoDay(new Date(stamp), timeZone), [stamp, timeZone]);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -126,42 +145,51 @@ function shortDay(iso: string, timeZone: string | null | undefined) {
 export default function DashboardPage() {
   const { hasPermission, user } = useAuth();
   const canViewReports = hasPermission("reports.view");
+  const canReadBranches = hasPermission("branches.read");
 
-  const [selectedBranch, setSelectedBranch] = React.useState<string>(readStoredBranch);
+  const storageKey = branchStorageKey(user?.id);
+  const [selectedBranch, setSelectedBranch] = React.useState<string>(() => readStoredBranch(storageKey));
   const chooseBranch = (value: string) => {
     setSelectedBranch(value);
-    try { window.localStorage.setItem(BRANCH_STORAGE_KEY, value); } catch { /* noop */ }
+    try { window.localStorage.setItem(storageKey, value); } catch { /* noop */ }
   };
 
-  const branches = useBranches({ pageSize: 100 }, { enabled: canViewReports && hasPermission("branches.read") });
+  const branches = useBranches({ pageSize: 100 }, { enabled: canViewReports && canReadBranches });
   const branchItems = branches.data?.items ?? [];
+  /* A remembered branch counts only for someone who can see the picker,
+     and only once it is confirmed to still exist. Firing first and
+     checking later asked for a stale (or another gym's) branch, which
+     the API answers with zeros — silently, for anyone without the
+     picker to reset it. The default "all" never waits. */
+  const branchReady = selectedBranch === ALL_BRANCHES || !canReadBranches || branches.isFetched;
   const branchFilter =
-    selectedBranch !== ALL_BRANCHES && (!branches.data || branchItems.some((b) => b.id === selectedBranch))
+    canReadBranches && selectedBranch !== ALL_BRANCHES && branchItems.some((b) => b.id === selectedBranch)
       ? selectedBranch
       : undefined;
+  const branchQuery = branchFilter ? { branchId: branchFilter } : {};
+  const reportsReady = canViewReports && branchReady;
 
-  const briefing      = useDailyBriefing({ enabled: canViewReports, branchId: branchFilter });
+  const briefing = useDailyBriefing({ enabled: reportsReady, branchId: branchFilter });
 
-
-  const canReadOrg    = hasPermission("organizations.read");
-  const organization  = useOrganization({ enabled: canReadOrg });
+  const canReadOrg = hasPermission("organizations.read");
+  const organization = useOrganization({ enabled: canReadOrg });
   /* Date windows are computed in the gym's timezone. Firing the queries
      before it loads would request (and flash) a wrong-timezone day, then
      refire — so date-driven queries wait for it. Without the permission
      the org never loads and local time is the only option. */
   const tzReady = !canReadOrg || organization.isFetched;
-  const revenueTrend  = useRevenueTrend(6, branchFilter, { enabled: canViewReports });
-  const gymHealth     = useGymHealth(
-    { ...(branchFilter ? { branchId: branchFilter } : {}) },
-    { enabled: canViewReports && tzReady },
-  );
-  const statusBreakdown = useMemberStatusBreakdown(branchFilter, { enabled: canViewReports });
+  const datedReady = reportsReady && tzReady;
+  const revenueTrend = useRevenueTrend(6, branchFilter, { enabled: reportsReady });
+  const gymHealth = useGymHealth(branchQuery, { enabled: datedReady });
+  const statusBreakdown = useMemberStatusBreakdown(branchFilter, { enabled: reportsReady });
 
-  const data          = briefing.data;
+  const data = briefing.data;
   const scopedBranchId = data?.branchId && data.branchId !== branchFilter ? data.branchId : null;
 
-  const gymName       = organization.data?.name ?? "Dashboard";
-  const currencyCode  = organization.data?.currency ?? "INR";
+  const gymName = organization.data?.name ?? "Dashboard";
+  const currencyCode = organization.data?.currency ?? "INR";
+  const timezone = organization.data?.timezone;
+  const todayStr = useGymToday(timezone);
 
   /* Finance period: presets or a custom range; always drives the summary below. */
   const [financePreset, setFinancePreset] = React.useState<FinancePreset>("30d");
@@ -169,65 +197,62 @@ export default function DashboardPage() {
   const [customOpen, setCustomOpen] = React.useState(false);
   const [draftFrom, setDraftFrom] = React.useState("");
   const [draftTo, setDraftTo] = React.useState("");
-  const timezone = organization.data?.timezone;
   const financeRange = React.useMemo(() => {
     if (financePreset === "custom" && customRange) return customRange;
     const days = FINANCE_PRESETS.find((preset) => preset.value === financePreset)?.days ?? 30;
-    const to = new Date();
-    const from = new Date();
-    from.setDate(to.getDate() - (days - 1));
-    return { from: isoDay(from, timezone), to: isoDay(to, timezone) };
-  }, [financePreset, customRange, timezone]);
+    return { from: addDays(todayStr, -(days - 1)), to: todayStr };
+  }, [financePreset, customRange, todayStr]);
   const financeSummary = useRevenueSummary(
-    { from: financeRange.from, to: financeRange.to, ...(branchFilter ? { branchId: branchFilter } : {}) },
-    { enabled: canViewReports && tzReady },
+    { from: financeRange.from, to: financeRange.to, ...branchQuery },
+    { enabled: datedReady },
   );
   const summaryRow =
     financeSummary.data?.revenue.find((r) => r.currency === currencyCode) ?? financeSummary.data?.revenue[0];
 
-  /* Today section: six KPIs, each from its authoritative source. New members
-     use the members joined-filter; renewals are today's memberships linked
-     to a previous row; leads and PT sessions come from their own endpoints.
-     Every query is permission-gated so nobody asks the API for what it
-     would refuse. */
+  /* Today section: six KPIs, each from its authoritative source, each
+     narrowed to the picked branch, each permission-gated so nobody asks
+     the API for what it would refuse. */
   const canReadMembers = hasPermission(["members.read", "members.read_assigned"]);
   const canReadMemberships = hasPermission(["memberships.read", "memberships.read_assigned"]);
   const canReadLeads = hasPermission("leads.read");
   const canReadWorkouts = hasPermission(["workouts.read", "workouts.read_assigned"]);
-  const todayStr = React.useMemo(() => isoDay(new Date(), timezone), [timezone]);
   // members joinedTo is lte-start-of-day server-side, so tomorrow bounds today.
-  const tomorrowStr = React.useMemo(
-    () => isoDay(new Date(new Date().setDate(new Date().getDate() + 1)), timezone),
-    [timezone],
-  );
+  const tomorrowStr = addDays(todayStr, 1);
   const todayCollection = useRevenueSummary(
-    { from: todayStr, to: todayStr, ...(branchFilter ? { branchId: branchFilter } : {}) },
-    { enabled: canViewReports && tzReady },
+    { from: todayStr, to: todayStr, ...branchQuery },
+    { enabled: datedReady },
   );
   const todayCollectionRow =
     todayCollection.data?.revenue.find((r) => r.currency === currencyCode) ?? todayCollection.data?.revenue[0];
   const newMembers = useMembers(
     { joinedFrom: todayStr, joinedTo: tomorrowStr, pageSize: 1, ...(branchFilter ? { branchId: [branchFilter] } : {}) },
-    { enabled: canViewReports && canReadMembers && tzReady },
+    { enabled: datedReady && canReadMembers },
   );
   const todayMemberships = useMemberships(
-    { createdFrom: todayStr, createdTo: todayStr, pageSize: 100 },
-    { enabled: canViewReports && canReadMemberships && tzReady },
+    { createdFrom: todayStr, createdTo: todayStr, pageSize: 100, ...branchQuery },
+    { enabled: datedReady && canReadMemberships },
   );
-  const renewalsToday = (todayMemberships.data?.items ?? []).filter((m) => m.previousMembershipId).length;
+  const todayMembershipItems = todayMemberships.data?.items ?? [];
+  const renewalsToday = todayMembershipItems.filter((m) => m.previousMembershipId).length;
+  // One page of 100 is plenty for a day; if a gym ever exceeds it, say
+  // "at least" rather than under-report.
+  const renewalsTruncated = (todayMemberships.data?.total ?? 0) > todayMembershipItems.length;
   const todayLeads = useLeads(
-    { createdFrom: todayStr, createdTo: todayStr, pageSize: 1 },
-    { enabled: canViewReports && canReadLeads && tzReady },
+    { createdFrom: todayStr, createdTo: todayStr, pageSize: 1, ...branchQuery },
+    { enabled: datedReady && canReadLeads },
   );
-  const todaySessions = useTodayWorkoutSessions({ enabled: canViewReports && canReadWorkouts && tzReady });
+  const todaySessions = useTodayWorkoutSessions({
+    enabled: datedReady && canReadWorkouts,
+    branchId: branchFilter,
+  });
   const summaryOutstanding =
     financeSummary.data?.outstanding.find((r) => r.currency === currencyCode) ?? financeSummary.data?.outstanding[0];
   const rangeLabel =
     financePreset === "custom" && customRange
-      ? `Custom · ${shortDay(customRange.from, timezone)} – ${shortDay(customRange.to, timezone)}`
+      ? `Custom · ${shortDay(customRange.from)} – ${shortDay(customRange.to)}`
       : financePreset === "today"
-        ? `Today · ${shortDay(financeRange.to, timezone)}`
-        : `Last ${FINANCE_PRESETS.find((preset) => preset.value === financePreset)?.days ?? 30} days · ${shortDay(financeRange.from, timezone)} – ${shortDay(financeRange.to, timezone)}`;
+        ? `Today · ${shortDay(financeRange.to)}`
+        : `Last ${FINANCE_PRESETS.find((preset) => preset.value === financePreset)?.days ?? 30} days · ${shortDay(financeRange.from)} – ${shortDay(financeRange.to)}`;
 
   const outstandingRow =
     data?.revenue.outstanding.find((r) => r.currency === currencyCode) ?? data?.revenue.outstanding[0];
@@ -235,12 +260,12 @@ export default function DashboardPage() {
   const visibleActions = QUICK_ACTIONS.filter(([,,,, permission]) => hasPermission(permission as string));
 
   /* Revenue chart data */
-  const { weeklyData, chartCurrency } = React.useMemo(
+  const { weeklyData: monthlyData, chartCurrency } = React.useMemo(
     () => revenueChart(revenueTrend.data ?? [], currencyCode),
     [revenueTrend.data, currencyCode],
   );
-  const maxRevenue = Math.max(1, ...weeklyData.map((d) => d.value));
-  const hasRevenue = weeklyData.some((d) => d.value > 0);
+  const maxRevenue = Math.max(1, ...monthlyData.map((d) => d.value));
+  const hasRevenue = monthlyData.some((d) => d.value > 0);
 
   /* Member status donut data */
   const memberDonutSegments = React.useMemo(
@@ -254,16 +279,16 @@ export default function DashboardPage() {
   );
   const totalMembers = memberDonutSegments.reduce((sum, s) => sum + s.value, 0);
 
-  /* Jump-to bento: one tile per work area, gated like the rail, with live
-     counts only from data this page already loads — never new requests. */
+  /* Jump-to launcher: one icon per work area, gated like the rail, with
+     live counts only from data this page already loads — never new requests. */
   const jumpItems = [
-    { title: "Branches", desc: "Locations, kiosks and stock", href: "/branches", icon: Building2, accent: "blue" as Accent, permission: "branches.read", badge: branchItems.length > 0 ? branchItems.length : undefined },
-    { title: "Members", desc: "Directory and memberships", href: "/members", icon: Users, accent: "cyan" as Accent, permission: ["members.read", "members.read_assigned"], badge: totalMembers > 0 ? totalMembers : undefined },
-    { title: "Revenue", desc: "Payments and invoices", href: "/billing", icon: Wallet, accent: "emerald" as Accent, permission: "payments.read", badge: outstandingRow && outstandingRow.membershipsWithBalance > 0 ? outstandingRow.membershipsWithBalance : undefined },
-    { title: "AI", desc: "Agent and approvals", href: "/ai", icon: Sparkles, accent: "violet" as Accent, permission: "ai.generate", badge: data?.pendingAiActions ? data.pendingAiActions : undefined },
-    { title: "Operations", desc: "Attendance and inventory", href: "/attendance", icon: CalendarCheck, accent: "orange" as Accent, permission: ["attendance.read", "attendance.read_assigned"], badge: data && data.today.checkIns > 0 ? data.today.checkIns : undefined },
-    { title: "Security", desc: "Access and audit", href: "/settings/security", icon: ShieldCheck, accent: "rose" as Accent, permission: ["organizations.update", "audit.read"], badge: undefined as number | undefined },
-    { title: "Control", desc: "Gym settings", href: "/settings", icon: Settings, accent: "indigo" as Accent, permission: "organizations.read", badge: undefined as number | undefined },
+    { title: "Branches", desc: "Locations, kiosks and stock", href: "/branches", icon: Building2, accent: "blue" as Accent, permission: "branches.read", badge: branchItems.length, alert: false },
+    { title: "Members", desc: "Directory and memberships", href: "/members", icon: Users, accent: "cyan" as Accent, permission: ["members.read", "members.read_assigned"], badge: totalMembers, alert: false },
+    { title: "Revenue", desc: "Payments and invoices", href: "/billing", icon: Wallet, accent: "emerald" as Accent, permission: "payments.read", badge: outstandingRow?.membershipsWithBalance, alert: true },
+    { title: "AI", desc: "Agent and approvals", href: "/ai", icon: Sparkles, accent: "violet" as Accent, permission: "ai.generate", badge: data?.pendingAiActions, alert: true },
+    { title: "Operations", desc: "Attendance and inventory", href: "/attendance", icon: CalendarCheck, accent: "orange" as Accent, permission: ["attendance.read", "attendance.read_assigned"], badge: data?.today.checkIns, alert: false },
+    { title: "Security", desc: "Access and audit", href: "/settings/security", icon: ShieldCheck, accent: "rose" as Accent, permission: ["organizations.update", "audit.read"], badge: undefined as number | undefined, alert: false },
+    { title: "Control", desc: "Gym settings", href: "/settings", icon: Settings, accent: "indigo" as Accent, permission: "organizations.read", badge: undefined as number | undefined, alert: false },
   ].filter((item) => hasPermission(item.permission));
 
   if (!canViewReports) {
@@ -271,503 +296,456 @@ export default function DashboardPage() {
       <StaffHome
         firstName={user?.firstName}
         gymName={organization.data?.name}
+        timeZone={timezone}
         actions={visibleActions}
       />
     );
   }
 
-  return (
-    <div className="flex w-full flex-col gap-6 pb-8">
+  const branchPicker =
+    branchItems.length > 1 && !scopedBranchId ? (
+      <Select value={branchFilter ?? ALL_BRANCHES} onValueChange={chooseBranch}>
+        <SelectTrigger
+          aria-label="Branch"
+          className={cn(styles.glassPill, "h-8 w-auto min-w-36 gap-2 !rounded-full !border-border/70 !bg-card/70 text-xs font-semibold")}
+        >
+          <Building2 className="size-3.5 text-muted-foreground" aria-hidden="true" />
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL_BRANCHES}>All branches</SelectItem>
+          {branchItems.map((b) => (
+            <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    ) : null;
 
-      {/* ── Gym Health hero ───────────────────────────────────────── */}
+  return (
+    <div className="flex w-full flex-col gap-8 pb-10">
+
+      {/* ── Hero ─────────────────────────────────────────────────── */}
       <GymHealthHero
         gymName={gymName}
+        firstName={user?.firstName}
+        timeZone={timezone}
         health={gymHealth.data}
-        isLoading={gymHealth.isLoading}
+        isLoading={gymHealth.isLoading || !datedReady}
         isError={gymHealth.isError}
         onRetry={() => void gymHealth.refetch()}
-      />
+      >
+        {branchPicker}
+      </GymHealthHero>
 
-      {/* ── Branch picker (drives every figure below) ─────────────── */}
-      {branchItems.length > 1 && !scopedBranchId && (
-        <div className="-mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
-          <Select value={branchFilter ?? ALL_BRANCHES} onValueChange={chooseBranch}>
-            <SelectTrigger aria-label="Branch" className="h-8 w-auto min-w-40 rounded-xl bg-card text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_BRANCHES}>All branches</SelectItem>
-              {branchItems.map((b) => (
-                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {/* ── KPI Grid ────────────────────────────────────────────── */}
-      <section aria-labelledby="dash-kpis">
-        <h2 id="dash-kpis" className="sr-only">Key performance indicators</h2>
-
-        {/* Category header: Today */}
-        <div className="category-header kpi-cyan mb-3">
-          <span className="category-header-icon">
-            <CalendarCheck className="size-3.5" aria-hidden="true" />
-          </span>
-          <span className="category-header-label">Today</span>
-        </div>
-        <BentoGrid columns={6} label="Today's key figures" className="mb-6">
-          <StatCard
+      {/* ── Today ────────────────────────────────────────────────── */}
+      <DashSection id="dash-today" title="Today" subtitle={`On the floor · ${shortDay(todayStr)}`}>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+          <Tile
             icon={CalendarCheck}
             title="Check In"
+            accent="cyan"
+            feature
             value={data?.today.checkIns}
             hint={data?.today.deniedCheckIns ? `${data.today.deniedCheckIns} turned away at the door` : "Visits today"}
-            isLoading={briefing.isLoading}
+            isLoading={briefing.isLoading || !reportsReady}
             isError={briefing.isError}
-            tone="primary"
-            accent="cyan"
           />
-          <StatCard
+          <Tile
             icon={HandCoins}
             title="Collection"
-            value={todayCollection.data ? displayCurrencyAmount(todayCollectionRow?.grossRevenue ?? "0.00", todayCollectionRow?.currency ?? currencyCode) : undefined}
-            hint={todayCollectionRow && todayCollectionRow.paymentCount > 0
-              ? `Today · across ${todayCollectionRow.paymentCount} payments`
-              : "No collections yet"}
-            isLoading={todayCollection.isLoading}
-            isError={todayCollection.isError}
-            tone="success"
             accent="emerald"
+            value={todayCollection.data ? displayCurrencyAmount(todayCollectionRow?.grossRevenue ?? "0.00", todayCollectionRow?.currency ?? currencyCode, 0) : undefined}
+            hint={todayCollectionRow && todayCollectionRow.paymentCount > 0
+              ? `${todayCollectionRow.paymentCount} payment${todayCollectionRow.paymentCount === 1 ? "" : "s"} today`
+              : "No collections yet"}
+            isLoading={todayCollection.isLoading || !datedReady}
+            isError={todayCollection.isError}
           />
           {canReadMembers && (
-            <StatCard
+            <Tile
               icon={UserPlus}
               title="New Members"
+              accent="violet"
               value={newMembers.data?.total}
               hint="Joined today"
-              isLoading={newMembers.isLoading}
+              isLoading={newMembers.isLoading || !datedReady}
               isError={newMembers.isError}
-              tone="primary"
-              accent="violet"
             />
           )}
           {canReadMemberships && (
-            <StatCard
+            <Tile
               icon={RefreshCw}
               title="Renewals"
-              value={todayMemberships.data ? renewalsToday : undefined}
+              accent="amber"
+              value={todayMemberships.data ? `${renewalsToday}${renewalsTruncated ? "+" : ""}` : undefined}
               hint={todayMemberships.data && todayMemberships.data.total > 0
                 ? `Of ${todayMemberships.data.total} started today`
                 : "None renewed today"}
-              isLoading={todayMemberships.isLoading}
+              isLoading={todayMemberships.isLoading || !datedReady}
               isError={todayMemberships.isError}
-              tone="primary"
-              accent="amber"
             />
           )}
           {canReadLeads && (
-            <StatCard
+            <Tile
               icon={Megaphone}
               title="Leads"
+              accent="rose"
               value={todayLeads.data?.total}
               hint="New enquiries today"
-              isLoading={todayLeads.isLoading}
+              isLoading={todayLeads.isLoading || !datedReady}
               isError={todayLeads.isError}
-              tone="primary"
-              accent="rose"
             />
           )}
           {canReadWorkouts && (
-            <StatCard
+            <Tile
               icon={Dumbbell}
-              title="PT Sessions"
-              value={todaySessions.data?.length}
-              hint="On today's floor"
-              isLoading={todaySessions.isLoading}
-              isError={todaySessions.isError}
-              tone="primary"
+              title="Workouts"
               accent="blue"
+              value={todaySessions.data?.length}
+              hint="Training sessions today"
+              isLoading={todaySessions.isLoading || !datedReady}
+              isError={todaySessions.isError}
             />
           )}
-        </BentoGrid>
+        </div>
+      </DashSection>
 
-        <SectionHeader
-          title="Finance"
-          action={
-            <span className="kpi-trend kpi-trend-neutral" role="status">
-              {financeSummary.isLoading ? "Loading…" : rangeLabel}
-            </span>
-          }
-        />
-        {/* Period selector: presets plus a custom range. Every choice
-            re-queries the revenue summary, so the four KPIs below always
-            reflect the selected period — except Outstanding, which is a
-            live balance by definition (see its hint). */}
-        <div className="mb-3 flex flex-col gap-2">
+      {/* ── Finance ─────────────────────────────────────────────── */}
+      <DashSection
+        id="dash-finance"
+        title="Finance"
+        subtitle={financeSummary.isLoading ? "Loading…" : rangeLabel}
+        subtitleLive
+        action={
           <div className="flex flex-wrap items-center gap-2">
-            {/* Segmented presets: plain buttons with pressed state, so the
-                control works identically with mouse, touch, keyboard and
-                assistive tech — no menu library needed for five options. */}
-            <div
-              role="group"
-              aria-label="Finance period"
-              className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-xl border border-border bg-surface-sunken p-1"
-            >
-              {FINANCE_PRESETS.map((preset) => {
-                const active = financePreset === preset.value;
-                return (
-                  <button
-                    key={preset.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setFinancePreset(preset.value)}
-                    className={active
-                      ? "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-card px-3.5 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition-all duration-200 touch-manipulation"
-                      : "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-all duration-200 hover:text-foreground touch-manipulation"}
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })}
-            </div>
+            {/* Plain buttons with pressed state: works identically with
+                mouse, touch, keyboard and assistive tech. */}
+            <Segmented
+              label="Finance period"
+              options={FINANCE_PRESETS}
+              value={financePreset === "custom" ? null : financePreset}
+              onChange={setFinancePreset}
+            />
             <Button
               variant={financePreset === "custom" ? "default" : "outline"}
               size="sm"
-              className="min-h-11 rounded-xl"
+              className="min-h-11 rounded-full px-4"
               aria-expanded={customOpen}
               onClick={() => setCustomOpen((open) => !open)}
             >
               <CalendarDays className="size-4" aria-hidden="true" />
               {financePreset === "custom" && customRange
-                ? `${shortDay(customRange.from, timezone)} – ${shortDay(customRange.to, timezone)}`
+                ? `${shortDay(customRange.from)} – ${shortDay(customRange.to)}`
                 : "Custom"}
             </Button>
           </div>
-          {customOpen && (
-            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-              <p className="mb-3 text-sm font-semibold tracking-tight">Custom range</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label htmlFor="finance-from" className="mb-1 block text-xs font-semibold text-muted-foreground">
-                    Start date
-                  </label>
-                  <Input
-                    id="finance-from"
-                    type="date"
-                    value={draftFrom}
-                    max={draftTo || undefined}
-                    onChange={(e) => setDraftFrom(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="finance-to" className="mb-1 block text-xs font-semibold text-muted-foreground">
-                    End date
-                  </label>
-                  <Input
-                    id="finance-to"
-                    type="date"
-                    value={draftTo}
-                    min={draftFrom || undefined}
-                    onChange={(e) => setDraftTo(e.target.value)}
-                  />
-                </div>
+        }
+      >
+        {customOpen && (
+          <div className={cn(styles.panel, "w-full max-w-md self-end")}>
+            <p className="mb-3 text-sm font-semibold tracking-tight">Custom range</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label htmlFor="finance-from" className="mb-1 block text-xs font-semibold text-muted-foreground">
+                  Start date
+                </label>
+                <Input
+                  id="finance-from"
+                  type="date"
+                  value={draftFrom}
+                  max={draftTo || todayStr}
+                  onChange={(e) => setDraftFrom(e.target.value)}
+                />
               </div>
-              {!draftFrom || !draftTo ? (
-                <p className="mt-2 text-xs text-muted-foreground">Pick a start and an end date.</p>
-              ) : draftFrom > draftTo ? (
-                <p className="mt-2 text-xs font-semibold text-destructive" role="alert">
-                  Start date must be on or before the end date.
-                </p>
-              ) : null}
-              <div className="mt-3 flex gap-2">
-                <Button
-                  size="sm"
-                  className="min-h-11 flex-1"
-                  disabled={!draftFrom || !draftTo || draftFrom > draftTo}
-                  onClick={() => {
-                    setCustomRange({ from: draftFrom, to: draftTo });
-                    setFinancePreset("custom");
-                    setCustomOpen(false);
-                  }}
-                >
-                  Apply
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="min-h-11"
-                  onClick={() => {
-                    setDraftFrom("");
-                    setDraftTo("");
-                    setCustomRange(null);
-                    setFinancePreset("30d");
-                    setCustomOpen(false);
-                  }}
-                >
-                  Reset
-                </Button>
+              <div>
+                <label htmlFor="finance-to" className="mb-1 block text-xs font-semibold text-muted-foreground">
+                  End date
+                </label>
+                <Input
+                  id="finance-to"
+                  type="date"
+                  value={draftTo}
+                  min={draftFrom || undefined}
+                  max={todayStr}
+                  onChange={(e) => setDraftTo(e.target.value)}
+                />
               </div>
             </div>
-          )}
-        </div>
-        <BentoGrid columns={4} label="Finance figures">
-          <StatCard
+            {!draftFrom || !draftTo ? (
+              <p className="mt-2 text-xs text-muted-foreground">Pick a start and an end date.</p>
+            ) : draftFrom > draftTo ? (
+              <p className="mt-2 text-xs font-semibold text-destructive" role="alert">
+                Start date must be on or before the end date.
+              </p>
+            ) : null}
+            <div className="mt-3 flex gap-2">
+              <Button
+                size="sm"
+                className="min-h-11 flex-1 rounded-full"
+                disabled={!draftFrom || !draftTo || draftFrom > draftTo}
+                onClick={() => {
+                  setCustomRange({ from: draftFrom, to: draftTo });
+                  setFinancePreset("custom");
+                  setCustomOpen(false);
+                }}
+              >
+                Apply
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="min-h-11 rounded-full"
+                onClick={() => {
+                  setDraftFrom("");
+                  setDraftTo("");
+                  setCustomRange(null);
+                  setFinancePreset("30d");
+                  setCustomOpen(false);
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
+        )}
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <Tile
             icon={Wallet}
             title="Net revenue"
+            accent="emerald"
+            feature
             value={financeSummary.data ? displayCurrencyAmount(summaryRow?.netRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint="After refunds"
-            isLoading={financeSummary.isLoading}
+            isLoading={financeSummary.isLoading || !datedReady}
             isError={financeSummary.isError}
-            tone="success"
-            accent="emerald"
           />
-          <StatCard
+          <Tile
             icon={HandCoins}
             title="Collected amount"
+            accent="cyan"
             value={financeSummary.data ? displayCurrencyAmount(summaryRow?.grossRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint={summaryRow && summaryRow.paymentCount > 0
-              ? `Across ${summaryRow.paymentCount} payments`
-              : "No collections yet"}
-            isLoading={financeSummary.isLoading}
+              ? `Across ${summaryRow.paymentCount} payments${Number(summaryRow.productRevenue ?? 0) > 0 ? " + product sales" : ""}`
+              : Number(summaryRow?.productRevenue ?? 0) > 0 ? "Product sales only" : "No collections yet"}
+            isLoading={financeSummary.isLoading || !datedReady}
             isError={financeSummary.isError}
-            tone="primary"
-            accent="cyan"
           />
-          <StatCard
+          <Tile
             icon={Scale}
             title="Outstanding amount"
+            accent="amber"
             value={financeSummary.data ? displayCurrencyAmount(summaryOutstanding?.outstandingBalance ?? "0.00", summaryOutstanding?.currency ?? currencyCode) : undefined}
             hint={summaryOutstanding && summaryOutstanding.membershipsWithBalance > 0
               ? `On ${summaryOutstanding.membershipsWithBalance} memberships · live balance`
               : "Nothing owed"}
-            isLoading={financeSummary.isLoading}
+            isLoading={financeSummary.isLoading || !datedReady}
             isError={financeSummary.isError}
-            tone="warning"
-            accent="amber"
           />
-          <StatCard
+          <Tile
             icon={ShoppingBag}
             title="Inventory sale"
+            accent="violet"
             value={financeSummary.data ? displayCurrencyAmount(summaryRow?.productRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint="Product sales in period"
-            isLoading={financeSummary.isLoading}
+            isLoading={financeSummary.isLoading || !datedReady}
             isError={financeSummary.isError}
-            tone="primary"
-            accent="violet"
           />
-        </BentoGrid>
-      </section>
+        </div>
+      </DashSection>
 
       {/* ── Revenue at risk (same gym-health request as the hero) ─── */}
       <GymHealthRevenueRisk
         health={gymHealth.data}
-        isLoading={gymHealth.isLoading}
+        isLoading={gymHealth.isLoading || !datedReady}
+        isError={gymHealth.isError}
       />
 
+      {/* ── Charts ──────────────────────────────────────────────── */}
+      <section aria-label="Revenue trend and member status" className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className={cn(styles.panel, "min-w-0")}>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className={styles.sectionTitle}>Revenue</h2>
+              <p className={styles.sectionSub}>Last 6 months · net of refunds</p>
+            </div>
+            {hasPermission("payments.read") && (
+              <Button asChild variant="ghost" size="sm" className="min-h-11 rounded-full">
+                <Link href="/billing">Details</Link>
+              </Button>
+            )}
+          </div>
+          {revenueTrend.isLoading || !reportsReady ? (
+            <Skeleton className="h-44 w-full rounded-2xl" aria-label="Loading revenue chart" />
+          ) : revenueTrend.isError ? (
+            <ErrorState message="Could not load revenue trend." onRetry={() => void revenueTrend.refetch()} />
+          ) : !hasRevenue ? (
+            <EmptyState title="No revenue yet" description="Revenue will appear here once payments are recorded." />
+          ) : (
+            <>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Peak{" "}
+                <span className="text-base font-bold tabular-nums tracking-tight text-foreground">
+                  {currencySymbol(chartCurrency)}{maxRevenue.toLocaleString("en-IN")}
+                </span>
+              </p>
+              <div
+                role="img"
+                aria-label={`Revenue trend: ${monthlyData.map((d) => `${d.day} ${d.value}`).join(", ")}`}
+                className={styles.bars}
+              >
+                {monthlyData.map((d, i) => {
+                  const isCurrentMonth = i === monthlyData.length - 1;
+                  const pct = d.value > 0 ? Math.max(6, Math.round((d.value / maxRevenue) * 100)) : 0;
+                  return (
+                    <div key={`${d.day}-${i}`} className={styles.barCol} title={`${d.day}: ${currencySymbol(chartCurrency)}${d.value.toLocaleString("en-IN")}`}>
+                      <div className={styles.barTrack} aria-hidden="true">
+                        <div
+                          className={cn(styles.bar, isCurrentMonth && styles.barCurrent)}
+                          style={{ height: `${pct}%` }}
+                        />
+                      </div>
+                      <span
+                        className={cn(
+                          "truncate text-xs",
+                          isCurrentMonth ? "font-semibold text-foreground" : "text-muted-foreground",
+                        )}
+                      >
+                        {d.day}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <table className="sr-only">
+                <caption>Revenue by month</caption>
+                <thead><tr><th scope="col">Month</th><th scope="col">Value</th></tr></thead>
+                <tbody>
+                  {monthlyData.map((d, i) => (
+                    <tr key={`${d.day}-${i}`}><th scope="row">{d.day}</th><td>{d.value}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+
+        <div className={cn(styles.panel, "min-w-0 overflow-hidden")}>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className={styles.sectionTitle}>Members</h2>
+              <p className={styles.sectionSub}>By status</p>
+            </div>
+            {hasPermission(["members.read", "members.read_assigned"]) && (
+              <Button asChild variant="ghost" size="sm" className="min-h-11 rounded-full">
+                <Link href="/members">All members</Link>
+              </Button>
+            )}
+          </div>
+          {statusBreakdown.isLoading || !reportsReady ? (
+            <DonutChart segments={[]} isLoading size={140} />
+          ) : statusBreakdown.isError ? (
+            <ErrorState message="Could not load member breakdown." onRetry={() => void statusBreakdown.refetch()} />
+          ) : (
+            <>
+              <DonutChart
+                segments={memberDonutSegments}
+                centerValue={totalMembers.toLocaleString("en-IN")}
+                centerLabel="Total"
+                size={148}
+                strokeWidth={20}
+                showLegend
+              />
+              <table className="sr-only">
+                <caption>Members by status</caption>
+                <thead><tr><th scope="col">Status</th><th scope="col">Count</th></tr></thead>
+                <tbody>
+                  {memberDonutSegments.map((seg) => (
+                    <tr key={seg.label}>
+                      <th scope="row">{seg.label}</th>
+                      <td>{seg.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* ── Priorities + launcher ──────────────────────────────── */}
+      <section aria-label="Needs attention and shortcuts" className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+        {reportsReady ? (
+          <PriorityActions
+            branchFilter={branchFilter}
+            outstandingBalance={summaryOutstanding?.outstandingBalance}
+            outstandingCount={summaryOutstanding?.membershipsWithBalance ?? 0}
+            currencyCode={summaryOutstanding?.currency ?? currencyCode}
+            atRiskCount={data?.atRiskMembers.count ?? 0}
+            pendingAiActions={data?.pendingAiActions ?? 0}
+          />
+        ) : (
+          <Skeleton className="h-64 w-full rounded-3xl" aria-label="Loading priorities" />
+        )}
+
+        <div className="flex flex-col gap-6">
+          <Launcher id="dash-quick" title="Quick actions" emptyHint="Your account doesn't include any of these actions.">
+            {visibleActions.map(([title, desc, href, Icon, , color]) => (
+              <AppIconLink key={href} href={href} icon={Icon} label={title} hint={desc} accent={color} />
+            ))}
+          </Launcher>
+          {jumpItems.length > 0 && (
+            <Launcher id="dash-jump" title="Jump to">
+              {jumpItems.map((item) => (
+                <AppIconLink
+                  key={item.href}
+                  href={item.href}
+                  icon={item.icon}
+                  label={item.title}
+                  hint={item.desc}
+                  accent={item.accent}
+                  badge={item.badge}
+                  badgeTone={item.alert ? "alert" : "neutral"}
+                />
+              ))}
+            </Launcher>
+          )}
+        </div>
+      </section>
+
+      {/* ── Why this score ──────────────────────────────────────── */}
       <GymHealthPanels
         health={gymHealth.data}
-        isLoading={gymHealth.isLoading}
+        isLoading={gymHealth.isLoading || !datedReady}
         isError={gymHealth.isError}
         onRetry={() => void gymHealth.refetch()}
       />
-
-      {/* ── Jump to ─────────────────────────────────────────────── */}
-      {jumpItems.length > 0 && (
-        <div>
-          <SectionHeader title="Jump to" />
-          <BentoGrid columns={3} label="Jump to a section">
-            {jumpItems.map((item) => (
-              <QuickActionCard
-                key={item.href}
-                icon={item.icon}
-                label={item.title}
-                hint={item.desc}
-                accent={item.accent}
-                href={item.href}
-                badge={item.badge}
-              />
-            ))}
-          </BentoGrid>
-        </div>
-      )}
-
-      {/* ── Charts row ──────────────────────────────────────────── */}
-      <section
-        aria-label="Revenue trend and member status"
-        className="grid gap-4 xl:grid-cols-[1.4fr_1fr]"
-      >
-        {/* Revenue bar chart */}
-        <Card>
-          <CardHeader className="border-b pb-4">
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em]">
-                Revenue · last 6 months
-              </CardTitle>
-              {hasPermission("payments.read") && (
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/billing">Details</Link>
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="pt-5">
-            {revenueTrend.isLoading ? (
-              <Skeleton className="h-44 w-full rounded-xl" aria-label="Loading revenue chart" />
-            ) : revenueTrend.isError ? (
-              <ErrorState message="Could not load revenue trend." onRetry={() => void revenueTrend.refetch()} />
-            ) : !hasRevenue ? (
-              <EmptyState title="No revenue yet" description="Revenue will appear here once payments are recorded." />
-            ) : (
-              <>
-                <p className="mb-3 text-xs text-muted-foreground">
-                  Peak{" "}
-                  <span className="font-semibold tabular-nums text-foreground">
-                    {currencySymbol(chartCurrency)}{maxRevenue.toLocaleString()}
-                  </span>{" "}
-                  · net of refunds
-                </p>
-                <div
-                  role="img"
-                  aria-label={`Revenue trend: ${weeklyData.map((d) => `${d.day} ${d.value}`).join(", ")}`}
-                  className="flex h-44 items-end gap-2"
-                >
-                  {weeklyData.map((d, i) => {
-                    const isCurrentMonth = i === weeklyData.length - 1;
-                    const pct = Math.max(4, Math.round((d.value / maxRevenue) * 100));
-                    return (
-                      <div
-                        key={d.day}
-                        className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
-                        title={`${d.day}: ${d.value}`}
-                      >
-                        <div className="flex h-36 w-full items-end border-b border-border" aria-hidden="true">
-                          <div
-                            className="w-full rounded-t-md transition-[height] motion-reduce:transition-none"
-                            style={{
-                              height: `${pct}%`,
-                              background: isCurrentMonth
-                                ? "linear-gradient(180deg, var(--a-indigo-grad-1), var(--a-indigo-grad-2))"
-                                : "linear-gradient(180deg, color-mix(in oklab, var(--a-indigo-grad-1) 45%, transparent), color-mix(in oklab, var(--a-indigo-grad-2) 45%, transparent))",
-                              borderRadius: "4px 4px 2px 2px",
-                            }}
-                          />
-                        </div>
-                        <span className="truncate text-xs text-muted-foreground">{d.day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* Screen-reader table */}
-                <table className="sr-only">
-                  <caption>Revenue by month</caption>
-                  <thead><tr><th scope="col">Month</th><th scope="col">Value</th></tr></thead>
-                  <tbody>
-                    {weeklyData.map((d) => (
-                      <tr key={d.day}><th scope="row">{d.day}</th><td>{d.value}</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Member status donut */}
-        <Card>
-          <CardHeader className="border-b pb-4">
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em]">
-                Members by status
-              </CardTitle>
-              {hasPermission(["members.read", "members.read_assigned"]) && (
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/members">All members</Link>
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="pt-5">
-            {statusBreakdown.isLoading ? (
-              <DonutChart segments={[]} isLoading size={140} />
-            ) : statusBreakdown.isError ? (
-              <ErrorState
-                message="Could not load member breakdown."
-                onRetry={() => void statusBreakdown.refetch()}
-              />
-            ) : (
-              <>
-                <DonutChart
-                  segments={memberDonutSegments}
-                  centerValue={totalMembers.toLocaleString()}
-                  centerLabel="Total"
-                  size={140}
-                  strokeWidth={22}
-                  showLegend
-                />
-                {/* Screen-reader table — duplicates the legend so status
-                    labels appear twice, which the test suite asserts on. */}
-                <table className="sr-only">
-                  <caption>Members by status</caption>
-                  <thead><tr><th scope="col">Status</th><th scope="col">Count</th></tr></thead>
-                  <tbody>
-                    {memberDonutSegments.map((seg) => (
-                      <tr key={seg.label}>
-                        <th scope="row">{seg.label}</th>
-                        <td>{seg.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* ── Attention + Quick actions row ───────────────────────── */}
-      <section
-        aria-label="Needs attention and quick actions"
-        className="grid gap-4 xl:grid-cols-[1fr_1fr]"
-      >
-        <PriorityActions
-          branchFilter={branchFilter}
-          outstandingBalance={summaryOutstanding?.outstandingBalance}
-          outstandingCount={summaryOutstanding?.membershipsWithBalance ?? 0}
-          currencyCode={summaryOutstanding?.currency ?? currencyCode}
-          atRiskCount={data?.atRiskMembers.count ?? 0}
-          pendingAiActions={data?.pendingAiActions ?? 0}
-        />
-
-        {/* Quick actions grid */}
-        <section aria-labelledby="dash-quick">
-          <h2
-            id="dash-quick"
-            className="section-title mb-4 text-base font-semibold tracking-tight"
-          >
-            Quick actions
-          </h2>
-          {visibleActions.length > 0 ? (
-            <BentoGrid columns={2} label="Quick actions">
-              {visibleActions.map(([title, desc, href, Icon, , color]) => (
-                <QuickActionCard
-                  key={href}
-                  icon={Icon}
-                  label={title}
-                  hint={desc}
-                  accent={color}
-                  href={href}
-                />
-              ))}
-            </BentoGrid>
-          ) : (
-            <EmptyState
-              title="Nothing to do here yet"
-              description="Your account doesn't include any of these actions."
-            />
-          )}
-        </section>
-      </section>
     </div>
+  );
+}
+
+/* ─── Launcher: an app-icon grid in a panel ─────────────────────── */
+function Launcher({
+  id,
+  title,
+  emptyHint,
+  children,
+}: {
+  id: string;
+  title: string;
+  emptyHint?: string;
+  children: React.ReactNode;
+}) {
+  const hasItems = React.Children.count(children) > 0;
+  return (
+    <DashSection id={id} title={title}>
+      <div className={cn(styles.panel, "p-3 sm:p-3")}>
+        {hasItems ? (
+          <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 xl:grid-cols-4">{children}</div>
+        ) : (
+          <EmptyState title="Nothing to do here yet" description={emptyHint} />
+        )}
+      </div>
+    </DashSection>
   );
 }
 
@@ -777,48 +755,35 @@ export default function DashboardPage() {
 function StaffHome({
   firstName,
   gymName,
+  timeZone,
   actions,
 }: {
   firstName?: string;
   gymName?: string;
+  timeZone?: string | null;
   actions: ReadonlyArray<(typeof QUICK_ACTIONS)[number]>;
 }) {
+  const today = useGymToday(timeZone);
   return (
-    <div className="flex w-full flex-col gap-6 pb-8">
-      <PageHero
-        id="dashboard-title"
-        eyebrow=""
-        title={gymName ?? (firstName ? `Welcome, ${firstName}` : "Welcome")}
-        description="Here's what you can do from here today."
-        compact
-        centered
-        tone="noir"
-      />
-
-      <section aria-labelledby="dash-quick">
-        <h2 id="dash-quick" className="section-title mb-4 text-base font-semibold">
-          Quick actions
-        </h2>
-        {actions.length > 0 ? (
-          <BentoGrid columns={3} label="Quick actions">
-            {actions.map(([title, desc, href, Icon, , color]) => (
-              <QuickActionCard
-                key={href}
-                icon={Icon}
-                label={title}
-                hint={desc}
-                accent={color}
-                href={href}
-              />
-            ))}
-          </BentoGrid>
-        ) : (
-          <EmptyState
-            title="Nothing to do here yet"
-            description="Your account doesn't include any of these actions. Ask the gym owner for access."
-          />
-        )}
+    <div className="flex w-full flex-col gap-8 pb-10">
+      <section aria-labelledby="dashboard-title" className={styles.hero}>
+        <div className={styles.aurora} aria-hidden="true" />
+        <p className={styles.eyebrow}>{shortDay(today)}</p>
+        <h1 id="dashboard-title" className={styles.gymName}>
+          {gymName ?? (firstName ? `Welcome, ${firstName}` : "Welcome")}
+        </h1>
+        <p className={styles.greeting}>Here&apos;s what you can do from here today.</p>
       </section>
+
+      <Launcher
+        id="dash-quick"
+        title="Quick actions"
+        emptyHint="Your account doesn't include any of these actions. Ask the gym owner for access."
+      >
+        {actions.map(([title, desc, href, Icon, , color]) => (
+          <AppIconLink key={href} href={href} icon={Icon} label={title} hint={desc} accent={color} />
+        ))}
+      </Launcher>
     </div>
   );
 }

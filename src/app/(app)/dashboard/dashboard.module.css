@@ -1,0 +1,391 @@
+/*
+ * Owner dashboard — "Aurora" layer.
+ *
+ * Scoped to this route (a CSS Module, per the Next.js CSS guide) and
+ * built only from the tokens in globals.css: every hue is a `--a-*`
+ * accent step, every surface a `--card`/`--border`/`--shadow-*` token,
+ * so dark mode and the section system keep working with no overrides.
+ *
+ * Colour lives in light washes, gradient icon discs and one vivid
+ * feature tile per row. Numbers always sit on a near-card ground, so
+ * contrast never depends on the hue behind them.
+ */
+
+/* --- Accent plumbing: one class per hue sets the two stops ------- */
+.indigo  { --t1: var(--a-indigo-grad-1);  --t2: var(--a-indigo-grad-2);  --ink: var(--a-indigo-ink); }
+.violet  { --t1: var(--a-violet-grad-1);  --t2: var(--a-violet-grad-2);  --ink: var(--a-violet-ink); }
+.rose    { --t1: var(--a-rose-grad-1);    --t2: var(--a-rose-grad-2);    --ink: var(--a-rose-ink); }
+.emerald { --t1: var(--a-emerald-grad-1); --t2: var(--a-emerald-grad-2); --ink: var(--a-emerald-ink); }
+.amber   { --t1: var(--a-amber-grad-1);   --t2: var(--a-amber-grad-2);   --ink: var(--a-amber-ink); }
+.cyan    { --t1: var(--a-cyan-grad-1);    --t2: var(--a-cyan-grad-2);    --ink: var(--a-cyan-ink); }
+.blue    { --t1: var(--a-blue-grad-1);    --t2: var(--a-blue-grad-2);    --ink: var(--a-blue-ink); }
+.orange  { --t1: var(--a-orange-grad-1);  --t2: var(--a-orange-grad-2);  --ink: var(--a-orange-ink); }
+
+/* --- Hero ------------------------------------------------------- */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-raised);
+  padding: 1.5rem;
+}
+@media (min-width: 640px) {
+  .hero { padding: 2rem 2.25rem; }
+}
+
+/* Four soft colour fields drifting slowly behind frosted glass. */
+.aurora {
+  position: absolute;
+  inset: -40%;
+  z-index: -2;
+  background:
+    radial-gradient(32% 38% at 18% 30%, color-mix(in oklab, var(--a-violet-grad-1) 42%, transparent), transparent 70%),
+    radial-gradient(30% 36% at 78% 18%, color-mix(in oklab, var(--a-rose-grad-1) 34%, transparent), transparent 70%),
+    radial-gradient(34% 40% at 70% 82%, color-mix(in oklab, var(--a-cyan-grad-1) 34%, transparent), transparent 70%),
+    radial-gradient(28% 34% at 30% 85%, color-mix(in oklab, var(--a-orange-grad-1) 26%, transparent), transparent 70%);
+  filter: blur(28px) saturate(130%);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+.hero::after {
+  /* Frosted veil keeps text on a calm ground. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in oklab, var(--card) 58%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  100% { transform: translate3d(4%, -3%, 0) rotate(8deg); }
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.gymName {
+  margin-top: 0.35rem;
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  background: linear-gradient(120deg, var(--foreground) 0%, var(--foreground) 45%, var(--a-violet-ink) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  overflow-wrap: anywhere;
+}
+.greeting {
+  margin-top: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+}
+
+.glassPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  color: var(--foreground);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.statusDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--dot, var(--muted-foreground));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--dot, var(--muted-foreground)) 22%, transparent);
+}
+
+.ringPanel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 1.5rem;
+  padding: 0.85rem 1.1rem 0.85rem 0.85rem;
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* --- Section heading ------------------------------------------- */
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--foreground);
+}
+.sectionSub {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+/* --- Tiles ------------------------------------------------------ */
+.tile {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 9.5rem;
+  border-radius: 1.5rem;
+  padding: 1.1rem 1.1rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--t1) 16%, var(--border));
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--t2) 16%, transparent), transparent 60%),
+    linear-gradient(165deg, color-mix(in oklab, var(--t1) 9%, var(--card)) 0%, var(--card) 72%);
+  box-shadow: var(--shadow-card);
+  container-type: inline-size;
+  transition:
+    transform var(--duration-base, 200ms) var(--ease-out, ease-out),
+    box-shadow var(--duration-base, 200ms) var(--ease-out, ease-out);
+}
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-raised);
+}
+
+/* Feature tile: the one vivid surface in a row. White type on the
+   darker gradient stop (L ≈ 0.31–0.55) clears 4.5:1. */
+.tileFeature {
+  border-color: transparent;
+  background:
+    radial-gradient(90% 80% at 100% 0%, color-mix(in oklab, white 18%, transparent), transparent 60%),
+    linear-gradient(140deg, var(--t1) 0%, var(--t2) 100%);
+  color: #fff;
+  box-shadow: 0 18px 36px -18px color-mix(in oklab, var(--t1) 70%, transparent), var(--shadow-card);
+}
+.tileFeature .tileLabel,
+.tileFeature .tileHint { color: rgb(255 255 255 / 0.86); }
+.tileFeature .tileValue { color: #fff; }
+.tileFeature .iconDisc {
+  background: rgb(255 255 255 / 0.2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+
+.iconDisc {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.9rem;
+  color: #fff;
+  background: linear-gradient(140deg, var(--t1), var(--t2));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 6px 14px -6px color-mix(in oklab, var(--t1) 70%, transparent);
+  flex-shrink: 0;
+}
+.tileLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.tileValue {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  font-size: clamp(1.05rem, 12cqi, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+  overflow-wrap: break-word;
+}
+.tileHint {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+}
+
+/* --- Segmented control (iOS) ----------------------------------- */
+.segmented {
+  display: inline-flex;
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+}
+.segment {
+  min-height: 2.75rem;
+  min-width: 3rem;
+  padding: 0 0.95rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  transition: background-color 160ms ease-out, color 160ms ease-out, box-shadow 160ms ease-out;
+  touch-action: manipulation;
+}
+.segment:hover { color: var(--foreground); }
+.segment[aria-pressed="true"] {
+  color: var(--foreground);
+  background: var(--card);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08), 0 4px 12px -6px rgb(15 23 42 / 0.18);
+}
+.segment:focus-visible,
+.appIcon:focus-visible,
+.row:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- Panels ----------------------------------------------------- */
+.panel {
+  min-width: 0;
+  border-radius: 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  padding: 1.25rem;
+}
+@media (min-width: 640px) {
+  .panel { padding: 1.5rem; }
+}
+
+/* --- Revenue bars ---------------------------------------------- */
+.bars {
+  display: flex;
+  height: 11rem;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+.barCol {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+.barTrack {
+  display: flex;
+  height: 9rem;
+  width: 100%;
+  align-items: flex-end;
+  border-radius: 0.85rem;
+  background: var(--surface-sunken);
+}
+.bar {
+  width: 100%;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--a-violet-grad-1) 55%, transparent),
+    color-mix(in oklab, var(--a-indigo-grad-1) 45%, transparent));
+  transition: height 500ms var(--ease-out, ease-out);
+}
+.barCurrent {
+  background: linear-gradient(180deg, var(--a-rose-grad-1) 0%, var(--a-violet-grad-1) 55%, var(--a-indigo-grad-1) 100%);
+  box-shadow: 0 10px 22px -10px color-mix(in oklab, var(--a-violet-grad-1) 75%, transparent);
+}
+
+/* --- Health breakdown meters ----------------------------------- */
+.meter {
+  height: 0.5rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--surface-sunken);
+}
+.meterFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--t1), var(--t2));
+}
+
+/* --- Grouped list rows (Settings-style) ------------------------ */
+.row {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  gap: 0.85rem;
+  border-radius: 1rem;
+  padding: 0.7rem 0.75rem;
+  transition: background-color 160ms ease-out;
+}
+.row:hover { background: var(--surface-hover); }
+
+/* --- App-icon launcher ----------------------------------------- */
+.appIcon {
+  position: relative;
+  display: flex;
+  min-height: 2.75rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 1.25rem;
+  padding: 0.75rem 0.25rem;
+  text-align: center;
+  transition: background-color 160ms ease-out;
+}
+.appIcon:hover { background: var(--surface-hover); }
+.appGlyph {
+  display: flex;
+  width: 3.5rem;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.1rem;
+  color: #fff;
+  background:
+    radial-gradient(80% 70% at 30% 15%, rgb(255 255 255 / 0.28), transparent 60%),
+    linear-gradient(150deg, var(--t1), var(--t2));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    0 10px 20px -10px color-mix(in oklab, var(--t1) 80%, transparent);
+  transition: transform 200ms var(--ease-out, ease-out);
+}
+.appIcon:hover .appGlyph { transform: translateY(-2px) scale(1.04); }
+.appIcon:active .appGlyph { transform: scale(0.96); }
+.appBadge {
+  position: absolute;
+  top: 0.35rem;
+  right: calc(50% - 2.1rem);
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 9999px;
+  background: var(--destructive);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--card);
+}
+
+.appBadgeNeutral {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora { animation: none; }
+  .tile:hover,
+  .appIcon:hover .appGlyph { transform: none; }
+  .tile,
+  .bar,
+  .appGlyph { transition: none; }
+}
