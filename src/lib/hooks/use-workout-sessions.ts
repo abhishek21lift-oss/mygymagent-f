@@ -41,11 +41,14 @@ export type WorkoutSession = WorkoutSessionSummary & {
 
 const KEY = "workout-sessions"
 
-export function useTodayWorkoutSessions({ enabled = true }: { enabled?: boolean } = {}) {
+/** Today on the gym's own calendar. `branchId` narrows to one branch;
+ * an enforced branch scope on the server always wins. */
+export function useTodayWorkoutSessions({ enabled = true, branchId }: { enabled?: boolean; branchId?: string } = {}) {
   return useQuery({
-    queryKey: [KEY, "today"],
+    queryKey: [KEY, "today", branchId ?? "all"],
     enabled,
-    queryFn: () => api.get<WorkoutSessionSummary[]>("/workout-sessions/today"),
+    queryFn: () =>
+      api.get<WorkoutSessionSummary[]>("/workout-sessions/today", branchId ? { query: { branchId } } : undefined),
   })
 }
 

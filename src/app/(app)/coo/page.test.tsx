@@ -84,6 +84,9 @@ beforeEach(() => {
       return { expiring: [], neverStarted: [], counts: { expiring: 0, neverStarted: 0, activePackages: 0 } }
     }
     if (path === "/ai-actions?status=PENDING_APPROVAL") return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0 }
+    if (path === "/ai-actions/effectiveness") {
+      return { total: 6, pending: 0, approved: 0, executed: 5, rejected: 1, failed: 0, acceptanceRate: 0.83, executionRate: 1 }
+    }
     if (path === "/ai-actions?status=EXECUTED") return { items: [], total: 5, page: 1, pageSize: 1, totalPages: 5 }
     if (path === "/ai-actions?status=REJECTED") return { items: [], total: 1, page: 1, pageSize: 1, totalPages: 1 }
     throw new Error(`unexpected GET ${path}`)

@@ -1,218 +1,196 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import * as React from "react";
+import {
+  AlertTriangle,
+  Boxes,
+  HandCoins,
+  HeartPulse,
+  Megaphone,
+  RefreshCw,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 
-import { BentoCard, BentoGrid, SectionHeader } from "@/components/shared/bento";
-import { StatCard } from "@/components/shared/stat-card";
-import { ProgressRing } from "@/components/shared/progress-ring";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-import { displayCurrencyAmount } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import type { Accent } from "@/lib/section-accent";
+import { cn, displayCurrencyAmount } from "@/lib/utils";
 import type {
   GymHealth,
   HealthComponent,
   HealthStatus,
 } from "@/lib/hooks/use-gym-health";
+import { DashSection, HealthRing, Tile, accentStyle } from "./dashboard-ui";
+import styles from "./dashboard.module.css";
 
-const STATUS_META: Record<
-  HealthStatus,
-  { label: string; fill: string; line: string }
-> = {
-  healthy: {
-    label: "Healthy",
-    fill: "var(--success)",
-    line: "Your gym is performing well.",
-  },
-  stable: {
-    label: "Stable",
-    fill: "var(--info)",
-    line: "Your gym is steady with room to grow.",
-  },
-  "needs-attention": {
-    label: "Needs attention",
-    fill: "var(--warning)",
-    line: "A few areas need attention.",
-  },
-  critical: {
-    label: "Critical",
-    fill: "var(--destructive)",
-    line: "Your gym needs urgent attention.",
-  },
-  unknown: {
-    label: "Unknown",
-    fill: "var(--muted-foreground)",
-    line: "Not enough data yet to score your gym.",
-  },
+const STATUS_META: Record<HealthStatus, { label: string; dot: string; line: string }> = {
+  healthy: { label: "Healthy", dot: "var(--success)", line: "Your gym is performing well." },
+  stable: { label: "Stable", dot: "var(--info)", line: "Your gym is steady with room to grow." },
+  "needs-attention": { label: "Needs attention", dot: "var(--warning)", line: "A few areas need attention." },
+  critical: { label: "Critical", dot: "var(--destructive)", line: "Your gym needs urgent attention." },
+  unknown: { label: "Not scored yet", dot: "var(--muted-foreground)", line: "Not enough data yet to score your gym." },
 };
 
-/** Vibrant Apple-style gradient per band for pills and bars. */
-function bandGradient(score: number): string {
-  if (score >= 80) return "linear-gradient(135deg,#10b981,#0d9488)";
-  if (score >= 60) return "linear-gradient(135deg,#3b82f6,#8b5cf6)";
-  if (score >= 40) return "linear-gradient(135deg,#f59e0b,#f97316)";
-  return "linear-gradient(135deg,#f43f5e,#ef4444)";
+/** Each health component keeps its own hue across the breakdown. */
+const COMPONENT_STYLE: Record<HealthComponent["key"], { icon: LucideIcon; accent: Accent }> = {
+  revenue: { icon: TrendingUp, accent: "emerald" },
+  collections: { icon: HandCoins, accent: "amber" },
+  retention: { icon: HeartPulse, accent: "rose" },
+  sales: { icon: Megaphone, accent: "violet" },
+  inventory: { icon: Boxes, accent: "cyan" },
+};
+
+function partOfDay(timeZone: string | null | undefined): string {
+  let hour = new Date().getHours();
+  try {
+    hour = Number(
+      new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: timeZone ?? undefined }).format(new Date()),
+    );
+  } catch {
+    /* fall back to local time */
+  }
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function longToday(timeZone: string | null | undefined): string {
+  const options: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long" };
+  try {
+    return new Intl.DateTimeFormat(undefined, { ...options, timeZone: timeZone ?? undefined }).format(new Date());
+  } catch {
+    return new Intl.DateTimeFormat(undefined, options).format(new Date());
+  }
+}
+
+function clockTime(iso: string | undefined, timeZone: string | null | undefined): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  const options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
+  try {
+    return new Intl.DateTimeFormat(undefined, { ...options, timeZone: timeZone ?? undefined }).format(date);
+  } catch {
+    return new Intl.DateTimeFormat(undefined, options).format(date);
+  }
 }
 
 /**
- * Gym Health hero: the gym's name in big type, centered, with the
- * health ring beneath it. Compact and centered by construction —
- * the same noir banner language as PageHero, composed for a metric
- * instead of a title.
+ * The page's masthead: date, greeting, the gym's name and its health
+ * ring on an aurora ground. `children` is the branch picker slot.
  */
 export function GymHealthHero({
   gymName,
+  firstName,
+  timeZone,
   health,
   isLoading,
   isError,
   onRetry,
+  children,
 }: {
   gymName: string;
+  firstName?: string;
+  timeZone?: string | null;
   health: GymHealth | undefined;
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
+  children?: React.ReactNode;
 }) {
-  const meta = STATUS_META[health?.status ?? "unknown"];
+  const status: HealthStatus = health?.score === null || !health ? "unknown" : health.status;
+  const meta = STATUS_META[status];
+  const updated = clockTime(health?.computedAt, timeZone);
+  const score = health?.score ?? null;
 
   return (
-    <section
-      aria-labelledby="dashboard-title"
-      className="relative -mx-4 mb-5 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-raised backdrop-blur-2xl transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
-      style={{
-        boxShadow:
-          "inset 0 1px 0 rgb(255 255 255 / 0.9), 0 12px 32px -8px rgb(15 23 42 / 0.08)",
-      }}
-    >
-      {/* Decorative ambient aurora glows */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-gradient-to-br from-violet-500/15 via-indigo-500/15 to-transparent blur-3xl dark:from-violet-500/25"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full bg-gradient-to-tl from-cyan-500/15 via-emerald-500/15 to-transparent blur-3xl dark:from-cyan-500/25"
-      />
-
-      <div className="relative flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/60 bg-violet-50/80 px-3 py-1 text-xs font-bold text-violet-800 shadow-sm dark:border-violet-800/40 dark:bg-violet-950/40 dark:text-violet-200">
-              <span className="size-2 rounded-full bg-violet-600 animate-pulse" />
-              Live Health & Telemetry
-            </span>
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold text-white shadow-sm"
-              style={{ backgroundImage: bandGradient(health?.score ?? 0) }}
-            >
-              {meta.label}
-            </span>
-          </div>
-
-          <h1
-            id="dashboard-title"
-            className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl lg:text-4xl"
-          >
+    <section aria-labelledby="dashboard-title" className={styles.hero}>
+      <div className={styles.aurora} aria-hidden="true" />
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className={styles.eyebrow}>{longToday(timeZone)}</p>
+          <h1 id="dashboard-title" className={styles.gymName}>
             {gymName}
           </h1>
-          <p className="mt-1 text-sm font-medium text-muted-foreground">
-            {meta.line}
+          <p className={styles.greeting}>
+            {partOfDay(timeZone)}
+            {firstName ? `, ${firstName}` : ""}. {isLoading || isError ? "" : meta.line}
           </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className={styles.glassPill} style={{ "--dot": meta.dot } as React.CSSProperties}>
+              <span className={styles.statusDot} aria-hidden="true" />
+              {isLoading ? "Scoring…" : isError ? "Score unavailable" : meta.label}
+            </span>
+            {updated && !isLoading && !isError && (
+              <span className={styles.glassPill}>Updated {updated}</span>
+            )}
+            {children}
+          </div>
         </div>
 
-        {isError && !isLoading ? (
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-sm font-semibold text-destructive">
-              Could not load gym health.
-            </p>
-            <button
-              type="button"
-              onClick={onRetry}
-              className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-bold text-foreground shadow-sm hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-              Retry
-            </button>
-          </div>
-        ) : (
-          <div className="flex shrink-0 items-center gap-4 rounded-2xl border border-white/70 bg-white/70 p-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-card/70">
-            {isLoading ? (
-              <div
-                className="size-20 rounded-full bg-muted/60 animate-pulse"
-                aria-label="Loading gym health"
+        <div className={styles.ringPanel}>
+          {isLoading ? (
+            <Skeleton className="size-[88px] rounded-full" aria-label="Loading gym health" />
+          ) : isError ? (
+            <div className="flex flex-col items-start gap-2 py-1 pr-1">
+              <p className="text-sm font-semibold text-destructive">Could not load gym health.</p>
+              <Button type="button" variant="outline" size="sm" className="min-h-11 rounded-full" onClick={onRetry}>
+                <RefreshCw className="size-4" aria-hidden="true" />
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <>
+              <HealthRing
+                score={score}
+                status={status}
+                label={score === null ? "Gym health unavailable" : `Gym health ${score} out of 100, ${meta.label}`}
               />
-            ) : (
-              <ProgressRing
-                value={health?.score ?? 0}
-                size={80}
-                strokeWidth={9}
-                tone="auto"
-                centerLabel={meta.label}
-                label={
-                  health?.score === null || health?.score === undefined
-                    ? "Gym health unavailable"
-                    : `Gym health ${health.score} out of 100, ${meta.label}`
-                }
-              />
-            )}
-          </div>
-        )}
+              <div className="pr-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gym health</p>
+                <p className="text-base font-bold tracking-tight text-foreground">{meta.label}</p>
+                <p className="text-xs text-muted-foreground">{score === null ? "Needs more data" : "out of 100"}</p>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </section>
   );
 }
 
 function ComponentRow({ component }: { component: HealthComponent }) {
+  const { icon: Icon, accent } = COMPONENT_STYLE[component.key] ?? COMPONENT_STYLE.revenue;
   return (
-    <li className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-semibold tracking-tight text-foreground">
-          {component.label}
-          <span className="ml-2 font-normal text-muted-foreground">
-            · {component.value}
+    <li className={cn("flex items-start gap-3 py-3 first:pt-0 last:pb-0", accentStyle(accent))}>
+      <span className={styles.iconDisc} aria-hidden="true">
+        <Icon className="size-[1.1rem]" strokeWidth={2.2} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="min-w-0 text-sm font-semibold tracking-tight text-foreground">
+            {component.label}
+            <span className="ml-2 font-normal text-muted-foreground">{component.value}</span>
+          </p>
+          <span className="shrink-0 text-sm font-bold tabular-nums text-foreground">
+            {component.score ?? "—"}
           </span>
-        </span>
-        <span
-          className={cn(
-            "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums shadow-sm",
-            component.score === null
-              ? "bg-muted text-muted-foreground"
-              : "text-white",
+        </div>
+        <div className={cn(styles.meter, "mt-2")} aria-hidden="true">
+          {component.score !== null && (
+            <div className={styles.meterFill} style={{ width: `${component.score}%` }} />
           )}
-          style={
-            component.score === null
-              ? undefined
-              : { backgroundImage: bandGradient(component.score) }
-          }
-        >
-          {component.score ?? "—"}
-        </span>
+        </div>
+        <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground">{component.explanation}</p>
       </div>
-      <div
-        className="h-1.5 overflow-hidden rounded-full bg-muted"
-        role="presentation"
-      >
-        {component.score !== null && (
-          <div
-            className="h-full rounded-full"
-            style={{
-              width: `${component.score}%`,
-              backgroundImage: bandGradient(component.score),
-            }}
-          />
-        )}
-      </div>
-      <p className="line-clamp-2 text-xs text-muted-foreground">
-        {component.explanation}{" "}
-        <span className="font-mono">[{component.source}]</span>
-      </p>
     </li>
   );
 }
 
 /**
  * "Why is my score X?" breakdown, from the same gym-health request.
- * Nothing here is computed in the browser beyond formatting — the
- * backend owns every number.
+ * Nothing here is computed in the browser beyond formatting.
  */
 export function GymHealthPanels({
   health,
@@ -225,153 +203,132 @@ export function GymHealthPanels({
   isError: boolean;
   onRetry: () => void;
 }) {
-  if (isLoading) {
-    return (
-      <section aria-label="Gym health breakdown">
-        <SectionHeader title="Why this score" />
-        <BentoCard>
-          <Skeleton className="h-5 w-2/3 rounded-lg" aria-label="Loading breakdown" />
-          <div className="mt-3 space-y-3" aria-hidden="true">
+  const opportunity = health?.opportunity
+    ? health.components.find((c) => c.key === health.opportunity)?.label
+    : undefined;
+
+  return (
+    <DashSection
+      id="dash-health-why"
+      title="Why this score"
+      subtitle={opportunity ? `Biggest opportunity: ${opportunity}` : "Five signals, weighted into one number."}
+    >
+      <div className={styles.panel}>
+        {isLoading ? (
+          <div className="space-y-4" aria-label="Loading breakdown" role="status">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-12 w-full rounded-xl" />
             ))}
           </div>
-        </BentoCard>
-      </section>
-    );
-  }
-  if (isError || !health) {
-    return (
-      <section aria-label="Gym health breakdown">
-        <SectionHeader title="Why this score" />
-        <BentoCard>
-          <p className="text-sm font-semibold">Could not load the breakdown.</p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-3 min-h-11"
-            onClick={onRetry}
-          >
-            Retry
-          </Button>
-        </BentoCard>
-      </section>
-    );
-  }
-
-  return (
-    <section aria-label="Why this score">
-        <SectionHeader
-          title="Why this score"
-          action={
-            health.opportunity ? (
-              <span className="kpi-trend kpi-trend-neutral">
-                Biggest opportunity:{" "}
-                {health.components.find((c) => c.key === health.opportunity)?.label}
-              </span>
-            ) : undefined
-          }
-        />
-        <BentoCard>
-          {health.score === null ? (
-            <p className="text-sm text-muted-foreground">
-              Not enough data yet — sell a membership, record a payment or
-              add a lead and the score will appear.
-            </p>
-          ) : (
-            <>
-              {health.mixedCurrencies && (
-                <p className="mb-2 rounded-xl bg-muted px-3 py-2 text-xs font-medium text-muted-foreground">
-                  Multiple currencies in play — ratios blend denominations,
-                  treat the score as approximate.
-                </p>
-              )}
+        ) : isError || !health ? (
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-sm font-semibold">Could not load the breakdown.</p>
+            <Button type="button" variant="outline" size="sm" className="min-h-11" onClick={onRetry}>
+              Retry
+            </Button>
+          </div>
+        ) : health.score === null ? (
+          <p className="text-sm text-muted-foreground">
+            Not enough data yet — sell a membership, record a payment or add a lead and the score will appear.
+          </p>
+        ) : (
+          <>
+            {health.mixedCurrencies && (
+              <p className="mb-3 rounded-xl bg-muted px-3 py-2 text-xs font-medium text-muted-foreground">
+                Multiple currencies in play — ratios blend denominations, treat the score as approximate.
+              </p>
+            )}
             <ul className="divide-y divide-border">
               {health.components.map((component) => (
                 <ComponentRow key={component.key} component={component} />
               ))}
             </ul>
-            </>
-          )}
-        </BentoCard>
-      </section>
+          </>
+        )}
+      </div>
+    </DashSection>
   );
 }
 
+const RISK_ACCENT: Record<string, Accent> = {
+  CRITICAL: "rose",
+  HIGH: "orange",
+  MEDIUM: "amber",
+  LOW: "cyan",
+};
+
 /**
- * Revenue at risk strip — extracted from GymHealthPanels so the
- * dashboard can slot it directly under Finance while the score
- * breakdown stays lower on the page.
+ * Membership value sitting on members the churn-risk model has flagged.
+ * Not the same list as "no visit in 14 days" on the priority card, so
+ * the subtitle names the source.
  */
 export function GymHealthRevenueRisk({
   health,
   isLoading,
+  isError,
 }: {
   health: GymHealth | undefined;
   isLoading: boolean;
+  isError?: boolean;
 }) {
-  if (isLoading) {
-    return (
-      <section aria-label="Revenue at risk">
-        <SectionHeader title="Revenue at risk" />
-        <BentoGrid columns={2} label="Revenue at risk">
-          <Skeleton className="h-24 w-full rounded-xl" aria-label="Loading revenue at risk" />
-          <Skeleton className="h-24 w-full rounded-xl" aria-hidden="true" />
-        </BentoGrid>
-      </section>
-    );
-  }
-  if (!health) return null;
+  if (!isLoading && (isError || !health)) return null;
 
-  const segments = (health.revenueAtRisk.bySegment ?? []).filter(
-    (segment) => segment.mrr > 0,
-  );
+  const risk = health?.revenueAtRisk;
+  const segments = (risk?.bySegment ?? []).filter((segment) => segment.mrr > 0);
+  const maxSegment = Math.max(1, ...segments.map((s) => s.mrr));
+
   return (
-    <section aria-label="Revenue at risk">
-      <SectionHeader title="Revenue at risk" />
-      <BentoGrid columns={2} label="Revenue at risk">
-        <StatCard
+    <DashSection id="dash-risk" title="Revenue at risk" subtitle="Monthly value on members flagged by churn-risk scoring.">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+        <Tile
           icon={AlertTriangle}
           title="At-risk MRR"
-          value={displayCurrencyAmount(health.revenueAtRisk.atRiskMRR)}
-          hint={
-            health.revenueAtRisk.mixed
-              ? "Mixed currencies — total indicative"
-              : `${Math.round(health.revenueAtRisk.atRiskPercentage)}% of ${displayCurrencyAmount(health.revenueAtRisk.totalMRR)} MRR`
-          }
-          isLoading={false}
-          tone="primary"
           accent="rose"
+          feature
+          isLoading={isLoading}
+          value={risk ? displayCurrencyAmount(risk.atRiskMRR) : undefined}
+          hint={
+            risk
+              ? risk.mixed
+                ? "Mixed currencies — total indicative"
+                : `${Math.round(risk.atRiskPercentage)}% of ${displayCurrencyAmount(risk.totalMRR)} MRR`
+              : undefined
+          }
         />
-        <BentoCard>
-          {segments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No membership value sits on at-risk accounts right now.
-            </p>
+        <div className={styles.panel}>
+          {isLoading ? (
+            <div className="space-y-3" aria-hidden="true">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-8 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : segments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No membership value sits on at-risk accounts right now.</p>
           ) : (
-            <ul className="flex flex-col gap-2.5">
+            <ul className="flex flex-col gap-3.5">
               {segments.map((segment) => (
-                <li
-                  key={segment.riskLevel}
-                  className="flex items-baseline justify-between gap-2 text-sm"
-                >
-                  <span className="font-semibold capitalize">
-                    {segment.riskLevel.toLowerCase()}
-                    <span className="ml-1.5 font-normal tabular-nums text-muted-foreground">
-                      {segment.memberCount} member
-                      {segment.memberCount === 1 ? "" : "s"}
+                <li key={segment.riskLevel} className={accentStyle(RISK_ACCENT[segment.riskLevel] ?? "violet")}>
+                  <div className="flex items-baseline justify-between gap-2 text-sm">
+                    <span className="font-semibold capitalize text-foreground">
+                      {segment.riskLevel.toLowerCase()}
+                      <span className="ml-1.5 font-normal tabular-nums text-muted-foreground">
+                        {segment.memberCount} member{segment.memberCount === 1 ? "" : "s"}
+                      </span>
                     </span>
-                  </span>
-                  <span className="shrink-0 font-bold tabular-nums">
-                    {displayCurrencyAmount(segment.mrr)}
-                  </span>
+                    <span className="shrink-0 font-bold tabular-nums">{displayCurrencyAmount(segment.mrr)}</span>
+                  </div>
+                  <div className={cn(styles.meter, "mt-1.5")} aria-hidden="true">
+                    <div
+                      className={styles.meterFill}
+                      style={{ width: `${Math.max(4, Math.round((segment.mrr / maxSegment) * 100))}%` }}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>
           )}
-        </BentoCard>
-      </BentoGrid>
-    </section>
+        </div>
+      </div>
+    </DashSection>
   );
 }
