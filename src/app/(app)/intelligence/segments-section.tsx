@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Filter, Plus, Trash2, Users } from "lucide-react"
+import { Filter, Plus, Sparkles, Trash2, Users } from "lucide-react"
 import { toast } from "sonner"
 
 import { ApiError } from "@/lib/api/client"
@@ -17,6 +17,7 @@ import {
  type SegmentSummary,
 } from "@/lib/hooks/use-member-intelligence"
 import { ConfirmAction } from "@/components/shared/confirm-action"
+import { useSegmentInsights } from "@/lib/hooks/use-member-intelligence"
 import { DataState } from "@/components/shared/data-state"
 import { Panel } from "@/components/shared/panel"
 import { Badge } from "@/components/ui/badge"
@@ -251,15 +252,20 @@ function SegmentMembersDialog({ segmentId, segmentName, memberCount }: {
       <DialogTitle>{segmentName}</DialogTitle>
       <DialogDescription>Members this segment resolves to right now.</DialogDescription>
      </DialogHeader>
-     {open ? <SegmentMembersBody segmentId={segmentId} /> : null}
+     {open ? <SegmentMembersBody segmentId={segmentId} segmentName={segmentName} /> : null}
     </DialogContent>
    </Dialog>
   </>
  )
 }
 
-function SegmentMembersBody({ segmentId }: { segmentId: string }) {
+function SegmentMembersBody({ segmentId, segmentName }: { segmentId: string; segmentName: string }) {
  const members = useSegmentMembers(segmentId, { limit: 100 })
+ const explain = useSegmentInsights()
+ const memberIds = React.useMemo(
+ () => (members.data?.members ?? []).slice(0, 50).map((m) => m.memberId),
+ [members.data],
+ )
  return (
   <DataState
    isLoading={members.isPending}
@@ -293,6 +299,53 @@ function SegmentMembersBody({ segmentId }: { segmentId: string }) {
     <p className="mt-2 text-xs text-muted-foreground">
      Showing the first {members.data?.members.length} of {members.data?.totalCount}.
     </p>
+   )}
+   {memberIds.length > 0 && (
+    <div className="mt-3 rounded-xl border border-border p-3">
+     {!explain.data && !explain.isPending && !explain.isError && (
+      <Button
+       type="button"
+       size="sm"
+       variant="outline"
+       className="min-h-11 rounded-xl"
+       disabled={explain.isPending}
+       onClick={() => explain.mutate({ segmentName, memberIds })}
+      >
+       <Sparkles className="mr-1.5 size-3.5" aria-hidden="true" />
+       Explain this segment
+      </Button>
+     )}
+     {explain.isPending && (
+      <p className="text-xs font-semibold text-muted-foreground" role="status">Explaining…</p>
+     )}
+     {explain.isError && (
+      <div className="flex flex-wrap items-center gap-2">
+       <p className="text-xs text-muted-foreground">Could not explain right now.</p>
+       <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="min-h-11 rounded-xl"
+        onClick={() => explain.mutate({ segmentName, memberIds })}
+       >
+        Retry
+       </Button>
+      </div>
+     )}
+     {explain.data?.summary && (
+      <div>
+       <p className="text-sm font-medium">{explain.data.summary}</p>
+       {explain.data.detail && (
+        <p className="mt-1 text-xs text-muted-foreground">{explain.data.detail}</p>
+       )}
+       <p className="mt-1 text-xs text-muted-foreground">
+        {explain.data.fallback
+         ? "Deterministic summary (AI unavailable)."
+         : `Confidence: ${explain.data.confidence ?? "moderate"}.`}
+       </p>
+      </div>
+     )}
+    </div>
    )}
   </DataState>
  )

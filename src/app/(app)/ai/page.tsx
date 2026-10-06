@@ -46,6 +46,17 @@ export default function AiPage() {
  const chat = useAiChat();
  const bottomRef = React.useRef<HTMLDivElement>(null);
 
+ // Contextual entry: /ai?q=<question> (e.g. from the COO page) prefills
+ // the composer without sending — the human reviews before anything runs.
+ React.useEffect(() => {
+ try {
+ const q = new URLSearchParams(window.location.search).get("q");
+ if (q && q.trim()) setInput(q.trim().slice(0, 2000));
+ } catch {
+ // Non-browser render or malformed URL: leave the composer empty.
+ }
+ }, []);
+
  React.useEffect(() => {
  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
  }, [messages]);

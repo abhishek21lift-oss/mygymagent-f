@@ -306,11 +306,19 @@ export function GymHealthPanels({
               add a lead and the score will appear.
             </p>
           ) : (
+            <>
+              {health.mixedCurrencies && (
+                <p className="mb-2 rounded-xl bg-muted px-3 py-2 text-xs font-medium text-muted-foreground">
+                  Multiple currencies in play — ratios blend denominations,
+                  treat the score as approximate.
+                </p>
+              )}
             <ul className="divide-y divide-border">
               {health.components.map((component) => (
                 <ComponentRow key={component.key} component={component} />
               ))}
             </ul>
+            </>
           )}
         </BentoCard>
       </section>
@@ -322,7 +330,11 @@ export function GymHealthPanels({
             icon={AlertTriangle}
             title="At-risk MRR"
             value={displayCurrencyAmount(health.revenueAtRisk.atRiskMRR)}
-            hint={`${Math.round(health.revenueAtRisk.atRiskPercentage)}% of ${displayCurrencyAmount(health.revenueAtRisk.totalMRR)} MRR`}
+            hint={
+              health.revenueAtRisk.mixed
+                ? "Mixed currencies — total indicative"
+                : `${Math.round(health.revenueAtRisk.atRiskPercentage)}% of ${displayCurrencyAmount(health.revenueAtRisk.totalMRR)} MRR`
+            }
             isLoading={false}
             tone="primary"
             accent="rose"

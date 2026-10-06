@@ -97,7 +97,9 @@ export function RiskSection() {
           isError={revenue.isError}
           hint={
             revenue.data
-              ? `${Math.round(revenue.data.atRiskPercentage)}% of ${displayCurrencyAmount(revenue.data.totalMRR)} MRR`
+              ? revenue.data.mixed
+                ? "Mixed currencies — total indicative"
+                : `${Math.round(revenue.data.atRiskPercentage)}% of ${displayCurrencyAmount(revenue.data.totalMRR)} MRR`
               : undefined
           }
           tone={toStatTone("warning")}
