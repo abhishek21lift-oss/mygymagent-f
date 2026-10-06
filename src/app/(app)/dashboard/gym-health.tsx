@@ -5,7 +5,6 @@ import { AlertTriangle } from "lucide-react";
 import { BentoCard, BentoGrid, SectionHeader } from "@/components/shared/bento";
 import { StatCard } from "@/components/shared/stat-card";
 import { ProgressRing } from "@/components/shared/progress-ring";
-import { NOIR_BANNER_STYLE } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -79,49 +78,83 @@ export function GymHealthHero({
   return (
     <section
       aria-labelledby="dashboard-title"
-      style={NOIR_BANNER_STYLE}
-      className="hero-banner hero-centered -mx-4 mb-5 sm:-mx-5 lg:-mx-8"
+      className="relative -mx-4 mb-5 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-raised backdrop-blur-2xl transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
+      style={{
+        boxShadow:
+          "inset 0 1px 0 rgb(255 255 255 / 0.9), 0 12px 32px -8px rgb(15 23 42 / 0.08)",
+      }}
     >
-      <div className="hero-banner-body relative">
-        <h1 id="dashboard-title" className="hero-banner-title">
-          {gymName}
-        </h1>
+      {/* Decorative ambient aurora glows */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-gradient-to-br from-violet-500/15 via-indigo-500/15 to-transparent blur-3xl dark:from-violet-500/25"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full bg-gradient-to-tl from-cyan-500/15 via-emerald-500/15 to-transparent blur-3xl dark:from-cyan-500/25"
+      />
+
+      <div className="relative flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/60 bg-violet-50/80 px-3 py-1 text-xs font-bold text-violet-800 shadow-sm dark:border-violet-800/40 dark:bg-violet-950/40 dark:text-violet-200">
+              <span className="size-2 rounded-full bg-violet-600 animate-pulse" />
+              Live Health & Telemetry
+            </span>
+            <span
+              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold text-white shadow-sm"
+              style={{ backgroundImage: bandGradient(health?.score ?? 0) }}
+            >
+              {meta.label}
+            </span>
+          </div>
+
+          <h1
+            id="dashboard-title"
+            className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl lg:text-4xl"
+          >
+            {gymName}
+          </h1>
+          <p className="mt-1 text-sm font-medium text-muted-foreground">
+            {meta.line}
+          </p>
+        </div>
+
         {isError && !isLoading ? (
           <div className="flex flex-col items-center gap-2">
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-destructive">
               Could not load gym health.
             </p>
             <button
               type="button"
               onClick={onRetry}
-              className="hero-banner-btn hero-banner-btn-ghost"
+              className="inline-flex min-h-11 items-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-bold text-foreground shadow-sm hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               Retry
             </button>
           </div>
         ) : (
-          <div className="shrink-0">
-              {isLoading ? (
-                <div
-                  className="rounded-full bg-white/20 animate-pulse"
-                  style={{ width: 72, height: 72 }}
-                  aria-label="Loading gym health"
-                />
-              ) : (
-                <ProgressRing
-                  value={health?.score ?? 0}
-                  size={72}
-                  strokeWidth={8}
-                  tone="light"
-                  centerLabel={meta.label}
-                  label={
-                    health?.score === null || health?.score === undefined
-                      ? "Gym health unavailable"
-                      : `Gym health ${health.score} out of 100, ${meta.label}`
-                  }
-                />
-              )}
-            </div>
+          <div className="flex shrink-0 items-center gap-4 rounded-2xl border border-white/70 bg-white/70 p-3 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-card/70">
+            {isLoading ? (
+              <div
+                className="size-20 rounded-full bg-muted/60 animate-pulse"
+                aria-label="Loading gym health"
+              />
+            ) : (
+              <ProgressRing
+                value={health?.score ?? 0}
+                size={80}
+                strokeWidth={9}
+                tone="auto"
+                centerLabel={meta.label}
+                label={
+                  health?.score === null || health?.score === undefined
+                    ? "Gym health unavailable"
+                    : `Gym health ${health.score} out of 100, ${meta.label}`
+                }
+              />
+            )}
+          </div>
         )}
       </div>
     </section>

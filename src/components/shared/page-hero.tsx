@@ -28,13 +28,16 @@ import { cn } from "@/lib/utils";
  */
 type HeroAccent = Accent;
 
-/** Shared noir banner paint (deep-black + red wash), so bespoke heroes match PageHero. */
+/** Luminous Apple Aurora glass banner style — replaces legacy dark noir paint. */
 export const NOIR_BANNER_STYLE: CSSProperties = {
-  backgroundImage:
-    "linear-gradient(120deg, #0b0b0d 0%, color-mix(in oklab, var(--a-rose-fill) 42%, #0b0b0d) 72%, color-mix(in oklab, var(--a-rose-fill) 58%, #0b0b0d) 100%)",
+  background:
+    "linear-gradient(135deg, color-mix(in oklab, var(--section-grad-1, var(--a-indigo)) 85%, #1e1b4b) 0%, color-mix(in oklab, var(--section-grad-2, var(--a-violet)) 90%, #2e1065) 50%, color-mix(in oklab, var(--a-cyan-fill, var(--a-cyan)) 80%, #042f2e) 100%)",
   boxShadow:
-    "inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 40px -12px color-mix(in oklab, var(--a-rose-fill) 45%, transparent)",
+    "inset 0 1px 0 rgb(255 255 255 / 0.3), 0 16px 40px -12px color-mix(in oklab, var(--section-grad-1, var(--a-indigo)) 40%, transparent)",
+  color: "#ffffff",
 };
+
+export const AURORA_BANNER_STYLE: CSSProperties = NOIR_BANNER_STYLE;
 
 export function PageHero({
   id,

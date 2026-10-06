@@ -5,7 +5,6 @@ import { CalendarDays, UserCheck } from "lucide-react";
 
 import { BentoCard, BentoGrid, SectionHeader } from "@/components/shared/bento";
 import { ProgressRing } from "@/components/shared/progress-ring";
-import { NOIR_BANNER_STYLE } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,38 +61,72 @@ export function OperationsHero({
   return (
     <section
       aria-labelledby="operations-title"
-      style={NOIR_BANNER_STYLE}
-      className="hero-banner hero-centered -mx-4 mb-5 sm:-mx-5 lg:-mx-8"
+      className="relative -mx-4 mb-5 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-sm backdrop-blur-2xl transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
+      style={{
+        boxShadow:
+          "inset 0 1px 0 rgb(255 255 255 / 0.9), 0 12px 32px -8px rgb(15 23 42 / 0.08)",
+      }}
     >
-      <div className="hero-banner-body">
-        <p className="hero-banner-eyebrow">MyGymAgent · Operations</p>
-        <div className="flex flex-col items-center gap-2">
+      {/* Decorative ambient aurora glows */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-16 -top-24 size-72 rounded-full bg-gradient-to-br from-violet-500/15 via-indigo-500/15 to-transparent blur-3xl dark:from-violet-500/25"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full bg-gradient-to-tl from-cyan-500/15 via-emerald-500/15 to-transparent blur-3xl dark:from-cyan-500/25"
+      />
+
+      <div className="relative flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/60 bg-violet-50/80 px-3 py-1 text-xs font-bold text-violet-800 shadow-2xs dark:border-violet-800/40 dark:bg-violet-950/40 dark:text-violet-200">
+              Operations & Facility Health
+            </span>
+          </div>
+
+          <h1
+            id="operations-title"
+            className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl"
+          >
+            Operations
+          </h1>
+          {!isLoading && !isError && (
+            <p className="mt-2 text-sm font-medium leading-relaxed text-muted-foreground">{summary}</p>
+          )}
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+            <Button asChild size="sm" className="rounded-xl shadow-xs">
+              <Link href="/calendar">
+                <CalendarDays className="mr-1.5 size-4" aria-hidden="true" />
+                View schedule
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-col items-center gap-2">
           {isLoading ? (
             <div
-              className="rounded-full bg-white/20 animate-pulse"
-              style={{ width: 112, height: 112 }}
+              className="size-28 animate-pulse rounded-full bg-muted/60"
               aria-label="Loading operations health"
             />
           ) : isError ? (
             <div className="flex flex-col items-center gap-2">
-              <p className="text-sm font-semibold text-white">
-                Could not load operations health.
+              <p className="text-xs font-semibold text-muted-foreground">
+                Could not load operations health
               </p>
-              <button
-                type="button"
-                onClick={onRetry}
-                className="hero-banner-btn hero-banner-btn-ghost"
-              >
+              <Button size="sm" variant="outline" onClick={onRetry}>
                 Retry
-              </button>
+              </Button>
             </div>
           ) : (
-            <>
+            <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/60 p-4 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-card/60">
               <ProgressRing
                 value={health?.score ?? 0}
-                size={112}
-                strokeWidth={12}
-                tone="light"
+                size={96}
+                strokeWidth={10}
+                tone="auto"
                 label={
                   health?.score === null || health?.score === undefined
                     ? "Operations health unavailable"
@@ -101,27 +134,13 @@ export function OperationsHero({
                 }
               />
               <span
-                className="rounded-full px-3 py-1 text-xs font-bold text-white"
+                className="rounded-full px-3 py-1 font-mono text-xs font-bold text-white shadow-2xs"
                 style={{ background: meta.fill }}
               >
                 {health?.score ?? "—"} · {meta.label}
               </span>
-            </>
+            </div>
           )}
-        </div>
-        <h1 id="operations-title" className="hero-banner-title">
-          Operations
-        </h1>
-        {!isLoading && !isError && (
-          <p className="hero-banner-subtitle">{summary}</p>
-        )}
-        <div className="hero-banner-actions">
-          <Button asChild size="sm" className="hero-banner-btn hero-banner-btn-ghost">
-            <Link href="/calendar">
-              <CalendarDays className="size-4" aria-hidden="true" />
-              View schedule
-            </Link>
-          </Button>
         </div>
       </div>
     </section>

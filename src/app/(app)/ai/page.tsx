@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Send, Sparkles, Wrench, Zap, Dumbbell, Users, CalendarCheck } from "lucide-react";
+import { ArrowRight, Send, Sparkles, Wrench, Zap, Dumbbell, Users, CalendarCheck, Bot } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,243 +16,294 @@ import { cn } from "@/lib/utils";
 import type { ChatMessage, ChatToolCall } from "@/lib/types/ai";
 
 interface DisplayMessage extends ChatMessage {
- toolCalls?: ChatToolCall[];
+  toolCalls?: ChatToolCall[];
 }
 
 const PROMPTS = [
- { icon: Users, label: "Who hasn't visited in 2 weeks?", accent: "rose" as const },
- { icon: Dumbbell, label: "Draft a 4-day hypertrophy split", accent: "violet" as const },
- { icon: CalendarCheck, label: "Summarize today's attendance", accent: "cyan" as const },
+  { icon: Users, label: "Who hasn't visited in 2 weeks?", accent: "rose" as const },
+  { icon: Dumbbell, label: "Draft a 4-day hypertrophy split", accent: "violet" as const },
+  { icon: CalendarCheck, label: "Summarize today's attendance", accent: "cyan" as const },
 ];
 
 function ToolCallChips({ toolCalls }: { toolCalls: ChatToolCall[] }) {
- if (toolCalls.length === 0) return null;
- return (
- <div className="mt-2 flex flex-wrap gap-1.5">
- {toolCalls.map((tc, i) => (
- <Badge key={i} variant="outline" className="gap-1 rounded-full border-border bg-card font-normal text-muted-foreground">
- <Wrench className="size-3" aria-hidden="true" />
- {tc.name}
- </Badge>
- ))}
- </div>
- );
+  if (toolCalls.length === 0) return null;
+  return (
+    <div className="mt-2.5 flex flex-wrap gap-1.5">
+      {toolCalls.map((tc, i) => (
+        <Badge
+          key={i}
+          variant="outline"
+          className="gap-1 rounded-full border-indigo-200/60 bg-indigo-50/50 text-[11px] font-semibold text-indigo-700 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300"
+        >
+          <Wrench className="size-3" aria-hidden="true" />
+          {tc.name}
+        </Badge>
+      ))}
+    </div>
+  );
 }
 
 export default function AiPage() {
- const [messages, setMessages] = React.useState<DisplayMessage[]>([]);
- const [input, setInput] = React.useState("");
- const [notConfigured, setNotConfigured] = React.useState(false);
- const chat = useAiChat();
- const bottomRef = React.useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = React.useState<DisplayMessage[]>([]);
+  const [input, setInput] = React.useState("");
+  const [notConfigured, setNotConfigured] = React.useState(false);
+  const chat = useAiChat();
+  const bottomRef = React.useRef<HTMLDivElement>(null);
 
- // Contextual entry: /ai?q=<question> (e.g. from the COO page) prefills
- // the composer without sending — the human reviews before anything runs.
- React.useEffect(() => {
- try {
- const q = new URLSearchParams(window.location.search).get("q");
- if (q && q.trim()) setInput(q.trim().slice(0, 2000));
- } catch {
- // Non-browser render or malformed URL: leave the composer empty.
- }
- }, []);
+  React.useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search).get("q");
+      if (q && q.trim()) setInput(q.trim().slice(0, 2000));
+    } catch {
+      // Non-browser render or malformed URL
+    }
+  }, []);
 
- React.useEffect(() => {
- bottomRef.current?.scrollIntoView({ behavior: "smooth" });
- }, [messages]);
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
- async function handleSend(prefill?: string) {
- const trimmed = (prefill ?? input).trim();
- if (!trimmed || chat.isPending) return;
+  async function handleSend(prefill?: string) {
+    const trimmed = (prefill ?? input).trim();
+    if (!trimmed || chat.isPending) return;
 
- const history = messages.map(({ role, content }) => ({ role, content }));
- const nextMessages: DisplayMessage[] = [...messages, { role: "user", content: trimmed }];
- setMessages(nextMessages);
- setInput("");
+    const history = messages.map(({ role, content }) => ({ role, content }));
+    const nextMessages: DisplayMessage[] = [...messages, { role: "user", content: trimmed }];
+    setMessages(nextMessages);
+    setInput("");
 
- try {
- const res = await chat.mutateAsync({ message: trimmed, history });
- setMessages((prev) => [
- ...prev,
- { role: "assistant", content: res.reply, toolCalls: res.toolCalls },
- ]);
- } catch (error) {
- if (error instanceof ApiError && error.status === 503) {
- setNotConfigured(true);
- } else {
- setMessages((prev) => [
- ...prev,
- {
- role: "assistant",
- content:
- error instanceof ApiError
- ? `Something went wrong: ${error.message}`
- : "Something went wrong. Try again.",
- },
- ]);
- }
- }
- }
+    try {
+      const res = await chat.mutateAsync({ message: trimmed, history });
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: res.reply, toolCalls: res.toolCalls },
+      ]);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 503) {
+        setNotConfigured(true);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              error instanceof ApiError
+                ? `Something went wrong: ${error.message}`
+                : "Something went wrong. Try again.",
+          },
+        ]);
+      }
+    }
+  }
 
- return (
- <div className="pb-4">
- <div className="flex flex-col gap-5">
- <PageHero
- id="ai-title"
- icon={Sparkles}
- title="AI agent"
- actions={
- <Link
- href="/ai-actions"
- className="btn-sheen inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition duration-300 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
- >
- <Zap className="size-4" aria-hidden="true" />
- Review AI actions
- <ArrowRight className="size-4" aria-hidden="true" />
- </Link>
- }
- />
+  return (
+    <div className="pb-6">
+      <div className="flex flex-col gap-6">
+        <PageHero
+          id="ai-title"
+          icon={Sparkles}
+          title="Apple Intelligence Co-pilot"
+          description="Contextual reasoning, member retention forecasting, workout generation and analytics"
+          actions={
+            <Link
+              href="/ai-actions"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <Zap className="size-4" aria-hidden="true" />
+              Action Approval Center
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          }
+        />
 
- {notConfigured ? (
- <Card className="overflow-hidden border-border bg-card shadow-sm">
- <CardContent className="flex flex-col items-center gap-2 px-6 py-14 text-center">
- <span className="flex size-14 items-center justify-center rounded-2xl text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
- <Sparkles className="size-6" aria-hidden="true" />
- </span>
- <p className="mt-2 text-base font-semibold text-foreground">AI isn&apos;t configured yet</p>
- <p className="max-w-sm text-sm font-medium text-muted-foreground">
- An administrator needs to set an OpenRouter API key on the backend before the
- assistant can respond.
- </p>
- </CardContent>
- </Card>
- ) : (
- <div className="grid grid-cols-[minmax(0,1fr)] gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
- <section aria-label="Conversation" className="flex min-h-[480px] flex-col overflow-hidden rounded-3xl border border-border bg-card">
- <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-5 py-4">
- <span className="flex size-10 items-center justify-center rounded-xl text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
- <Sparkles className="size-5" aria-hidden="true" />
- </span>
- <div>
- <h2 className="section-title">Conversation</h2>
- </div>
- {chat.isPending && <span className="ml-auto rounded-full bg-muted px-3 py-1 text-xs font-black text-muted-foreground">THINKING…</span>}
- </div>
- <div className="h-[420px] flex-1 overflow-y-auto p-4 sm:p-5" role="log" aria-live="polite" aria-label="AI conversation">
- {messages.length === 0 ? (
- <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
- <span className="flex size-14 items-center justify-center rounded-2xl text-white" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
- <Sparkles className="size-6" aria-hidden="true" />
- </span>
- <p className="max-w-sm text-lg font-semibold text-foreground">What should we solve today?</p>
- <div className="mt-2 grid w-full max-w-md gap-2">
- {PROMPTS.map((p) => (
- <QuickActionCard
- key={p.label}
- icon={p.icon}
- label={p.label}
- accent={p.accent}
- onClick={() => void handleSend(p.label)}
- className="w-full"
- />
- ))}
- </div>
- </div>
- ) : (
- <div className="flex flex-col gap-4">
- {messages.map((m, i) => (
- <div
- key={i}
- className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
- >
- <div
- className={cn( "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
- m.role === "user"
- ? "text-white"
- : "border border-border bg-muted/40 text-foreground",
- )}
- style={m.role === "user" ? { backgroundImage: "var(--brand-grad)" } : undefined}
- >
- <p className="whitespace-pre-wrap">{m.content}</p>
- {m.toolCalls && <ToolCallChips toolCalls={m.toolCalls} />}
- </div>
- </div>
- ))}
- {chat.isPending && (
- <div className="flex justify-start">
- <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted px-4 py-3 text-sm font-bold text-foreground">
- <span className="size-2 animate-pulse rounded-full" style={{ background: "var(--ai)" }} aria-hidden="true" />
- Thinking…
- </div>
- </div>
- )}
- <div ref={bottomRef} />
- </div>
- )}
- </div>
- <div className="border-t border-border bg-card p-4">
- <div className="flex gap-2">
- <label htmlFor="ai-input" className="sr-only">Ask the assistant</label>
- <Textarea
- id="ai-input"
- value={input}
- onChange={(e) => setInput(e.target.value)}
- onKeyDown={(e) => {
- if (e.key === "Enter" && !e.shiftKey) {
- e.preventDefault();
- void handleSend();
- }
- }}
- placeholder="Ask the assistant..."
- rows={2}
- className="min-h-11 resize-none rounded-xl bg-card"
- />
- <Button
- onClick={() => void handleSend()}
- disabled={chat.isPending || !input.trim()}
- className="btn-sheen min-h-11 min-w-11 rounded-lg bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
- aria-label="Send message"
- >
- <Send className="size-4" aria-hidden="true" />
- </Button>
- </div>
- <p className="mt-2 text-xs font-medium text-muted-foreground">Enter to send · Shift + Enter for a new line.</p>
- </div>
- </section>
+        {notConfigured ? (
+          <Card className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-sm">
+            <CardContent className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+              <span className="flex size-16 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 text-white shadow-lg">
+                <Sparkles className="size-8" aria-hidden="true" />
+              </span>
+              <p className="mt-2 text-lg font-bold text-foreground">AI Intelligence isn&apos;t configured yet</p>
+              <p className="max-w-md text-xs leading-relaxed text-muted-foreground">
+                An administrator needs to configure the LLM provider key or FreeLLMAPI endpoint on the backend before the copilot can process instructions.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+            {/* Conversation Window */}
+            <section
+              aria-label="Conversation"
+              className="relative flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-border/60 bg-muted/20 px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-500 to-cyan-500 text-white shadow-xs">
+                    <Bot className="size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-bold text-foreground">Active Intelligence Session</h2>
+                    <p className="text-[11px] text-muted-foreground">Tenant-isolated memory enabled</p>
+                  </div>
+                </div>
 
- <aside aria-label="AI tips" className="flex flex-col gap-4">
- <div className="relative overflow-hidden rounded-3xl p-4 text-white sm:p-5" style={{ backgroundImage: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}>
- <div className="pointer-events-none absolute -right-12 -top-16 size-56 rounded-full bg-fuchsia-400/25 blur-3xl" aria-hidden="true" />
- <div className="pointer-events-none absolute -bottom-16 -left-10 size-56 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />
- <h2 className="relative text-sm font-semibold tracking-tight">Grounded answers</h2>
- <Link
- href="/ai-actions"
- className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-card px-4 py-2.5 text-xs font-extrabold text-foreground shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
- >
- Open approval queue <ArrowRight className="size-4" aria-hidden="true" />
- </Link>
- </div>
- <Card className="border-border bg-card">
- <CardContent className="space-y-3 p-5">
- <h2 className="text-xs font-black uppercase tracking-[.18em] text-muted-foreground">Power prompts</h2>
- {["Flag members likely to churn this week", "Write a win-back message for lapsed members", "Plan tomorrow's floor staffing from attendance"].map((tip) => (
- <Button
- key={tip}
- type="button"
- variant="outline"
- onClick={() => void handleSend(tip)}
- className="h-auto min-h-11 w-full justify-between whitespace-normal rounded-lg px-4 py-3 text-left text-xs"
- >
- {tip}
- <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />
- </Button>
- ))}
- </CardContent>
- </Card>
- </aside>
- </div>
- )}
- </div>
- </div>
- );
+                {chat.isPending && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-indigo-500/10 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-wider text-indigo-700 ring-1 ring-indigo-500/20 dark:text-indigo-300">
+                    <span className="size-1.5 animate-ping rounded-full bg-indigo-500" />
+                    Synthesizing response…
+                  </span>
+                )}
+              </div>
+
+              {/* Message scroll container */}
+              <div
+                className="h-[460px] flex-1 overflow-y-auto p-5 sm:p-6"
+                role="log"
+                aria-live="polite"
+                aria-label="AI conversation"
+              >
+                {messages.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                    <div className="relative">
+                      <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 blur-xl animate-pulse" />
+                      <span className="relative flex size-16 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 text-white shadow-xl">
+                        <Sparkles className="size-8" aria-hidden="true" />
+                      </span>
+                    </div>
+
+                    <div className="max-w-md">
+                      <p className="text-lg font-black tracking-tight text-foreground">
+                        How can I accelerate your gym today?
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Ask about attendance patterns, draft personalized split programs, or triage overdue lead follow-ups.
+                      </p>
+                    </div>
+
+                    <div className="mt-3 grid w-full max-w-md gap-2.5">
+                      {PROMPTS.map((p) => (
+                        <QuickActionCard
+                          key={p.label}
+                          icon={p.icon}
+                          label={p.label}
+                          accent={p.accent}
+                          onClick={() => void handleSend(p.label)}
+                          className="w-full"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {messages.map((m, i) => (
+                      <div
+                        key={i}
+                        className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+                      >
+                        <div
+                          className={cn(
+                            "max-w-[85%] rounded-3xl px-5 py-3.5 text-sm leading-relaxed shadow-xs transition-all",
+                            m.role === "user"
+                              ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm"
+                              : "border border-border/80 bg-muted/40 text-foreground backdrop-blur-md",
+                          )}
+                        >
+                          <p className="whitespace-pre-wrap">{m.content}</p>
+                          {m.toolCalls && <ToolCallChips toolCalls={m.toolCalls} />}
+                        </div>
+                      </div>
+                    ))}
+
+                    {chat.isPending && (
+                      <div className="flex justify-start">
+                        <div className="flex items-center gap-2 rounded-3xl border border-indigo-200/60 bg-indigo-50/50 px-4 py-3 text-xs font-bold text-indigo-700 shadow-2xs dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300">
+                          <Sparkles className="size-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
+                          <span>Generating grounded answer…</span>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={bottomRef} />
+                  </div>
+                )}
+              </div>
+
+              {/* Composer */}
+              <div className="border-t border-border/60 bg-card/95 p-4 backdrop-blur-md">
+                <div className="relative flex items-center gap-2 rounded-2xl border border-border/80 bg-background/80 p-1.5 shadow-2xs focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+                  <label htmlFor="ai-input" className="sr-only">Ask the assistant</label>
+                  <Textarea
+                    id="ai-input"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        void handleSend();
+                      }
+                    }}
+                    placeholder="Ask Apple Intelligence anything about members, plans, attendance, or workouts..."
+                    rows={1}
+                    className="min-h-10 flex-1 resize-none border-0 bg-transparent px-3 py-2 text-xs shadow-none focus-visible:ring-0"
+                  />
+                  <Button
+                    onClick={() => void handleSend()}
+                    disabled={chat.isPending || !input.trim()}
+                    className="size-9 shrink-0 rounded-xl bg-primary p-0 shadow-xs"
+                    aria-label="Send message"
+                  >
+                    <Send className="size-4" aria-hidden="true" />
+                  </Button>
+                </div>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  Press Enter to send · Shift + Enter for newline
+                </p>
+              </div>
+            </section>
+
+            {/* Aside / Suggestions & Tips */}
+            <aside aria-label="AI tips" className="flex flex-col gap-4">
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 p-6 text-white shadow-md">
+                <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-fuchsia-400/30 blur-3xl" aria-hidden="true" />
+                <div className="pointer-events-none absolute -bottom-16 -left-10 size-48 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />
+                <h3 className="relative text-sm font-bold">Safe Autonomous Actions</h3>
+                <p className="relative mt-1 text-xs leading-relaxed text-white/80">
+                  AI suggestions that require write permissions are held in the Human-in-the-Loop review queue.
+                </p>
+                <Link
+                  href="/ai-actions"
+                  className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white/90 px-4 py-2 text-xs font-bold text-indigo-950 shadow-md transition hover:-translate-y-0.5 hover:bg-white"
+                >
+                  Review Approvals <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+
+              <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+                <CardContent className="space-y-3 p-5">
+                  <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Recommended Prompts
+                  </h3>
+                  {[
+                    "Flag members likely to churn this week",
+                    "Write a personalized win-back message for lapsed members",
+                    "Plan tomorrow's floor staffing from attendance",
+                  ].map((tip) => (
+                    <Button
+                      key={tip}
+                      type="button"
+                      variant="outline"
+                      onClick={() => void handleSend(tip)}
+                      className="h-auto min-h-10 w-full justify-between whitespace-normal rounded-xl border-border/60 bg-muted/20 px-3.5 py-2.5 text-left text-xs font-semibold hover:border-primary/30"
+                    >
+                      <span className="line-clamp-2">{tip}</span>
+                      <ArrowRight className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    </Button>
+                  ))}
+                </CardContent>
+              </Card>
+            </aside>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import { BentoGrid, SectionHeader } from "@/components/shared/bento";
 import { StatCard } from "@/components/shared/stat-card";
 import { ProgressRing } from "@/components/shared/progress-ring";
-import { NOIR_BANNER_STYLE } from "@/components/shared/page-hero";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -22,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AiActionReviewDialog } from "../ai-actions/review-dialog";
 import { EffectivenessStrip, ForecastScenario, TrendsStrip } from "./coo-insights";
 import { PriorityActions } from "../dashboard/priority-actions";
+import { cn } from "@/lib/utils";
 
 const ALL_BRANCHES = "all";
 
@@ -35,15 +35,22 @@ const STATUS_META: Record<string, { label: string; fill: string }> = {
 
 function Delta({ value, invert }: { value: number | null; invert?: boolean }) {
   if (value === null) {
-    return <span className="text-xs font-semibold text-white/60">— vs yesterday</span>;
+    return <span className="text-xs font-semibold text-muted-foreground">— vs yesterday</span>;
   }
   const good = invert ? value < 0 : value > 0;
   const arrow = value > 0 ? "↑" : value < 0 ? "↓" : "→";
   return (
-    <span className="text-xs font-bold text-white">
-      {arrow} {Math.abs(value)}%
-      <span className="ml-1 font-medium text-white/70">
-        vs yesterday · {good ? "on track" : "needs a look"}
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ring-1",
+        good
+          ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300"
+          : "bg-amber-500/10 text-amber-700 ring-amber-500/20 dark:text-amber-300",
+      )}
+    >
+      <span>{arrow} {Math.abs(value)}%</span>
+      <span className="font-medium text-muted-foreground">
+        vs yesterday · {good ? "on track" : "needs look"}
       </span>
     </span>
   );
@@ -60,7 +67,7 @@ function ApprovalsQueue() {
       <SectionHeader
         title="Pending approvals"
         action={
-          <Button asChild variant="outline" size="sm" className="min-h-11 rounded-xl">
+          <Button asChild variant="outline" size="sm" className="min-h-10 rounded-xl text-xs font-semibold">
             <Link href="/ai-actions">Action Center</Link>
           </Button>
         }
@@ -80,10 +87,10 @@ function ApprovalsQueue() {
           {items.map((action: AiAction) => (
             <li
               key={action.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-xs"
             >
               <div className="min-w-0">
-                <p className="text-sm font-extrabold tracking-tight">
+                <p className="text-sm font-bold tracking-tight text-foreground">
                   {action.type.replaceAll("_", " ").toLowerCase()}
                 </p>
                 <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
@@ -135,40 +142,99 @@ export default function CooPage() {
 
   return (
     <div className="flex w-full flex-col gap-6 pb-8">
+      {/* Light Apple-Aurora Glass Hero */}
       <section
         aria-labelledby="coo-title"
-        style={NOIR_BANNER_STYLE}
-        className="hero-banner hero-centered -mx-4 mb-5 sm:-mx-5 lg:-mx-8"
+        className="relative -mx-4 mb-3 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-sm backdrop-blur-2xl transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
+        style={{
+          boxShadow:
+            "inset 0 1px 0 rgb(255 255 255 / 0.9), 0 12px 32px -8px rgb(15 23 42 / 0.08)",
+        }}
       >
-        <div className="hero-banner-body">
-          <p className="hero-banner-eyebrow">MyGymAgent · AI COO</p>
-          <div className="flex flex-col items-center gap-2">
+        {/* Decorative ambient aurora glows */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-16 -top-24 size-72 rounded-full bg-gradient-to-br from-violet-500/15 via-indigo-500/15 to-transparent blur-3xl dark:from-violet-500/25"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full bg-gradient-to-tl from-cyan-500/15 via-emerald-500/15 to-transparent blur-3xl dark:from-cyan-500/25"
+        />
+
+        <div className="relative flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/60 bg-violet-50/80 px-3 py-1 text-xs font-bold text-violet-800 shadow-2xs dark:border-violet-800/40 dark:bg-violet-950/40 dark:text-violet-200">
+                <Sparkles className="size-3.5 text-violet-600 dark:text-violet-400" />
+                Apple Intelligence · Executive Briefing
+              </span>
+            </div>
+
+            <h1
+              id="coo-title"
+              className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl"
+            >
+              Morning briefing
+            </h1>
+
+            {briefing.data && (
+              <div className="mt-2 space-y-2">
+                <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+                  <span className="font-bold text-foreground">
+                    {displayCurrencyAmount(briefing.data.today.collected, briefing.data.today.currency)}
+                  </span>{" "}
+                  collected today ·{" "}
+                  <span className="font-bold text-foreground">
+                    {briefing.data.today.checkIns}
+                  </span>{" "}
+                  check-ins ·{" "}
+                  {briefing.data.today.mixed ? "mixed currencies · " : ""}
+                  <span className="font-bold text-foreground">
+                    {briefing.data.outcomes.pending}
+                  </span>{" "}
+                  approvals awaiting signature
+                </p>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-1 sm:justify-start">
+                  <Delta value={briefing.data.deltas.collectedPct} />
+                  <Delta value={briefing.data.deltas.checkinsPct} />
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+              <Button asChild size="sm" className="rounded-xl shadow-xs">
+                <Link href="/ai">
+                  <Sparkles className="mr-1.5 size-4" aria-hidden="true" />
+                  Ask AI Co-pilot
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Health Score Progress Ring */}
+          <div className="flex shrink-0 flex-col items-center gap-2">
             {briefing.isLoading ? (
               <div
-                className="rounded-full bg-white/20 animate-pulse"
-                style={{ width: 112, height: 112 }}
+                className="size-28 animate-pulse rounded-full bg-muted/60"
                 aria-label="Loading briefing"
               />
             ) : briefing.isError || !briefing.data ? (
               <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-semibold text-white">
-                  Could not load the briefing.
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Could not load health score
                 </p>
-                <button
-                  type="button"
-                  onClick={() => void briefing.refetch()}
-                  className="hero-banner-btn hero-banner-btn-ghost"
-                >
+                <Button size="sm" variant="outline" onClick={() => void briefing.refetch()}>
                   Retry
-                </button>
+                </Button>
               </div>
             ) : (
-              <>
+              <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/60 p-4 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-card/60">
                 <ProgressRing
                   value={health?.score ?? 0}
-                  size={112}
-                  strokeWidth={12}
-                  tone="light"
+                  size={96}
+                  strokeWidth={10}
+                  tone="auto"
                   label={
                     health?.score === null || health?.score === undefined
                       ? "Gym health unavailable"
@@ -176,46 +242,21 @@ export default function CooPage() {
                   }
                 />
                 <span
-                  className="rounded-full px-3 py-1 text-xs font-bold text-white"
+                  className="rounded-full px-3 py-1 font-mono text-xs font-bold text-white shadow-2xs"
                   style={{ background: meta.fill }}
                 >
                   {health?.score ?? "—"} · {meta.label}
                 </span>
-              </>
-            )}
-          </div>
-          <h1 id="coo-title" className="hero-banner-title">
-            Morning briefing
-          </h1>
-          {briefing.data && (
-            <div className="flex flex-col items-center gap-1">
-              <p className="hero-banner-subtitle">
-                {displayCurrencyAmount(briefing.data.today.collected, briefing.data.today.currency)} collected
-                today · {briefing.data.today.checkIns} check-ins ·{" "}
-                {briefing.data.today.mixed ? "mixed currencies · " : ""}
-                {briefing.data.outcomes.pending} approvals waiting
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-                <Delta value={briefing.data.deltas.collectedPct} />
-                <Delta value={briefing.data.deltas.checkinsPct} />
               </div>
-            </div>
-          )}
-          <div className="hero-banner-actions">
-            <Button asChild size="sm" className="hero-banner-btn hero-banner-btn-ghost">
-              <Link href="/ai">
-                <Sparkles className="size-4" aria-hidden="true" />
-                Ask AI
-              </Link>
-            </Button>
+            )}
           </div>
         </div>
       </section>
 
       {branchItems.length > 1 && (
-        <div className="-mt-4 flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select value={branchFilter ?? ALL_BRANCHES} onValueChange={setSelectedBranch}>
-            <SelectTrigger aria-label="Branch" className="h-8 w-auto min-w-40 rounded-xl bg-card text-sm">
+            <SelectTrigger aria-label="Branch" className="h-9 w-auto min-w-44 rounded-xl bg-card text-xs font-semibold shadow-2xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
