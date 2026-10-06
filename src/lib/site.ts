@@ -110,6 +110,7 @@ export const PRIVATE_PATH_PREFIXES = [
   "/branches",
   "/staff",
   "/payroll",
+  "/coo",
   "/owner-os",
   "/command-center",
   "/intelligence",

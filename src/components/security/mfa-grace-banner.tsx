@@ -27,7 +27,7 @@ export function MfaGraceBanner() {
  if (pathname === "/settings/security") return null
 
  const deadline = mfaEnrolment.deadline
- ? new Date(mfaEnrolment.deadline).toLocaleDateString(undefined, {
+ ? new Date(mfaEnrolment.deadline).toLocaleDateString("en-US", {
  year: "numeric",
  month: "long",
  day: "numeric",

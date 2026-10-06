@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
       // Retired copies of the owner home: one place for the day's figures.
       { source: "/owner-os", destination: "/dashboard", permanent: false },
       { source: "/command-center", destination: "/dashboard", permanent: false },
+      // Platform console root redirects to platform command center
+      { source: "/platform", destination: "/platform/command-center", permanent: false },
     ];
   },
   async headers() {

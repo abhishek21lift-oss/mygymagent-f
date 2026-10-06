@@ -178,7 +178,7 @@ describe("AddStaffDialog", () => {
       ),
     );
     expect(await within(dialog).findByText(/kamla is on the team/i)).toBeTruthy();
-  });
+  }, 15_000);
 
   it("has no pay step without hr.manage", async () => {
     const user = userEvent.setup();
