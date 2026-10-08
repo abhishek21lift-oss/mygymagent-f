@@ -27,6 +27,14 @@ export const SITE = {
   locale: "en_IN",
 } as const;
 
+/**
+ * Google Search Console's ownership token for mygymagent.tech. Public by
+ * design (it is printed in every page's <head>), so it lives here rather
+ * than only in the environment, which the Docker build does not pass
+ * through. `public/googlefcc0e6a2c8561d4d.html` is the same proof as a file.
+ */
+export const GOOGLE_SITE_VERIFICATION = "hdnUsovs-Lwx9LDDd2ZaWWVa-3SqMtpaexiNBzg9-2c";
+
 /** Where the public site lives: the one canonical address. */
 export const DEFAULT_SITE_URL = "https://mygymagent.tech";
 
