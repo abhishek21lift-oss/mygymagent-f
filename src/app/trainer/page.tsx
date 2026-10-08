@@ -1,11 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { CalendarClock } from "lucide-react";
+import { toast } from "sonner";
 
 import { SessionProgress, SessionSummary } from "@/components/trainer/session-progress";
 import { SessionCard } from "@/components/trainer/session-card";
 import { DataState } from "@/components/shared/data-state";
+import { ApiError } from "@/lib/api/client";
+import { useStartWorkoutSession } from "@/lib/hooks/use-workout-sessions";
 import {
   useTrainerSessions,
   useTrainerAwaitingAssignments,
@@ -26,10 +30,25 @@ import {
 const IN_PROGRESS = new Set(["IN_PROGRESS"]);
 
 export default function TrainerTodayPage() {
+  const router = useRouter();
   const sessions = useTrainerSessions();
   const assignments = useTrainerAwaitingAssignments();
+  const start = useStartWorkoutSession();
   const rows = sessions.data ?? [];
-  const awaiting: TrainerAssignment[] = assignments.data ?? [];
+  // A plan already started today is on the floor or done, not "to go":
+  // offering it again as "next" is how one tap too many opened a second
+  // session for the same member.
+  const startedToday = new Set(rows.map((s) => s.assignmentId));
+  const awaiting: TrainerAssignment[] = (assignments.data ?? []).filter((a) => !startedToday.has(a.id));
+
+  async function startSession(assignment: TrainerAssignment) {
+    try {
+      const session = await start.mutateAsync({ assignmentId: assignment.id });
+      router.push(`/trainer/session/${session.id}`);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "The session could not be started.");
+    }
+  }
 
   const onTheFloor = rows.filter((s) => IN_PROGRESS.has(s.status));
   const done = rows.filter((s) => s.status === "COMPLETED");
@@ -126,8 +145,11 @@ export default function TrainerTodayPage() {
                 name={fullName(next)}
                 subtitle={subtitle(next)}
                 action={{
-                  label: "Start",
-                  href: `/trainer/session/${next.id}`,
+                  // `next` is an assignment, not a session: start one
+                  // (or resume the one already running) and open it.
+                  label: start.isPending ? "Starting…" : "Start",
+                  onClick: () => void startSession(next),
+                  disabled: start.isPending,
                 }}
               />
             ) : null}

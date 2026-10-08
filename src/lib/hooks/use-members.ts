@@ -171,17 +171,6 @@ export function useMember(id: string | undefined) {
   });
 }
 
-export function useCreateMember() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateMemberInput) => api.post<Member>("/members", input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: [KEY] });
-      void queryClient.invalidateQueries({ queryKey: [KEY, "metrics"] });
-    },
-  });
-}
-
 export function useUpdateMember(id: string) {
   const queryClient = useQueryClient();
   return useMutation({

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -239,7 +241,7 @@ function SessionAction({
 
   if (href) {
     return (
-      <a
+      <Link
         href={href}
         className={classNames}
         style={style}
@@ -253,7 +255,7 @@ function SessionAction({
         }}
       >
         {inner}
-      </a>
+      </Link>
     );
   }
 

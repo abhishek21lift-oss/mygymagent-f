@@ -2,6 +2,19 @@
 
 _Audited 8 October 2026 against `main`: frontend `3a04a9a`, API `56ec543`._
 
+## Status
+
+Fixed on branch `claude/project-seo-audit-o45rid` in both repos (full unit and e2e suites green; flows below verified in a browser against a local API):
+
+- **1 (trainer "Start"/"Resume" → 404):** fixed. New `/trainer/session/[id]` screen for logging sets and finishing. "Start" now opens the session first. The backend returns the running session when an assignment is started twice, and the home screen stops offering a member already started today.
+- **2 (double booking):** fixed. One clash check (`src/common/scheduling/trainer-clash.ts` in the API) across PT sessions and appointments, on every create, update and reschedule path. Covered by `test/trainer-double-booking.e2e-spec.ts`.
+- **3 (leave unusable):** fixed. Payroll page: "Leave type" and "Record leave" (for `hr.manage`), recorded on a staff member's behalf, as the API defines it.
+- **5 (broken exercise history):** the broken endpoint and its unused hook are removed.
+- **7 (duplicate hooks):** `useInviteStaff` and `useCreateMember` are removed.
+- **Test gap (16):** `/workout-sessions` now has an e2e suite.
+
+Still open: 4, 6, 8, 9, the "built but not reachable" table, and 10–17.
+
 ## How this was checked
 
 Static analysis and live testing, across both repos:

@@ -3,7 +3,7 @@ import { api } from "@/lib/api/client";
 import { STAFF_PAYROLL_KEY } from "@/lib/hooks/use-staff-payroll";
 import type { StaffAccessState, StaffStats, StaffUser } from "@/lib/types/gym";
 import type { Paginated, PaginationParams } from "@/lib/types/pagination";
-import type { AddStaffPayload, InviteStaffInput } from "@/lib/validation/gym";
+import type { AddStaffPayload } from "@/lib/validation/gym";
 
 const KEY = "staff";
 
@@ -37,16 +37,6 @@ export function useAddStaff() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: AddStaffPayload) => api.post<StaffUser>("/users", payload),
-    onSuccess: () => invalidateStaff(queryClient),
-  });
-}
-
-/** The original email invite. Kept for callers of the old form. */
-export function useInviteStaff() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: InviteStaffInput & { roleBranchId?: string }) =>
-      api.post<StaffUser>("/users", input),
     onSuccess: () => invalidateStaff(queryClient),
   });
 }
