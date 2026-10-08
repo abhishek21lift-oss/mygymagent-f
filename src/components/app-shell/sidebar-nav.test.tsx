@@ -53,6 +53,50 @@ describe("SidebarNav", () => {
     expect(onNavigate).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps one group open at a time: opening another closes the one before", async () => {
+    const user = userEvent.setup();
+    as("all");
+    render(<SidebarNav />);
+    const groups = screen
+      .getAllByRole("button")
+      .filter((b) => b.hasAttribute("aria-expanded"))
+      .slice(0, 2);
+    expect(groups).toHaveLength(2);
+    const [first, second] = groups;
+
+    await user.click(first);
+    expect(first.getAttribute("aria-expanded")).toBe("true");
+
+    await user.click(second);
+    expect(second.getAttribute("aria-expanded")).toBe("true");
+    expect(first.getAttribute("aria-expanded")).toBe("false");
+
+    // Tapping the open one closes it, leaving none open.
+    await user.click(second);
+    expect(second.getAttribute("aria-expanded")).toBe("false");
+    expect(first.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("closes the current page's group when another is opened, and remembers the choice", async () => {
+    const user = userEvent.setup();
+    as("all", "/inventory/sales");
+    const { unmount } = render(<SidebarNav />);
+    const operations = screen.getByRole("button", { name: /operations/i });
+    expect(operations.getAttribute("aria-expanded")).toBe("true");
+
+    const other = screen
+      .getAllByRole("button")
+      .find((b) => b.hasAttribute("aria-expanded") && b !== operations)!;
+    await user.click(other);
+    expect(other.getAttribute("aria-expanded")).toBe("true");
+    expect(operations.getAttribute("aria-expanded")).toBe("false");
+
+    unmount();
+    render(<SidebarNav />);
+    expect(screen.getByRole("button", { name: other.textContent ?? "" }).getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("button", { name: /operations/i }).getAttribute("aria-expanded")).toBe("false");
+  });
+
   it("opens the group holding the current page, and marks only the most specific page", () => {
     as("all", "/inventory/sales");
     render(<SidebarNav />);

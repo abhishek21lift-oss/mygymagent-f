@@ -25,7 +25,9 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PRODUCT_LOGO_ALT, PRODUCT_NAME } from "@/lib/brand";
 
-const OPEN_GROUPS_KEY = "mygymagent:nav-open-groups";
+/** One open group at most (an accordion). A new key: the old one held a
+ * flag per group, several of which could be open at once. */
+const OPEN_GROUP_KEY = "mygymagent:nav-open-group";
 
 /** The hue a row wears: `data-nav-accent` re-points `--nav-accent` and
  * `--nav-ink` (globals.css), so one set of rules paints every colour. */
@@ -34,22 +36,25 @@ function navAccent(item: NavItem): Accent | "ai" {
   return item.hue ?? accentForPath(item.children?.[0]?.href ?? item.href);
 }
 
-function readOpenGroups(): Record<string, boolean> {
+/** The group the person last opened; `null` when they closed it; `undefined`
+ * when they never chose, so the group holding the current page opens. */
+function readOpenGroup(): string | null | undefined {
   try {
-    const raw = window.localStorage.getItem(OPEN_GROUPS_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === "object" ? (parsed as Record<string, boolean>) : {};
+    const raw = window.localStorage.getItem(OPEN_GROUP_KEY);
+    if (raw === null) return undefined;
+    const parsed: unknown = JSON.parse(raw);
+    return typeof parsed === "string" || parsed === null ? parsed : undefined;
   } catch {
-    return {};
+    return undefined;
   }
 }
 
-function writeOpenGroups(value: Record<string, boolean>) {
+function writeOpenGroup(value: string | null) {
   try {
-    window.localStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify(value));
+    window.localStorage.setItem(OPEN_GROUP_KEY, JSON.stringify(value));
   } catch {
     // Private mode or blocked storage: the rail still works, it just
-    // forgets which groups were open.
+    // forgets which group was open.
   }
 }
 
@@ -398,24 +403,23 @@ export function SidebarNav({
   const settings = visibleNavItem(settingsNav, hasPermission, isPlatformStaff);
   const actions = visible(quickActions);
 
-  // What the person opened or closed. A group they never touched is open
-  // exactly when it holds the page they are on.
-  const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(() =>
-    typeof window === "undefined" ? {} : readOpenGroups(),
+  // One group open at a time: opening another closes the one before, so
+  // the rail never piles up open lists. Until the person picks one, the
+  // group holding the page they are on is the open one.
+  const [openGroup, setOpenGroup] = React.useState<string | null | undefined>(() =>
+    typeof window === "undefined" ? undefined : readOpenGroup(),
   );
 
   const isOpen = (item: NavItem) => {
-    const chosen = openGroups[item.title];
-    if (chosen !== undefined) return chosen;
+    if (openGroup !== undefined) return openGroup === item.title;
     return activeChildHref(pathname, item.children ?? []) !== null;
   };
 
-  const toggle = (item: NavItem) =>
-    setOpenGroups((current) => {
-      const next = { ...current, [item.title]: !isOpen(item) };
-      writeOpenGroups(next);
-      return next;
-    });
+  const toggle = (item: NavItem) => {
+    const next = isOpen(item) ? null : item.title;
+    writeOpenGroup(next);
+    setOpenGroup(next);
+  };
 
   const renderItems = (items: NavItem[]) =>
     items.map((item) => {
