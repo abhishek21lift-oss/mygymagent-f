@@ -40,18 +40,20 @@ describe("WhatsAppWebCard", () => {
   it("says when the deployment has it switched off", async () => {
     renderWith({ ...base, available: false })
     expect(await screen.findByText(/Not switched on on the server yet/)).toBeTruthy()
-    expect(screen.getByText("WHATSAPP_WEB_ENABLED=true")).toBeTruthy()
+    // The one setting the API reads; the retired names must not come back.
+    expect(screen.getByText(/^WA_AUTH_KEY=/)).toBeTruthy()
+    expect(screen.queryByText(/WHATSAPP_WEB_ENABLED|WHATSAPP_TOKEN_KEY/)).toBeNull()
     expect(screen.queryByRole("button", { name: /link my whatsapp/i })).toBeNull()
   })
 
   it("says exactly which server setting is wrong", async () => {
     const { unmount } = renderWith({ ...base, available: false, unavailableReason: "KEY_MISSING" })
-    expect(await screen.findByText("WHATSAPP_TOKEN_KEY is not set")).toBeTruthy()
+    expect(await screen.findByText("WA_AUTH_KEY is not set")).toBeTruthy()
     unmount()
     renderWith({ ...base, available: false, unavailableReason: "KEY_INVALID" })
-    expect(await screen.findByText("WHATSAPP_TOKEN_KEY is not a valid key")).toBeTruthy()
-    expect(screen.getByText(/not the <64 hex characters> placeholder/)).toBeTruthy()
-    expect(screen.getByText("openssl rand -hex 32")).toBeTruthy()
+    expect(await screen.findByText("WA_AUTH_KEY is not a valid key")).toBeTruthy()
+    expect(screen.getByText(/exactly 64 characters/)).toBeTruthy()
+    expect(screen.getByText("Generate one with: openssl rand -hex 32")).toBeTruthy()
   })
 
   it("while linking, says it is connecting and shows why an attempt failed", async () => {

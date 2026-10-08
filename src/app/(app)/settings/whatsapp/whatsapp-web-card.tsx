@@ -78,21 +78,26 @@ export function WhatsAppWebCard({ canManage }: { canManage: boolean }) {
 
 /** What to change on the server, for the one setting that is wrong. */
 function ServerSetup({ reason }: { reason: NonNullable<WhatsAppWebSession["unavailableReason"]> }) {
+  // The API now reads one setting, WA_AUTH_KEY (src/whatsapp-web/wa-auth.store.ts
+  // in the API), and reports a missing or malformed key as DISABLED. The older
+  // WHATSAPP_WEB_ENABLED / WHATSAPP_TOKEN_KEY settings are no longer read, so
+  // naming them here sent owners to set variables nothing looks at.
+  const keyLines = ["WA_AUTH_KEY=<64 characters, 0-9 and a-f>", "Generate one with: openssl rand -hex 32"]
   const copy = {
     DISABLED: {
       title: "Not switched on on the server yet",
-      body: "Linking a number needs two settings on the backend (Render → Environment), then a redeploy:",
-      lines: ["WHATSAPP_WEB_ENABLED=true", "WHATSAPP_TOKEN_KEY=<64 hex characters>"],
+      body: "Linking a number needs one setting on the backend server: add it to the backend's environment, then restart the backend:",
+      lines: keyLines,
     },
     KEY_MISSING: {
-      title: "WHATSAPP_TOKEN_KEY is not set",
-      body: "WhatsApp Web is switched on, but the server has no key to encrypt the linked session with. Add it on the backend (Render → Environment), then redeploy:",
-      lines: ["WHATSAPP_TOKEN_KEY=<64 hex characters>"],
+      title: "WA_AUTH_KEY is not set",
+      body: "The backend has no key to encrypt the linked session with. Add it to the backend's environment, then restart the backend:",
+      lines: keyLines,
     },
     KEY_INVALID: {
-      title: "WHATSAPP_TOKEN_KEY is not a valid key",
-      body: "It must be exactly 64 characters, using only 0-9 and a-f. Paste the key itself, not the <64 hex characters> placeholder. Generate one with the command below, set it on the backend (Render → Environment), then redeploy:",
-      lines: ["openssl rand -hex 32"],
+      title: "WA_AUTH_KEY is not a valid key",
+      body: "It must be exactly 64 characters, using only 0-9 and a-f, with no quotes or spaces. Set a correct one in the backend's environment, then restart the backend:",
+      lines: keyLines,
     },
   }[reason]
   return (
