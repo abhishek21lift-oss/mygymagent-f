@@ -25,6 +25,8 @@ export interface Conversation {
   /** Fullest form seen, for display and for `?to=` deep-links. */
   phone: string
   unmatched: boolean
+  /** The sender's WhatsApp name, when one came in with a message. */
+  name?: string
   lastAt: string
   messages: ThreadMsg[]
 }
@@ -64,8 +66,12 @@ export function buildConversations(
   outbound: WhatsAppMessage[],
 ): Conversation[] {
   const threads = new Map<string, Conversation>()
-  const thread = (raw: string): Conversation => {
+  const thread = (value: string | null | undefined): Conversation | null => {
+    // A row without a number can't be a thread, and must not take the
+    // whole inbox down with it.
+    const raw = value ?? ""
     const key = normalizePhone(raw)
+    if (!key) return null
     let t = threads.get(key)
     if (!t) {
       t = { key, phone: raw.replace(/\D/g, ""), unmatched: false, lastAt: "", messages: [] }
@@ -75,12 +81,15 @@ export function buildConversations(
     return t
   }
   for (const m of inbound) {
-    const t = thread(m.fromPhone)
+    const t = thread(m.from)
+    if (!t) continue
     t.messages.push({ id: m.id, fromMe: false, text: m.body, createdAt: m.createdAt })
     if (m.matchedMemberId === null) t.unmatched = true
+    if (m.pushName && !t.name) t.name = m.pushName
   }
   for (const m of outbound) {
     const t = thread(m.recipient)
+    if (!t) continue
     t.messages.push({
       id: m.id,
       fromMe: true,

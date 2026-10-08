@@ -83,7 +83,7 @@ export function ConversationList({
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-sm font-bold text-stone-900 dark:text-stone-100">{c.phone}</span>
+                <span className="truncate text-sm font-bold text-stone-900 dark:text-stone-100">{c.name ? `${c.name} · ${c.phone}` : c.phone}</span>
                 <time dateTime={c.lastAt} className="shrink-0 text-xs text-stone-500 tabular-nums">
                   {timeLabel(c.lastAt)}
                 </time>
