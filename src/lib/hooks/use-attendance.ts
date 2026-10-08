@@ -8,7 +8,8 @@ const KEY = "attendance";
 const LIVE_KEY = "attendance-live";
 const ENTRY_QR_KEY = "entry-qr";
 
-export function useAttendance(params: PaginationParams & { branchId?: string; memberId?: string } = {}) {
+/** `date` is a YYYY-MM-DD day on the gym's calendar. */
+export function useAttendance(params: PaginationParams & { branchId?: string; memberId?: string; date?: string } = {}) {
   return useQuery({
     queryKey: [KEY, params],
     queryFn: () => api.get<Paginated<Attendance>>("/attendance", { query: params }),

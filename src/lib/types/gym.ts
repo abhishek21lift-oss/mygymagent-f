@@ -381,6 +381,8 @@ export interface Attendance {
   checkInAt: string
   checkOutAt: string | null
   method: AttendanceMethod
+  /** Set when the gate turned the member away; the visit is still logged. */
+  deniedReason?: string | null
   recordedByUserId: string | null
   createdAt: string
   member?: { id: string; firstName: string; lastName: string } | null

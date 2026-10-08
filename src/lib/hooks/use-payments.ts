@@ -6,7 +6,9 @@ import type { CreatePaymentInput, RefundPaymentInput } from "@/lib/validation/gy
 
 const KEY = "payments";
 
-export function usePayments(params: PaginationParams & { memberId?: string } = {}) {
+/** `date` is a YYYY-MM-DD day on the gym's calendar; `branchId` narrows to
+ * one branch (an enforced branch scope on the server always wins). */
+export function usePayments(params: PaginationParams & { memberId?: string; branchId?: string; date?: string } = {}) {
   return useQuery({
     queryKey: [KEY, params],
     queryFn: () => api.get<Paginated<Payment>>("/payments", { query: params }),

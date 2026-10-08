@@ -37,6 +37,8 @@ import { GymHealthHero, GymHealthPanels, GymHealthRevenueRisk } from "./gym-heal
 import { PriorityActions } from "./priority-actions";
 import { AppIconLink, DashSection, Segmented, Tile } from "./dashboard-ui";
 import styles from "./dashboard.module.css";
+import { addDays, shortDay, useGymToday } from "./gym-day";
+import { todayMetricHref } from "./today/[metric]/metrics";
 import { cn, currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { DonutChart } from "@/components/shared/donut-chart";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -92,52 +94,6 @@ const FINANCE_PRESETS: ReadonlyArray<{ value: Exclude<FinancePreset, "custom">; 
   { value: "30d", label: "30D", days: 30 },
   { value: "90d", label: "90D", days: 90 },
 ];
-
-/** YYYY-MM-DD in the gym's timezone — what the API bounds by day. */
-function isoDay(date: Date, timeZone: string | null | undefined) {
-  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
-  try {
-    return new Intl.DateTimeFormat("en-CA", { ...options, timeZone: timeZone ?? undefined }).format(date);
-  } catch {
-    return new Intl.DateTimeFormat("en-CA", options).format(date);
-  }
-}
-
-/** Pure calendar arithmetic on a YYYY-MM-DD string — no clock, no
- * timezone, so a DST day can never make "tomorrow" equal "today". */
-function addDays(iso: string, days: number): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(Date.UTC(y, (m ?? 1) - 1, (d ?? 1) + days)).toISOString().slice(0, 10);
-}
-
-/** "Oct 6" for a YYYY-MM-DD. Formatted as a UTC calendar date: the
- * string is already the gym's day, and re-zoning it shifted the label a
- * day whenever the browser sat east of the gym. */
-function shortDay(iso: string) {
-  const [y, m, d] = iso.split("-").map(Number);
-  try {
-    return new Intl.DateTimeFormat(undefined, { timeZone: "UTC", month: "short", day: "numeric" }).format(
-      new Date(Date.UTC(y, (m ?? 1) - 1, d ?? 1)),
-    );
-  } catch {
-    return iso;
-  }
-}
-
-/** Today in the gym's timezone, re-checked every minute so a dashboard
- * left open overnight moves to the new day by itself. */
-function useGymToday(timeZone: string | null | undefined): string {
-  const [stamp, setStamp] = React.useState(() => Date.now());
-  React.useEffect(() => {
-    const id = window.setInterval(() => {
-      setStamp((previous) =>
-        isoDay(new Date(previous), timeZone) === isoDay(new Date(), timeZone) ? previous : Date.now(),
-      );
-    }, 60_000);
-    return () => window.clearInterval(id);
-  }, [timeZone]);
-  return React.useMemo(() => isoDay(new Date(stamp), timeZone), [stamp, timeZone]);
-}
 
 /* ─────────────────────────────────────────────────────────────────
    Main Dashboard Page
@@ -245,6 +201,11 @@ export default function DashboardPage() {
     enabled: datedReady && canReadWorkouts,
     branchId: branchFilter,
   });
+  /* Each Today figure opens the records behind it, for the same day and
+     branch -- when this person may read that list. */
+  const canReadAttendance = hasPermission(["attendance.read", "attendance.read_assigned"]);
+  const canReadPayments = hasPermission("payments.read");
+  const todayHref = (metric: Parameters<typeof todayMetricHref>[0]) => todayMetricHref(metric, todayStr, branchFilter);
   const summaryOutstanding =
     financeSummary.data?.outstanding.find((r) => r.currency === currencyCode) ?? financeSummary.data?.outstanding[0];
   const rangeLabel =
@@ -327,7 +288,6 @@ export default function DashboardPage() {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <GymHealthHero
         gymName={gymName}
-        firstName={user?.firstName}
         timeZone={timezone}
         health={gymHealth.data}
         isLoading={gymHealth.isLoading || !datedReady}
@@ -345,6 +305,7 @@ export default function DashboardPage() {
             title="Check In"
             accent="cyan"
             feature
+            href={canReadAttendance ? todayHref("check-ins") : undefined}
             value={data?.today.checkIns}
             hint={data?.today.deniedCheckIns ? `${data.today.deniedCheckIns} turned away at the door` : "Visits today"}
             isLoading={briefing.isLoading || !reportsReady}
@@ -354,6 +315,7 @@ export default function DashboardPage() {
             icon={HandCoins}
             title="Collection"
             accent="emerald"
+            href={canReadPayments ? todayHref("collection") : undefined}
             value={todayCollection.data ? displayCurrencyAmount(todayCollectionRow?.grossRevenue ?? "0.00", todayCollectionRow?.currency ?? currencyCode, 0) : undefined}
             hint={todayCollectionRow && todayCollectionRow.paymentCount > 0
               ? `${todayCollectionRow.paymentCount} payment${todayCollectionRow.paymentCount === 1 ? "" : "s"} today`
@@ -366,6 +328,7 @@ export default function DashboardPage() {
               icon={UserPlus}
               title="New Members"
               accent="violet"
+              href={todayHref("new-members")}
               value={newMembers.data?.total}
               hint="Joined today"
               isLoading={newMembers.isLoading || !datedReady}
@@ -377,6 +340,7 @@ export default function DashboardPage() {
               icon={RefreshCw}
               title="Renewals"
               accent="amber"
+              href={todayHref("renewals")}
               value={todayMemberships.data ? `${renewalsToday}${renewalsTruncated ? "+" : ""}` : undefined}
               hint={todayMemberships.data && todayMemberships.data.total > 0
                 ? `Of ${todayMemberships.data.total} started today`
@@ -390,6 +354,7 @@ export default function DashboardPage() {
               icon={Megaphone}
               title="Leads"
               accent="rose"
+              href={todayHref("leads")}
               value={todayLeads.data?.total}
               hint="New enquiries today"
               isLoading={todayLeads.isLoading || !datedReady}
@@ -401,6 +366,7 @@ export default function DashboardPage() {
               icon={Dumbbell}
               title="Workouts"
               accent="blue"
+              href="/workout-sessions"
               value={todaySessions.data?.length}
               hint="Training sessions today"
               isLoading={todaySessions.isLoading || !datedReady}
