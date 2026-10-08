@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Loader2, Percent, Play, Plus } from "lucide-react";
+import { Loader2, Pencil, Percent, Play, Plus } from "lucide-react";
 
 import { DataState } from "@/components/shared/data-state";
 import { Panel, MetricStrip } from "@/components/shared/panel";
@@ -25,6 +25,7 @@ import {
   useCommissionSummary,
   useCommissions,
   useGenerateCommissions,
+  useUpdateCommissionRule,
   useUpsertCommissionRule,
   type CommissionRule,
 } from "@/lib/hooks/use-commissions";
@@ -80,6 +81,9 @@ export function CommissionsSection() {
 
   const generate = useGenerateCommissions();
   const upsertRule = useUpsertCommissionRule();
+  const updateRule = useUpdateCommissionRule();
+  // One rule edited in place at a time: its new rate and flat amount.
+  const [editing, setEditing] = React.useState<{ id: string; percentage: string; fixedAmount: string } | null>(null);
 
   const [draft, setDraft] = React.useState({
     trainerId: "",
@@ -132,6 +136,27 @@ export function CommissionsSection() {
       toast.success("Commission rule saved");
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : "Could not save the rule");
+    }
+  }
+
+  async function onSaveEdit() {
+    if (!editing) return;
+    const percentage = Number(editing.percentage || 0);
+    const fixedAmount = Number(editing.fixedAmount || 0);
+    if (!Number.isFinite(percentage) || percentage < 0 || percentage > 100) {
+      toast.error("Percentage must be between 0 and 100");
+      return;
+    }
+    if (!Number.isFinite(fixedAmount) || fixedAmount < 0) {
+      toast.error("Flat amount can't be negative");
+      return;
+    }
+    try {
+      await updateRule.mutateAsync({ id: editing.id, percentage, fixedAmount });
+      setEditing(null);
+      toast.success("Commission rule updated");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Could not update the rule");
     }
   }
 
@@ -275,7 +300,54 @@ export function CommissionsSection() {
                       {rule.sessionType ? `${rule.sessionType} sessions` : "All session types"}
                     </p>
                   </div>
-                  <Badge variant="secondary">{ruleLabel(rule)}</Badge>
+                  {editing?.id === rule.id ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Input
+                        aria-label="Percentage of session price"
+                        inputMode="decimal"
+                        placeholder="% of price"
+                        value={editing.percentage}
+                        onChange={(e) => setEditing((d) => d && { ...d, percentage: e.target.value })}
+                        className="w-24"
+                      />
+                      <Input
+                        aria-label="Flat amount per session"
+                        inputMode="decimal"
+                        placeholder="Flat amount"
+                        value={editing.fixedAmount}
+                        onChange={(e) => setEditing((d) => d && { ...d, fixedAmount: e.target.value })}
+                        className="w-28"
+                      />
+                      <Button size="sm" className="min-h-10" onClick={() => void onSaveEdit()} disabled={updateRule.isPending}>
+                        {updateRule.isPending ? "Saving…" : "Save"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="min-h-10" onClick={() => setEditing(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{ruleLabel(rule)}</Badge>
+                      {canManage && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="min-h-10"
+                          aria-label={`Edit rule for ${who ? `${who.firstName} ${who.lastName}` : "trainer"}`}
+                          onClick={() =>
+                            setEditing({
+                              id: rule.id,
+                              percentage: String(Number(rule.percentage)),
+                              fixedAmount: String(Number(rule.fixedAmount)),
+                            })
+                          }
+                        >
+                          <Pencil className="size-4" aria-hidden="true" />
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
