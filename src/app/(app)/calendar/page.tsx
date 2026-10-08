@@ -19,6 +19,7 @@ import { useMembers } from "@/lib/hooks/use-members"
 import { useStaff } from "@/lib/hooks/use-staff"
 import {
  useAddTimeOff,
+ useDeleteTimeOff,
  useAvailabilityRules,
  useCancelAppointment,
  useCalendarFeed,
@@ -28,6 +29,7 @@ import {
  useFreeSlots,
  useNoShowAppointment,
  useRescheduleAppointment,
+ useUpdateAppointment,
  useSetAvailabilityRule,
  useTimeOffs,
  type AppointmentType,
@@ -244,10 +246,13 @@ function SlotRow({ slot, showDate }: { slot: CalendarSlot; showDate: boolean }) 
  const complete = useCompleteAppointment()
  const noShow = useNoShowAppointment()
  const reschedule = useRescheduleAppointment()
+ const update = useUpdateAppointment()
+ const [editTitle, setEditTitle] = React.useState(slot.title)
+ const [editNotes, setEditNotes] = React.useState(slot.notes ?? "")
  const [rsStart, setRsStart] = React.useState(toLocalInput(new Date(slot.startTime)))
  const [rsEnd, setRsEnd] = React.useState(toLocalInput(new Date(slot.endTime)))
  const isAppt = slot.source === "APPOINTMENT"
- const busy = cancel.isPending || complete.isPending || noShow.isPending || reschedule.isPending
+ const busy = cancel.isPending || complete.isPending || noShow.isPending || reschedule.isPending || update.isPending
 
  async function run(fn: () => Promise<unknown>, ok: string) {
  try {
@@ -305,6 +310,25 @@ function SlotRow({ slot, showDate }: { slot: CalendarSlot; showDate: boolean }) 
  <Label className="text-xs">New end</Label>
  <Input type="datetime-local" value={rsEnd} onChange={(e) => setRsEnd(e.target.value)} className="min-h-11" />
  </div>
+ </div>
+ <div className="flex flex-col gap-2">
+ <div>
+ <Label htmlFor={`appt-title-${slot.id}`} className="text-xs">Title</Label>
+ <Input id={`appt-title-${slot.id}`} value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="min-h-11" />
+ </div>
+ <div>
+ <Label htmlFor={`appt-notes-${slot.id}`} className="text-xs">Notes</Label>
+ <Input id={`appt-notes-${slot.id}`} value={editNotes} onChange={(e) => setEditNotes(e.target.value)} placeholder="Anything the trainer should know" className="min-h-11" />
+ </div>
+ <Button
+ size="sm"
+ variant="outline"
+ className="min-h-11"
+ disabled={busy || !editTitle.trim() || (editTitle.trim() === slot.title && editNotes.trim() === (slot.notes ?? ""))}
+ onClick={() => run(() => update.mutateAsync({ id: slot.id, title: editTitle.trim(), notes: editNotes.trim() }), "Appointment updated")}
+ >
+ Save details
+ </Button>
  </div>
  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
  <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => reschedule.mutateAsync({ id: slot.id, startTime: new Date(rsStart).toISOString(), endTime: new Date(rsEnd).toISOString() }), "Appointment rescheduled")} className="min-h-11">Reschedule</Button>
@@ -369,6 +393,7 @@ function BookingPanel({ branchId }: { branchId: string }) {
  const leads = useLeads({ page: 1, pageSize: 100 })
  const create = useCreateAppointment()
 
+ // Trainers are named by user id everywhere the API takes a staffId.
  const trainers = (staff.data?.items ?? []).filter((s) => s.staffProfile?.isTrainer)
  const [staffId, setStaffId] = React.useState("")
  const [memberId, setMemberId] = React.useState("")
@@ -438,11 +463,11 @@ function BookingPanel({ branchId }: { branchId: string }) {
  </div>
  <div>
  <Label className="text-sm font-bold text-stone-700">Staff</Label>
- <Select value={staffId} onValueChange={setStaffId}>
+ <Select value={staffId || "none"} onValueChange={(v) => setStaffId(v === "none" ? "" : v)}>
  <SelectTrigger className="mt-1.5 min-h-11 w-full"><SelectValue placeholder="Optional" /></SelectTrigger>
  <SelectContent>
  <SelectItem value="none">Unassigned</SelectItem>
- {trainers.map((s) => s.staffProfile && <SelectItem key={s.staffProfile.id} value={s.staffProfile.id}>{s.firstName} {s.lastName}</SelectItem>)}
+ {trainers.map((s) => <SelectItem key={s.id} value={s.id}>{s.firstName} {s.lastName}</SelectItem>)}
  </SelectContent>
  </Select>
  </div>
@@ -537,6 +562,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  const setRule = useSetAvailabilityRule()
  const delRule = useDeleteAvailabilityRule()
  const addOff = useAddTimeOff()
+ const delOff = useDeleteTimeOff()
 
  const trainers = (staff.data?.items ?? []).filter((s) => s.staffProfile?.isTrainer)
  const [staffId, setStaffId] = React.useState("")
@@ -563,7 +589,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  <Select value={staffId} onValueChange={setStaffId}>
  <SelectTrigger className="min-h-11 w-full"><SelectValue placeholder="Select trainer" /></SelectTrigger>
  <SelectContent>
- {trainers.map((s) => s.staffProfile && <SelectItem key={s.staffProfile.id} value={s.staffProfile.id}>{s.firstName} {s.lastName}</SelectItem>)}
+ {trainers.map((s) => <SelectItem key={s.id} value={s.id}>{s.firstName} {s.lastName}</SelectItem>)}
  </SelectContent>
  </Select>
  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -613,6 +639,7 @@ function AvailabilityPanel({ branchId }: { branchId: string }) {
  {(timeOffs.data ?? []).map((t) => (
  <div key={t.id} className="flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-muted/40 px-3 py-2 text-xs">
  <span className="font-bold text-amber-800">{t.staff ? `${t.staff.firstName} ${t.staff.lastName}` : "Trainer"} · {fmtDate(new Date(t.startAt))} → {fmtDate(new Date(t.endAt))}{t.reason ? ` · ${t.reason}` : ""}</span>
+ <Button type="button" variant="ghost" size="icon" aria-label="Remove time off" className="min-h-10 min-w-10 shrink-0 rounded-md" disabled={delOff.isPending} onClick={() => guard(() => delOff.mutateAsync(t.id), "Time off removed")}><Trash2 className="size-4" aria-hidden="true" /></Button>
  </div>
  ))}
  </div>

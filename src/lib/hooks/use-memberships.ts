@@ -75,4 +75,3 @@ export function useTransferMembership() {
 
 export function useCancelMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, reason }: { id: string; reason?: string }) => api.post<Membership>(`/memberships/${id}/cancel`, { reason }), onSuccess: () => invalidate(qc) }); }
 export function useRenewMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, discount }: { id: string; discount?: number }) => api.post<Membership>(`/memberships/${id}/renew`, { discount }), onSuccess: () => invalidate(qc) }); }
-export function useRecordPaymentFailure() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, amount, reason }: { id: string; amount?: number; reason?: string }) => api.post(`/memberships/${id}/payment-failed`, { amount, reason }), onSuccess: () => invalidate(qc) }); }

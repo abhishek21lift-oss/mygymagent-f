@@ -2,13 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Send, Sparkles, Wrench, Zap, Dumbbell, Users, CalendarCheck, Bot } from "lucide-react";
+import { ArrowRight, Send, Sparkles, Wrench, Zap, Dumbbell, Users, CalendarCheck, Bot, History, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAiChat } from "@/lib/hooks/use-ai-chat";
+import { fetchAiConversation, useAiConversations, useDeleteAiConversation } from "@/lib/hooks/use-ai-conversations";
 import { PageHero } from "@/components/shared/page-hero";
 import { QuickActionCard } from "@/components/shared/bento";
 import { ApiError } from "@/lib/api/client";
@@ -48,6 +50,11 @@ export default function AiPage() {
   const [input, setInput] = React.useState("");
   const [notConfigured, setNotConfigured] = React.useState(false);
   const chat = useAiChat();
+  // The stored chat being continued; null for a new one.
+  const [conversationId, setConversationId] = React.useState<string | null>(null);
+  const [loadingConversation, setLoadingConversation] = React.useState(false);
+  const conversations = useAiConversations();
+  const deleteConversation = useDeleteAiConversation();
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -73,7 +80,8 @@ export default function AiPage() {
     setInput("");
 
     try {
-      const res = await chat.mutateAsync({ message: trimmed, history });
+      const res = await chat.mutateAsync({ message: trimmed, history, conversationId: conversationId ?? undefined });
+      if (res.conversationId) setConversationId(res.conversationId);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: res.reply, toolCalls: res.toolCalls },
@@ -96,13 +104,42 @@ export default function AiPage() {
     }
   }
 
+  function newChat() {
+    setConversationId(null);
+    setMessages([]);
+    setInput("");
+  }
+
+  async function openConversation(id: string) {
+    if (id === conversationId || chat.isPending) return;
+    setLoadingConversation(true);
+    try {
+      setMessages(await fetchAiConversation(id));
+      setConversationId(id);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "That chat could not be opened");
+    } finally {
+      setLoadingConversation(false);
+    }
+  }
+
+  async function removeConversation(id: string) {
+    try {
+      await deleteConversation.mutateAsync(id);
+      if (id === conversationId) newChat();
+      toast.success("Chat deleted");
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Chat could not be deleted");
+    }
+  }
+
   return (
     <div className="pb-6">
       <div className="flex flex-col gap-6">
         <PageHero
           id="ai-title"
           icon={Sparkles}
-          title="Apple Intelligence Co-pilot"
+          title="AI agent"
           description="Contextual reasoning, member retention forecasting, workout generation and analytics"
           actions={
             <Link
@@ -142,10 +179,16 @@ export default function AiPage() {
                     <Bot className="size-5" aria-hidden="true" />
                   </span>
                   <div>
-                    <h2 className="text-sm font-bold text-foreground">Active Intelligence Session</h2>
-                    <p className="text-[11px] text-muted-foreground">Tenant-isolated memory enabled</p>
+                    <h2 className="text-sm font-bold text-foreground">{conversationId ? "Saved chat" : "New chat"}</h2>
+                    <p className="text-[11px] text-muted-foreground">Chats are saved, so you can come back to them</p>
                   </div>
                 </div>
+                {messages.length > 0 && !chat.isPending ? (
+                  <Button type="button" size="sm" variant="outline" className="min-h-9 rounded-xl" onClick={newChat}>
+                    <Plus className="size-4" aria-hidden="true" />
+                    New chat
+                  </Button>
+                ) : null}
 
                 {chat.isPending && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-indigo-500/10 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-wider text-indigo-700 ring-1 ring-indigo-500/20 dark:text-indigo-300">
@@ -241,7 +284,7 @@ export default function AiPage() {
                         void handleSend();
                       }
                     }}
-                    placeholder="Ask Apple Intelligence anything about members, plans, attendance, or workouts..."
+                    placeholder="Ask anything about members, plans, attendance, or workouts..."
                     rows={1}
                     className="min-h-10 flex-1 resize-none border-0 bg-transparent px-3 py-2 text-xs shadow-none focus-visible:ring-0"
                   />
@@ -262,6 +305,52 @@ export default function AiPage() {
 
             {/* Aside / Suggestions & Tips */}
             <aside aria-label="AI tips" className="flex flex-col gap-4">
+              <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
+                <CardContent className="space-y-2 p-5">
+                  <h3 className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <History className="size-3.5" aria-hidden="true" />
+                    Recent chats
+                  </h3>
+                  {conversations.isPending ? (
+                    <p className="text-xs text-muted-foreground">Loading…</p>
+                  ) : (conversations.data ?? []).length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Your chats will appear here.</p>
+                  ) : (
+                    <ul className="flex flex-col gap-1">
+                      {(conversations.data ?? []).map((c) => (
+                        <li key={c.id} className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => void openConversation(c.id)}
+                            disabled={loadingConversation}
+                            aria-current={c.id === conversationId ? "true" : undefined}
+                            className={cn(
+                              "min-h-10 min-w-0 flex-1 rounded-xl px-3 py-2 text-left text-xs transition hover:bg-muted",
+                              c.id === conversationId && "bg-primary/10 font-semibold text-foreground",
+                            )}
+                          >
+                            <span className="line-clamp-1">{c.preview || "Untitled chat"}</span>
+                            <span className="block text-[10px] text-muted-foreground">
+                              {new Date(c.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {c.messageCount} message{c.messageCount === 1 ? "" : "s"}
+                            </span>
+                          </button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-9 shrink-0 rounded-lg text-muted-foreground"
+                            aria-label="Delete chat"
+                            disabled={deleteConversation.isPending}
+                            onClick={() => void removeConversation(c.id)}
+                          >
+                            <Trash2 className="size-3.5" aria-hidden="true" />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
               <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 p-6 text-white shadow-md">
                 <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-fuchsia-400/30 blur-3xl" aria-hidden="true" />
                 <div className="pointer-events-none absolute -bottom-16 -left-10 size-48 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />

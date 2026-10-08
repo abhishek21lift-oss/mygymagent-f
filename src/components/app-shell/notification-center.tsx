@@ -5,7 +5,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import {
  Bell, Check, CheckCheck, Circle, ExternalLink, Filter, RefreshCw, Search,
  Settings2, UserPlus, CreditCard, CalendarCheck, Dumbbell, Package,
- MessageCircle, Users, Archive, Trash2, Clock3,
+ MessageCircle, Users, Archive, ArchiveRestore, Trash2, Clock3,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
- archiveNotification, deleteNotification, getNotifications, markAllNotificationsRead,
+ archiveNotification, deleteNotification, getNotifications, markAllNotificationsRead, unarchiveNotification,
  markNotificationRead, markNotificationUnread, snoozeNotification, type NotificationItem,
 } from "@/lib/notifications"
 import { ApiError } from "@/lib/api/client"
@@ -29,6 +29,7 @@ const filters = [
  { key: "ATTENDANCE", label: "Attendance" }, { key: "WORKOUT", label: "Workout" },
  { key: "DIET", label: "Diet" }, { key: "PT", label: "PT" },
  { key: "INVENTORY", label: "Inventory" }, { key: "WHATSAPP", label: "WhatsApp" },
+ { key: "archived", label: "Archived" },
 ] as const
 
 function formatRelativeTime(value: string) {
@@ -59,8 +60,9 @@ function priorityLabel(priority: NotificationItem["priority"]) {
  return priority === "CRITICAL" ? "Critical" : priority === "HIGH" ? "High" : priority === "LOW" ? "Low" : "Normal"
 }
 
-function NotificationRow({ item, onRead, onUnread, onOpen, onArchive, onDelete, onSnooze }: {
+function NotificationRow({ item, onRead, onUnread, onOpen, onArchive, onUnarchive, onDelete, onSnooze }: {
  item: NotificationItem
+ onUnarchive: (id: string) => void
  onRead: (id: string) => void
  onUnread: (id: string) => void
  onOpen: (item: NotificationItem) => void
@@ -94,9 +96,15 @@ function NotificationRow({ item, onRead, onUnread, onOpen, onArchive, onDelete, 
  <Button type="button" variant="ghost" size="icon" className="size-7 rounded-lg" onClick={() => onSnooze(item.id)} aria-label="Snooze for one hour" title="Snooze 1 hour">
  <Clock3 className="size-3.5" aria-hidden="true" />
  </Button>
+ {item.archivedAt ? (
+ <Button type="button" variant="ghost" size="icon" className="size-7 rounded-lg" onClick={() => onUnarchive(item.id)} aria-label="Restore notification" title="Restore">
+ <ArchiveRestore className="size-3.5" aria-hidden="true" />
+ </Button>
+ ) : (
  <Button type="button" variant="ghost" size="icon" className="size-7 rounded-lg" onClick={() => onArchive(item.id)} aria-label="Archive notification" title="Archive">
  <Archive className="size-3.5" aria-hidden="true" />
  </Button>
+ )}
  <Button type="button" variant="ghost" size="icon" className="size-7 rounded-lg text-destructive" onClick={() => onDelete(item.id)} aria-label="Delete notification" title="Delete">
  <Trash2 className="size-3.5" aria-hidden="true" />
  </Button>
@@ -114,11 +122,12 @@ export function NotificationCenter() {
  const [search, setSearch] = React.useState("")
  const [appliedSearch, setAppliedSearch] = React.useState("")
  const unreadOnly = filter === "unread"
- const category = filter && filter !== "unread" ? filter : undefined
+ const archivedOnly = filter === "archived"
+ const category = filter && filter !== "unread" && !archivedOnly ? filter : undefined
 
  const query = useInfiniteQuery({
  queryKey: [...notificationKey, { filter, appliedSearch }],
- queryFn: ({ pageParam }) => getNotifications({ limit: 25, unreadOnly, category, search: appliedSearch, cursor: pageParam }),
+ queryFn: ({ pageParam }) => getNotifications({ limit: 25, unreadOnly, archivedOnly, category, search: appliedSearch, cursor: pageParam }),
  initialPageParam: undefined as string | undefined,
  getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
  staleTime: 5_000,
@@ -133,6 +142,7 @@ export function NotificationCenter() {
  const readMutation = useMutation({ mutationFn: markNotificationRead, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to update notification") })
  const unreadMutation = useMutation({ mutationFn: markNotificationUnread, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to update notification") })
  const archiveMutation = useMutation({ mutationFn: archiveNotification, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to archive notification") })
+ const unarchiveMutation = useMutation({ mutationFn: unarchiveNotification, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to restore notification") })
  const deleteMutation = useMutation({ mutationFn: deleteNotification, onSuccess: invalidate, onError: (e) => toast.error(e instanceof ApiError ? e.message : "Failed to delete notification") })
  const snoozeMutation = useMutation({
  mutationFn: (id: string) => snoozeNotification(id, new Date(Date.now() + 60 * 60_000).toISOString()),
@@ -177,8 +187,8 @@ export function NotificationCenter() {
  <div className="max-h-[min(34rem,60vh)] overflow-y-auto">
  {query.isPending ? <div className="space-y-3 p-4" role="status" aria-label="Loading notifications">{[1,2,3].map((item) => <div key={item} className="flex gap-3"><div className="size-8 animate-pulse rounded-xl bg-muted" /><div className="flex-1 space-y-2"><div className="h-3 w-2/3 animate-pulse rounded bg-muted" /><div className="h-3 w-full animate-pulse rounded bg-muted" /></div></div>)}</div>
  : query.isError ? <div className="p-6 text-center"><Bell className="mx-auto size-8 text-muted-foreground/50" aria-hidden="true" /><p className="mt-2 text-sm font-semibold">Notifications are unavailable</p><p className="mt-1 text-xs text-muted-foreground">We could not load your notification center.</p><Button variant="outline" size="sm" className="mt-4 rounded-xl" onClick={() => query.refetch()}>Try again</Button></div>
- : items.length === 0 ? <div className="p-8 text-center"><Bell className="mx-auto size-9 text-muted-foreground/40" aria-hidden="true" /><p className="mt-2 text-sm font-semibold">{filter === "unread" ? "No unread notifications" : "No notifications found"}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{appliedSearch ? "Try a different search." : "Important gym activity will appear here."}</p></div>
- : <>{items.map((item) => <NotificationRow key={item.id} item={item} onRead={(id) => readMutation.mutate(id)} onUnread={(id) => unreadMutation.mutate(id)} onOpen={openNotification} onArchive={(id) => archiveMutation.mutate(id)} onDelete={(id) => deleteMutation.mutate(id)} onSnooze={(id) => snoozeMutation.mutate(id)} />)}{query.hasNextPage && <div className="p-3"><Button variant="outline" className="w-full rounded-xl" disabled={query.isFetchingNextPage} onClick={() => query.fetchNextPage()}>{query.isFetchingNextPage ? "Loading..." : "Load more"}</Button></div>}</>}
+ : items.length === 0 ? <div className="p-8 text-center"><Bell className="mx-auto size-9 text-muted-foreground/40" aria-hidden="true" /><p className="mt-2 text-sm font-semibold">{filter === "unread" ? "No unread notifications" : archivedOnly ? "Nothing archived" : "No notifications found"}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{appliedSearch ? "Try a different search." : "Important gym activity will appear here."}</p></div>
+ : <>{items.map((item) => <NotificationRow key={item.id} item={item} onRead={(id) => readMutation.mutate(id)} onUnread={(id) => unreadMutation.mutate(id)} onOpen={openNotification} onArchive={(id) => archiveMutation.mutate(id)} onUnarchive={(id) => unarchiveMutation.mutate(id)} onDelete={(id) => deleteMutation.mutate(id)} onSnooze={(id) => snoozeMutation.mutate(id)} />)}{query.hasNextPage && <div className="p-3"><Button variant="outline" className="w-full rounded-xl" disabled={query.isFetchingNextPage} onClick={() => query.fetchNextPage()}>{query.isFetchingNextPage ? "Loading..." : "Load more"}</Button></div>}</>}
  </div>
  <div className="border-t border-border/60 bg-muted/20 px-4 py-2.5 text-center"><button type="button" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" onClick={() => { setOpen(false); router.push("/settings/notifications") }}>Manage notification preferences<ExternalLink className="size-3" aria-hidden="true" /></button></div>
  </PopoverContent>

@@ -43,14 +43,6 @@ export function usePtPackages(memberId?: string, { enabled = true }: { enabled?:
   })
 }
 
-export function usePtPackage(id: string | null) {
-  return useQuery({
-    queryKey: [KEY, id],
-    queryFn: () => api.get<PtPackage>(`/pt-packages/${id}`),
-    enabled: Boolean(id),
-  })
-}
-
 export interface PtWalletTotals {
   total: number
   used: number

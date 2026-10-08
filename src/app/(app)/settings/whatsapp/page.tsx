@@ -39,6 +39,7 @@ import {
 } from "@/lib/hooks/use-whatsapp"
 import { useBranches } from "@/lib/hooks/use-branches"
 import { WhatsAppWebCard } from "./whatsapp-web-card"
+import { ReplyBox, ScheduledMessagesCard } from "./whatsapp-messaging"
 
 declare global {
  interface Window {
@@ -68,6 +69,8 @@ export default function WhatsAppSettingsPage() {
  const sessionRef = React.useRef<{ wabaId: string; phoneNumberId?: string } | null>(null)
 
  const canManage = hasPermission("settings.manage")
+ // Replying and scheduling send real messages: whatsapp.manage, as the API asks.
+ const canSend = hasPermission("whatsapp.manage")
  const integration = integrationQuery.data
  const connected = integration?.status === "CONNECTED"
  const configured = Boolean(META_APP_ID && META_CONFIG_ID)
@@ -206,7 +209,8 @@ export default function WhatsAppSettingsPage() {
  <div className="flex w-full max-w-3xl flex-col gap-5">
  <TestSendCard canManage={canManage} orgCountry={orgCountry} />
  <TemplatesCard />
- <InboundCard />
+ <InboundCard canReply={canSend} />
+ <ScheduledMessagesCard canManage={canSend} />
  <DeliveryLogCard />
  <DangerZoneCard canManage={canManage} />
  </div>
@@ -299,7 +303,7 @@ function TestSendCard({ canManage, orgCountry }: { canManage: boolean; orgCountr
  * Unmatched first: a number the system could not tie to a member is a
  * person no follow-up will ever reach.
  */
-function InboundCard() {
+function InboundCard({ canReply }: { canReply: boolean }) {
  const [unmatchedOnly, setUnmatchedOnly] = React.useState(false)
  const inbound = useInboundWhatsApp({ limit: 50, ...(unmatchedOnly ? { matched: false } : {}) })
 
@@ -343,6 +347,7 @@ function InboundCard() {
    {!message.matchedMemberId && (
     <p className="mt-1 text-xs font-semibold text-amber-700 dark:text-amber-400">Not matched to a member</p>
    )}
+   {canReply ? <ReplyBox to={message.fromPhone} /> : null}
    </div>
   ))}
   </div>

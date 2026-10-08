@@ -2727,7 +2727,10 @@ function TagsPanel({ memberId }: { memberId: string }) {
  );
  })}
  {tagsQuery.data?.length === 0 && (
- <p className="text-sm text-stone-600">No tags created yet.</p>
+ <p className="text-sm text-stone-600">
+ No tags created yet.{" "}
+ <a href="/settings/tags" className="font-semibold text-primary underline-offset-4 hover:underline">Create tags</a>
+ </p>
  )}
  </div>
  </div>

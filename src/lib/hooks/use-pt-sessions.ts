@@ -52,14 +52,6 @@ export function usePtSessions(params: PaginationParams & { memberId?: string; tr
   })
 }
 
-export function usePtSession(id: string | null) {
-  return useQuery({
-    queryKey: [KEY, id],
-    queryFn: () => api.get<PtSession>(`/pt-sessions/${id}`),
-    enabled: Boolean(id),
-  })
-}
-
 export function useBookPtSession() {
   const queryClient = useQueryClient()
   return useMutation({

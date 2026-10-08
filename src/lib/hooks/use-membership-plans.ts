@@ -31,10 +31,3 @@ export function useUpdateMembershipPlan(id: string) {
   });
 }
 
-export function useDeleteMembershipPlan() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => api.delete<MembershipPlan>(`/membership-plans/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
-  });
-}

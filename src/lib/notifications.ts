@@ -41,6 +41,8 @@ export interface NotificationQuery {
   search?: string
   cursor?: string
   includeArchived?: boolean
+  /** Only archived notifications: the centre's Archived view. */
+  archivedOnly?: boolean
 }
 
 export interface NotificationPreference {
@@ -86,6 +88,7 @@ export function getNotifications(query: NotificationQuery = {}) {
       search: query.search || undefined,
       cursor: query.cursor || undefined,
       includeArchived: query.includeArchived ? "true" : undefined,
+      archivedOnly: query.archivedOnly ? "true" : undefined,
     },
   })
 }

@@ -3,6 +3,12 @@ import { api } from "@/lib/api/client";
 
 const KEY = "member-tags";
 
+function invalidateTagged(queryClient: ReturnType<typeof useQueryClient>) {
+  void queryClient.invalidateQueries({ queryKey: [KEY] });
+  void queryClient.invalidateQueries({ queryKey: ["member-tag-assignments"] });
+  void queryClient.invalidateQueries({ queryKey: ["members"] });
+}
+
 export interface MemberTag {
   id: string;
   organizationId: string;
@@ -10,7 +16,8 @@ export interface MemberTag {
   color: string;
   createdAt: string;
   updatedAt: string;
-  _count?: { memberAssignments: number };
+  /** How many members carry the tag (the API's `_count`). */
+  _count?: { assignments: number };
 }
 
 export interface MemberTagAssignment {
@@ -54,9 +61,8 @@ export function useUpdateMemberTag() {
   return useMutation({
     mutationFn: ({ tagId, ...input }: { tagId: string; name?: string; color?: string }) =>
       api.patch<MemberTag>(`/members/tags/${tagId}`, input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: [KEY] });
-    },
+    // A renamed or recoloured tag shows on every member who carries it.
+    onSuccess: () => invalidateTagged(queryClient),
   });
 }
 
@@ -64,9 +70,8 @@ export function useDeleteMemberTag() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (tagId: string) => api.delete(`/members/tags/${tagId}`),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: [KEY] });
-    },
+    // Deleting a tag takes it off every member, so their lists change too.
+    onSuccess: () => invalidateTagged(queryClient),
   });
 }
 

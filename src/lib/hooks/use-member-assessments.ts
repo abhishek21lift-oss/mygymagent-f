@@ -1,31 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import type {
-  MemberAssessment,
-  MemberAssessmentType,
   MemberFitnessTestResult,
   MemberMeasurement,
   MemberScreening,
 } from "@/lib/types/gym";
 
 const KEY = "member-assessments";
-
-export function useMemberAssessments(memberId: string | undefined) {
-  return useQuery({
-    queryKey: [KEY, memberId, "assessments"],
-    queryFn: () => api.get<MemberAssessment[]>(`/members/${memberId}/assessments`),
-    enabled: !!memberId,
-  });
-}
-
-export function useCreateMemberAssessment(memberId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: { type: MemberAssessmentType; notes?: string }) =>
-      api.post<MemberAssessment>(`/members/${memberId}/assessments`, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, memberId, "assessments"] }),
-  });
-}
 
 export interface MemberMeasurementInput {
   assessmentId?: string;

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api/client"
-import type { WhatsAppIntegration, WhatsAppMessage, WhatsAppWebSession } from "@/lib/types/whatsapp"
+import type { WhatsAppIntegration, WhatsAppWebSession } from "@/lib/types/whatsapp"
 
 const KEY = "whatsapp"
 
@@ -17,23 +17,51 @@ export function useCompleteWhatsAppSignup() {
   })
 }
 
-export function useDisconnectWhatsApp() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: () => api.post<{ disconnected: boolean }>("/whatsapp/integration/disconnect", {}),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
-  })
-}
-
-export function useWhatsAppMessages(limit = 100) {
-  return useQuery({ queryKey: [KEY, "messages", limit], queryFn: () => api.get<WhatsAppMessage[]>("/whatsapp/messages", { query: { limit } }) })
-}
-
+/** A free-text WhatsApp message to one number, sent now: a reply to a
+ * member who wrote in. */
 export function useSendWhatsAppMessage() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: { to: string; text: string }) => api.post<{ id: string; status: string }>("/whatsapp/messages", input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "messages"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "logs"] }),
+  })
+}
+
+export type ScheduledMessageStatus = "PENDING" | "SENT" | "CANCELLED" | "FAILED"
+
+export interface ScheduledWhatsAppMessage {
+  id: string
+  recipient: string
+  body: string
+  memberId: string | null
+  sendAt: string
+  status: ScheduledMessageStatus
+  errorMessage: string | null
+  createdAt: string
+}
+
+export function useScheduledWhatsApp(limit = 50) {
+  return useQuery({
+    queryKey: [KEY, "scheduled", limit],
+    queryFn: () => api.get<ScheduledWhatsAppMessage[]>("/whatsapp/scheduled", { query: { limit } }),
+  })
+}
+
+export function useScheduleWhatsApp() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { to: string; text: string; sendAt: string; memberId?: string }) =>
+      api.post<ScheduledWhatsAppMessage>("/whatsapp/scheduled", input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "scheduled"] }),
+  })
+}
+
+/** Only a message still waiting to go can be cancelled. */
+export function useCancelScheduledWhatsApp() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete<ScheduledWhatsAppMessage>(`/whatsapp/scheduled/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "scheduled"] }),
   })
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Building2, MessageCircle, Settings2, ShieldCheck, Store } from "lucide-react";
+import { ArrowRight, Building2, MessageCircle, Settings2, ShieldCheck, Store, Tag } from "lucide-react";
 
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHero } from "@/components/shared/page-hero";
@@ -31,6 +31,9 @@ export default function SettingsPage() {
  // so every role has to be able to reach it.
  <div className="flex flex-wrap gap-2">
  <Link href="/settings/security" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> <ShieldCheck className="size-4" aria-hidden="true" /> Security </Link>
+ {hasPermission(["members.read", "members.read_assigned"]) ? (
+ <Link href="/settings/tags" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> <Tag className="size-4" aria-hidden="true" /> Member tags </Link>
+ ) : null}
  {canManageSettings ? (
  <><Link href="/settings/notifications" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> Notification preferences </Link><Link href="/settings/messages" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> Message templates </Link><Link href="/settings/billing" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition hover:-translate-y-0.5"> Platform Billing <ArrowRight className="size-4" aria-hidden="true" /></Link><Link href="/settings/whatsapp" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" style={{ backgroundImage: "linear-gradient(135deg, var(--a-orange-grad-1), var(--a-orange-grad-2))" }}>
  <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp setup <ArrowRight className="size-4" aria-hidden="true" />
