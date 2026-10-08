@@ -125,13 +125,16 @@ export function useDisconnectWhatsapp() {
   })
 }
 
+/** A message a member (or anyone) sent the gym, as GET /whatsapp/inbound
+ * returns it: the sender's number is `from`. */
 export interface InboundWhatsAppMessage {
   id: string
   organizationId: string
-  fromPhone: string
+  from: string
   body: string | null
+  /** The name the sender set in WhatsApp, when it reported one. */
+  pushName?: string | null
   matchedMemberId: string | null
-  providerMessageId: string | null
   createdAt: string
 }
 

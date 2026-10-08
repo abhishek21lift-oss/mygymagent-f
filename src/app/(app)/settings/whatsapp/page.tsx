@@ -340,14 +340,14 @@ function InboundCard({ canReply }: { canReply: boolean }) {
   {(inbound.data ?? []).map((message) => (
    <div key={message.id} className="rounded-lg border border-border p-3">
    <div className="flex items-baseline justify-between gap-3">
-    <span className="font-mono text-xs font-bold">{message.fromPhone}</span>
+    <span className="font-mono text-xs font-bold">{message.pushName ? `${message.pushName} · ${message.from}` : message.from}</span>
     <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{new Date(message.createdAt).toLocaleString()}</span>
    </div>
    <p className="mt-1 text-sm">{message.body || "(no text)"}</p>
    {!message.matchedMemberId && (
     <p className="mt-1 text-xs font-semibold text-amber-700 dark:text-amber-400">Not matched to a member</p>
    )}
-   {canReply ? <ReplyBox to={message.fromPhone} /> : null}
+   {canReply && message.from ? <ReplyBox to={message.from} /> : null}
    </div>
   ))}
   </div>
