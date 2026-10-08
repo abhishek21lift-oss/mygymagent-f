@@ -170,7 +170,7 @@ export default function AiPage() {
             {/* Conversation Window */}
             <section
               aria-label="Conversation"
-              className="relative flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl"
+              className="relative flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border/60 bg-muted/20 px-6 py-4">
@@ -208,7 +208,7 @@ export default function AiPage() {
                 {messages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
                     <div className="relative">
-                      <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 blur-xl animate-pulse" />
+                      <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 blur-xl" />
                       <span className="relative flex size-16 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-indigo-600 text-white shadow-xl">
                         <Sparkles className="size-8" aria-hidden="true" />
                       </span>
@@ -248,7 +248,7 @@ export default function AiPage() {
                             "max-w-[85%] rounded-3xl px-5 py-3.5 text-sm leading-relaxed shadow-xs transition-all",
                             m.role === "user"
                               ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm"
-                              : "border border-border/80 bg-muted/40 text-foreground backdrop-blur-md",
+                              : "border border-border/80 bg-muted/40 text-foreground",
                           )}
                         >
                           <p className="whitespace-pre-wrap">{m.content}</p>
@@ -271,7 +271,7 @@ export default function AiPage() {
               </div>
 
               {/* Composer */}
-              <div className="border-t border-border/60 bg-card/95 p-4 backdrop-blur-md">
+              <div className="border-t border-border/60 bg-card/95 p-4">
                 <div className="relative flex items-center gap-2 rounded-2xl border border-border/80 bg-background/80 p-1.5 shadow-2xs focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
                   <label htmlFor="ai-input" className="sr-only">Ask the assistant</label>
                   <Textarea
@@ -366,7 +366,7 @@ export default function AiPage() {
                 </Link>
               </div>
 
-              <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+              <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
                 <CardContent className="space-y-3 p-5">
                   <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                     Recommended Prompts

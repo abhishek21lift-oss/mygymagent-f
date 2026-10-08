@@ -83,10 +83,10 @@ export function BottomTabBar({ onOpenMore }: { onOpenMore: () => void }) {
 
   return (
     /**
-     * Floating frosted bar, inset from screen edges so the safe-area
-     * bottom reads as space rather than a bar sitting on the content.
-     * The glass class (globals.css) provides blur + border + shadow —
-     * no extra visual props needed here.
+     * Floating bar, inset from screen edges so the safe-area bottom
+     * reads as space rather than a bar sitting on the content. The
+     * glass class (globals.css) provides the surface, border and
+     * shadow — no extra visual props needed here.
      */
     <nav
       aria-label="Primary"

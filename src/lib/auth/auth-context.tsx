@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { api, ApiError } from "@/lib/api/client"
+import { api, ApiError, refreshSession } from "@/lib/api/client"
 import { getAccessToken, setAccessToken } from "@/lib/api/token-store"
 import { setCurrentBranchId } from "@/lib/branch-context"
 import { unregisterPushOnSignOut } from "@/lib/push/web-push"
@@ -110,6 +110,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
  async function bootstrap() {
  try {
+ // The access token lives only in memory, so a fresh page load has
+ // none. Asking /auth/me first just earned a 401, then a refresh,
+ // then /auth/me again: three round trips before the app could draw,
+ // on every open. Refresh first; with no session, stop there.
+ const genAtStart = sessionGen.current
+ const hasSession = getAccessToken() !== null || (await refreshSession())
+ if (!hasSession) {
+ // Unless someone signed in while the refresh was in flight.
+ if (!cancelled && sessionGen.current === genAtStart) clearSession(genAtStart)
+ return
+ }
  await loadMe()
  } catch {
  if (!cancelled) {
