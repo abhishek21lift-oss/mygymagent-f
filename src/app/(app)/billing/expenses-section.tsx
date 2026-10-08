@@ -23,6 +23,7 @@ import {
  useExpenses,
  useMarkExpensePaid,
  useRejectExpense,
+ useUpdateExpense,
  type Expense,
 } from "@/lib/hooks/use-expenses"
 
@@ -35,13 +36,29 @@ const statusVariant: Record<Expense["status"], "secondary" | "default" | "destru
  PAID: "success",
 }
 
-function RecordExpenseDialog() {
+/** Records a new expense, or edits one that isn't paid yet (the API
+ * keeps paid expenses as they are). */
+function ExpenseDialog({ expense }: { expense?: Expense }) {
  const [open, setOpen] = React.useState(false)
  const create = useCreateExpense()
+ const update = useUpdateExpense()
+ const pending = create.isPending || update.isPending
  const [category, setCategory] = React.useState("RENT")
  const [amount, setAmount] = React.useState("")
  const [vendor, setVendor] = React.useState("")
  const [notes, setNotes] = React.useState("")
+ const [date, setDate] = React.useState("")
+
+ function onOpenChange(next: boolean) {
+ if (next) {
+ setCategory(expense?.category ?? "RENT")
+ setAmount(expense ? String(Number(expense.amount)) : "")
+ setVendor(expense?.vendor ?? "")
+ setNotes(expense?.notes ?? "")
+ setDate(expense ? expense.expenseDate.slice(0, 10) : "")
+ }
+ setOpen(next)
+ }
 
  async function submit() {
  const value = Number(amount)
@@ -50,33 +67,55 @@ function RecordExpenseDialog() {
  return
  }
  try {
- await create.mutateAsync({ category, amount: value, vendor: vendor || undefined, notes: notes || undefined })
+ if (expense) {
+ await update.mutateAsync({
+ id: expense.id,
+ category,
+ amount: value,
+ vendor: vendor.trim(),
+ notes: notes.trim(),
+ ...(date ? { expenseDate: date } : {}),
+ })
+ toast.success("Expense updated")
+ } else {
+ await create.mutateAsync({
+ category,
+ amount: value,
+ vendor: vendor.trim() || undefined,
+ notes: notes.trim() || undefined,
+ ...(date ? { expenseDate: date } : {}),
+ })
  toast.success("Expense recorded")
+ }
  setOpen(false)
- setAmount("")
- setVendor("")
- setNotes("")
  } catch (e) {
- toast.error(e instanceof ApiError ? e.message : "Failed to record expense")
+ toast.error(e instanceof ApiError ? e.message : expense ? "Failed to update expense" : "Failed to record expense")
  }
  }
 
+ const categories = expense && !CATEGORIES.includes(expense.category) ? [...CATEGORIES, expense.category] : CATEGORIES
+
  return (
- <Dialog open={open} onOpenChange={setOpen}>
+ <Dialog open={open} onOpenChange={onOpenChange}>
  <DialogTrigger asChild>
+ {expense ? (
+ <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Edit</Button>
+ ) : (
  <Button className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"><Plus className="size-4" aria-hidden="true" /> Record expense</Button>
+ )}
  </DialogTrigger>
  <DialogContent>
- <DialogHeader><DialogTitle>Record an expense</DialogTitle></DialogHeader>
+ <DialogHeader><DialogTitle>{expense ? "Edit expense" : "Record an expense"}</DialogTitle></DialogHeader>
  <div className="flex flex-col gap-4">
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <div><Label>Category</Label><Select value={category} onValueChange={setCategory}><SelectTrigger className="mt-1.5 w-full"><SelectValue /></SelectTrigger><SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
- <div><Label>Amount</Label><Input className="mt-1.5" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" /></div>
+ <div><Label htmlFor="expense-category">Category</Label><Select value={category} onValueChange={setCategory}><SelectTrigger id="expense-category" className="mt-1.5 w-full"><SelectValue /></SelectTrigger><SelectContent>{categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+ <div><Label htmlFor="expense-amount">Amount</Label><Input id="expense-amount" className="mt-1.5" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" /></div>
  </div>
- <div><Label>Vendor (optional)</Label><Input className="mt-1.5" value={vendor} onChange={(e) => setVendor(e.target.value)} placeholder="Landlord, utility company..." /></div>
- <div><Label>Notes (optional)</Label><Input className="mt-1.5" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="What was this for?" /></div>
+ <div><Label htmlFor="expense-date">Date</Label><Input id="expense-date" className="mt-1.5" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+ <div><Label htmlFor="expense-vendor">Vendor (optional)</Label><Input id="expense-vendor" className="mt-1.5" value={vendor} onChange={(e) => setVendor(e.target.value)} placeholder="Landlord, utility company..." /></div>
+ <div><Label htmlFor="expense-notes">Notes (optional)</Label><Input id="expense-notes" className="mt-1.5" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="What was this for?" /></div>
  </div>
- <DialogFooter><Button className="w-full sm:w-auto" onClick={submit} disabled={create.isPending}>{create.isPending ? "Recording..." : "Record expense"}</Button></DialogFooter>
+ <DialogFooter><Button className="w-full sm:w-auto" onClick={submit} disabled={pending}>{pending ? "Saving..." : expense ? "Save expense" : "Record expense"}</Button></DialogFooter>
  </DialogContent>
  </Dialog>
  )
@@ -101,6 +140,7 @@ function ExpenseActions({ expense }: { expense: Expense }) {
  {(expense.status === "PENDING" || expense.status === "APPROVED") && (
  <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={busy} onClick={() => markPaid.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Mark-paid failed") })}>Mark paid</Button>
  )}
+ {expense.status !== "PAID" && <ExpenseDialog expense={expense} />}
  {expense.status !== "PAID" && hasPermission("expenses.delete") && (
  <Button variant="ghost" size="sm" className="min-h-11 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" disabled={busy} onClick={() => remove.mutate(expense.id, { onError: (e) => toast.error(e instanceof ApiError ? e.message : "Delete failed") })}>Delete</Button>
  )}
@@ -149,7 +189,7 @@ export function ExpensesSection() {
  <p className="mt-0.5 text-xs font-medium text-stone-600 dark:text-stone-400">Rent, salaries, utilities and everything the gym spends.</p>
  </div>
  </div>
- {hasPermission("expenses.create") && <RecordExpenseDialog />}
+ {hasPermission("expenses.create") && <ExpenseDialog />}
  </div>
  <div className="p-4 sm:p-5">
  <DataTable columns={columns} data={list.data} isLoading={list.isLoading} isError={list.isError} onRetry={() => list.refetch()} page={page} onPageChange={setPage} emptyTitle="No expenses recorded yet" emptyDescription="Record rent, salaries or utilities to complete the profit picture." />

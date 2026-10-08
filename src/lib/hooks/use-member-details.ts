@@ -88,6 +88,16 @@ export function useCreateMemberEmergencyContact(memberId: string) {
   });
 }
 
+export function useUpdateMemberEmergencyContact(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<MemberEmergencyContactInput> }) =>
+      api.patch<MemberEmergencyContact>(`/members/${memberId}/emergency-contacts/${id}`, input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [KEY, memberId, "emergency-contacts"] }),
+  });
+}
+
 export function useDeleteMemberEmergencyContact(memberId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -113,6 +123,16 @@ export function useCreateMemberNote(memberId: string) {
   return useMutation({
     mutationFn: (input: { body: string; pinned?: boolean }) =>
       api.post<MemberNote>(`/members/${memberId}/notes`, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, memberId, "notes"] }),
+  });
+}
+
+/** Only the note's author may edit it; the API refuses anyone else. */
+export function useUpdateMemberNote(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: { body?: string; pinned?: boolean } }) =>
+      api.patch<MemberNote>(`/members/${memberId}/notes/${id}`, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, memberId, "notes"] }),
   });
 }

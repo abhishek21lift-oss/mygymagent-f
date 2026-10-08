@@ -58,26 +58,11 @@ function lifecycleMutation<T>(path: string) {
 
 export function useActivateMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/activate`), onSuccess: () => invalidate(qc) }); }
 export function usePauseMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days?: number; reason?: string }>("pause"), onSuccess: () => invalidate(qc) }); }
-export function useUnpauseMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/unpause`), onSuccess: () => invalidate(qc) }); }
 export function useFreezeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("freeze"), onSuccess: () => invalidate(qc) }); }
 export function useResumeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: (id: string) => api.post<Membership>(`/memberships/${id}/resume`), onSuccess: () => invalidate(qc) }); }
 export function useExtendMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: lifecycleMutation<{ days: number }>("extend"), onSuccess: () => invalidate(qc) }); }
 export function useUpgradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, ...body }: { id: string; membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }) => api.post<ChangePlanResult>(`/memberships/${id}/upgrade`, body), onSuccess: () => invalidate(qc) }); }
 export function useDowngradeMembership() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, ...body }: { id: string; membershipPlanId: string; initialPayment?: number; paymentMethod?: string; discount?: number }) => api.post<ChangePlanResult>(`/memberships/${id}/downgrade`, body), onSuccess: () => invalidate(qc) }); }
-
-/** Plan change with server-side proration. Direction is derived from the
- * plan prices by the backend; the result carries the credit/amount-due
- * breakdown alongside the new membership row. */
-export function useChangeMembershipPlan() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, newMembershipPlanId, direction, discount, initialPayment, paymentMethod }: { id: string; newMembershipPlanId: string; direction?: "UPGRADE" | "DOWNGRADE"; discount?: number; initialPayment?: number; paymentMethod?: string }) => {
-      void direction; // reserved for callers; server derives it from prices
-      return api.post<ChangePlanResult>(`/memberships/${id}/change-plan`, { membershipPlanId: newMembershipPlanId, discount, initialPayment, paymentMethod });
-    },
-    onSuccess: () => invalidate(qc),
-  });
-}
 
 export function useTransferMembership() {
   const qc = useQueryClient();

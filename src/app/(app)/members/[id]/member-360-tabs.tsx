@@ -40,6 +40,7 @@ import {
  Tag,
  Send,
  MessageSquare,
+ Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -65,8 +66,10 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/lib/auth/auth-context";
 import { ApiError } from "@/lib/api/client";
 import type {
+ MemberAddress,
  MemberAddressType,
  MemberConsentType,
+ MemberEmergencyContact,
  MemberDocumentCategory,
  MemberGoalCategory,
  MemberGoalMilestone,
@@ -78,6 +81,7 @@ import {
  useMemberFitnessResults,
  useCreateMemberFitnessResult,
 } from "@/lib/hooks/use-member-assessments";
+import type { MemberMeasurementInput } from "@/lib/hooks/use-member-assessments";
 import {
  useMemberGoals,
  useCreateMemberGoal,
@@ -96,12 +100,15 @@ import {
 import {
  useMemberAddresses,
  useCreateMemberAddress,
+ useUpdateMemberAddress,
  useDeleteMemberAddress,
  useMemberEmergencyContacts,
  useCreateMemberEmergencyContact,
+ useUpdateMemberEmergencyContact,
  useDeleteMemberEmergencyContact,
  useMemberNotes,
  useCreateMemberNote,
+ useUpdateMemberNote,
  useDeleteMemberNote,
  useMemberConsents,
  useRecordMemberConsent,
@@ -361,24 +368,51 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 function AddressesPanel({ memberId }: { memberId: string }) {
  const query = useMemberAddresses(memberId);
  const create = useCreateMemberAddress(memberId);
+ const update = useUpdateMemberAddress(memberId);
  const remove = useDeleteMemberAddress(memberId);
  const [open, setOpen] = React.useState(false);
+ // null while adding; the address being changed while editing.
+ const [editing, setEditing] = React.useState<MemberAddress | null>(null);
  const [type, setType] = React.useState<MemberAddressType>("HOME");
  const [isPrimary, setIsPrimary] = React.useState(false);
  const [line1, setLine1] = React.useState("");
+ const [line2, setLine2] = React.useState("");
  const [city, setCity] = React.useState("");
+ const [state, setState] = React.useState("");
+ const [postalCode, setPostalCode] = React.useState("");
+ const pending = create.isPending || update.isPending;
 
- async function handleAdd() {
+ function openFor(addr: MemberAddress | null) {
+ setEditing(addr);
+ setType(addr?.type ?? "HOME");
+ setIsPrimary(addr?.isPrimary ?? false);
+ setLine1(addr?.addressLine1 ?? "");
+ setLine2(addr?.addressLine2 ?? "");
+ setCity(addr?.city ?? "");
+ setState(addr?.state ?? "");
+ setPostalCode(addr?.postalCode ?? "");
+ setOpen(true);
+ }
+
+ async function handleSave() {
  if (!line1.trim()) return;
+ // On an edit, a cleared field is sent as "" so it is actually cleared.
+ const input = {
+ type,
+ isPrimary,
+ addressLine1: line1.trim(),
+ addressLine2: line2.trim() || (editing ? "" : undefined),
+ city: city.trim() || (editing ? "" : undefined),
+ state: state.trim() || (editing ? "" : undefined),
+ postalCode: postalCode.trim() || (editing ? "" : undefined),
+ };
  try {
- await create.mutateAsync({ type, isPrimary, addressLine1: line1, city: city || undefined });
- toast.success("Address added");
+ if (editing) await update.mutateAsync({ id: editing.id, input });
+ else await create.mutateAsync(input);
+ toast.success(editing ? "Address updated" : "Address added");
  setOpen(false);
- setLine1("");
- setCity("");
- setIsPrimary(false);
  } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Failed to add address");
+ toast.error(error instanceof ApiError ? error.message : editing ? "Failed to update address" : "Failed to add address");
  }
  }
 
@@ -387,20 +421,18 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-3">
  <div className="flex justify-end">
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Button size="sm" variant="outline" onClick={() => openFor(null)} className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Add address
  </Button>
- </DialogTrigger>
+ <Dialog open={open} onOpenChange={setOpen}>
  <DialogContent>
  <DialogHeader>
- <DialogTitle>Add an address</DialogTitle>
+ <DialogTitle>{editing ? "Edit address" : "Add an address"}</DialogTitle>
  </DialogHeader>
  <div className="flex flex-col gap-3">
  <Select value={type} onValueChange={(v) => setType(v as MemberAddressType)}>
- <SelectTrigger className="w-full">
+ <SelectTrigger className="w-full" aria-label="Address type">
  <SelectValue />
  </SelectTrigger>
  <SelectContent>
@@ -410,16 +442,21 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  <SelectItem value="OTHER">Other</SelectItem>
  </SelectContent>
  </Select>
- <Input placeholder="Address line 1" value={line1} onChange={(e) => setLine1(e.target.value)} />
- <Input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+ <Input placeholder="Address line 1" aria-label="Address line 1" value={line1} onChange={(e) => setLine1(e.target.value)} />
+ <Input placeholder="Address line 2 (optional)" aria-label="Address line 2" value={line2} onChange={(e) => setLine2(e.target.value)} />
+ <div className="grid grid-cols-2 gap-3">
+ <Input placeholder="City" aria-label="City" value={city} onChange={(e) => setCity(e.target.value)} />
+ <Input placeholder="State" aria-label="State" value={state} onChange={(e) => setState(e.target.value)} />
+ </div>
+ <Input placeholder="PIN code" aria-label="PIN code" inputMode="numeric" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
  <div className="flex items-center gap-2">
  <Switch id="primary-addr" checked={isPrimary} onCheckedChange={setIsPrimary} />
  <Label htmlFor="primary-addr">Set as primary</Label>
  </div>
  </div>
  <DialogFooter>
- <Button onClick={handleAdd} disabled={!line1.trim() || create.isPending}>
- {create.isPending ? "Adding..." : "Add address"}
+ <Button onClick={handleSave} disabled={!line1.trim() || pending}>
+ {pending ? "Saving..." : editing ? "Save address" : "Add address"}
  </Button>
  </DialogFooter>
  </DialogContent>
@@ -431,21 +468,25 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((addr) => (
- <div key={addr.id} className="flex items-start justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
- <div>
+ <div key={addr.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div className="min-w-0">
  <div className="flex items-center gap-2">
  <Badge variant="secondary">{addr.type}</Badge>
  {addr.isPrimary && <Badge>Primary</Badge>}
  </div>
- <p className="mt-1 text-sm">
- {addr.addressLine1}
- {addr.city ? `, ${addr.city}` : ""}
+ <p className="mt-1 text-sm [overflow-wrap:anywhere]">
+ {[addr.addressLine1, addr.addressLine2, addr.city, addr.state, addr.postalCode].filter(Boolean).join(", ")}
  </p>
  </div>
+ <div className="flex shrink-0 gap-1">
+ <Button variant="ghost" size="icon" className="size-9" aria-label="Edit address" onClick={() => openFor(addr)}>
+ <Pencil className="size-3.5" />
+ </Button>
  <Button
  variant="ghost"
  size="icon"
- className="size-7"
+ className="size-9"
+ aria-label="Remove address"
  disabled={remove.isPending}
  onClick={() =>
  remove
@@ -456,6 +497,7 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  >
  <Trash2 className="size-3.5" />
  </Button>
+ </div>
  </div>
  ))}
  </div>
@@ -469,23 +511,40 @@ function AddressesPanel({ memberId }: { memberId: string }) {
 function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  const query = useMemberEmergencyContacts(memberId);
  const create = useCreateMemberEmergencyContact(memberId);
+ const update = useUpdateMemberEmergencyContact(memberId);
  const remove = useDeleteMemberEmergencyContact(memberId);
  const [open, setOpen] = React.useState(false);
+ const [editing, setEditing] = React.useState<MemberEmergencyContact | null>(null);
  const [name, setName] = React.useState("");
  const [phone, setPhone] = React.useState("");
  const [relationship, setRelationship] = React.useState("");
+ const [isPrimary, setIsPrimary] = React.useState(false);
+ const pending = create.isPending || update.isPending;
 
- async function handleAdd() {
+ function openFor(contact: MemberEmergencyContact | null) {
+ setEditing(contact);
+ setName(contact?.name ?? "");
+ setPhone(contact?.phone ?? "");
+ setRelationship(contact?.relationship ?? "");
+ setIsPrimary(contact?.isPrimary ?? false);
+ setOpen(true);
+ }
+
+ async function handleSave() {
  if (!name.trim() || !phone.trim()) return;
+ const input = {
+ name: name.trim(),
+ phone: phone.trim(),
+ relationship: relationship.trim() || (editing ? "" : undefined),
+ isPrimary,
+ };
  try {
- await create.mutateAsync({ name, phone, relationship: relationship || undefined });
- toast.success("Emergency contact added");
+ if (editing) await update.mutateAsync({ id: editing.id, input });
+ else await create.mutateAsync(input);
+ toast.success(editing ? "Emergency contact updated" : "Emergency contact added");
  setOpen(false);
- setName("");
- setPhone("");
- setRelationship("");
  } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Failed to add contact");
+ toast.error(error instanceof ApiError ? error.message : editing ? "Failed to update contact" : "Failed to add contact");
  }
  }
 
@@ -494,29 +553,32 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-3">
  <div className="flex justify-end">
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>
- <Button size="sm" variant="outline" className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Button size="sm" variant="outline" onClick={() => openFor(null)} className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Plus className="size-3.5" />
  Add contact
  </Button>
- </DialogTrigger>
+ <Dialog open={open} onOpenChange={setOpen}>
  <DialogContent>
  <DialogHeader>
- <DialogTitle>Add an emergency contact</DialogTitle>
+ <DialogTitle>{editing ? "Edit emergency contact" : "Add an emergency contact"}</DialogTitle>
  </DialogHeader>
  <div className="flex flex-col gap-3">
- <Input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
- <Input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+ <Input placeholder="Full name" aria-label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
+ <Input placeholder="Phone" aria-label="Phone" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
  <Input
  placeholder="Relationship (e.g. Spouse)"
+ aria-label="Relationship"
  value={relationship}
  onChange={(e) => setRelationship(e.target.value)}
  />
+ <div className="flex items-center gap-2">
+ <Switch id="primary-contact" checked={isPrimary} onCheckedChange={setIsPrimary} />
+ <Label htmlFor="primary-contact">Call this person first</Label>
+ </div>
  </div>
  <DialogFooter>
- <Button onClick={handleAdd} disabled={!name.trim() || !phone.trim() || create.isPending}>
- {create.isPending ? "Adding..." : "Add contact"}
+ <Button onClick={handleSave} disabled={!name.trim() || !phone.trim() || pending}>
+ {pending ? "Saving..." : editing ? "Save contact" : "Add contact"}
  </Button>
  </DialogFooter>
  </DialogContent>
@@ -528,8 +590,8 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((contact) => (
- <div key={contact.id} className="flex items-start justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
- <div>
+ <div key={contact.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div className="min-w-0">
  <div className="flex items-center gap-2">
  <p className="font-medium">{contact.name}</p>
  {contact.isPrimary && <Badge>Primary</Badge>}
@@ -539,10 +601,15 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  {contact.relationship ? ` · ${contact.relationship}` : ""}
  </p>
  </div>
+ <div className="flex shrink-0 gap-1">
+ <Button variant="ghost" size="icon" className="size-9" aria-label={`Edit ${contact.name}`} onClick={() => openFor(contact)}>
+ <Pencil className="size-3.5" />
+ </Button>
  <Button
  variant="ghost"
  size="icon"
- className="size-7"
+ className="size-9"
+ aria-label={`Remove ${contact.name}`}
  disabled={remove.isPending}
  onClick={() =>
  remove
@@ -553,6 +620,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  >
  <Trash2 className="size-3.5" />
  </Button>
+ </div>
  </div>
  ))}
  </div>
@@ -567,8 +635,11 @@ function NotesPanel({ memberId }: { memberId: string }) {
  const { user } = useAuth();
  const query = useMemberNotes(memberId);
  const create = useCreateMemberNote(memberId);
+ const update = useUpdateMemberNote(memberId);
  const remove = useDeleteMemberNote(memberId);
  const [body, setBody] = React.useState("");
+ const [editingId, setEditingId] = React.useState<string | null>(null);
+ const [draft, setDraft] = React.useState("");
 
  async function handleAdd() {
  if (!body.trim()) return;
@@ -577,6 +648,25 @@ function NotesPanel({ memberId }: { memberId: string }) {
  setBody("");
  } catch (error) {
  toast.error(error instanceof ApiError ? error.message : "Failed to add note");
+ }
+ }
+
+ async function handleSave(id: string) {
+ if (!draft.trim()) return;
+ try {
+ await update.mutateAsync({ id, input: { body: draft } });
+ setEditingId(null);
+ toast.success("Note updated");
+ } catch (error) {
+ toast.error(error instanceof ApiError ? error.message : "Failed to update note");
+ }
+ }
+
+ async function togglePin(id: string, pinned: boolean) {
+ try {
+ await update.mutateAsync({ id, input: { pinned: !pinned } });
+ } catch (error) {
+ toast.error(error instanceof ApiError ? error.message : "Failed to pin note");
  }
  }
 
@@ -600,9 +690,13 @@ function NotesPanel({ memberId }: { memberId: string }) {
  <EmptyState icon={StickyNote} title="No notes yet" description="Notes are timestamped and keep full history." />
  ) : (
  <div className="flex flex-col gap-2">
- {query.data.map((note) => (
- <div key={note.id} className="flex items-start justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
- <div>
+ {query.data.map((note) => {
+ // The API lets only the author change a note.
+ const mine = note.authorUserId === user?.id;
+ const isEditing = editingId === note.id;
+ return (
+ <div key={note.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div className="min-w-0 flex-1">
  <div className="flex items-center gap-2 text-xs text-stone-600">
  {note.pinned && <Pin className="size-3" />}
  <span>
@@ -610,13 +704,51 @@ function NotesPanel({ memberId }: { memberId: string }) {
  </span>
  <span>· {fmtDateTime(note.createdAt)}</span>
  </div>
- <p className="mt-1 text-sm whitespace-pre-wrap">{note.body}</p>
+ {isEditing ? (
+ <div className="mt-2 flex flex-col gap-2">
+ <Textarea aria-label="Edit note" value={draft} onChange={(e) => setDraft(e.target.value)} className="min-h-16" />
+ <div className="flex gap-2">
+ <Button size="sm" onClick={() => void handleSave(note.id)} disabled={!draft.trim() || update.isPending}>
+ {update.isPending ? "Saving..." : "Save"}
+ </Button>
+ <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
+ Cancel
+ </Button>
  </div>
- {note.authorUserId === user?.id && (
+ </div>
+ ) : (
+ <p className="mt-1 text-sm whitespace-pre-wrap [overflow-wrap:anywhere]">{note.body}</p>
+ )}
+ </div>
+ {mine && !isEditing && (
+ <div className="flex shrink-0 gap-1">
  <Button
  variant="ghost"
  size="icon"
- className="size-7 shrink-0"
+ className="size-9"
+ aria-label={note.pinned ? "Unpin note" : "Pin note"}
+ disabled={update.isPending}
+ onClick={() => void togglePin(note.id, note.pinned)}
+ >
+ <Pin className={`size-3.5 ${note.pinned ? "fill-current" : ""}`} />
+ </Button>
+ <Button
+ variant="ghost"
+ size="icon"
+ className="size-9"
+ aria-label="Edit note"
+ onClick={() => {
+ setEditingId(note.id);
+ setDraft(note.body);
+ }}
+ >
+ <Pencil className="size-3.5" />
+ </Button>
+ <Button
+ variant="ghost"
+ size="icon"
+ className="size-9"
+ aria-label="Delete note"
  disabled={remove.isPending}
  onClick={() =>
  remove
@@ -627,9 +759,11 @@ function NotesPanel({ memberId }: { memberId: string }) {
  >
  <Trash2 className="size-3.5" />
  </Button>
+ </div>
  )}
  </div>
- ))}
+ );
+ })}
  </div>
  )}
  </div>
@@ -788,6 +922,24 @@ function HistoryPanel({ memberId }: { memberId: string }) {
 
 // -- Assessments (measurements + fitness tests) -----------------------------------
 
+type MeasurementField = Exclude<keyof MemberMeasurementInput, "assessmentId" | "notes">;
+
+/** Every body measurement the API records, in the order a trainer takes them. */
+const MEASUREMENT_FIELDS: { key: MeasurementField; label: string; whole?: boolean; format: (v: number) => string }[] = [
+ { key: "weightKg", label: "Weight (kg)", format: (v) => `${v} kg` },
+ { key: "heightCm", label: "Height (cm)", format: (v) => `${v} cm tall` },
+ { key: "bodyFatPercent", label: "Body fat %", format: (v) => `${v}% body fat` },
+ { key: "muscleMassKg", label: "Muscle mass (kg)", format: (v) => `${v} kg muscle` },
+ { key: "chestCm", label: "Chest (cm)", format: (v) => `chest ${v} cm` },
+ { key: "waistCm", label: "Waist (cm)", format: (v) => `waist ${v} cm` },
+ { key: "hipCm", label: "Hip (cm)", format: (v) => `hip ${v} cm` },
+ { key: "restingHeartRate", label: "Resting heart rate (bpm)", whole: true, format: (v) => `${v} bpm resting` },
+ { key: "bloodPressureSystolic", label: "BP systolic", whole: true, format: (v) => `BP ${v} sys` },
+ { key: "bloodPressureDiastolic", label: "BP diastolic", whole: true, format: (v) => `BP ${v} dia` },
+];
+
+const EMPTY_MEASUREMENT = Object.fromEntries(MEASUREMENT_FIELDS.map((f) => [f.key, ""])) as Record<MeasurementField, string>;
+
 function AssessmentsPanel({ memberId }: { memberId: string }) {
  const measurementsQuery = useMemberMeasurements(memberId);
  const fitnessQuery = useMemberFitnessResults(memberId);
@@ -795,8 +947,8 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  const createFitness = useCreateMemberFitnessResult(memberId);
 
  const [measurementOpen, setMeasurementOpen] = React.useState(false);
- const [weightKg, setWeightKg] = React.useState("");
- const [bodyFatPercent, setBodyFatPercent] = React.useState("");
+ const [measurement, setMeasurement] = React.useState<Record<MeasurementField, string>>(EMPTY_MEASUREMENT);
+ const [measurementNotes, setMeasurementNotes] = React.useState("");
 
  const [fitnessOpen, setFitnessOpen] = React.useState(false);
  const [testName, setTestName] = React.useState("");
@@ -804,15 +956,27 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  const [testUnit, setTestUnit] = React.useState("");
 
  async function handleLogMeasurement() {
+ const input: MemberMeasurementInput = {};
+ for (const field of MEASUREMENT_FIELDS) {
+ const raw = measurement[field.key].trim();
+ if (!raw) continue;
+ const value = Number(raw);
+ if (!Number.isFinite(value) || value <= 0) {
+ toast.error(`${field.label} must be a positive number`);
+ return;
+ }
+ input[field.key] = field.whole ? Math.round(value) : value;
+ }
+ if (Object.keys(input).length === 0) {
+ toast.error("Enter at least one measurement");
+ return;
+ }
  try {
- await createMeasurement.mutateAsync({
- weightKg: weightKg ? Number(weightKg) : undefined,
- bodyFatPercent: bodyFatPercent ? Number(bodyFatPercent) : undefined,
- });
+ await createMeasurement.mutateAsync({ ...input, notes: measurementNotes.trim() || undefined });
  toast.success("Measurement logged");
  setMeasurementOpen(false);
- setWeightKg("");
- setBodyFatPercent("");
+ setMeasurement(EMPTY_MEASUREMENT);
+ setMeasurementNotes("");
  } catch (error) {
  toast.error(error instanceof ApiError ? error.message : "Failed to log measurement");
  }
@@ -837,9 +1001,13 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  type Row = { id: string; date: string; label: string; detail: string };
  const rows: Row[] = [
  ...(measurementsQuery.data ?? []).map((m) => {
- const parts: string[] = [];
- if (m.weightKg) parts.push(`${m.weightKg} kg`);
- if (m.bodyFatPercent) parts.push(`${m.bodyFatPercent}% body fat`);
+ const bothBp = m.bloodPressureSystolic != null && m.bloodPressureDiastolic != null;
+ const parts = MEASUREMENT_FIELDS.filter(
+ (f) => m[f.key] != null && m[f.key] !== "" && !(bothBp && f.key.startsWith("bloodPressure")),
+ ).map((f) => f.format(Number(m[f.key])));
+ // Both halves of a blood pressure reading read as one: 120/80.
+ if (bothBp) parts.push(`BP ${m.bloodPressureSystolic}/${m.bloodPressureDiastolic}`);
+ if (m.notes) parts.push(m.notes);
  return {
  id: `measurement-${m.id}`,
  date: m.recordedAt,
@@ -869,19 +1037,24 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  <DialogHeader>
  <DialogTitle>Log a measurement</DialogTitle>
  </DialogHeader>
- <div className="flex flex-col gap-3">
+ <div className="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto">
+ {MEASUREMENT_FIELDS.map((field) => (
+ <div key={field.key} className="flex flex-col gap-1">
+ <Label htmlFor={`measure-${field.key}`} className="text-xs">{field.label}</Label>
  <Input
+ id={`measure-${field.key}`}
  type="number"
- placeholder="Weight (kg)"
- value={weightKg}
- onChange={(e) => setWeightKg(e.target.value)}
+ inputMode="decimal"
+ step={field.whole ? "1" : "0.1"}
+ value={measurement[field.key]}
+ onChange={(e) => setMeasurement((m) => ({ ...m, [field.key]: e.target.value }))}
  />
- <Input
- type="number"
- placeholder="Body fat %"
- value={bodyFatPercent}
- onChange={(e) => setBodyFatPercent(e.target.value)}
- />
+ </div>
+ ))}
+ <div className="col-span-2 flex flex-col gap-1">
+ <Label htmlFor="measure-notes" className="text-xs">Notes (optional)</Label>
+ <Input id="measure-notes" value={measurementNotes} onChange={(e) => setMeasurementNotes(e.target.value)} placeholder="e.g. morning, fasted" />
+ </div>
  </div>
  <DialogFooter>
  <Button onClick={handleLogMeasurement} disabled={createMeasurement.isPending}>
