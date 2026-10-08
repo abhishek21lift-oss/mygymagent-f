@@ -182,7 +182,7 @@ export function InventoryOperationsPanel() {
       )}
 
       {hasPermission("inventory.manage") && (
-        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card backdrop-blur-xl sm:p-6">
+        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card sm:p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
             <div>
               <h3 className="text-base font-bold tracking-tight text-foreground">
@@ -436,7 +436,7 @@ export function InventoryOperationsPanel() {
       )}
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card backdrop-blur-xl">
+        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-bold text-foreground">Purchase orders</h3>
             <Badge variant="secondary" className="rounded-full">
@@ -488,7 +488,7 @@ export function InventoryOperationsPanel() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card backdrop-blur-xl">
+        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-bold text-foreground">Branch transfers</h3>
             <Badge variant="secondary" className="rounded-full">
@@ -533,7 +533,7 @@ export function InventoryOperationsPanel() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card backdrop-blur-xl">
+        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card p-5 shadow-card">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-bold text-foreground">Recent product sales</h3>
             <Badge variant="secondary" className="rounded-full">

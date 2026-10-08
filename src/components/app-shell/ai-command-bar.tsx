@@ -107,7 +107,7 @@ export function AICommandBar() {
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-[rgb(8_10_20/0.38)] p-4 pt-[10vh] backdrop-blur-[6px] sm:p-6 sm:pt-[12vh]"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-[rgb(8_10_20/0.5)] p-4 pt-[10vh]-[6px] sm:p-6 sm:pt-[12vh]"
           onMouseDown={() => setOpen(false)}
         >
           <div

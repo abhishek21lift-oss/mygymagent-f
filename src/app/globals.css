@@ -25,8 +25,8 @@
      is typed on. A hue used as a fill never becomes a hue used
      as type.
    - Depth is MATERIAL and LIGHT, not borders. Elevation is a
-     soft multi-layer shadow, a 1px top highlight, and — on the
-     chrome — real backdrop blur. Hairline borders are reserved
+     soft multi-layer shadow and a 1px top highlight. No backdrop
+     blur on the chrome: it cost every scrolled frame. Hairline borders are reserved
      for things that genuinely divide, like table rows.
    - Motion is SPRING-SMOOTH and short. 180-320ms on a decelerate
      curve, a small scale on press, never a bounce.
@@ -183,10 +183,9 @@
   --surface-sunken: oklch(0.955 0.006 265);
   --surface-hover: oklch(0.962 0.008 265);
 
-  /* — Materials. Real backdrop blur, with saturate() so the colour
-       coming through stays vivid instead of going grey the way a
-       plain blur makes it. This is what the nav rail, the top bar,
-       menus and dialogs are made of. — */
+  /* — Materials: the nav rail, the top bar, menus and dialogs.
+       `.glass` paints them near-solid; the blur values stay for
+       anything that still opts in. — */
   --glass-bg: rgb(255 255 255 / 0.72);
   --glass-bg-strong: rgb(255 255 255 / 0.95);
   --glass-bg-thin: rgb(255 255 255 / 0.55);
@@ -1050,9 +1049,6 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: var(--header-height);
-    /* The aurora is fixed to the viewport, so a translucent sticky
-       bar blurs whatever is passing under it rather than a flat
-       colour. */
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -1160,22 +1156,16 @@
 
   /* --- Glass --------------------------------------------------
      One definition, used by the rail, the top bar, menus, dialogs
-     and the command palette. `saturate()` is not optional: a plain
-     blur over a coloured canvas desaturates it, and the whole point
-     is that the colour coming through the material stays vivid. */
-  .glass {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-highlight), var(--shadow-float);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  }
+     and the command palette. It is near-solid on purpose, with no
+     backdrop blur: the rail and the top bar stay on screen the whole
+     time, and blurring what scrolls under them re-rendered a large
+     area every frame, which made the app stutter on phones and
+     cheaper laptops. */
+  .glass,
   .glass-strong {
     background: var(--glass-bg-strong);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-highlight), var(--shadow-float);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   }
 
   /* --- Brand mark, sign-in -------------------------------------
@@ -1455,9 +1445,7 @@
     outline: none;
   }
   [data-slot="dialog-overlay"] {
-    background: rgb(8 10 20 / 0.42);
-    -webkit-backdrop-filter: blur(6px) saturate(120%);
-    backdrop-filter: blur(6px) saturate(120%);
+    background: rgb(8 10 20 / 0.5);
   }
   [data-slot="dropdown-menu-content"],
   [data-slot="popover-content"],
@@ -1730,8 +1718,6 @@
     border: 1px solid var(--glass-border);
     border-left: none;
     box-shadow: var(--glass-highlight), var(--shadow-float);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   }
   /* The drawer sits over a dimmed page, so the overlay needs to be
      darker than the sheet or the sheet reads as the background. */
@@ -1801,8 +1787,6 @@
       radial-gradient(32% 40% at 72% 86%, color-mix(in oklab, var(--a-cyan-grad-1) 40%, transparent), transparent 70%),
       radial-gradient(28% 34% at 34% 90%, color-mix(in oklab, var(--a-rose-grad-1) 36%, transparent), transparent 70%),
       radial-gradient(22% 28% at 52% 40%, color-mix(in oklab, var(--a-amber-grad-1) 16%, transparent), transparent 70%);
-    filter: blur(28px) saturate(135%);
-    animation: aurora-drift 28s ease-in-out infinite alternate;
   }
   .hero-banner::after {
     content: "";
@@ -1810,9 +1794,7 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: color-mix(in oklab, var(--card) 46%, transparent);
-    -webkit-backdrop-filter: blur(18px);
-    backdrop-filter: blur(18px);
+    background: color-mix(in oklab, var(--card) 52%, transparent);
   }
   /* Dark: the gradient steps are deep by design (they carry white
      type), so behind glass they vanish. The aurora uses the brighter
@@ -1826,10 +1808,6 @@
   }
   .dark .hero-banner::after {
     background: color-mix(in oklab, var(--card) 40%, transparent);
-  }
-  @keyframes aurora-drift {
-    0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
-    100% { transform: translate3d(4%, -3%, 0) rotate(8deg); }
   }
 
   .hero-banner > * { position: relative; z-index: 1; }

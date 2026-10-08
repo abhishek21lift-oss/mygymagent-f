@@ -269,7 +269,7 @@ export default function PayrollPage() {
       {/* Apple-style Metric Cards */}
       <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {canReadHr && (
-          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-5 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-5 shadow-sm">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
               <Calendar className="size-6" />
             </div>
@@ -282,7 +282,7 @@ export default function PayrollPage() {
         )}
 
         {canReadHr && (
-          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-5 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-5 shadow-sm">
             <div className={cn(
               "flex size-12 items-center justify-center rounded-2xl",
               requests.filter((r) => r.status === "PENDING").length > 0
@@ -302,7 +302,7 @@ export default function PayrollPage() {
         )}
 
         {canReadPayroll && (
-          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-5 shadow-sm backdrop-blur-xl sm:col-span-2 md:col-span-1">
+          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-5 shadow-sm sm:col-span-2 md:col-span-1">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <IndianRupee className="size-6" />
             </div>
@@ -322,7 +322,7 @@ export default function PayrollPage() {
 
       {/* Create Payroll Run */}
       {canReadPayroll && (
-        <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+        <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -374,7 +374,7 @@ export default function PayrollPage() {
 
       {/* Leave Requests Review Cards */}
       {canReadHr && (
-        <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+        <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -497,7 +497,7 @@ export default function PayrollPage() {
 
       {/* Payroll Runs Section */}
       {canReadPayroll && (
-        <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+        <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
             <div className="flex items-center justify-between">
               <div>

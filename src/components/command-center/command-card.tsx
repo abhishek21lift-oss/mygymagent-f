@@ -233,7 +233,7 @@ export function MetricWell({ children, className }: { children: ReactNode; class
   return (
     <div
       className={cn(
-        "min-w-0 rounded-2xl border border-border/60 bg-[color-mix(in_oklab,var(--card)_70%,transparent)] p-3.5 backdrop-blur-sm",
+        "min-w-0 rounded-2xl border border-border/60 bg-[color-mix(in_oklab,var(--card)_70%,transparent)] p-3.5",
         className,
       )}
     >

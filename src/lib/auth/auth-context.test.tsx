@@ -1,7 +1,7 @@
 import * as React from "react"
 import { act, render, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { api, ApiError } from "@/lib/api/client"
+import { api, ApiError, refreshSession } from "@/lib/api/client"
 import { getAccessToken } from "@/lib/api/token-store"
 import { AuthProvider, useAuth } from "@/lib/auth/auth-context"
 
@@ -10,6 +10,8 @@ jest.mock("@/lib/api/client", () => {
  return {
  ...actual,
  api: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn() },
+ // A page load holds no access token; bootstrap refreshes first.
+ refreshSession: jest.fn(async () => true),
  }
 })
 
@@ -66,6 +68,8 @@ describe("AuthProvider session handling", () => {
  () => new Promise((resolve) => { resolveBootstrap = resolve }),
  )
  const ctx = setup()
+ // Bootstrap refreshes first; let it reach its /auth/me.
+ await waitFor(() => expect(mockGet).toHaveBeenCalledWith("/auth/me"))
 
  // Log in as B while the bootstrap /auth/me for the previous (empty)
  // session is still in flight.
@@ -285,5 +289,16 @@ describe("AuthProvider MFA policy state", () => {
  expect(paths.indexOf("/notifications/devices/unregister")).toBeGreaterThanOrEqual(0)
  expect(paths.indexOf("/notifications/devices/unregister")).toBeLessThan(paths.indexOf("/auth/logout"))
  expect(window.localStorage.getItem("mga.push.token")).toBeNull()
+ })
+
+ it("refreshes before asking who the user is, and asks nothing with no session", async () => {
+ // One round trip fewer on every app open: no /auth/me that can only 401.
+ ;(refreshSession as jest.Mock).mockResolvedValueOnce(false)
+ mockGet.mockClear()
+ const ctx = setup()
+ await waitFor(() => expect(ctx.latest().isLoading).toBe(false))
+ expect(refreshSession).toHaveBeenCalled()
+ expect(mockGet).not.toHaveBeenCalledWith("/auth/me")
+ expect(ctx.latest().user).toBeNull()
  })
 })

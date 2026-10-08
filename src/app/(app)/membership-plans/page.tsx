@@ -110,7 +110,7 @@ function PlanCard({
   return (
     <article
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-card/90 p-6 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-card/90 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
         plan.isFeatured
           ? "border-primary/50 ring-2 ring-primary/20 bg-gradient-to-b from-primary/5 via-card to-card"
           : "border-border/80 hover:border-border",

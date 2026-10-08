@@ -84,7 +84,7 @@ export default function PortalHome() {
       />
 
       {/* Apple Fitness Style Membership Status Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card/95 to-indigo-50/20 p-6 shadow-sm backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card/95 to-indigo-50/20 p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
@@ -163,7 +163,7 @@ export default function PortalHome() {
             <Link
               key={href}
               href={href}
-              className="group flex items-center justify-between rounded-3xl border border-border/80 bg-card/90 p-4 shadow-xs backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              className="group flex items-center justify-between rounded-3xl border border-border/80 bg-card/90 p-4 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-2xl", tone)}>
