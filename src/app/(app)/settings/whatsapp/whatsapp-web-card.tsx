@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AlertTriangle, CheckCircle2, Link2, Loader2, Smartphone } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Link2, Loader2, QrCode, Smartphone } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -152,14 +152,16 @@ function RiskNotice() {
 function LinkForm({ session, canManage }: { session: WhatsAppWebSession; canManage: boolean }) {
   const connect = useConnectWhatsAppWeb()
   const [accepted, setAccepted] = React.useState(false)
+  // Scanning a QR is the usual way; a code is the fallback for when this
+  // page is open on the same phone that has to scan.
   const [useCode, setUseCode] = React.useState(false)
   const [phone, setPhone] = React.useState("")
   const digits = phone.replace(/\D/g, "")
   const phoneValid = /^\d{11,15}$/.test(digits)
 
-  async function handleLink() {
+  async function link(withCode: boolean) {
     try {
-      await connect.mutateAsync(useCode ? { phoneNumber: digits } : {})
+      await connect.mutateAsync(withCode ? { phoneNumber: digits } : {})
     } catch (error) {
       toast.error(errorText(error, "Couldn't start linking"))
     }
@@ -180,37 +182,51 @@ function LinkForm({ session, canManage }: { session: WhatsAppWebSession; canMana
             <span>I understand WhatsApp may ban the number I link, and I accept that risk for this gym.</span>
           </label>
 
-          <div className="rounded-2xl bg-muted/50 p-4">
-            <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
-              <span>
-                <span className="font-medium text-foreground">Link with a code instead of a QR</span>
-                <span className="block text-xs text-muted-foreground">For when this page is open on the phone you&rsquo;re linking.</span>
-              </span>
-              <Switch checked={useCode} onCheckedChange={setUseCode} aria-label="Link with a code instead of a QR" />
-            </label>
-            {useCode ? (
-              <div className="mt-3 space-y-1.5">
-                <Label htmlFor="wa-web-phone">WhatsApp number, with country code</Label>
-                <Input
-                  id="wa-web-phone"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="+91 98765 43210"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-            ) : null}
-          </div>
-
           <Button
-            onClick={() => void handleLink()}
-            disabled={!accepted || connect.isPending || (useCode && !phoneValid)}
+            onClick={() => void link(false)}
+            disabled={!accepted || connect.isPending}
             className="h-11 w-full rounded-2xl font-semibold sm:w-auto"
           >
-            {connect.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Link2 className="size-4" aria-hidden="true" />}
-            Link my WhatsApp
+            {connect.isPending && !useCode ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <QrCode className="size-4" aria-hidden="true" />}
+            Show QR code to scan
           </Button>
+
+          <div className="rounded-2xl bg-muted/50 p-4">
+            {useCode ? (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="wa-web-phone">WhatsApp number, with country code</Label>
+                  <Input
+                    id="wa-web-phone"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="+91 98765 43210"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => void link(true)}
+                    disabled={!accepted || connect.isPending || !phoneValid}
+                    className="h-10 rounded-xl"
+                  >
+                    {connect.isPending && useCode ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Link2 className="size-4" aria-hidden="true" />}
+                    Get a code
+                  </Button>
+                  <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setUseCode(false)}>
+                    Back to QR
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" className="text-left text-sm" onClick={() => setUseCode(true)}>
+                <span className="font-medium text-primary underline-offset-4 hover:underline">Can&rsquo;t scan? Link with a code instead</span>
+                <span className="block text-xs text-muted-foreground">For when this page is open on the phone you&rsquo;re linking.</span>
+              </button>
+            )}
+          </div>
         </>
       ) : (
         <p className="text-sm text-muted-foreground">Ask an owner or admin to link the gym&rsquo;s number.</p>
@@ -221,7 +237,23 @@ function LinkForm({ session, canManage }: { session: WhatsAppWebSession; canMana
 
 function Pairing({ session, canManage }: { session: WhatsAppWebSession; canManage: boolean }) {
   const disconnect = useDisconnectWhatsAppWeb()
+  const connect = useConnectWhatsAppWeb()
+  const [switching, setSwitching] = React.useState(false)
   const code = session.pairingCode
+
+  // A code that won't go through is a dead end without this: stop the
+  // code attempt and start again with a QR to scan.
+  async function switchToQr() {
+    setSwitching(true)
+    try {
+      await disconnect.mutateAsync()
+      await connect.mutateAsync({})
+    } catch (error) {
+      toast.error(errorText(error, "Couldn't switch to a QR code"))
+    } finally {
+      setSwitching(false)
+    }
+  }
   return (
     <div className="space-y-5">
       {session.lastError ? (
@@ -268,9 +300,17 @@ function Pairing({ session, canManage }: { session: WhatsAppWebSession; canManag
         </ol>
       </div>
       {canManage ? (
-        <Button variant="outline" className="h-11 rounded-2xl" disabled={disconnect.isPending} onClick={() => disconnect.mutate()}>
-          Cancel
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {code ? (
+            <Button className="h-11 rounded-2xl" disabled={switching || disconnect.isPending} onClick={() => void switchToQr()}>
+              {switching ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <QrCode className="size-4" aria-hidden="true" />}
+              Scan a QR code instead
+            </Button>
+          ) : null}
+          <Button variant="outline" className="h-11 rounded-2xl" disabled={switching || disconnect.isPending} onClick={() => disconnect.mutate()}>
+            Cancel
+          </Button>
+        </div>
       ) : null}
     </div>
   )

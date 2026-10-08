@@ -64,7 +64,7 @@ describe("WhatsAppWebCard", () => {
 
   it("will not link until the ban risk is accepted, and then sends that acceptance", async () => {
     renderWith(base)
-    const link = await screen.findByRole("button", { name: /link my whatsapp/i })
+    const link = await screen.findByRole("button", { name: /show qr code to scan/i })
     expect(screen.getByText(/permanently ban/)).toBeTruthy()
     expect((link as HTMLButtonElement).disabled).toBe(true)
 
@@ -78,8 +78,8 @@ describe("WhatsAppWebCard", () => {
   it("asks for a number when linking by code, and sends it as digits", async () => {
     renderWith(base)
     fireEvent.click(await screen.findByRole("checkbox"))
-    fireEvent.click(screen.getByRole("switch", { name: /code instead of a qr/i }))
-    const link = screen.getByRole("button", { name: /link my whatsapp/i }) as HTMLButtonElement
+    fireEvent.click(screen.getByRole("button", { name: /link with a code instead/i }))
+    const link = screen.getByRole("button", { name: /get a code/i }) as HTMLButtonElement
     expect(link.disabled).toBe(true)
     fireEvent.change(screen.getByLabelText("WhatsApp number, with country code"), { target: { value: "+91 98765 43210" } })
     ;(api.post as jest.Mock).mockResolvedValue({ ...base, status: "PAIRING" })
@@ -87,6 +87,16 @@ describe("WhatsAppWebCard", () => {
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith("/whatsapp-web/connect", { acceptRisk: true, phoneNumber: "919876543210" }),
     )
+  })
+
+  it("switches a code that won't go through to a QR to scan", async () => {
+    renderWith({ ...base, status: "PAIRING", pairingCode: "ABCD1234" })
+    ;(api.post as jest.Mock).mockResolvedValue({ ...base, status: "PAIRING" })
+    fireEvent.click(await screen.findByRole("button", { name: /scan a qr code instead/i }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith("/whatsapp-web/connect", { acceptRisk: true }))
+    // The code attempt is stopped first, so the new one starts clean.
+    const calls = (api.post as jest.Mock).mock.calls.map((c) => c[0])
+    expect(calls.indexOf("/whatsapp-web/disconnect")).toBeLessThan(calls.indexOf("/whatsapp-web/connect"))
   })
 
   it("shows the QR while pairing, or the code when there is one", async () => {
