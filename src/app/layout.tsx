@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
 import Script from "next/script";
-import { SITE, siteUrl } from "@/lib/site";
+import { GOOGLE_SITE_VERIFICATION, SITE, siteUrl } from "@/lib/site";
 
 /**
  * No webfont.
@@ -37,9 +37,7 @@ export const metadata: Metadata = {
   description: SITE.description,
   // Search Console and Bing Webmaster Tools ownership, set per deployment.
   verification: {
-    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
-      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-      : {}),
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || GOOGLE_SITE_VERIFICATION,
     ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
       ? { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } }
       : {}),
