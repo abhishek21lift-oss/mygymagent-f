@@ -91,13 +91,6 @@ export function usePortalMe() {
   });
 }
 
-export function usePortalMemberships() {
-  return useQuery({
-    queryKey: [KEY, "memberships"],
-    queryFn: () => api.get<{ items: PortalMembership[] }>("/portal/memberships"),
-  });
-}
-
 export function usePortalVisits(limit = 30) {
   return useQuery({
     queryKey: [KEY, "visits", limit],

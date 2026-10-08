@@ -112,14 +112,6 @@ export function useAppointments(
   })
 }
 
-export function useAppointment(id: string | null) {
-  return useQuery({
-    queryKey: [KEY, id],
-    queryFn: () => api.get<Appointment>(`/appointments/${id}`),
-    enabled: Boolean(id),
-  })
-}
-
 export function useCreateAppointment() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -218,7 +210,8 @@ export function useDeleteTimeOff() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.delete<{ ok: true }>(`/appointments/time-off/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "time-off"] }),
+    // Free slots change too: the trainer is bookable again.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
   })
 }
 

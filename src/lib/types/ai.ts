@@ -11,4 +11,6 @@ export interface ChatToolCall {
 export interface ChatResponse {
   reply: string
   toolCalls: ChatToolCall[]
+  /** The stored chat this turn belongs to; send it back to continue it. */
+  conversationId?: string
 }

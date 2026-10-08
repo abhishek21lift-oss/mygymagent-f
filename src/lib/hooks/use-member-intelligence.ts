@@ -99,14 +99,6 @@ export interface ChurnAssessment {
   [key: string]: unknown
 }
 
-export function useAtRiskAssessments(enabled = true) {
-  return useQuery({
-    queryKey: [RISK, "assessments"],
-    queryFn: () => api.get<ChurnAssessment[]>("/analytics/members/at-risk/assessments"),
-    enabled,
-  })
-}
-
 export function useChurnAssessment(memberId: string | undefined) {
   return useQuery({
     queryKey: [RISK, "assessment", memberId],

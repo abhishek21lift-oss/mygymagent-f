@@ -1,19 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import type { Member360Overview, Member360Timeline } from "@/lib/types/gym";
+import type { Member360Timeline } from "@/lib/types/gym";
 
 const KEY = "member-360";
-
-export function useMemberOverview(memberId: string | undefined) {
-  return useQuery({
-    queryKey: [KEY, "overview", memberId],
-    queryFn: () =>
-      api.get<Member360Overview>("/members/overview", {
-        query: { memberId: memberId! },
-      }),
-    enabled: !!memberId,
-  });
-}
 
 export function useMemberTimeline(
   memberId: string | undefined,

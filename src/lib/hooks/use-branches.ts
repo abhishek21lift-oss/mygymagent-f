@@ -15,14 +15,6 @@ export function useBranches(params: PaginationParams = {}, { enabled = true }: {
   });
 }
 
-export function useBranch(id: string | undefined) {
-  return useQuery({
-    queryKey: [KEY, id],
-    queryFn: () => api.get<Branch>(`/branches/${id}`),
-    enabled: !!id,
-  });
-}
-
 export function useCreateBranch() {
   const queryClient = useQueryClient();
   return useMutation({

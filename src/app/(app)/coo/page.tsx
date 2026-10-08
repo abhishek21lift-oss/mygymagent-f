@@ -166,7 +166,7 @@ export default function CooPage() {
             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/60 bg-violet-50/80 px-3 py-1 text-xs font-bold text-violet-800 shadow-2xs dark:border-violet-800/40 dark:bg-violet-950/40 dark:text-violet-200">
                 <Sparkles className="size-3.5 text-violet-600 dark:text-violet-400" />
-                Apple Intelligence · Executive Briefing
+                AI · Executive Briefing
               </span>
             </div>
 
