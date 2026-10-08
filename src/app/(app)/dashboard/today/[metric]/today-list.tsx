@@ -192,10 +192,10 @@ function Collection({ date, branchId, timeZone, currency }: BodyProps) {
 
 function NewMembers({ date, branchId }: BodyProps) {
   const [page, setPage] = React.useState(1);
-  // Exactly the tile's query: joinedFrom the day, joinedTo the next.
+  // Exactly the tile's query: the gym's day, both ends inclusive.
   const q = useMembers({
     joinedFrom: date,
-    joinedTo: addDays(date, 1),
+    joinedTo: date,
     page,
     pageSize: PAGE_SIZE,
     ...(branchId ? { branchId: [branchId] } : {}),

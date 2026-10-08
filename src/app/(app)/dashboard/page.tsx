@@ -173,8 +173,6 @@ export default function DashboardPage() {
   const canReadMemberships = hasPermission(["memberships.read", "memberships.read_assigned"]);
   const canReadLeads = hasPermission("leads.read");
   const canReadWorkouts = hasPermission(["workouts.read", "workouts.read_assigned"]);
-  // members joinedTo is lte-start-of-day server-side, so tomorrow bounds today.
-  const tomorrowStr = addDays(todayStr, 1);
   const todayCollection = useRevenueSummary(
     { from: todayStr, to: todayStr, ...branchQuery },
     { enabled: datedReady },
@@ -182,7 +180,7 @@ export default function DashboardPage() {
   const todayCollectionRow =
     todayCollection.data?.revenue.find((r) => r.currency === currencyCode) ?? todayCollection.data?.revenue[0];
   const newMembers = useMembers(
-    { joinedFrom: todayStr, joinedTo: tomorrowStr, pageSize: 1, ...(branchFilter ? { branchId: [branchFilter] } : {}) },
+    { joinedFrom: todayStr, joinedTo: todayStr, pageSize: 1, ...(branchFilter ? { branchId: [branchFilter] } : {}) },
     { enabled: datedReady && canReadMembers },
   );
   const todayMemberships = useMemberships(

@@ -2,6 +2,7 @@
 
 import { useRefreshOnPull } from "@/components/shared/pull-to-refresh"
 import * as React from "react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { Brain, Megaphone, ShieldCheck, Sparkles, Star, Tablet } from "lucide-react"
 
@@ -20,8 +21,6 @@ import {
   SupportSection,
 } from "./business-os-sections"
 import {
-  useCreatePortalInvite,
-  useRevokePortalInvites,
 } from "@/lib/hooks/use-business-os"
 import { CampaignAudienceButton, CampaignAudiencePanel } from "./campaign-audience"
 
@@ -62,8 +61,6 @@ export default function BusinessOsPage() {
   // same untrue thing after the toast had gone.
   const [loadError, setLoadError] = React.useState(false)
 
-  const portalInvite = useCreatePortalInvite()
-  const portalRevoke = useRevokePortalInvites()
 
   const refresh = React.useCallback(async () => {
     setLoading(true)
@@ -352,57 +349,21 @@ export default function BusinessOsPage() {
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              <ShieldCheck className="size-5" /> Member portal &amp; kiosk
+              <ShieldCheck className="size-5" /> Member app &amp; kiosk
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Portal links are single-use and can be revoked. Kiosk devices are branch-bound.
+              Members sign in to the member app with their phone number. Turn it on from the
+              member&apos;s profile, under &ldquo;Member app access&rdquo;. Kiosk devices are
+              branch-bound.
             </p>
-            {hasPermission("portal.manage") && (
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  value={memberId}
-                  onChange={(e) => setMemberId(e.target.value)}
-                  placeholder="Member UUID"
-                  aria-label="Member UUID for portal invite"
-                  className="max-w-xs"
-                />
-                {/* Issuing and revoking a portal link were both built and
-                    unreachable: a member could be invited only by someone
-                    with a terminal, and a leaked link could not be pulled. */}
-                <Button
-                  disabled={!memberId || portalInvite.isPending}
-                  onClick={() =>
-                    void portalInvite
-                      .mutateAsync(memberId)
-                      .then((r) => {
-                        setOutput(r)
-                        toast.success("Portal invite created")
-                      })
-                      .catch((e) => toast.error(e instanceof Error ? e.message : "Could not create the invite"))
-                  }
-                >
-                  Invite to portal
-                </Button>
-                <Button
-                  variant="outline"
-                  disabled={!memberId || portalRevoke.isPending}
-                  onClick={() =>
-                    void portalRevoke
-                      .mutateAsync(memberId)
-                      .then(() => toast.success("Portal invites revoked"))
-                      .catch((e) => toast.error(e instanceof Error ? e.message : "Could not revoke the invites"))
-                  }
-                >
-                  Revoke invites
-                </Button>
-              </div>
-            )}
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" onClick={() => window.open("/member-portal", "_blank")}>
-                <Star className="mr-2 size-4" />
-                Member portal
+              <Button variant="outline" asChild>
+                <Link href="/members">
+                  <Star className="mr-2 size-4" />
+                  Find a member
+                </Link>
               </Button>
               <Button variant="outline" onClick={() => window.open("/kiosk", "_blank")}>
                 <Tablet className="mr-2 size-4" />

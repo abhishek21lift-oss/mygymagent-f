@@ -233,8 +233,7 @@ describe("DashboardPage", () => {
     const memberCalls = callsTo("/members").filter((options) => options?.query?.joinedFrom)
     expect(memberCalls).toHaveLength(1)
     expect(memberCalls[0]?.query).toMatchObject({ pageSize: 1 })
-    // joinedTo is lte-start-of-day server-side, so the window ends tomorrow.
-    // Computed in the org timezone, exactly like the page under test.
+    // Today in the org timezone, both ends inclusive server-side.
     const inKolkata = (d: Date) =>
       new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Kolkata",
@@ -242,11 +241,9 @@ describe("DashboardPage", () => {
         month: "2-digit",
         day: "2-digit",
       }).format(d);
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(now.getDate() + 1);
-    expect(memberCalls[0]?.query?.joinedFrom).toBe(inKolkata(now))
-    expect(memberCalls[0]?.query?.joinedTo).toBe(inKolkata(tomorrow))
+    const today = inKolkata(new Date())
+    expect(memberCalls[0]?.query?.joinedFrom).toBe(today)
+    expect(memberCalls[0]?.query?.joinedTo).toBe(today)
     const leadCalls = callsTo("/leads")
     expect(leadCalls).toHaveLength(1)
     expect(leadCalls[0]?.query).toMatchObject({ pageSize: 1 })

@@ -342,25 +342,3 @@ export function useTaxSummary(range: { from?: string; to?: string } = {}, enable
     enabled,
   })
 }
-
-/* ----------------------------------------------------------- portal invites */
-
-const PORTAL_INVITES = "portal-invites"
-
-export function useCreatePortalInvite() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (memberId: string) =>
-      api.post<{ token?: string; id?: string }>(`/portal/invites/${memberId}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [PORTAL_INVITES] }),
-  })
-}
-
-export function useRevokePortalInvites() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (memberId: string) =>
-      api.post<unknown>(`/portal/invites/${memberId}/revoke`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [PORTAL_INVITES] }),
-  })
-}
