@@ -1245,14 +1245,12 @@
     inset: -18% -12%;
     z-index: -1;
     border-radius: 9999px;
+    /* Soft by its own falloff rather than a blur filter, and still: a
+       filtered, breathing layer behind the logo cost every frame on the
+       sign-in screen. */
     background:
-      radial-gradient(closest-side at 38% 55%, rgb(239 68 68 / 0.28), transparent),
-      radial-gradient(closest-side at 64% 45%, rgb(234 179 8 / 0.32), transparent);
-    filter: blur(26px);
-    animation: brand-neon-breathe 8s var(--ease-out) infinite;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .brand-glow::before { animation: none; }
+      radial-gradient(closest-side at 38% 55%, rgb(239 68 68 / 0.22), rgb(239 68 68 / 0.08) 55%, transparent),
+      radial-gradient(closest-side at 64% 45%, rgb(234 179 8 / 0.26), rgb(234 179 8 / 0.09) 55%, transparent);
   }
 
   /* --- The sign-in canvas ---------------------------------------

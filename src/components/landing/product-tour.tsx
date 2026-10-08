@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils";
 /**
  * A guided look at four real screens, drawn as UI rather than shipped as
  * screenshots. Every panel is in the HTML (inactive ones are `hidden`),
- * so search engines read all four. It advances on its own until someone
- * picks a tab, and never with reduced motion.
+ * so search engines read all four. It changes only when someone picks a
+ * tab; it no longer advances on its own.
  */
 
 type Tab = {
@@ -201,7 +201,7 @@ function MemberAppScreen() {
  ].map(([Icon, t, s]) => {
  const I = Icon as LucideIcon;
  return (
- <div key={t as string} className="mt-2 flex items-center gap-2.5 rounded-2xl bg-white/20 p-2.5 backdrop-blur">
+ <div key={t as string} className="mt-2 flex items-center gap-2.5 rounded-2xl bg-white/20 p-2.5">
  <I className="size-5 shrink-0" aria-hidden="true" />
  <div>
  <p className="text-[11px] font-semibold">{t as string}</p>
@@ -260,26 +260,9 @@ const TABS: Tab[] = [
 
 export function ProductTour() {
  const [active, setActive] = React.useState(0);
- const [auto, setAuto] = React.useState(true);
  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
- const root = React.useRef<HTMLDivElement>(null);
-
- React.useEffect(() => {
- if (!auto || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
- let visible = false;
- const observer = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.4 });
- if (root.current) observer.observe(root.current);
- const timer = window.setInterval(() => {
- if (visible) setActive((i) => (i + 1) % TABS.length);
- }, 6000);
- return () => {
- window.clearInterval(timer);
- observer.disconnect();
- };
- }, [auto]);
 
  function choose(index: number, focus = false) {
- setAuto(false);
  setActive(index);
  if (focus) tabRefs.current[index]?.focus();
  }
@@ -298,12 +281,12 @@ export function ProductTour() {
  }
 
  return (
- <div ref={root} className="mx-auto mt-12 max-w-6xl">
+ <div className="mx-auto mt-12 max-w-6xl">
  <div
  role="tablist"
  aria-label="Product tour"
  onKeyDown={onKey}
- className="mx-auto grid w-full max-w-sm grid-cols-2 gap-1 rounded-[26px] border border-black/5 bg-white/70 p-1.5 shadow-sm backdrop-blur-xl sm:flex sm:w-fit sm:max-w-full sm:rounded-full dark:border-white/10 dark:bg-white/5"
+ className="mx-auto grid w-full max-w-sm grid-cols-2 gap-1 rounded-[26px] border border-black/5 bg-white/70 p-1.5 shadow-sm sm:flex sm:w-fit sm:max-w-full sm:rounded-full dark:border-white/10 dark:bg-white/5"
  >
  {TABS.map((tab, i) => (
  <button
@@ -337,7 +320,7 @@ export function ProductTour() {
  hidden={i !== active}
  className="mt-10 grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]"
  >
- <div className="motion-safe:animate-[tour-in_500ms_cubic-bezier(0.22,1,0.36,1)]">
+ <div>
  <span className={cn("inline-flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg", tab.accent)}>
  <tab.icon className="size-6" aria-hidden="true" />
  </span>
@@ -355,7 +338,7 @@ export function ProductTour() {
  </ul>
  </div>
  <div className="[perspective:1600px]" aria-hidden="true">
- <div className="motion-safe:animate-[tour-screen_700ms_cubic-bezier(0.22,1,0.36,1)] transition-transform duration-500 [transform:rotateY(-8deg)_rotateX(4deg)] hover:[transform:none]">
+ <div className="[transform:rotateY(-8deg)_rotateX(4deg)]">
  {tab.screen}
  </div>
  </div>

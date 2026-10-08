@@ -1,7 +1,8 @@
 /*
- * The landing page's motion. Everything here is transform and opacity
- * only, so it runs on the compositor: no layout, no paint per frame, and
- * nothing that moves the page's Largest Contentful Paint.
+ * The landing page's hero scene. Static on purpose: the page used to
+ * animate (drifting blurred orbs, a swaying 3D scene, bobbing cards, a
+ * marquee, a shine, fade-ins) and on phones that kept the main thread
+ * busy and made browsing stutter. The scene is held at one fixed angle.
  */
 
 .stage {
@@ -9,177 +10,22 @@
   perspective-origin: 50% 30%;
 }
 
-.sway,
 .scene {
   position: relative;
   width: 100%;
   height: 100%;
-}
-
-.sway {
   transform-style: preserve-3d;
-  animation: sway 14s ease-in-out infinite;
+  transform: rotateX(16deg) rotateY(-16deg) rotateZ(2deg);
 }
 
-.scene {
-  transform-style: preserve-3d;
-  transform: rotateX(var(--rx, 16deg)) rotateY(var(--ry, -16deg)) rotateZ(var(--rz, 2deg));
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-
-/* A phone is narrow: a gentler angle and shallower depth keep the
-   floating cards on screen. */
+/* A phone is narrow: a gentler angle keeps the floating cards on screen. */
 @media (max-width: 639px) {
   .scene {
-    --rx: 14deg;
-    --ry: -8deg;
-    --rz: 1deg;
-    scale: 0.94;
+    transform: rotateX(14deg) rotateY(-8deg) rotateZ(1deg) scale(0.94);
   }
 }
 
 .layer {
   position: absolute;
   transform-style: preserve-3d;
-}
-
-.bob {
-  animation: bob 6s ease-in-out infinite;
-}
-.bobSlow {
-  animation: bob 8s ease-in-out infinite -2s;
-}
-.bobFast {
-  animation: bob 5s ease-in-out infinite -1s;
-}
-
-.bar {
-  transform-origin: bottom;
-  animation: grow 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.orb {
-  animation: drift 18s ease-in-out infinite;
-}
-.orbAlt {
-  animation: drift 22s ease-in-out infinite reverse;
-}
-
-.shine {
-  background-size: 200% 100%;
-  animation: shine 6s linear infinite;
-}
-
-.ring {
-  animation: spin 18s linear infinite;
-}
-
-.marquee {
-  animation: marquee 40s linear infinite;
-}
-
-/* Revealed on scroll by <Reveal>. */
-.reveal {
-  opacity: 0;
-  transform: translate3d(0, 28px, 0) scale(0.98);
-  transition:
-    opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--delay, 0ms);
-}
-.reveal[data-visible="true"] {
-  opacity: 1;
-  transform: none;
-}
-
-/* A card that leans toward the pointer: --tx/--ty set by <TiltCard>. */
-.tilt {
-  transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateZ(0);
-  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
-  transform-style: preserve-3d;
-}
-.tiltInner {
-  transform: translateZ(28px);
-}
-
-@keyframes sway {
-  0%,
-  100% {
-    transform: rotateY(-4deg) rotateX(1deg);
-  }
-  50% {
-    transform: rotateY(4deg) rotateX(-1deg);
-  }
-}
-@keyframes bob {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -14px, 0);
-  }
-}
-@keyframes grow {
-  from {
-    transform: scaleY(0.05);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  33% {
-    transform: translate3d(6%, -4%, 0) scale(1.08);
-  }
-  66% {
-    transform: translate3d(-5%, 5%, 0) scale(0.95);
-  }
-}
-@keyframes shine {
-  from {
-    background-position: 200% 0;
-  }
-  to {
-    background-position: -200% 0;
-  }
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes marquee {
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sway,
-  .bob,
-  .bobSlow,
-  .bobFast,
-  .bar,
-  .orb,
-  .orbAlt,
-  .shine,
-  .ring,
-  .marquee {
-    animation: none;
-  }
-  .scene,
-  .tilt {
-    transition: none;
-  }
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
 }
