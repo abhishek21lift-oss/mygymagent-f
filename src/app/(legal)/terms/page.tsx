@@ -4,8 +4,9 @@ import { LEGAL } from "@/lib/legal";
 import { Fact, LegalPage, LegalSection } from "../legal-ui";
 
 export const metadata: Metadata = {
-  title: `Terms of Service · ${LEGAL.productName}`,
+  title: "Terms of Service",
   description: `The terms on which gyms use ${LEGAL.productName}.`,
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, KeyRound, Send, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
  Form,
@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
  <p className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-card px-2.5 py-1 text-xs font-black uppercase tracking-[.18em]">
  <Sparkles className="size-3" aria-hidden="true" /> Recovery
  </p>
- <CardTitle className="mt-1.5 font-semibold text-2xl font-semibold tracking-tight text-white">Reset your password</CardTitle>
+ <h1 className="mt-1.5 text-2xl leading-tight font-semibold tracking-tight text-white">Reset your password</h1>
  </div>
  </div>
  <CardDescription className="relative mt-3 text-xs font-medium text-white/75">We&apos;ll email you a link if the account exists.</CardDescription>

@@ -2,6 +2,24 @@
 
 _Audited 8 October 2026 against `main` @ `3a04a9a` (frontend) and `56ec543` (API)._
 
+## Status
+
+Fixed on branch `claude/project-seo-audit-o45rid` (checked against a fresh production build):
+
+- **P0 1:** `/register`, `/login` and `/forgot-password` have their own titles and descriptions;
+  `/register` and `/login` have canonicals; `/register` and `/forgot-password` render a real
+  `<h1>`. `/login` already had one, but it renders client-side, behind its `useSearchParams`
+  Suspense boundary. Google renders JS, so it still sees it.
+- **P0 2:** the OG image is served as a JPEG, 458 KB → 53 KB.
+- **P0 3:** root `title.template` (`%s · THE CULT CLIENT`); canonicals on all public pages.
+- **P0 4:** meta description is now 152 characters.
+- **P0 5:** `/contact` description copy fixed.
+- **P1 8 (part):** `/forgot-password` is `noindex`.
+- **P1 12:** the API sends `X-Robots-Tag: noindex, nofollow` (in `mygymagent-b`).
+- **P2 17 (part):** `<html lang="en-IN">`.
+
+Everything else below is still open.
+
 ## How this was audited
 
 - Read every public route, the metadata files (`layout.tsx`, `page.tsx`, `robots.ts`, `sitemap.ts`,

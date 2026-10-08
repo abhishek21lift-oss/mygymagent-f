@@ -4,8 +4,9 @@ import { LEGAL } from "@/lib/legal";
 import { EmailFact, Fact, LegalPage, LegalSection } from "../legal-ui";
 
 export const metadata: Metadata = {
-  title: `Privacy Policy · ${LEGAL.productName}`,
+  title: "Privacy Policy",
   description: `How ${LEGAL.productName} collects, uses and protects personal data.`,
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

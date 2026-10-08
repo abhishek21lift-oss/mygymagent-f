@@ -4,8 +4,9 @@ import { LEGAL } from "@/lib/legal";
 import { EmailFact, Fact, LegalPage, LegalSection } from "../legal-ui";
 
 export const metadata: Metadata = {
-  title: `Contact · ${LEGAL.productName}`,
-  description: `How to reach the ${LEGAL.productName} team.`,
+  title: "Contact",
+  description: `How to reach ${LEGAL.productName} for help with your gym's account, plans, billing or data.`,
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
