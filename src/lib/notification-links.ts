@@ -7,7 +7,7 @@
  * tapping an old alert never ends on "This page does not exist".
  */
 const LEGACY_LINKS: Array<[RegExp, string]> = [
-  [/^\/whatsapp(\/inbox)?\/?$/, "/settings/whatsapp#inbox"],
+  [/^\/whatsapp(\/inbox)?\/?$/, "/inbox"],
   [/^\/pt\/sessions(\/[^/]+)?\/?$/, "/pt-operations/sessions"],
   // `/inventory/products/new` is a real page; any other product id is not.
   [/^\/inventory\/products\/(?!new(?:\/|$))[^/]+\/?$/, "/inventory/reorder"],

@@ -1,9 +1,9 @@
 import { notificationPath } from "./notification-links"
 
 describe("notificationPath", () => {
-  it("sends old WhatsApp inbox links to the replies on the WhatsApp screen", () => {
-    expect(notificationPath("/whatsapp/inbox")).toBe("/settings/whatsapp#inbox")
-    expect(notificationPath("/whatsapp")).toBe("/settings/whatsapp#inbox")
+  it("sends old WhatsApp inbox links to the inbox", () => {
+    expect(notificationPath("/whatsapp/inbox")).toBe("/inbox")
+    expect(notificationPath("/whatsapp")).toBe("/inbox")
   })
 
   it("sends old PT session and product links to pages that exist", () => {

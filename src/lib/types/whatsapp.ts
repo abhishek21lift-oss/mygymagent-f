@@ -25,6 +25,8 @@ export interface WhatsAppMessage {
   templateKey: string
   recipient: string
   memberId: string | null
+  /** Rendered text; null for rows written before the backend stored it. */
+  body: string | null
   status: "PENDING" | "SENT" | "FAILED" | "SKIPPED_NO_CONSENT"
   attempts: number
   errorMessage: string | null
