@@ -24,14 +24,13 @@ import type {
 import { DashSection, HealthRing, Tile, accentStyle } from "./dashboard-ui";
 import styles from "./dashboard.module.css";
 
-const STATUS_META: Record<HealthStatus, { label: string; dot: string; line: string }> = {
-  healthy: { label: "Healthy", dot: "var(--success)", line: "Your gym is performing well." },
-  stable: { label: "Stable", dot: "var(--info)", line: "Your gym is steady with room to grow." },
-  "needs-attention": { label: "Needs attention", dot: "var(--warning)", line: "A few areas need attention." },
-  critical: { label: "Critical", dot: "var(--destructive)", line: "Your gym needs urgent attention." },
-  unknown: { label: "Not scored yet", dot: "var(--muted-foreground)", line: "Not enough data yet to score your gym." },
+const STATUS_META: Record<HealthStatus, { label: string }> = {
+  healthy: { label: "Healthy" },
+  stable: { label: "Stable" },
+  "needs-attention": { label: "Needs attention" },
+  critical: { label: "Critical" },
+  unknown: { label: "Not scored yet" },
 };
-
 /** Each health component keeps its own hue across the breakdown. */
 const COMPONENT_STYLE: Record<HealthComponent["key"], { icon: LucideIcon; accent: Accent }> = {
   revenue: { icon: TrendingUp, accent: "emerald" },
@@ -40,20 +39,6 @@ const COMPONENT_STYLE: Record<HealthComponent["key"], { icon: LucideIcon; accent
   sales: { icon: Megaphone, accent: "violet" },
   inventory: { icon: Boxes, accent: "cyan" },
 };
-
-function partOfDay(timeZone: string | null | undefined): string {
-  let hour = new Date().getHours();
-  try {
-    hour = Number(
-      new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: timeZone ?? undefined }).format(new Date()),
-    );
-  } catch {
-    /* fall back to local time */
-  }
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
 
 function longToday(timeZone: string | null | undefined): string {
   const options: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long" };
@@ -64,25 +49,17 @@ function longToday(timeZone: string | null | undefined): string {
   }
 }
 
-function clockTime(iso: string | undefined, timeZone: string | null | undefined): string | null {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  const options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
-  try {
-    return new Intl.DateTimeFormat(undefined, { ...options, timeZone: timeZone ?? undefined }).format(date);
-  } catch {
-    return new Intl.DateTimeFormat(undefined, options).format(date);
-  }
-}
-
 /**
- * The page's masthead: date, greeting, the gym's name and its health
- * ring on an aurora ground. `children` is the branch picker slot.
+ * The page's masthead: the date and the gym's name, centred, with the
+ * health ring in the bottom-right corner on an aurora ground. `children`
+ * is the branch picker slot, bottom-left.
+ *
+ * Kept short on purpose: no greeting, status pill or "updated" time --
+ * the ring already carries the status, and the hero should hand the
+ * screen to the numbers below it.
  */
 export function GymHealthHero({
   gymName,
-  firstName,
   timeZone,
   health,
   isLoading,
@@ -91,7 +68,6 @@ export function GymHealthHero({
   children,
 }: {
   gymName: string;
-  firstName?: string;
   timeZone?: string | null;
   health: GymHealth | undefined;
   isLoading: boolean;
@@ -101,59 +77,64 @@ export function GymHealthHero({
 }) {
   const status: HealthStatus = health?.score === null || !health ? "unknown" : health.status;
   const meta = STATUS_META[status];
-  const updated = clockTime(health?.computedAt, timeZone);
   const score = health?.score ?? null;
 
   return (
     <section aria-labelledby="dashboard-title" className={styles.hero}>
       <div className={styles.aurora} aria-hidden="true" />
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
+      {/* Phone: name, then picker and ring on one row. Wider: three
+          columns, so the name sits in the true centre with the picker
+          bottom-left and the ring bottom-right. */}
+      <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+        <div className="min-w-0 text-center sm:col-start-2 sm:row-start-1 sm:self-center">
           <p className={styles.eyebrow}>{longToday(timeZone)}</p>
           <h1 id="dashboard-title" className={styles.gymName}>
             {gymName}
           </h1>
-          <p className={styles.greeting}>
-            {partOfDay(timeZone)}
-            {firstName ? `, ${firstName}` : ""}. {isLoading || isError ? "" : meta.line}
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className={styles.glassPill} style={{ "--dot": meta.dot } as React.CSSProperties}>
-              <span className={styles.statusDot} aria-hidden="true" />
-              {isLoading ? "Scoring…" : isError ? "Score unavailable" : meta.label}
-            </span>
-            {updated && !isLoading && !isError && (
-              <span className={styles.glassPill}>Updated {updated}</span>
-            )}
-            {children}
-          </div>
         </div>
 
-        <div className={styles.ringPanel}>
-          {isLoading ? (
-            <Skeleton className="size-[88px] rounded-full" aria-label="Loading gym health" />
-          ) : isError ? (
-            <div className="flex flex-col items-start gap-2 py-1 pr-1">
-              <p className="text-sm font-semibold text-destructive">Could not load gym health.</p>
-              <Button type="button" variant="outline" size="sm" className="min-h-11 rounded-full" onClick={onRetry}>
-                <RefreshCw className="size-4" aria-hidden="true" />
-                Retry
-              </Button>
-            </div>
-          ) : (
-            <>
-              <HealthRing
-                score={score}
-                status={status}
-                label={score === null ? "Gym health unavailable" : `Gym health ${score} out of 100, ${meta.label}`}
-              />
-              <div className="pr-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gym health</p>
-                <p className="text-base font-bold tracking-tight text-foreground">{meta.label}</p>
-                <p className="text-xs text-muted-foreground">{score === null ? "Needs more data" : "out of 100"}</p>
+        <div className="flex flex-wrap items-end justify-between gap-3 sm:contents">
+          <div className="sm:col-start-1 sm:row-start-1 sm:justify-self-start">{children}</div>
+
+          <div
+            className={cn(
+              styles.ringPanel,
+              // On a phone it shares a row with the branch picker, which
+              // leaves room for the ring alone: its label still names the
+              // status, and "Why this score" below has the detail.
+              "ml-auto max-sm:p-2 max-sm:[&_svg]:size-14",
+              "sm:col-start-3 sm:row-start-1 sm:justify-self-end",
+            )}
+          >
+            {isLoading ? (
+              <Skeleton className="size-[72px] rounded-full" aria-label="Loading gym health" />
+            ) : isError ? (
+              <div className="flex flex-col items-start gap-2 py-1 pr-1">
+                <p className="text-sm font-semibold text-destructive">Could not load gym health.</p>
+                <Button type="button" variant="outline" size="sm" className="min-h-11 rounded-full" onClick={onRetry}>
+                  <RefreshCw className="size-4" aria-hidden="true" />
+                  Retry
+                </Button>
               </div>
-            </>
-          )}
+            ) : (
+              <>
+                <HealthRing
+                  score={score}
+                  status={status}
+                  size={72}
+                  stroke={9}
+                  label={score === null ? "Gym health unavailable" : `Gym health ${score} out of 100, ${meta.label}`}
+                />
+                {/* nowrap on each line: the base `p { text-wrap: pretty }`
+                    would otherwise undo it from the container. */}
+                <div className="pr-1 max-sm:hidden [&>p]:whitespace-nowrap">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gym health</p>
+                  <p className="text-base font-bold tracking-tight text-foreground">{meta.label}</p>
+                  <p className="text-xs text-muted-foreground">{score === null ? "Needs more data" : "out of 100"}</p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </section>

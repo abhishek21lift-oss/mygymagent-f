@@ -288,6 +288,50 @@ describe("DashboardPage", () => {
     expect(healthCalls).toHaveLength(1)
   })
 
+  it("keeps the hero to the date, the gym's name and its health ring", async () => {
+    renderPage()
+    expect(await screen.findByRole("heading", { level: 1, name: "619 Fitness Studio" })).toBeInTheDocument()
+    expect(await screen.findByRole("img", { name: "Gym health 82 out of 100, Healthy" })).toBeInTheDocument()
+    // No greeting, no status pill beside the name, no "Updated" time.
+    expect(screen.queryByText(/Good (morning|afternoon|evening)/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Updated /)).not.toBeInTheDocument()
+    expect(screen.getAllByText("Healthy")).toHaveLength(1)
+  })
+
+  it("opens each Today figure's records for the same day and branch", async () => {
+    mockPermissions = [...ALL, "attendance.read"]
+    window.localStorage.setItem("mygymagent:dashboard-branch", BRANCH_A)
+    renderPage()
+    await screen.findByText("Of 2 started today")
+    const day = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date())
+    const expected: Record<string, string> = {
+      "Check In": "check-ins",
+      Collection: "collection",
+      "New Members": "new-members",
+      Renewals: "renewals",
+      Leads: "leads",
+    }
+    for (const [title, metric] of Object.entries(expected)) {
+      const link = screen.getByText(title).closest("a")
+      expect(link).toHaveAttribute("href", `/dashboard/today/${metric}?date=${day}&branch=${BRANCH_A}`)
+    }
+  })
+
+  it("does not link a Today figure to a list the person cannot read", async () => {
+    mockPermissions = ALL.filter((p) => p !== "payments.read")
+    renderPage()
+    await screen.findByText("Of 2 started today")
+    // No attendance.read and no payments.read in this set.
+    expect(screen.getByText("Check In").closest("a")).toBeNull()
+    expect(screen.getByText("Collection").closest("a")).toBeNull()
+    expect(screen.getByText("Leads").closest("a")).not.toBeNull()
+  })
+
   it("asks the revenue summary for the default 30-day period", async () => {
     renderPage()
     // Data-driven hint: proves the summary resolved, not just rendered.

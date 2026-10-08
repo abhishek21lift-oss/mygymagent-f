@@ -73,6 +73,7 @@ export function Tile({
   feature = false,
   isLoading,
   isError,
+  href,
 }: {
   icon: LucideIcon;
   title: string;
@@ -83,9 +84,11 @@ export function Tile({
   feature?: boolean;
   isLoading: boolean;
   isError?: boolean;
+  /** Where the records behind this figure are listed. */
+  href?: string;
 }) {
-  return (
-    <div className={cn(styles.tile, feature && styles.tileFeature, accentStyle(accent))}>
+  const body = (
+    <>
       <div className="flex items-center gap-2.5">
         <span className={styles.iconDisc} aria-hidden="true">
           <Icon className="size-[1.15rem]" strokeWidth={2.2} />
@@ -103,7 +106,20 @@ export function Tile({
         <p className={styles.tileValue}>{nonBreakingCurrency(value) ?? "—"}</p>
       )}
       {hint && !isLoading && <p className={styles.tileHint}>{hint}</p>}
-    </div>
+    </>
+  );
+  const className = cn(styles.tile, feature && styles.tileFeature, accentStyle(accent));
+  if (!href) return <div className={className}>{body}</div>;
+  return (
+    <Link
+      href={href}
+      className={cn(
+        className,
+        "cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+      )}
+    >
+      {body}
+    </Link>
   );
 }
 
