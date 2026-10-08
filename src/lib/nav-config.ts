@@ -3,7 +3,7 @@ import {
   BarChart3, Bell, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare,
   ClipboardList, CreditCard, Dumbbell, Gauge, HandCoins, Home,
   ListChecks, Megaphone, MessageCircle, MessagesSquare, MonitorSmartphone, Package,
-  Receipt, Rocket, Salad, Search, Settings, ShieldCheck, ShoppingBag, Sparkles, Store,
+  Receipt, Rocket, Salad, Search, Send, Settings, ShieldCheck, ShoppingBag, Sparkles, Store,
   UserCog, UserPlus, Users, Wallet, Workflow,
 } from "lucide-react";
 
@@ -104,6 +104,7 @@ export const primaryNav: NavItem[] = [
 
   { title: "Engage", href: "/engage", icon: MessagesSquare, hue: "orange", children: [
     { title: "Inbox", href: "/inbox", icon: MessagesSquare, permission: "whatsapp.read" },
+    { title: "Broadcasts", href: "/broadcasts", icon: Send, permission: "whatsapp.manage" },
     { title: "WhatsApp", href: "/settings/whatsapp", icon: MessageCircle, permission: ["whatsapp.read", "whatsapp.manage"] },
     { title: "Automations", href: "/automation", icon: Workflow, permission: "reports.view" },
     { title: "Message templates", href: "/settings/messages", icon: ClipboardList, permission: "notifications.manage" },
