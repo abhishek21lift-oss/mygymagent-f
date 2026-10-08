@@ -1404,7 +1404,11 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:gap-6">
  <MembershipCard member={member} activeMembership={activeMembership} daysLeft={daysLeft} now={now} />
  {/* Every credential that opens the door, in one place */}
- <EntryAccessCard memberId={memberId} branchId={member.primaryBranchId} />
+ <EntryAccessCard
+ memberId={memberId}
+ memberName={`${member.firstName} ${member.lastName}`.trim()}
+ branchId={member.primaryBranchId}
+ />
  {/* Whether this member can sign in to the app at all */}
  <PortalAccessCard member={member} />
  </div>

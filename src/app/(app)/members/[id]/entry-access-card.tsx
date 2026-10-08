@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Copy, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Copy, Download, Loader2, Plus, Trash2 } from "lucide-react";
 
+import { ConfirmAction } from "@/components/shared/confirm-action";
+import { downloadQrPng, QrCodeImage, qrValidUntil } from "@/components/shared/qr-code-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +15,7 @@ import {
   useDeleteDeviceEnrolment,
   useDeviceEnrolments,
   useEntryQrToken,
+  useRotateEntryQrToken,
   type DeviceEnrolment,
 } from "@/lib/hooks/use-attendance";
 import { ApiError } from "@/lib/api/client";
@@ -32,16 +35,21 @@ import { ApiError } from "@/lib/api/client";
  */
 export function EntryAccessCard({
   memberId,
+  memberName,
   branchId,
 }: {
   memberId: string;
+  memberName: string;
   branchId: string | null | undefined;
 }) {
   const { hasPermission } = useAuth();
   const canRead = hasPermission(["attendance.read", "attendance.read_assigned"]);
   const canIssue = hasPermission(["attendance.create", "attendance.create_assigned"]);
 
-  const qr = useEntryQrToken(memberId);
+  // The server hands the code only to roles that can check people in;
+  // anyone else would just get a 403 for asking.
+  const qr = useEntryQrToken(canIssue ? memberId : undefined);
+  const rotate = useRotateEntryQrToken(memberId);
   const enrolments = useDeviceEnrolments({ memberId });
   const createEnrolment = useCreateDeviceEnrolment();
   const deleteEnrolment = useDeleteDeviceEnrolment();
@@ -60,12 +68,13 @@ export function EntryAccessCard({
     }
   }
 
-  async function handleRotate() {
+  async function handleDownload() {
+    if (!qr.data) return;
     try {
-      await qr.refetch();
-      toast.success("Entry QR rotated");
-    } catch (error) {
-      toast.error(error instanceof ApiError ? error.message : "Could not rotate QR");
+      const slug = memberName.trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+      await downloadQrPng(qr.data.token, `entry-qr-${slug || memberId}.png`);
+    } catch {
+      toast.error("Could not save the QR code");
     }
   }
 
@@ -117,40 +126,58 @@ export function EntryAccessCard({
 
       <div className="divide-y divide-border">
         <div className="px-5 py-4">
-          <p className="text-xs font-medium text-muted-foreground">Front-desk QR</p>
-          {qr.isLoading ? (
-            <Skeleton className="mt-2 h-10 w-full rounded-lg" aria-label="Loading entry token" />
+          <p className="text-xs font-medium text-muted-foreground">QR code</p>
+          {!canIssue ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Only roles that check members in can see this code.
+            </p>
+          ) : qr.isLoading ? (
+            <Skeleton className="mt-3 size-40 rounded-2xl" aria-label="Loading entry token" />
           ) : qr.isError || !qr.data ? (
             <p className="mt-2 text-sm text-muted-foreground">Entry QR unavailable right now.</p>
           ) : (
-            <>
-              <p className="mt-2 break-all rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm">
-                {qr.data.token}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleCopy} className="min-h-11 rounded-lg">
-                  <Copy className="size-4" aria-hidden="true" />
-                  Copy
-                </Button>
-                {canIssue && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRotate}
-                    disabled={qr.isFetching}
-                    className="min-h-11 rounded-lg"
-                  >
-                    <RefreshCw className="size-4" aria-hidden="true" />
-                    {qr.isFetching ? "Rotating…" : "Rotate"}
-                  </Button>
-                )}
-                {qr.data.rotatesAt && (
-                  <span className="text-xs text-muted-foreground">
-                    Rotates {new Date(qr.data.rotatesAt).toLocaleDateString()}
-                  </span>
-                )}
+            <div className="mt-3 flex flex-col gap-3">
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+                <QrCodeImage
+                  token={qr.data.token}
+                  label={`Entry QR code for ${memberName}`}
+                  failedText="The QR code could not be drawn here. Copy the code instead."
+                  className="size-40 shrink-0 p-2 shadow-sm"
+                />
+                <div className="flex min-w-0 flex-col gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    The same code {memberName} sees in their app. Scan it at the kiosk, or download it
+                    to print or send on WhatsApp.
+                  </p>
+                  {qrValidUntil(qr.data.rotatesAt) && (
+                    <p className="text-xs text-muted-foreground">
+                      Valid till {qrValidUntil(qr.data.rotatesAt)}, then renews by itself.
+                    </p>
+                  )}
+                </div>
               </div>
-            </>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => void handleDownload()} className="min-h-11 rounded-lg">
+                  <Download className="size-4" aria-hidden="true" />
+                  Download
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => void handleCopy()} className="min-h-11 rounded-lg">
+                  <Copy className="size-4" aria-hidden="true" />
+                  Copy code
+                </Button>
+                <ConfirmAction
+                  label="Rotate"
+                  title={`Give ${memberName} a new entry code?`}
+                  description="The current code stops working straight away: on their phone, in screenshots and on any printed card. Do this if the code has been lost or shared."
+                  confirmLabel="Rotate code"
+                  pendingLabel="Rotating..."
+                  successMessage="New entry code issued"
+                  errorMessage="Could not rotate the entry code."
+                  onConfirm={() => rotate.mutateAsync()}
+                  className="min-h-11 rounded-lg"
+                />
+              </div>
+            </div>
           )}
         </div>
 

@@ -28,6 +28,7 @@ type ConfirmActionProps = {
   variant?: "destructive" | "outline" | "default"
   size?: "sm" | "default"
   disabled?: boolean
+  className?: string
 }
 
 /**
@@ -49,6 +50,7 @@ export function ConfirmAction({
   variant = "outline",
   size = "sm",
   disabled,
+  className,
 }: ConfirmActionProps) {
   const [open, setOpen] = React.useState(false)
   const [pending, setPending] = React.useState(false)
@@ -73,6 +75,7 @@ export function ConfirmAction({
         variant={variant}
         size={size}
         disabled={disabled}
+        className={className}
         onClick={() => setOpen(true)}
       >
         {label}

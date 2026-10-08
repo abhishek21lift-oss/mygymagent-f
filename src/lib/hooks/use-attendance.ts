@@ -119,24 +119,38 @@ export interface EntryQrToken {
   rotatesAt: string;
 }
 
-/** Plaintext entry token. Only returned on generation — never persist it. */
+function asEntryQrToken(raw: unknown): EntryQrToken {
+  const envelope = isRecord(raw) && "data" in raw ? (raw as { data: unknown }).data : raw;
+  if (!isRecord(envelope) || typeof envelope.token !== "string") {
+    throw new Error("Unexpected QR token response");
+  }
+  return {
+    token: envelope.token,
+    rotatesAt: typeof envelope.rotatesAt === "string" ? envelope.rotatesAt : "",
+  };
+}
+
+/**
+ * The member's current entry code. Reading it does not change it: the
+ * same code comes back until someone rotates it, so opening a profile
+ * never retires the code on the member's phone or a printed card.
+ */
 export function useEntryQrToken(memberId: string | undefined) {
   return useQuery({
     queryKey: [ENTRY_QR_KEY, memberId],
-    queryFn: async () => {
-      const raw = await api.get<unknown>(`/attendance/qr-token/${memberId}`);
-      const envelope = isRecord(raw) && "data" in raw ? (raw as { data: unknown }).data : raw;
-      if (!isRecord(envelope) || typeof envelope.token !== "string") {
-        throw new Error("Unexpected QR token response");
-      }
-      return {
-        token: envelope.token,
-        rotatesAt: typeof envelope.rotatesAt === "string" ? envelope.rotatesAt : "",
-      } satisfies EntryQrToken;
-    },
+    queryFn: async () => asEntryQrToken(await api.get<unknown>(`/attendance/qr-token/${memberId}`)),
     enabled: !!memberId,
     retry: false,
-    staleTime: 0,
+  });
+}
+
+/** A new entry code for the member; the old one stops working at once. */
+export function useRotateEntryQrToken(memberId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () =>
+      asEntryQrToken(await api.post<unknown>(`/attendance/qr-token/${memberId}/rotate`)),
+    onSuccess: (code) => queryClient.setQueryData([ENTRY_QR_KEY, memberId], code),
   });
 }
 
