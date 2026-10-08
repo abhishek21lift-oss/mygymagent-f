@@ -8,8 +8,9 @@ export const SITE = {
   name: PRODUCT_NAME,
   /** What the page should rank for, first. */
   title: "Gym Management Software with WhatsApp & AI",
+  /** Under ~155 characters, so search results show it whole. */
   description:
-    "THE CULT CLIENT is gym management software for Indian gyms and fitness studios: memberships, renewals, WhatsApp reminders and AI replies, attendance and check-in, personal training, payments, staff payroll and reports, in one app.",
+    "Gym management software for Indian gyms: memberships, WhatsApp renewal reminders, QR check-in, PT, payments and payroll in one app. Free trial, no card.",
   keywords: [
     "gym management software",
     "gym management software India",

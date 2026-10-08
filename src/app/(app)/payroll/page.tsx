@@ -18,6 +18,7 @@ import { api } from "@/lib/api/client";
 import { ErrorState } from "@/components/shared/error-state";
 import { StaffPayrollSection } from "./staff-payroll-section";
 import { CommissionsSection } from "./commissions-section";
+import { AddLeaveTypeDialog, RecordLeaveDialog } from "./leave-dialogs";
 import { useAuth } from "@/lib/auth/auth-context";
 import { PageHero } from "@/components/shared/page-hero";
 import { Badge } from "@/components/ui/badge";
@@ -107,6 +108,8 @@ export default function PayrollPage() {
   const [periodEnd, setPeriodEnd] = React.useState(toInputDate(today));
   const { hasPermission } = useAuth();
   const canReadHr = hasPermission("hr.read");
+  const canManageHr = hasPermission("hr.manage");
+  const [leaveDialog, setLeaveDialog] = React.useState<"type" | "request" | null>(null);
   const canReadPayroll = hasPermission("payroll.read");
 
   const [leaveTypes, setLeaveTypes] = React.useState<LeaveType[]>([]);
@@ -385,9 +388,27 @@ export default function PayrollPage() {
                   Review time-off requests from staff and personal trainers
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="rounded-full font-mono text-xs font-bold">
-                {requests.length} records
-              </Badge>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {canManageHr && (
+                  <>
+                    <Button size="sm" variant="outline" className="rounded-xl" onClick={() => setLeaveDialog("type")}>
+                      <Plus className="mr-1 size-3.5" aria-hidden="true" /> Leave type
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => setLeaveDialog("request")}
+                      disabled={leaveTypes.length === 0}
+                      title={leaveTypes.length === 0 ? "Add a leave type first" : undefined}
+                    >
+                      <Plus className="mr-1 size-3.5" aria-hidden="true" /> Record leave
+                    </Button>
+                  </>
+                )}
+                <Badge variant="outline" className="rounded-full font-mono text-xs font-bold">
+                  {requests.length} records
+                </Badge>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-6">
@@ -462,6 +483,11 @@ export default function PayrollPage() {
               {!loading && !loadError && requests.length === 0 && (
                 <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
                   No leave requests logged yet.
+                  {canManageHr
+                    ? leaveTypes.length === 0
+                      ? " Add a leave type, then record leave for a staff member."
+                      : " Use Record leave to add one."
+                    : ""}
                 </p>
               )}
             </div>
@@ -629,6 +655,21 @@ export default function PayrollPage() {
         <p className="text-sm text-muted-foreground">
           You do not have access to payroll on this organization.
         </p>
+      )}
+      {canManageHr && (
+        <>
+          <AddLeaveTypeDialog
+            open={leaveDialog === "type"}
+            onOpenChange={(open) => setLeaveDialog(open ? "type" : null)}
+            onSaved={() => void load()}
+          />
+          <RecordLeaveDialog
+            open={leaveDialog === "request"}
+            onOpenChange={(open) => setLeaveDialog(open ? "request" : null)}
+            leaveTypes={leaveTypes}
+            onSaved={() => void load()}
+          />
+        </>
       )}
     </main>
   );

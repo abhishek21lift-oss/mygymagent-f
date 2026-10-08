@@ -4,8 +4,9 @@ import { LEGAL } from "@/lib/legal";
 import { EmailFact, LegalPage, LegalSection } from "../legal-ui";
 
 export const metadata: Metadata = {
-  title: `Refund & Cancellation Policy · ${LEGAL.productName}`,
+  title: "Refund & Cancellation Policy",
   description: `How cancellations and refunds work for ${LEGAL.productName} subscriptions.`,
+  alternates: { canonical: "/refund-policy" },
 };
 
 export default function RefundPolicyPage() {

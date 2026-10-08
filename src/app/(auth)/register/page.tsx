@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { ArrowRight, Building2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
  Form,
@@ -59,7 +59,7 @@ export default function RegisterPage() {
  <p className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-card px-2.5 py-1 text-xs font-black uppercase tracking-[.18em]">
  <Sparkles className="size-3" aria-hidden="true" /> New gym launch
  </p>
- <CardTitle className="mt-1.5 font-semibold text-2xl font-semibold tracking-tight text-white">Set up your gym</CardTitle>
+ <h1 className="mt-1.5 text-2xl leading-tight font-semibold tracking-tight text-white">Set up your gym</h1>
  </div>
  </div>
  <CardDescription className="relative mt-3 text-xs font-medium leading-5 text-white/80">Creates your organization and first branch, then takes you to the setup wizard.</CardDescription>

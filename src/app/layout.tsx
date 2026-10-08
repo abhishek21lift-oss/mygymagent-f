@@ -6,7 +6,7 @@ import { AuthProvider } from "@/lib/auth/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
-import { siteUrl } from "@/lib/site";
+import { SITE, siteUrl } from "@/lib/site";
 
 /**
  * No webfont.
@@ -28,8 +28,10 @@ import { siteUrl } from "@/lib/site";
 export const metadata: Metadata = {
   // The canonical origin, for every route's social cards (src/lib/site.ts).
   metadataBase: siteUrl(),
-  title: PRODUCT_NAME,
-  description: "AI-driven gym management and personal training platform",
+  // A page's own `title` becomes "<title> · THE CULT CLIENT"; the landing
+  // page sets an absolute one.
+  title: { default: PRODUCT_NAME, template: `%s · ${PRODUCT_NAME}` },
+  description: SITE.description,
   applicationName: PRODUCT_NAME,
   appleWebApp: { capable: true, title: PRODUCT_NAME, statusBarStyle: "default" },
   icons: {
@@ -54,7 +56,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full antialiased">
+    <html lang="en-IN" suppressHydrationWarning className="h-full antialiased">
       <body className="min-h-full">
         <ThemeProvider>
           <QueryProvider>

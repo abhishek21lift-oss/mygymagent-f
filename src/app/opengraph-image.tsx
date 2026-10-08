@@ -1,19 +1,26 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 
 import { SITE } from "@/lib/site";
 
 export const alt = `${SITE.name} — ${SITE.title}`;
 export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+/**
+ * JPEG, not the PNG `ImageResponse` draws: the gradients cost about 460 KB
+ * as a PNG and about 55 KB as a JPEG. WhatsApp drops the preview
+ * image of a link whose card is much over 300 KB, and WhatsApp is where
+ * gym owners share links.
+ */
+export const contentType = "image/jpeg";
 
 /** The card a shared link shows on WhatsApp, LinkedIn, X and Slack. */
 export default async function OpengraphImage() {
   const logo = await readFile(join(process.cwd(), "public/brand/tcc-logo.png"));
   const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
 
-  return new ImageResponse(
+  const png = new ImageResponse(
     (
       <div
         style={{
@@ -58,4 +65,8 @@ export default async function OpengraphImage() {
     ),
     size,
   );
+  const jpeg = await sharp(Buffer.from(await png.arrayBuffer()))
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toBuffer();
+  return new Response(new Uint8Array(jpeg), { headers: { "Content-Type": contentType } });
 }
