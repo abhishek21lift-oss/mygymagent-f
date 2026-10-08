@@ -6,6 +6,7 @@ import { AuthProvider } from "@/lib/auth/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
+import Script from "next/script";
 import { SITE, siteUrl } from "@/lib/site";
 
 /**
@@ -25,6 +26,8 @@ import { SITE, siteUrl } from "@/lib/site";
  * font request, no layout shift, and the first paint is already in
  * the right face.
  */
+const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN?.trim();
+
 export const metadata: Metadata = {
   // The canonical origin, for every route's social cards (src/lib/site.ts).
   metadataBase: siteUrl(),
@@ -32,6 +35,15 @@ export const metadata: Metadata = {
   // page sets an absolute one.
   title: { default: PRODUCT_NAME, template: `%s · ${PRODUCT_NAME}` },
   description: SITE.description,
+  // Search Console and Bing Webmaster Tools ownership, set per deployment.
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } }
+      : {}),
+  },
   applicationName: PRODUCT_NAME,
   appleWebApp: { capable: true, title: PRODUCT_NAME, statusBarStyle: "default" },
   icons: {
@@ -72,6 +84,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {children}
               </ErrorBoundary>
               <Toaster position="top-center" richColors closeButton />
+              {/* Cookie-free page analytics, only where a domain is configured
+                  (next.config.ts allows the script in that case only). */}
+              {PLAUSIBLE_DOMAIN ? (
+                <Script defer data-domain={PLAUSIBLE_DOMAIN} src="https://plausible.io/js/script.js" strategy="afterInteractive" />
+              ) : null}
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

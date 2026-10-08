@@ -738,7 +738,7 @@ export default function LandingPage() {
  <MobileCtaBar startAfterId="hero" stopAtId="cta-title" />
 
  <footer className="border-t border-black/5 px-4 pb-24 pt-14 sm:px-6 sm:pb-12 dark:border-white/10">
- <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+ <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
  <div className="max-w-sm">
  <div className="flex items-center gap-2">
  <BrandLogo decorative className="h-8" />
@@ -760,8 +760,18 @@ export default function LandingPage() {
  { href: "#features", label: "Features" },
  { href: "#tour", label: "Product tour" },
  { href: "#automation", label: "WhatsApp automation" },
- { href: "#pricing", label: "Pricing" },
+ { href: "/pricing", label: "Pricing" },
  { href: "#faq", label: "FAQ" },
+ ],
+ },
+ {
+ title: "Learn",
+ links: [
+ { href: "/features", label: "All features" },
+ { href: "/features/whatsapp-reminders", label: "WhatsApp reminders" },
+ { href: "/features/attendance-qr-checkin", label: "QR check-in" },
+ { href: "/features/personal-training", label: "PT management" },
+ { href: "/resources", label: "Guides for gym owners" },
  ],
  },
  {

@@ -17,6 +17,7 @@ export const NAV_LINKS = [
  { href: "#how-it-works", label: "How it works" },
  { href: "#pricing", label: "Pricing" },
  { href: "#faq", label: "FAQ" },
+ { href: "/resources", label: "Guides" },
 ] as const;
 
 /** Signed in already: one tap back into the app instead of a sign-up pitch. */
