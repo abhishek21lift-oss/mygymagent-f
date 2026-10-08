@@ -359,16 +359,27 @@ export interface PortalCheckInCode {
   rotatesAt: string;
 }
 
+const CHECK_IN_CODE_KEY = ["portal", "check-in-code"] as const;
+
 /**
- * Mints the member's check-in code. A mutation, not a query: the server
- * keeps only a hash, so every call issues a new code and retires the
- * previous one. Caching it or refetching it in the background would
- * quietly invalidate the code on the member's screen -- so it is minted
- * once, when they ask to see it, and never persisted.
+ * The member's check-in code. Reading it does not change it, so the pass
+ * on their screen, a screenshot and a card printed at the desk all stay
+ * valid until the code is deliberately replaced.
  */
-export function useMintPortalCheckInCode() {
+export function usePortalCheckInCode() {
+  return useQuery({
+    queryKey: CHECK_IN_CODE_KEY,
+    queryFn: () => api.get<PortalCheckInCode>("/portal/check-in-code"),
+    retry: false,
+  });
+}
+
+/** Replaces the member's code; the previous one stops working at once. */
+export function useNewPortalCheckInCode() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => api.post<PortalCheckInCode>("/portal/check-in-code"),
+    onSuccess: (code) => queryClient.setQueryData(CHECK_IN_CODE_KEY, code),
   });
 }
 
