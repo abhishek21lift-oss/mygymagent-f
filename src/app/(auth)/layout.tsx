@@ -27,15 +27,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <span className="brand-glow">
             <BrandLogo priority sizes="240px" className="h-24 sm:h-28" />
           </span>
-          <p className="glass rounded-full px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="rounded-full border border-border/60 bg-card/85 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
             Gym Management OS
           </p>
         </div>
 
-        {/* The card is glass over the brand canvas rather than a bordered
-            white box, so the sign-in form looks like a pane floating in
-            the same light as the mark above it. */}
-        <div className="glass-strong w-full rounded-3xl p-1.5">
+        {/* A solid pane over the brand canvas. It used to be frosted glass
+            (backdrop-filter blur), which re-blurs the canvas behind it on
+            every frame and made the sign-in screen stutter on phones. */}
+        <div className="w-full rounded-3xl border border-border/60 bg-card/90 p-1.5 shadow-[var(--shadow-float)]">
           <div className="relative z-10">{children}</div>
         </div>
 

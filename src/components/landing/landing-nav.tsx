@@ -71,9 +71,9 @@ export function LandingNav() {
  <nav
  aria-label="Main"
  className={cn(
- "mx-auto flex max-w-6xl items-center gap-3 rounded-full border px-3 py-2 transition-all duration-300 sm:px-4",
+ "mx-auto flex max-w-6xl items-center gap-3 rounded-full border px-3 py-2 sm:px-4",
  scrolled || open
- ? "border-black/5 bg-white/75 shadow-[0_10px_40px_-12px_rgba(20,10,60,0.25)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#12121c]/75"
+ ? "border-black/5 bg-white/95 shadow-[0_10px_40px_-12px_rgba(20,10,60,0.25)] dark:border-white/10 dark:bg-[#12121c]/95"
  : "border-transparent bg-transparent",
  )}
  >
@@ -110,7 +110,7 @@ export function LandingNav() {
  <div
  id="landing-menu"
  hidden={!open}
- className="mx-auto mt-2 max-w-6xl rounded-3xl border border-black/5 bg-white/90 p-3 shadow-2xl backdrop-blur-2xl lg:hidden dark:border-white/10 dark:bg-[#12121c]/90"
+ className="mx-auto mt-2 max-w-6xl rounded-3xl border border-black/5 bg-white p-3 shadow-2xl lg:hidden dark:border-white/10 dark:bg-[#12121c]"
  >
  <ul className="flex flex-col">
  {NAV_LINKS.map((link) => (
@@ -148,7 +148,7 @@ export function HeroActions() {
  </Link>
  <a
  href="#features"
- className="inline-flex min-h-[52px] items-center rounded-full border border-black/10 bg-white/60 px-7 text-base font-semibold text-foreground backdrop-blur transition hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
+ className="inline-flex min-h-[52px] items-center rounded-full border border-black/10 bg-white/60 px-7 text-base font-semibold text-foreground transition hover:bg-white dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
  >
  See what it does
  </a>

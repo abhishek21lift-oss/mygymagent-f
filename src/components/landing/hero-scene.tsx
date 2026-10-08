@@ -36,7 +36,7 @@ function Glass({ children, className, style }: { children: ReactNode; className?
  <div
  style={style}
  className={cn(
- "rounded-[22px] border border-white/60 bg-white/80 shadow-[0_30px_60px_-20px_rgba(30,20,80,0.35),0_0_0_1px_rgba(255,255,255,0.4)_inset] backdrop-blur-xl dark:border-white/10 dark:bg-[#1b1b2b]/85",
+ "rounded-[22px] border border-white/60 bg-white/80 shadow-[0_30px_60px_-20px_rgba(30,20,80,0.35),0_0_0_1px_rgba(255,255,255,0.4)_inset] dark:border-white/10 dark:bg-[#1b1b2b]/85",
  className,
  )}
  >
@@ -94,7 +94,7 @@ function Dashboard() {
  {BARS.map((h, i) => (
  <span
  key={i}
- className={cn("flex-1 rounded-t-md bg-gradient-to-t from-violet-500 via-fuchsia-500 to-orange-400", styles.bar)}
+ className="flex-1 rounded-t-md bg-gradient-to-t from-violet-500 via-fuchsia-500 to-orange-400"
  style={{ height: `${h}%`, animationDelay: `${300 + i * 60}ms` }}
  />
  ))}
@@ -136,14 +136,14 @@ function Phone() {
  <span className="text-[8px] text-white/80">days left</span>
  </span>
  </div>
- <div className="flex items-center gap-2 rounded-2xl bg-white/20 p-2 backdrop-blur">
+ <div className="flex items-center gap-2 rounded-2xl bg-white/20 p-2">
  <QrCode className="size-7" />
  <div>
  <p className="text-[10px] font-semibold">Check in</p>
  <p className="text-[8px] text-white/80">Show at the desk</p>
  </div>
  </div>
- <div className="mt-2 flex items-center gap-2 rounded-2xl bg-white/20 p-2 backdrop-blur">
+ <div className="mt-2 flex items-center gap-2 rounded-2xl bg-white/20 p-2">
  <Dumbbell className="size-5" />
  <p className="text-[10px] font-semibold">Leg day · 6 PM</p>
  </div>
@@ -161,7 +161,7 @@ export function HeroScene() {
 
  {/* WhatsApp renewal reminder */}
  <div className={styles.layer} style={{ left: "1%", top: "8%", ...z(150) }}>
- <div className={styles.bob}>
+ <div>
  <Glass className="w-[190px] p-3 sm:w-[250px]">
  <div className="flex items-center gap-2">
  <span className="flex size-7 items-center justify-center rounded-full bg-[#25d366] text-white">
@@ -182,7 +182,7 @@ export function HeroScene() {
 
  {/* Check-in toast */}
  <div className={styles.layer} style={{ right: "-1%", top: "2%", ...z(120) }}>
- <div className={styles.bobSlow}>
+ <div>
  <Glass className="flex items-center gap-2.5 p-3 pr-4">
  <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white">
  <CalendarCheck className="size-5" />
@@ -197,7 +197,7 @@ export function HeroScene() {
 
  {/* AI insight */}
  <div className={cn(styles.layer, "hidden sm:block")} style={{ left: "5%", bottom: "2%", ...z(190) }}>
- <div className={styles.bobFast}>
+ <div>
  <Glass className="w-[190px] p-3 sm:w-[240px]">
  <div className="flex items-center gap-2">
  <span className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-violet-600 text-white">
@@ -218,14 +218,14 @@ export function HeroScene() {
 
  {/* Member app */}
  <div className={cn(styles.layer, "hidden sm:block")} style={{ right: "3%", bottom: "-4%", ...z(230) }}>
- <div className={styles.bobSlow}>
+ <div>
  <Phone />
  </div>
  </div>
 
  {/* Payment received */}
  <div className={cn(styles.layer, "hidden md:block")} style={{ right: "26%", top: "-4%", ...z(80) }}>
- <div className={styles.bob}>
+ <div>
  <Glass className="flex items-center gap-2 px-3 py-2">
  <span className="flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
  <Check className="size-3.5" strokeWidth={3} />

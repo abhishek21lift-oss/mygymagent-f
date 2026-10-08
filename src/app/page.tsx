@@ -35,7 +35,6 @@ import { HeroActions, LandingNav } from "@/components/landing/landing-nav";
 import { Reveal, TiltCard } from "@/components/landing/motion";
 import { ProductTour } from "@/components/landing/product-tour";
 import { MobileCtaBar } from "@/components/landing/mobile-cta-bar";
-import styles from "@/components/landing/landing.module.css";
 import { PRODUCT_NAME } from "@/lib/brand";
 import { LEGAL, LEGAL_LINKS } from "@/lib/legal";
 import { PLATFORM_PLANS, SITE, siteUrl } from "@/lib/site";
@@ -364,12 +363,10 @@ export default function LandingPage() {
  <JsonLd data={structuredData} />
 
  <div className="relative isolate min-h-svh overflow-x-clip bg-[#fbfaff] text-foreground dark:bg-[#0a0a12]">
- {/* Colour, as light behind glass */}
- <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[1500px] overflow-hidden [mask-image:linear-gradient(to_bottom,black_55%,transparent)]">
- <div className={cn("absolute -left-[10%] -top-[10%] size-[620px] rounded-full bg-violet-400/40 blur-[120px] dark:bg-violet-600/30", styles.orb)} />
- <div className={cn("absolute right-[-12%] top-[5%] size-[560px] rounded-full bg-fuchsia-400/35 blur-[120px] dark:bg-fuchsia-600/25", styles.orbAlt)} />
- <div className={cn("absolute left-[20%] top-[45%] size-[520px] rounded-full bg-sky-300/35 blur-[120px] dark:bg-cyan-500/20", styles.orbAlt)} />
- <div className={cn("absolute right-[15%] top-[60%] size-[420px] rounded-full bg-orange-300/35 blur-[120px] dark:bg-orange-500/15", styles.orb)} />
+ {/* Colour behind the page: plain gradients and a dot grid, painted once.
+     It used to be four 120px-blurred orbs drifting forever, which kept
+     phones busy repainting the page even when nobody touched it. */}
+ <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[1500px] [mask-image:linear-gradient(to_bottom,black_55%,transparent)] [background:radial-gradient(38rem_32rem_at_8%_4%,rgb(167_139_250/0.32),transparent_70%),radial-gradient(34rem_30rem_at_96%_10%,rgb(232_121_249/0.26),transparent_70%),radial-gradient(32rem_28rem_at_40%_52%,rgb(125_211_252/0.24),transparent_70%),radial-gradient(28rem_24rem_at_78%_70%,rgb(253_186_116/0.24),transparent_70%)] dark:[background:radial-gradient(38rem_32rem_at_8%_4%,rgb(124_58_237/0.26),transparent_70%),radial-gradient(34rem_30rem_at_96%_10%,rgb(192_38_211/0.2),transparent_70%),radial-gradient(32rem_28rem_at_40%_52%,rgb(6_182_212/0.16),transparent_70%),radial-gradient(28rem_24rem_at_78%_70%,rgb(249_115_22/0.12),transparent_70%)]">
  <div className="absolute inset-0 bg-[radial-gradient(rgba(20,10,60,0.07)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)] dark:bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)]" />
  </div>
 
@@ -379,7 +376,7 @@ export default function LandingPage() {
  {/* ── Hero ───────────────────────────────────────────── */}
  <section id="hero" aria-labelledby="hero-title" className="px-4 pb-10 pt-32 sm:px-6 sm:pt-40">
  <div className="mx-auto max-w-5xl text-center">
- <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-white/70 px-3.5 py-1.5 text-sm font-medium text-violet-700 shadow-sm backdrop-blur dark:bg-white/5 dark:text-violet-300">
+ <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-white/70 px-3.5 py-1.5 text-sm font-medium text-violet-700 shadow-sm dark:bg-white/5 dark:text-violet-300">
  <Zap className="size-4" aria-hidden="true" />
  WhatsApp + AI, built in for Indian gyms
  </p>
@@ -388,7 +385,7 @@ export default function LandingPage() {
  className="mx-auto mt-6 max-w-4xl text-balance text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-foreground sm:text-6xl lg:text-7xl"
  >
  Gym management software that{" "}
- <span className={cn("bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-500 bg-clip-text text-transparent", styles.shine)} style={{ backgroundImage: "linear-gradient(90deg,#7c3aed,#d946ef,#f97316,#d946ef,#7c3aed)" }}>
+ <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-500 bg-clip-text text-transparent">
  runs your gym for you
  </span>
  </h1>
@@ -415,19 +412,16 @@ export default function LandingPage() {
  {/* ── Who it's for ───────────────────────────────────── */}
  <section aria-label="Built for" className="py-10">
  <p className="text-center text-sm font-medium text-muted-foreground">Built for every kind of fitness business</p>
- <div className="relative mt-5 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
- <ul className={cn("flex w-max gap-3", styles.marquee)}>
- {[...AUDIENCE, ...AUDIENCE].map((label, i) => (
+ <ul className="mx-auto mt-5 flex max-w-5xl flex-wrap justify-center gap-3 px-4">
+ {AUDIENCE.map((label) => (
  <li
- key={`${label}-${i}`}
- aria-hidden={i >= AUDIENCE.length ? true : undefined}
- className="whitespace-nowrap rounded-full border border-black/5 bg-white/70 px-5 py-2.5 text-sm font-semibold text-foreground/80 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5"
+ key={label}
+ className="whitespace-nowrap rounded-full border border-black/5 bg-white/80 px-5 py-2.5 text-sm font-semibold text-foreground/80 shadow-sm dark:border-white/10 dark:bg-white/5"
  >
  {label}
  </li>
  ))}
  </ul>
- </div>
  </section>
 
  {/* ── Features ───────────────────────────────────────── */}
@@ -442,9 +436,8 @@ export default function LandingPage() {
  {FEATURES.map((f, i) => (
  <Reveal as="li" key={f.title} delay={(i % 3) * 90} className={cn(f.wide && "sm:col-span-2")}>
  <TiltCard className="h-full">
- <article className="group relative h-full overflow-hidden rounded-[28px] border border-black/5 bg-white/75 p-6 shadow-[0_20px_50px_-25px_rgba(30,20,80,0.25)] backdrop-blur-xl sm:p-7 dark:border-white/10 dark:bg-white/[0.04]">
- <div aria-hidden="true" className={cn("pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition duration-500 group-hover:opacity-40", f.gradient)} />
- <div className={styles.tiltInner}>
+ <article className="group relative h-full overflow-hidden rounded-[28px] border border-black/5 bg-white/85 p-6 shadow-[0_20px_50px_-25px_rgba(30,20,80,0.25)] sm:p-7 dark:border-white/10 dark:bg-white/[0.04]">
+ <div>
  <span className={cn("flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg", f.gradient)}>
  <f.icon className="size-6" strokeWidth={2.2} aria-hidden="true" />
  </span>
@@ -473,11 +466,7 @@ export default function LandingPage() {
  {/* ── Automation ─────────────────────────────────────── */}
  <section id="automation" aria-labelledby="automation-title" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-24">
  <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[40px] bg-[#0d0b1d] px-6 py-16 text-white shadow-2xl sm:px-12 sm:py-20">
- <div aria-hidden="true" className="pointer-events-none absolute inset-0">
- <div className={cn("absolute -left-24 top-0 size-96 rounded-full bg-violet-600/50 blur-[110px]", styles.orb)} />
- <div className={cn("absolute -right-24 bottom-0 size-96 rounded-full bg-emerald-500/35 blur-[110px]", styles.orbAlt)} />
- <div className={cn("absolute left-1/2 top-1/3 size-72 -translate-x-1/2 rounded-full bg-fuchsia-500/30 blur-[100px]", styles.orb)} />
- </div>
+ <div aria-hidden="true" className="pointer-events-none absolute inset-0 [background:radial-gradient(28rem_24rem_at_0%_0%,rgb(124_58_237/0.45),transparent_70%),radial-gradient(28rem_24rem_at_100%_100%,rgb(16_185_129/0.3),transparent_70%),radial-gradient(20rem_18rem_at_50%_35%,rgb(217_70_239/0.22),transparent_70%)]" />
  <div className="relative grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
  <Reveal>
  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300">Automation</p>
@@ -498,7 +487,7 @@ export default function LandingPage() {
  <ul className="grid gap-3 sm:grid-cols-2">
  {AUTOMATIONS.map((a, i) => (
  <Reveal as="li" key={a.title} delay={i * 70}>
- <div className="h-full rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-xl transition hover:bg-white/[0.1]">
+ <div className="h-full rounded-3xl border border-white/10 bg-white/[0.06] p-5">
  <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white">
  <a.icon className="size-5" aria-hidden="true" />
  </span>
@@ -523,7 +512,7 @@ export default function LandingPage() {
  <ul className="mx-auto mt-12 grid max-w-6xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
  {INDIA.map((item, i) => (
  <Reveal as="li" key={item.title} delay={(i % 3) * 80}>
- <div className="h-full rounded-[24px] border border-black/5 bg-white/75 p-5 backdrop-blur-xl sm:p-6 dark:border-white/10 dark:bg-white/[0.04]">
+ <div className="h-full rounded-[24px] border border-black/5 bg-white/85 p-5 sm:p-6 dark:border-white/10 dark:bg-white/[0.04]">
  <span className={cn("flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md", item.gradient)}>
  <item.icon className="size-5" aria-hidden="true" />
  </span>
@@ -559,7 +548,7 @@ export default function LandingPage() {
  },
  ].map((card, i) => (
  <Reveal key={card.title} delay={i * 90}>
- <div className="h-full rounded-[28px] border border-black/5 bg-white/75 p-7 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+ <div className="h-full rounded-[28px] border border-black/5 bg-white/85 p-7 dark:border-white/10 dark:bg-white/[0.04]">
  <span className={cn("flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg", card.gradient)}>
  <card.icon className="size-6" aria-hidden="true" />
  </span>
@@ -579,7 +568,7 @@ export default function LandingPage() {
  <ol className="mx-auto mt-14 grid max-w-5xl gap-4 md:grid-cols-3">
  {STEPS.map((step, i) => (
  <Reveal as="li" key={step.n} delay={i * 110}>
- <div className="relative h-full rounded-[28px] border border-black/5 bg-white/75 p-7 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+ <div className="relative h-full rounded-[28px] border border-black/5 bg-white/85 p-7 dark:border-white/10 dark:bg-white/[0.04]">
  <span className="bg-gradient-to-br from-violet-600 to-orange-500 bg-clip-text text-5xl font-extrabold tracking-tighter text-transparent">
  {step.n}
  </span>
@@ -642,10 +631,10 @@ export default function LandingPage() {
  <article
  aria-labelledby={`plan-${plan.key}`}
  className={cn(
- "relative flex h-full flex-col rounded-[28px] border p-6 backdrop-blur-xl",
+ "relative flex h-full flex-col rounded-[28px] border p-6",
  plan.highlight
  ? "border-transparent bg-[#0d0b1d] text-white shadow-[0_30px_70px_-25px_rgba(124,58,237,0.7)] ring-2 ring-violet-500"
- : "border-black/5 bg-white/75 dark:border-white/10 dark:bg-white/[0.04]",
+ : "border-black/5 bg-white/85 dark:border-white/10 dark:bg-white/[0.04]",
  )}
  >
  {plan.highlight ? (
@@ -704,7 +693,7 @@ export default function LandingPage() {
  <div className="mx-auto mt-12 max-w-3xl space-y-3">
  {FAQS.map((f, i) => (
  <Reveal key={f.q} delay={Math.min(i, 4) * 50}>
- <details className="group rounded-3xl border border-black/5 bg-white/75 px-6 py-1 backdrop-blur-xl open:shadow-lg dark:border-white/10 dark:bg-white/[0.04]">
+ <details className="group rounded-3xl border border-black/5 bg-white/85 px-6 py-1 open:shadow-lg dark:border-white/10 dark:bg-white/[0.04]">
  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-left text-base font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
  <h3 className="text-base font-semibold">{f.q}</h3>
  <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-black/5 text-lg transition group-open:rotate-45 dark:bg-white/10">
@@ -721,8 +710,6 @@ export default function LandingPage() {
  {/* ── Closing call ───────────────────────────────────── */}
  <section aria-labelledby="cta-title" className="px-4 pb-24 pt-8 sm:px-6">
  <Reveal className="relative mx-auto max-w-5xl overflow-hidden rounded-[40px] bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 px-6 py-16 text-center text-white shadow-[0_40px_90px_-30px_rgba(192,38,211,0.7)] sm:px-12 sm:py-20">
- <div aria-hidden="true" className={cn("pointer-events-none absolute -right-24 -top-24 size-80 rounded-full border-[40px] border-white/10", styles.ring)} />
- <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-white/10 blur-2xl" />
  <h2 id="cta-title" className="relative text-balance text-4xl font-bold tracking-[-0.035em] sm:text-5xl">
  Spend your time on members, not admin
  </h2>

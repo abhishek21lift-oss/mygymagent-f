@@ -28,6 +28,7 @@ import type { Accent } from "@/lib/section-accent";
 import { cn, displayCurrencyAmount } from "@/lib/utils";
 import { DashSection, accentStyle } from "./dashboard-ui";
 import styles from "./dashboard.module.css";
+import { outstandingHref } from "./outstanding/outstanding-list";
 
 interface ActionRow {
   key: string;
@@ -153,7 +154,8 @@ export function PriorityActions({
       icon: Wallet,
       title: `${displayCurrencyAmount(outstandingBalance ?? "0.00", currencyCode)} outstanding`,
       detail: `On ${outstandingCount} membership${outstandingCount === 1 ? "" : "s"}.`,
-      href: "/billing",
+      // Who owes, not the billing screen: that lists invoices, not these.
+      href: outstandingHref(branchFilter),
       action: "Collect",
       color: "amber",
     });

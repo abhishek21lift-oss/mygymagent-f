@@ -49,8 +49,6 @@ export default function RegisterPage() {
  return (
  <Card className="overflow-hidden rounded-xl border-white/40 bg-card py-0 shadow-[0_35px_90px_-40px_rgba(79,70,229,.55)] ">
  <div className="relative overflow-hidden bg-[linear-gradient(135deg,#064e3b_0%,#059669_35%,#06b6d4_70%,#7c3aed_100%)] p-6 text-white">
- <div className="pointer-events-none absolute -right-10 -top-14 size-48 rounded-full bg-card blur-3xl" aria-hidden="true" />
- <div className="pointer-events-none absolute -bottom-16 -left-10 size-48 rounded-full bg-amber-300/25 blur-3xl" aria-hidden="true" />
  <div className="relative flex items-center gap-3">
  <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-white/25 ">
  <Building2 className="size-6" aria-hidden="true" />

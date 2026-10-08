@@ -559,3 +559,30 @@ export function useSchedulingConflicts(
     enabled,
   })
 }
+
+/** One membership with money still owed on it (GET /analytics/outstanding):
+ * the rows behind the revenue summary's outstanding total. */
+export interface OutstandingMembership {
+  membershipId: string
+  status: string
+  member: { id: string; firstName: string; lastName: string; phone: string | null }
+  planName: string | null
+  branch: { id: string; name: string } | null
+  startDate: string
+  endDate: string
+  currency: string
+  price: string
+  /** Net of refunds. */
+  paid: string
+  outstanding: string
+}
+
+/** Who owes, largest balance first; `branchId` narrows to one branch. */
+export function useOutstandingMemberships(branchId?: string, { enabled = true }: { enabled?: boolean } = {}) {
+  return useQuery({
+    queryKey: ["analytics", "outstanding", branchId ?? "all"],
+    queryFn: () =>
+      api.get<OutstandingMembership[]>("/analytics/outstanding", branchId ? { query: { branchId } } : undefined),
+    enabled,
+  })
+}

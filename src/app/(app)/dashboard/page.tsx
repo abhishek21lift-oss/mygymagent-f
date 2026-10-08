@@ -39,6 +39,7 @@ import { AppIconLink, DashSection, Segmented, Tile } from "./dashboard-ui";
 import styles from "./dashboard.module.css";
 import { addDays, shortDay, useGymToday } from "./gym-day";
 import { todayMetricHref } from "./today/[metric]/metrics";
+import { outstandingHref } from "./outstanding/outstanding-list";
 import { cn, currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { DonutChart } from "@/components/shared/donut-chart";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -500,6 +501,7 @@ export default function DashboardPage() {
             icon={Scale}
             title="Outstanding amount"
             accent="amber"
+            href={outstandingHref(branchFilter)}
             value={financeSummary.data ? displayCurrencyAmount(summaryOutstanding?.outstandingBalance ?? "0.00", summaryOutstanding?.currency ?? currencyCode) : undefined}
             hint={summaryOutstanding && summaryOutstanding.membershipsWithBalance > 0
               ? `On ${summaryOutstanding.membershipsWithBalance} memberships · live balance`

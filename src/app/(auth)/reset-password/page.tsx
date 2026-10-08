@@ -62,7 +62,6 @@ function ResetPasswordForm() {
  return (
  <Card className="overflow-hidden rounded-xl border-white/40 bg-card py-0 shadow-[0_35px_90px_-40px_rgba(79,70,229,.55)] ">
  <CardHeader className="relative overflow-hidden bg-[linear-gradient(135deg,#0f0c29_0%,#065f46_50%,#06b6d4_100%)] p-6 text-white">
- <div className="pointer-events-none absolute -right-10 -top-14 size-48 rounded-full bg-emerald-300/25 blur-3xl" aria-hidden="true" />
  <div className="relative flex items-center gap-3">
  <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-white/25 ">
  <ShieldCheck className="size-6" aria-hidden="true" />

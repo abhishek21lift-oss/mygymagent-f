@@ -322,6 +322,16 @@ describe("DashboardPage", () => {
     }
   })
 
+  it("opens who owes from the Outstanding amount, for the picked branch", async () => {
+    window.localStorage.setItem("mygymagent:dashboard-branch", BRANCH_A)
+    renderPage()
+    await screen.findByText("Of 2 started today")
+    expect(screen.getByText("Outstanding amount").closest("a")).toHaveAttribute(
+      "href",
+      `/dashboard/outstanding?branch=${BRANCH_A}`,
+    )
+  })
+
   it("does not link a Today figure to a list the person cannot read", async () => {
     mockPermissions = ALL.filter((p) => p !== "payments.read")
     renderPage()
