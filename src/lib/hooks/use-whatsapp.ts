@@ -22,8 +22,12 @@ export function useCompleteWhatsAppSignup() {
 export function useSendWhatsAppMessage() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: { to: string; text: string }) => api.post<{ id: string; status: string }>("/whatsapp/messages", input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY, "logs"] }),
+    mutationFn: (input: { to: string; text: string; mediaKey?: string; replyToMessageId?: string }) =>
+      api.post<{ id: string; status: string }>("/whatsapp/messages", input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [KEY, "logs"] })
+      queryClient.invalidateQueries({ queryKey: [KEY, "messages"] })
+    },
   })
 }
 
