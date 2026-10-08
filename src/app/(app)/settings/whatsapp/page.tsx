@@ -41,6 +41,7 @@ import { useBranches } from "@/lib/hooks/use-branches"
 import { WhatsAppWebCard } from "./whatsapp-web-card"
 import { ReplyBox, ScheduledMessagesCard } from "./whatsapp-messaging"
 import { AutoRepliesCard } from "./auto-replies-card"
+import { WebhooksCard } from "./webhooks-card"
 
 declare global {
  interface Window {
@@ -212,6 +213,7 @@ export default function WhatsAppSettingsPage() {
   <TemplatesCard />
   <InboundCard canReply={canSend} />
   <AutoRepliesCard canManage={canManage} />
+  <WebhooksCard canManage={canManage} />
   <ScheduledMessagesCard canManage={canSend} />
   <DeliveryLogCard />
   <DangerZoneCard canManage={canManage} />
