@@ -145,7 +145,7 @@ export default function CooPage() {
       {/* Light Apple-Aurora Glass Hero */}
       <section
         aria-labelledby="coo-title"
-        className="relative -mx-4 mb-3 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-sm backdrop-blur-2xl transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
+        className="relative -mx-4 mb-3 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-sm transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
         style={{
           boxShadow:
             "inset 0 1px 0 rgb(255 255 255 / 0.9), 0 12px 32px -8px rgb(15 23 42 / 0.08)",
@@ -229,7 +229,7 @@ export default function CooPage() {
                 </Button>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/60 p-4 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-card/60">
+              <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/60 p-4 shadow-2xs dark:border-white/10 dark:bg-card/60">
                 <ProgressRing
                   value={health?.score ?? 0}
                   size={96}

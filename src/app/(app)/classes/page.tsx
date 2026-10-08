@@ -42,7 +42,7 @@ function AnalyticsSection({ branchId }: { branchId: string }) {
   const rows = analytics.data ?? []
 
   return (
-    <Card className="overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+    <Card className="overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm">
       <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
@@ -230,7 +230,7 @@ export default function ClassesPage() {
       />
 
       {/* Control bar */}
-      <div className="flex flex-wrap items-end justify-between gap-4 rounded-3xl border border-border/80 bg-card/80 p-4 shadow-sm backdrop-blur-xl">
+      <div className="flex flex-wrap items-end justify-between gap-4 rounded-3xl border border-border/80 bg-card/80 p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-4">
           <div className="grid gap-1.5">
             <Label htmlFor="class-branch" className="text-xs font-semibold text-muted-foreground">
@@ -277,7 +277,7 @@ export default function ClassesPage() {
       {/* Creation and Scheduling Panel */}
       {hasPermission("classes.manage") && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+          <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
             <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
               <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
                 <span className="flex size-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
@@ -346,7 +346,7 @@ export default function ClassesPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+          <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
             <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
               <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
                 <span className="flex size-7 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
@@ -425,7 +425,7 @@ export default function ClassesPage() {
       )}
 
       {/* Upcoming Timetable Sessions */}
-      <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+      <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
         <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
