@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+/** The public site's host. `www.` in front of it redirects to it, so search
+ * engines index one address rather than splitting a page between two. */
+const SITE_HOST = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://mygymagent.tech").host;
+  } catch {
+    return null;
+  }
+})();
+
 const nextConfig: NextConfig = {
   output: process.env.DOCKER_BUILD === "1" ? "standalone" : undefined,
   allowedDevOrigins: [
@@ -16,6 +26,16 @@ const nextConfig: NextConfig = {
   // tapped in a browser that opens the old address directly.
   async redirects() {
     return [
+      ...(SITE_HOST && !SITE_HOST.startsWith("www.")
+        ? [
+            {
+              source: "/:path*",
+              has: [{ type: "host" as const, value: `www.${SITE_HOST}` }],
+              destination: `https://${SITE_HOST}/:path*`,
+              permanent: true,
+            },
+          ]
+        : []),
       { source: "/whatsapp/inbox", destination: "/settings/whatsapp", permanent: false },
       { source: "/pt/sessions/:id", destination: "/pt-operations/sessions", permanent: false },
       { source: "/inventory/products/:id((?!new$)[^/]+)", destination: "/inventory/reorder", permanent: false },

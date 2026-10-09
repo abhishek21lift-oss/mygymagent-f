@@ -15,6 +15,9 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 ENV DOCKER_BUILD=1
+# Every other NEXT_PUBLIC_* value (legal details, analytics, search-engine
+# verification, Firebase, Meta) comes from .env.production beside this
+# file, which `next build` reads; see .env.local.example for the list.
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build

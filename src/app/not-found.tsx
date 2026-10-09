@@ -4,8 +4,6 @@ import { BrandLogo } from "@/components/shared/brand-logo";
 import Link from "next/link";
 import { Compass } from "lucide-react";
 
-import { useAuth } from "@/lib/auth/auth-context";
-import { homeRouteFor } from "@/lib/auth/home-route";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_NAME } from "@/lib/brand";
 
@@ -18,14 +16,12 @@ import { PRODUCT_NAME } from "@/lib/brand";
  * navigation and no way back — `/crm/leads` reached it just by being the
  * parent of `/crm/leads/[id]`, which does exist.
  *
- * It is a Client Component so it can offer a way out that is actually
- * correct for whoever is reading it: a member has no staff pages to go
- * back to, and a signed-out visitor has neither.
+ * It renders outside the session (that lives in (session)/layout.tsx), so
+ * it offers the two ways out that are right for anyone: the home page, and
+ * sign-in, which sends someone already signed in straight to their own
+ * home -- the dashboard for staff, the portal for a member.
  */
 export default function NotFound() {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const home = homeRouteFor(user);
-
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-6 py-16 text-center">
       <div className="relative">
@@ -49,37 +45,16 @@ export default function NotFound() {
         </p>
       </div>
 
-      {/* While auth is still resolving we cannot say which home is the
-          right one, so offer the one link that is true either way. */}
       <div className="flex flex-wrap items-center justify-center gap-3">
-        {isLoading ? (
-          <Button asChild className="min-h-11 px-6">
-            <Link href="/">
-              <Compass className="mr-2 size-4" aria-hidden="true" />
-              Take me somewhere useful
-            </Link>
-          </Button>
-        ) : isAuthenticated ? (
-          <>
-            <Button asChild className="min-h-11 px-6">
-              <Link href={home}>
-                <Compass className="mr-2 size-4" aria-hidden="true" />
-                {home === "/portal" ? "Back to my portal" : "Back to dashboard"}
-              </Link>
-            </Button>
-            {/* Search is a staff page; a member would only be bounced
-                back out of it, so it is not offered to one. */}
-            {home === "/dashboard" && (
-              <Button asChild variant="outline" className="min-h-11 px-6">
-                <Link href="/search">Search instead</Link>
-              </Button>
-            )}
-          </>
-        ) : (
-          <Button asChild className="min-h-11 px-6">
-            <Link href="/login">Sign in</Link>
-          </Button>
-        )}
+        <Button asChild className="min-h-11 px-6">
+          <Link href="/login">
+            <Compass className="mr-2 size-4" aria-hidden="true" />
+            Back to the app
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="min-h-11 px-6">
+          <Link href="/">Home page</Link>
+        </Button>
       </div>
     </main>
   );

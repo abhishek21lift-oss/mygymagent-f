@@ -1,7 +1,7 @@
 import { BrandLogo } from "@/components/shared/brand-logo";
 import * as React from "react";
 
-import { LegalFooter } from "../(legal)/legal-ui";
+import { LegalFooter } from "../../(legal)/legal-ui";
 
 /**
  * The sign-in canvas.
