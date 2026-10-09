@@ -47,7 +47,7 @@ export default function BillingPage() {
  <PageHero
  id="billing-title"
  icon={Wallet}
- title="Finance"
+ title="Payments"
  description="Payments, invoices and expenses"
  actions={
  <>
@@ -107,7 +107,8 @@ export default function BillingPage() {
  </div>
  </section>
 
- <ExpensesSection />
+ {/* The "Expenses" menu item lands here. */}
+ <div id="expenses" className="scroll-mt-24"><ExpensesSection /></div>
  </div>
  </div>
  );

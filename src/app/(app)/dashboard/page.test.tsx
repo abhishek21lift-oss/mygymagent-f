@@ -170,7 +170,7 @@ describe("DashboardPage", () => {
     renderPage()
 
     expect(await screen.findByRole("heading", { name: "Welcome, Asha" })).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /add a member/i })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /add member/i })).toBeInTheDocument()
     expect(screen.queryByText(/could not load/i)).not.toBeInTheDocument()
     // Before: four requests, four 403s.
     expect(mockGet).not.toHaveBeenCalled()

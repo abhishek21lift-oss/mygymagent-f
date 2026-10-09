@@ -139,8 +139,7 @@ export default function StaffPage() {
         <PageHero
           id="staff-title"
           icon={Users}
-          eyebrow="Users"
-          title="Directory"
+          title="Staff"
           description="Every account on the team — roles, sign-in state and access."
           actions={
             <>

@@ -1,10 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3, Bell, Brain, Building2, CalendarCheck, CalendarDays, CheckSquare,
-  ClipboardList, CreditCard, Dumbbell, Gauge, HandCoins, Home,
-  ListChecks, Megaphone, MessageCircle, MessagesSquare, MonitorSmartphone, Package,
-  Receipt, Rocket, Salad, Search, Send, Settings, ShieldCheck, ShoppingBag, Sparkles, Store,
-  UserCog, UserPlus, Users, Wallet, Workflow,
+  BadgeIndianRupee, BarChart3, Bell, BookOpen, Brain, Briefcase, Building2, CalendarClock,
+  CalendarDays, CheckSquare, CreditCard, Dumbbell, FileText, Gauge, Gem, Group, HandCoins,
+  Home, ListChecks, Megaphone, MessageCircle, MessagesSquare, MonitorSmartphone, NotebookPen,
+  Package, Receipt, ReceiptIndianRupee, Rocket, Salad, Send, Settings, ShieldCheck, ShoppingBag,
+  Sparkles, Store, Sunrise, Tag, UserCheck, UserCog, UserPlus, Users, Wallet, Workflow,
 } from "lucide-react";
 
 import type { Accent } from "@/lib/section-accent";
@@ -94,6 +94,9 @@ export const primaryNav: NavItem[] = [
     { title: "All members", href: "/members", icon: Users, permission: ["members.read", "members.read_assigned"] },
     { title: "Add member", href: "/members/new", icon: UserPlus, permission: "members.create" },
     { title: "Memberships", href: "/memberships", icon: CreditCard, permission: ["memberships.read", "memberships.read_assigned"] },
+    // With the memberships they are sold as, not under Finance: the desk
+    // looks for plans when it is signing someone up.
+    { title: "Membership plans", href: "/membership-plans", icon: BadgeIndianRupee, permission: "membership_plans.read" },
   ] },
 
   { title: "Sales", href: "/crm", icon: Megaphone, hue: "rose", children: [
@@ -107,27 +110,32 @@ export const primaryNav: NavItem[] = [
     { title: "Broadcasts", href: "/broadcasts", icon: Send, permission: "whatsapp.manage" },
     { title: "WhatsApp", href: "/settings/whatsapp", icon: MessageCircle, permission: ["whatsapp.read", "whatsapp.manage"] },
     { title: "Automations", href: "/automation", icon: Workflow, permission: "reports.view" },
-    { title: "Message templates", href: "/settings/messages", icon: ClipboardList, permission: "notifications.manage" },
+    { title: "Message templates", href: "/settings/messages", icon: FileText, permission: "notifications.manage" },
   ] },
 
   { title: "Training", href: "/pt-operations", icon: Dumbbell, hue: "emerald", children: [
     { title: "PT overview", href: "/pt-operations", icon: Dumbbell, permission: "workouts.read" },
-    { title: "PT sessions", href: "/pt-operations/sessions", icon: CalendarCheck, permission: ["pt-sessions.read", "pt-sessions.read_assigned"] },
+    { title: "PT sessions", href: "/pt-operations/sessions", icon: CalendarClock, permission: ["pt-sessions.read", "pt-sessions.read_assigned"] },
     { title: "Calendar", href: "/calendar", icon: CalendarDays, permission: ["appointments.read", "appointments.read_assigned"] },
-    { title: "Classes", href: "/classes", icon: Users, permission: "classes.read" },
-    { title: "Today's sessions", href: "/workout-sessions", icon: CalendarCheck, permission: ["workouts.read", "workouts.read_assigned"] },
-    { title: "Workout plans", href: "/workouts", icon: Dumbbell, permission: ["workouts.read", "workouts.read_assigned"] },
+    { title: "Classes", href: "/classes", icon: Group, permission: "classes.read" },
+    // Sets logged on the floor today. "Today's sessions" read like a
+    // second list of PT sessions.
+    { title: "Workout log", href: "/workout-sessions", icon: NotebookPen, permission: ["workouts.read", "workouts.read_assigned"] },
+    { title: "Workout plans", href: "/workouts", icon: BookOpen, permission: ["workouts.read", "workouts.read_assigned"] },
     { title: "Nutrition", href: "/nutrition", icon: Salad, permission: "nutrition.read" },
   ] },
 
   { title: "Finance", href: "/billing", icon: Wallet, hue: "amber", children: [
-    { title: "Payments & invoices", href: "/billing", icon: Receipt, permission: "payments.read" },
-    { title: "Plans & pricing", href: "/membership-plans", icon: CreditCard, permission: "membership_plans.read" },
+    { title: "Payments", href: "/billing", icon: Receipt, permission: "payments.read" },
+    // Who owes what: before, only the dashboard tile led here.
+    { title: "Outstanding dues", href: "/dashboard/outstanding", icon: ReceiptIndianRupee, permission: "reports.view" },
+    // A section of the payments page, so it lands on that section.
+    { title: "Expenses", href: "/billing#expenses", icon: Wallet, permission: "expenses.read" },
   ] },
 
-  { title: "Operations", href: "/attendance", icon: Store, hue: "cyan", children: [
+  { title: "Operations", href: "/operations", icon: Store, hue: "cyan", children: [
     { title: "Overview", href: "/operations", icon: Gauge, permission: "reports.view" },
-    { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: ["attendance.read", "attendance.read_assigned"] },
+    { title: "Attendance", href: "/attendance", icon: UserCheck, permission: ["attendance.read", "attendance.read_assigned"] },
     { title: "Check-in kiosk", href: "/kiosk", icon: MonitorSmartphone, permission: ["kiosk.manage", "attendance.create"], external: true },
     { title: "Inventory", href: "/inventory", icon: Package, permission: "inventory.read" },
     { title: "Product sales", href: "/inventory/sales", icon: ShoppingBag, permission: "inventory.read" },
@@ -153,14 +161,14 @@ export const secondaryNav: NavItem[] = [
   // and their addresses redirect there (next.config.ts).
   { title: "Insights", href: "/intelligence", icon: BarChart3, hue: "blue", children: [
     { title: "Member intelligence", href: "/intelligence", icon: Brain, permission: "reports.view" },
-    { title: "Business OS", href: "/business-os", icon: Gauge, permission: "reports.view" },
+    { title: "Business OS", href: "/business-os", icon: Briefcase, permission: "reports.view" },
   ] },
   { title: "AI agent", href: "/ai", icon: Sparkles, accent: "ai", children: [
     { title: "Ask the agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
     { title: "Action queue", href: "/ai-actions", icon: CheckSquare, permission: "ai.generate", accent: "ai" },
-    { title: "COO briefing", href: "/coo", icon: Gauge, permission: "ai.generate", accent: "ai" },
+    { title: "Morning briefing", href: "/coo", icon: Sunrise, permission: "ai.generate", accent: "ai" },
   ] },
-  { title: "Search", href: "/search", icon: Search, permission: "search.read" },
+  // No "Search" row: the search box in the top bar is always there.
 ];
 
 export const comingSoonNav: NavItem[] = [];
@@ -182,16 +190,17 @@ export const platformNav: NavItem[] = [
 export const settingsNav: NavItem = { title: "Settings", href: "/settings", icon: Settings, hue: "orange", children: [
   { title: "General", href: "/settings", icon: Settings, permission: "organizations.read" },
   { title: "Gym profile", href: "/settings/profile", icon: Store, permission: "organizations.read" },
+  { title: "Member tags", href: "/settings/tags", icon: Tag, permission: "members.update" },
   // Everyone's own alert preferences: no grant needed.
   { title: "My notifications", href: "/settings/notifications", icon: Bell },
   { title: "Security", href: "/settings/security", icon: ShieldCheck, permission: ["organizations.update", "audit.read"] },
-  { title: "Subscription", href: "/settings/billing", icon: CreditCard, permission: "platform_billing.read" },
+  { title: "Subscription", href: "/settings/billing", icon: Gem, permission: "platform_billing.read" },
   { title: "Setup guide", href: "/onboarding", icon: Rocket, permission: "organizations.update" },
 ] };
 
 /** One-tap actions at the top of the rail: the two things the front desk
  * does all day. */
 export const quickActions: NavItem[] = [
-  { title: "New member", shortTitle: "Member", href: "/members/new", icon: UserPlus, permission: "members.create", hue: "violet" },
-  { title: "Check in", href: "/attendance", icon: CalendarCheck, permission: ["attendance.create", "attendance.create_assigned"], hue: "cyan" },
+  { title: "Add member", shortTitle: "Member", href: "/members/new", icon: UserPlus, permission: "members.create", hue: "violet" },
+  { title: "Check in", href: "/attendance", icon: UserCheck, permission: ["attendance.create", "attendance.create_assigned"], hue: "cyan" },
 ];

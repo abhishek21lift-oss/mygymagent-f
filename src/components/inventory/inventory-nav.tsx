@@ -6,12 +6,12 @@ import { BarChart3, Boxes, ClipboardList, FileText, GitBranch, History, LayoutDa
 
 const items = [
  ["/inventory","Overview",LayoutDashboard],
- ["/inventory/branch-stock","Branch Stock",Boxes],
+ ["/inventory/branch-stock","Branch stock",Boxes],
  ["/inventory/reorder","Reorder",PackageSearch],
  ["/inventory/suppliers","Suppliers",Users],
- ["/inventory/purchase-orders","Purchase Orders",ClipboardList],
+ ["/inventory/purchase-orders","Purchase orders",ClipboardList],
  ["/inventory/transfers","Transfers",GitBranch],
- ["/inventory/sales","Sales",ShoppingCart],
+ ["/inventory/sales","Product sales",ShoppingCart],
  ["/inventory/returns","Returns",RotateCcw],
  ["/inventory/valuation","Valuation",BarChart3],
  ["/inventory/reports","Reports",FileText],

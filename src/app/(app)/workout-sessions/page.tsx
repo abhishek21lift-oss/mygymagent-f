@@ -108,9 +108,9 @@ export default function WorkoutSessionsPage() {
  <PageHero
  id="ws-title"
  icon={Dumbbell}
- title="Today's sessions"
+ title="Workout log"
  actions={
- <div className="flex items-center gap-3 rounded-lg border border-orange-100 bg-muted/40 px-4 py-3 text-xs font-bold text-stone-700">
+ <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-xs font-bold text-foreground">
  <span className="flex size-11 items-center justify-center rounded-lg bg-rose-500 text-white shadow-md shadow-rose-500/25" aria-hidden="true">
  <Dumbbell className="size-5" />
  </span>
