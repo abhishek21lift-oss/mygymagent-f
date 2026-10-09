@@ -16,6 +16,11 @@ concurrency:
   # waits its turn instead.
   cancel-in-progress: false
 
+# The jobs only read the repository; nothing here needs a token that can
+# write to it.
+permissions:
+  contents: read
+
 jobs:
   deploy:
     name: Deploy Frontend to VPS
@@ -32,6 +37,9 @@ jobs:
         env:
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         with:
+          # Set VPS_HOST_FINGERPRINT (ssh-keygen -l -f on the VPS host key) to
+          # refuse a host that is not the VPS; empty, the check is skipped.
+          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
