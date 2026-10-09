@@ -35,7 +35,7 @@ function ColorPicker({ value, onChange, label }: { value: string; onChange: (c: 
           aria-checked={value === color}
           aria-label={color}
           onClick={() => onChange(color)}
-          className="flex size-8 items-center justify-center rounded-full outline-none ring-offset-2 ring-offset-card focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-8 items-center justify-center rounded-full outline-none pointer-coarse:size-10 ring-offset-2 ring-offset-card focus-visible:ring-2 focus-visible:ring-ring"
           style={{ backgroundColor: color }}
         >
           {value === color ? <Check className="size-4 text-white" aria-hidden="true" /> : null}

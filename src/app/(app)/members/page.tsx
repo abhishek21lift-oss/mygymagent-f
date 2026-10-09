@@ -97,7 +97,7 @@ function SegmentChip({
  type="button"
  onClick={onClick}
  aria-pressed={active}
- className={ "inline-flex h-8 shrink-0 items-center rounded-full border px-3 text-[13px] font-medium transition-colors " +
+ className={ "inline-flex h-8 shrink-0 items-center rounded-full border px-3 pointer-coarse:h-10 text-[13px] font-medium transition-colors " +
  (active
  ? "border-primary bg-primary text-primary-foreground"
  : "border-border bg-card text-muted-foreground hover:bg-surface-hover hover:text-foreground")

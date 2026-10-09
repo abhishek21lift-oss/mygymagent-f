@@ -177,7 +177,7 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
                       }))
                     }
                     aria-label={`Salary type for ${row.user.firstName}`}
-                    className="h-9 rounded-lg border border-input bg-transparent px-2 text-sm"
+                    className="h-9 rounded-lg border border-input bg-transparent px-2 text-base pointer-coarse:h-11 sm:text-sm"
                   >
                     <option value="MONTHLY">Monthly</option>
                     <option value="DAILY">Daily</option>
@@ -196,7 +196,7 @@ export function StaffPayrollSection({ onChanged }: { onChanged?: () => void }) {
                         [row.userId]: { ...d, amount: e.target.value },
                       }))
                     }
-                    className="h-9 w-28 tabular-nums"
+                    className="h-9 w-28 tabular-nums pointer-coarse:h-11"
                   />
 
                   {canManage && (

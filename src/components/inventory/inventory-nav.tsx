@@ -24,7 +24,7 @@ export function InventoryNav() {
  return <nav aria-label="Inventory navigation" className="flex gap-2 overflow-x-auto pb-1">
  {items.map(([href,label,Icon]) => {
  const active = href === "/inventory" ? pathname === href : pathname.startsWith(href)
- return <Link key={href} href={href} className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold transition ${active ? "border-amber-300 bg-amber-50 text-amber-900 shadow-sm" : "border-stone-200 bg-card text-stone-600 hover:border-amber-200 hover:bg-amber-50/60"}`}>
+ return <Link key={href} href={href} className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-xs pointer-coarse:min-h-10 font-extrabold transition ${active ? "border-amber-300 bg-amber-50 text-amber-900 shadow-sm" : "border-stone-200 bg-card text-stone-600 hover:border-amber-200 hover:bg-amber-50/60"}`}>
  <Icon className="size-3.5" />{label}
  </Link>
  })}

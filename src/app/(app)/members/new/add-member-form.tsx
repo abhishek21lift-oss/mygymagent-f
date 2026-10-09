@@ -843,7 +843,7 @@ export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
 
       {/* Phones and tablets: the button stays in reach above the tab bar
           for the whole form, not just once the summary scrolls in. */}
-      <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+5.25rem)] z-10 flex items-center gap-3 rounded-2xl border border-border bg-card p-2 pl-4 shadow-[var(--shadow-float)] md:bottom-4 lg:hidden">
+      <div className="sticky bottom-[calc(var(--mobile-tabbar-height)+0.25rem)] z-10 flex items-center gap-3 rounded-2xl border border-border bg-card p-2 pl-4 shadow-[var(--shadow-float)] md:bottom-4 lg:hidden">
         <div className="min-w-0 flex-1 text-sm">
           {plan ? (
             <>

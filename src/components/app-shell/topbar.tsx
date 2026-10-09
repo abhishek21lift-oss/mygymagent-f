@@ -46,7 +46,9 @@ export function Topbar({
     // on a flat band of the page colour. It floats — inset from the
     // edges, rounded on all four corners — which is what makes it read
     // as a separate pane instead of as the header of a document.
-    <header className="sticky top-0 z-40 shrink-0 px-2 pt-2 sm:px-3">
+    // viewport-fit=cover draws the page under the status bar / notch
+    // (installed app, landscape), so the bar starts below it.
+    <header className="sticky top-0 z-40 shrink-0 px-2 pt-[calc(0.5rem+env(safe-area-inset-top))] sm:px-3">
       <div className="glass flex h-[var(--header-height)] items-center gap-2 rounded-3xl px-2 sm:px-3">
         <div className="flex shrink-0 items-center gap-1">
           <Button

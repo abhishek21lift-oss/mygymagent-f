@@ -5,6 +5,8 @@ import * as SwitchPrimitive from "@radix-ui/react-switch"
 
 import { cn } from "@/lib/utils"
 
+/** Drawn small, but the `after:` layer gives it a finger-sized
+ * (~44px) tap area so it is not missed on a phone. */
 function Switch({
  className,
  ...props
@@ -12,7 +14,7 @@ function Switch({
  return (
  <SwitchPrimitive.Root
  data-slot="switch"
- className={cn( "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border border-input bg-input px-0.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+ className={cn( "peer relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center after:absolute after:-inset-x-1 after:-inset-y-2.5 rounded-full border border-input bg-input px-0.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary",
  className,
  )}
  {...props}

@@ -432,7 +432,9 @@ function ProfileEditor({
       </Panel>
 
       {canEdit && (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 px-4 py-3 sm:static sm:border-0 sm:bg-transparent sm:p-0 xl:col-span-2">
+        // Above the phone tab bar, not under it: fixed to bottom-0 it sat
+        // behind the bar and the Save button could not be tapped.
+        <div className="sticky bottom-[calc(var(--mobile-tabbar-height)+0.25rem)] z-20 rounded-2xl border border-border bg-background/95 px-4 py-3 shadow-[var(--shadow-float)] md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none xl:col-span-2">
           <div className="flex items-center justify-end gap-3">
             {dirty && (
               <span className="text-xs text-muted-foreground">

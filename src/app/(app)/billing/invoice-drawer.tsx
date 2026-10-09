@@ -168,7 +168,7 @@ export function InvoiceDrawer({
 
  return (
  <Dialog open={open} onOpenChange={handleOpenChange}>
- <DialogContent className="left-auto right-0 top-0 flex h-dvh w-full translate-x-0 translate-y-0 flex-col gap-4 overflow-y-auto rounded-none sm:max-w-lg">
+ <DialogContent className="left-auto right-0 top-0 flex h-dvh max-h-none w-full translate-x-0 translate-y-0 flex-col gap-4 overflow-y-auto rounded-none sm:max-w-lg">
  <DialogHeader>
  <DialogTitle>{invoice ? `Invoice ${invoice.number}` : "Invoice"}</DialogTitle>
  <DialogDescription className="text-sm">Review lines, payments, reminders and collection actions.</DialogDescription>
