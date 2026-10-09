@@ -267,9 +267,9 @@ export default function DashboardPage() {
       <Select value={branchFilter ?? ALL_BRANCHES} onValueChange={chooseBranch}>
         <SelectTrigger
           aria-label="Branch"
-          className={cn(styles.glassPill, "h-8 w-auto min-w-36 gap-2 !rounded-full !border-border/70 !bg-card/70 text-xs font-semibold")}
+          className={cn(styles.glassPill, "h-8 w-auto min-w-36 gap-2 !rounded-full text-xs font-semibold")}
         >
-          <Building2 className="size-3.5 text-muted-foreground" aria-hidden="true" />
+          <Building2 className="size-3.5 text-white/70" aria-hidden="true" />
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

@@ -1757,23 +1757,27 @@
    ============================================================ */
 @layer utilities {
 
-  /* --- Hero Banner (Aurora) -----------------------------------
-     The page masthead. A light card with four soft fields of colour
-     drifting behind frosted glass: the section's own two hues lead,
-     with violet, rose and cyan in support. Text sits on the frosted
-     veil, so contrast never depends on the hue behind it: ink for the
-     eyebrow, foreground for the title, muted for the description.
-     The same material as the dashboard hero, so every page opens the
-     same way. */
+  /* --- Hero Banner ----------------------------------------------
+     The page masthead, in the section's own colour: a deep gradient
+     from its two `grad` steps (made to carry white type), with soft
+     light drifting across it and two faint rings on the right.
+
+     Every moving part is a transform on a pre-painted layer: no blur,
+     no filter, nothing re-rasterised per frame, so the drift costs the
+     compositor next to nothing. (The old aurora animated a 28px blur
+     under an 18px backdrop blur, which is what made phones stutter.) */
   .hero-banner {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     border-radius: 1.75rem;
-    border: 1px solid var(--border);
-    background: var(--card);
-    box-shadow: var(--shadow-raised);
-    color: var(--foreground);
+    border: 1px solid color-mix(in oklab, var(--section-grad-1) 45%, transparent);
+    background: linear-gradient(135deg, var(--section-grad-1) 0%, var(--section-grad-2) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      0 18px 40px -22px color-mix(in oklab, var(--section-grad-1) 75%, transparent);
+    color: #fff;
+    animation: hero-in 520ms var(--ease-out) backwards;
   }
   .hero-banner::before {
     content: "";
@@ -1782,11 +1786,12 @@
     z-index: -2;
     pointer-events: none;
     background:
-      radial-gradient(32% 42% at 14% 26%, color-mix(in oklab, var(--section-grad-1) 62%, transparent), transparent 70%),
-      radial-gradient(30% 38% at 80% 14%, color-mix(in oklab, var(--section-grad-2) 54%, transparent), transparent 70%),
-      radial-gradient(32% 40% at 72% 86%, color-mix(in oklab, var(--a-cyan-grad-1) 40%, transparent), transparent 70%),
-      radial-gradient(28% 34% at 34% 90%, color-mix(in oklab, var(--a-rose-grad-1) 36%, transparent), transparent 70%),
-      radial-gradient(22% 28% at 52% 40%, color-mix(in oklab, var(--a-amber-grad-1) 16%, transparent), transparent 70%);
+      radial-gradient(28% 36% at 18% 24%, rgb(255 255 255 / 0.26), transparent 70%),
+      radial-gradient(30% 40% at 82% 78%, color-mix(in oklab, var(--a-rose-grad-1) 55%, transparent), transparent 70%),
+      radial-gradient(26% 32% at 70% 18%, color-mix(in oklab, var(--a-cyan-grad-1) 45%, transparent), transparent 70%),
+      radial-gradient(24% 30% at 30% 88%, color-mix(in oklab, var(--a-amber-grad-1) 30%, transparent), transparent 70%);
+    will-change: transform;
+    animation: hero-drift 20s ease-in-out infinite alternate;
   }
   .hero-banner::after {
     content: "";
@@ -1794,20 +1799,16 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: color-mix(in oklab, var(--card) 52%, transparent);
-  }
-  /* Dark: the gradient steps are deep by design (they carry white
-     type), so behind glass they vanish. The aurora uses the brighter
-     solid steps instead, and the veil lets more of it through. */
-  .dark .hero-banner::before {
     background:
-      radial-gradient(32% 42% at 14% 26%, color-mix(in oklab, var(--section) 55%, transparent), transparent 70%),
-      radial-gradient(30% 38% at 80% 14%, color-mix(in oklab, var(--a-violet) 45%, transparent), transparent 70%),
-      radial-gradient(32% 40% at 72% 86%, color-mix(in oklab, var(--a-cyan) 34%, transparent), transparent 70%),
-      radial-gradient(28% 34% at 34% 90%, color-mix(in oklab, var(--a-rose) 30%, transparent), transparent 70%);
+      radial-gradient(circle at 96% 50%, transparent 0 18%, rgb(255 255 255 / 0.1) 18.4% 18.9%, transparent 19.3% 31%, rgb(255 255 255 / 0.07) 31.4% 31.9%, transparent 32.3%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.08), transparent 45%);
   }
-  .dark .hero-banner::after {
-    background: color-mix(in oklab, var(--card) 40%, transparent);
+  @keyframes hero-drift {
+    0%   { transform: translate3d(-3%, 2%, 0) rotate(-4deg); }
+    100% { transform: translate3d(4%, -3%, 0) rotate(6deg); }
+  }
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
   }
 
   .hero-banner > * { position: relative; z-index: 1; }
@@ -1824,7 +1825,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--section-ink);
+    color: rgb(255 255 255 / 0.78);
     margin-bottom: 0.35rem;
   }
   .hero-banner-title {
@@ -1832,21 +1833,25 @@
     font-weight: 800;
     letter-spacing: -0.035em;
     line-height: 1.08;
-    background: linear-gradient(120deg, var(--foreground) 0%, var(--foreground) 50%, var(--section-ink) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    overflow-wrap: anywhere;
+    color: #fff;
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.12);
+    /* Not `anywhere`: that lets the actions squeeze the title until a
+       short word like "Settings" breaks in the middle. */
+    overflow-wrap: break-word;
   }
   .hero-banner-subtitle {
     font-size: 0.9375rem;
     font-weight: 450;
-    color: var(--muted-foreground);
+    color: rgb(255 255 255 / 0.84);
     margin-top: 0.4rem;
     line-height: 1.5;
     max-width: 46rem;
   }
+  /* Controls in here bring their own surface (white pills on the
+     colour), so they get the normal text colour back rather than the
+     banner's white: a pill that only sets a background stays legible. */
   .hero-banner-actions {
+    color: var(--foreground);
     margin-top: 1.25rem;
     display: flex;
     flex-wrap: wrap;
@@ -1854,8 +1859,8 @@
     align-items: center;
   }
 
-  /* The masthead glyph: an app-icon squircle in the section's
-     gradient, lit from the top-left. */
+  /* The masthead glyph: a frosted-white squircle on the colour, which
+     pops in once when the page opens. */
   .hero-banner-glyph {
     display: flex;
     flex-shrink: 0;
@@ -1865,10 +1870,15 @@
     color: #fff;
     background:
       radial-gradient(80% 70% at 30% 15%, rgb(255 255 255 / 0.3), transparent 60%),
-      linear-gradient(150deg, var(--section-grad-1), var(--section-grad-2));
+      rgb(255 255 255 / 0.16);
+    border: 1px solid rgb(255 255 255 / 0.28);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.35),
-      0 12px 24px -12px color-mix(in oklab, var(--section-grad-1) 80%, transparent);
+      0 12px 24px -12px rgb(0 0 0 / 0.35);
+    animation: glyph-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms backwards;
+  }
+  @keyframes glyph-pop {
+    from { opacity: 0; transform: scale(0.6) rotate(-12deg); }
   }
 
   /* --- Centered brand hero --------------------------------------
@@ -1928,12 +1938,12 @@
       0 12px 24px -10px color-mix(in oklab, var(--section-grad-1) 75%, transparent);
   }
   .hero-banner-btn-ghost {
-    background: color-mix(in oklab, var(--card) 72%, transparent);
-    color: var(--foreground);
-    border: 1px solid var(--border);
+    background: rgb(255 255 255 / 0.14);
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.28);
   }
   .hero-banner-btn-ghost:hover {
-    background: var(--card);
+    background: rgb(255 255 255 / 0.22);
   }
 
   /* Decorative icon tile inside the banner (top-right) */
@@ -1975,7 +1985,25 @@
       transform var(--duration-base) var(--ease-out),
       border-color var(--duration-base) var(--ease-out);
     container-type: inline-size;
+    animation: rise-in 460ms var(--ease-out) backwards;
   }
+  /* Cards in a row arrive one after another, not all at once. */
+  .kpi-card:nth-child(2) { animation-delay: 50ms; }
+  .kpi-card:nth-child(3) { animation-delay: 100ms; }
+  .kpi-card:nth-child(4) { animation-delay: 150ms; }
+  .kpi-card:nth-child(5) { animation-delay: 200ms; }
+  .kpi-card:nth-child(n + 6) { animation-delay: 250ms; }
+
+  /* Entrances. Opacity and transform only, and `backwards` fill, so
+     nothing is left transformed once they finish (a lingering
+     transform would trap `position: fixed` children). */
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(12px); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+  .page-enter { animation: fade-in 260ms var(--ease-out) backwards; }
 
   /* Top-cap gradient strip */
   .kpi-card::before {
@@ -2375,7 +2403,10 @@
   @media (prefers-reduced-motion: reduce) {
     .kpi-card:hover,
     .quick-action-tile:hover { transform: none; }
+    .hero-banner,
     .hero-banner::before,
-    .hero-banner::after { animation: none; }
+    .hero-banner-glyph,
+    .page-enter,
+    .kpi-card { animation: none; }
   }
 }

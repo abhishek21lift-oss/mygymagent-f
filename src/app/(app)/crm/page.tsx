@@ -819,13 +819,13 @@ export default function CrmPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/crm/follow-ups"
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-blue-500/10 px-3.5 py-2 text-xs font-bold text-blue-700 ring-1 ring-blue-200/60 transition hover:bg-foreground hover:text-background dark:text-blue-300"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white/15 px-3.5 py-2 text-xs font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
             >
               <CalendarClock className="size-3.5" aria-hidden="true" /> Follow-ups
             </Link>
             <Link
               href="/crm/analytics"
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-violet-500/10 px-3.5 py-2 text-xs font-bold text-violet-700 ring-1 ring-violet-200/60 transition hover:bg-foreground hover:text-background dark:text-violet-300"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white/15 px-3.5 py-2 text-xs font-bold text-white ring-1 ring-white/30 transition hover:bg-white/25"
             >
               <TrendingUp className="size-3.5" aria-hidden="true" /> Analytics
             </Link>
