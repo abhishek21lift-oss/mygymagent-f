@@ -50,7 +50,7 @@ import type { Accent } from "@/lib/section-accent";
 
 /* ─── Quick action definitions ──────────────────────────────────── */
 const QUICK_ACTIONS = [
-  ["Add a member",     "Register a new client",       "/members/new",  UserPlus,     "members.create",   "violet"]  as const,
+  ["Add member",       "Register a new client",       "/members/new",  UserPlus,     "members.create",   "violet"]  as const,
   ["Record a payment", "Log cash, card, or UPI",      "/billing",      Wallet,       "payments.create",  "amber"]   as const,
   ["Check in",         "Record today's attendance",   "/attendance",   CalendarCheck,"attendance.create","cyan"]    as const,
   ["Build a workout",  "Create or assign a plan",     "/workouts",     Dumbbell,     "workouts.create",  "emerald"] as const,

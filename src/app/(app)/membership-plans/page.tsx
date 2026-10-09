@@ -33,7 +33,7 @@ export default function MembershipPlansPage() {
         <PageHero
           id="plans-title"
           icon={Sparkles}
-          title="Membership Plans"
+          title="Membership plans"
           description="Pricing tiers, package privileges, duration terms, and freeze policies"
           actions={
             <>

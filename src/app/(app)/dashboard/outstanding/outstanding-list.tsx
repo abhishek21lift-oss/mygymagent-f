@@ -48,7 +48,7 @@ export function OutstandingList({ branchId }: { branchId?: string }) {
         eyebrow="Finance"
         icon={Scale}
         accent="amber"
-        title="Outstanding"
+        title="Outstanding dues"
         description={`Members who still owe on a membership · ${branchId ? (branchName ?? "One branch") : "All branches"}`}
       />
 

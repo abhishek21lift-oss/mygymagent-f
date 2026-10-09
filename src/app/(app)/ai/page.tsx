@@ -139,7 +139,7 @@ export default function AiPage() {
         <PageHero
           id="ai-title"
           icon={Sparkles}
-          title="AI agent"
+          title="Ask the agent"
           description="Contextual reasoning, member retention forecasting, workout generation and analytics"
           actions={
             <Link

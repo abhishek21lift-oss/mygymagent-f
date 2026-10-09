@@ -121,10 +121,17 @@ describe("SidebarNav", () => {
     render(<SidebarNav />);
     await user.click(screen.getByRole("button", { name: /engage/i }));
     await user.click(screen.getByRole("button", { name: /settings/i }));
-    for (const name of ["WhatsApp", "Automations", "Message templates", "Gym profile", "Security", "Subscription", "Setup guide"]) {
+    await user.click(screen.getByRole("button", { name: /finance/i }));
+    for (const name of ["WhatsApp", "Automations", "Message templates", "Gym profile", "Member tags", "Security", "Subscription", "Setup guide"]) {
       expect(screen.getByRole("link", { name })).toBeTruthy();
     }
-    expect(screen.getByRole("link", { name: /new member/i }).getAttribute("href")).toBe("/members/new");
+    // Dues and expenses were each reachable only from inside another page.
+    expect(screen.getByRole("link", { name: "Outstanding dues" }).getAttribute("href")).toBe("/dashboard/outstanding");
+    expect(screen.getByRole("link", { name: "Expenses" }).getAttribute("href")).toBe("/billing#expenses");
+    // The rail's quick action and the Members page share one name.
+    expect(
+      screen.getAllByRole("link", { name: /add member/i }).every((a) => a.getAttribute("href") === "/members/new"),
+    ).toBe(true);
   });
 
   it("shows an inventory manager Operations, which it used to hide behind attendance.read", () => {
@@ -143,8 +150,8 @@ describe("SidebarNav", () => {
     render(<SidebarNav collapsed />);
     // fireEvent: userEvent's pointer model stalls on Radix's popover in jsdom.
     fireEvent.click(screen.getByLabelText("Finance"));
-    expect(await screen.findByText("Payments & invoices")).toBeTruthy();
-    expect(screen.getByText("Payments & invoices").closest("a")?.getAttribute("href")).toBe("/billing");
+    expect(await screen.findByText("Payments")).toBeTruthy();
+    expect(screen.getByText("Payments").closest("a")?.getAttribute("href")).toBe("/billing");
   });
 });
 
@@ -156,7 +163,7 @@ describe("nav config", () => {
     const finance = primaryNav.find((i) => i.title === "Finance")!;
     expect(visibleNavItem(finance, can([]), false)).toBeNull();
     expect(visibleNavItem(finance, can(["payments.read"]), false)?.children?.map((c) => c.title)).toEqual([
-      "Payments & invoices",
+      "Payments",
     ]);
   });
 

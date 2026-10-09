@@ -28,6 +28,8 @@ const ROUTE_ACCENTS: ReadonlyArray<readonly [string, Accent]> = [
   // belong to Engage, so they come first.
   ["/settings/whatsapp", "orange"],
   ["/settings/messages", "orange"],
+  ["/inbox", "orange"],
+  ["/broadcasts", "orange"],
   ["/automation", "orange"],
   ["/settings", "orange"],
   ["/intelligence", "blue"],
@@ -47,7 +49,7 @@ const ROUTE_ACCENTS: ReadonlyArray<readonly [string, Accent]> = [
   ["/payroll", "indigo"],
   // Finance
   ["/billing", "amber"],
-  ["/membership-plans", "amber"],
+  ["/membership-plans", "violet"],
   ["/memberships", "violet"],
   // Training
   ["/pt-operations", "emerald"],
@@ -61,6 +63,8 @@ const ROUTE_ACCENTS: ReadonlyArray<readonly [string, Accent]> = [
   // Members
   ["/members", "violet"],
   // Home
+  // A Finance page that lives under Home's address.
+  ["/dashboard/outstanding", "amber"],
   ["/dashboard", "indigo"],
   // The member's own app. One hue throughout: a member has no sections
   // to tell apart, and four colours in a four-tab app is noise.
@@ -87,6 +91,8 @@ const ROUTE_SECTIONS: ReadonlyArray<readonly [string, string]> = [
   ["/settings/whatsapp", "Engage"],
   ["/settings/messages", "Engage"],
   ["/automation", "Engage"],
+  ["/inbox", "Engage"],
+  ["/broadcasts", "Engage"],
   ["/settings", "Settings"],
   ["/intelligence", "Insights"],
   ["/business-os", "Insights"],
@@ -102,7 +108,7 @@ const ROUTE_SECTIONS: ReadonlyArray<readonly [string, string]> = [
   ["/staff", "Team"],
   ["/payroll", "Team"],
   ["/billing", "Finance"],
-  ["/membership-plans", "Finance"],
+  ["/membership-plans", "Members"],
   ["/memberships", "Members"],
   ["/pt-operations", "Training"],
   ["/workout-sessions", "Training"],
@@ -112,6 +118,7 @@ const ROUTE_SECTIONS: ReadonlyArray<readonly [string, string]> = [
   ["/calendar", "Training"],
   ["/crm", "Sales"],
   ["/members", "Members"],
+  ["/dashboard/outstanding", "Finance"],
   ["/dashboard", "Home"],
 ];
 
