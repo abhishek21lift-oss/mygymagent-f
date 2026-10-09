@@ -25,7 +25,7 @@ export function TrainerTopBar() {
     "AB";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--t-line)] bg-white/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-[var(--t-line)] bg-white/85">
       <div className="mx-auto flex max-w-lg items-center gap-2 px-4 py-3">
         <button
           type="button"

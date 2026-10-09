@@ -158,7 +158,7 @@ function NewLeadDialog() {
           <Plus className="size-4" aria-hidden="true" /> New lead
         </Button>
       </DialogTrigger>
-      <DialogContent className="rounded-3xl border border-border/80 bg-card/95 shadow-xl backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="rounded-3xl border border-border/80 bg-card/95 shadow-xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Add New Lead</DialogTitle>
         </DialogHeader>
@@ -385,7 +385,7 @@ function LeadDetail({ leadId, onClose }: { leadId: string; onClose: () => void }
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl sm:max-w-xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 bg-card/95 shadow-2xl sm:max-w-xl">
         <DialogHeader className="border-b border-border/60 pb-3">
           <div className="flex items-center gap-3">
             <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 font-bold text-primary">
@@ -613,7 +613,7 @@ function KanbanBoard({
         return (
           <div
             key={col.status}
-            className="flex w-72 shrink-0 flex-col rounded-3xl border border-border/70 bg-card/60 p-3 shadow-xs backdrop-blur-xl"
+            className="flex w-72 shrink-0 flex-col rounded-3xl border border-border/70 bg-card/60 p-3 shadow-xs"
           >
             {/* Column Header */}
             <div className="mb-3 flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2">
@@ -834,7 +834,7 @@ export default function CrmPage() {
 
         {/* Apple-style SLA & Pipeline Telemetry Bar */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
               <Users className="size-6" />
             </div>
@@ -845,7 +845,7 @@ export default function CrmPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-xl">
+          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
               <Clock className="size-6" />
             </div>
@@ -858,7 +858,7 @@ export default function CrmPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-xl sm:col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm sm:col-span-2 lg:col-span-1">
             <div className={cn(
               "flex size-12 items-center justify-center rounded-2xl",
               (sla.data?.overdueCount ?? 0) > 0 ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
@@ -876,7 +876,7 @@ export default function CrmPage() {
         </div>
 
         {/* Pipeline Filter & View Switcher */}
-        <div className="flex flex-col gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 rounded-3xl border border-border/80 bg-card/90 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <Tabs
             value={filter}
             onValueChange={(v) => {
@@ -921,7 +921,7 @@ export default function CrmPage() {
         </div>
 
         {/* Content Section: Table vs Kanban */}
-        <section className="overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
+        <section className="overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-muted/20 px-6 py-4">
             <h2 className="text-base font-bold text-foreground">
               {viewMode === "kanban" ? "Pipeline Kanban Board" : "Lead Directory"}

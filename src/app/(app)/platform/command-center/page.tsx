@@ -250,7 +250,7 @@ function Hero({
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {data ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1 text-xs font-semibold text-foreground">
                   Updated {relative(data.collectedAt, now)}
                 </span>
               ) : null}
@@ -262,7 +262,7 @@ function Hero({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-4 rounded-3xl border border-border/70 bg-card/70 p-3 pr-5 shadow-[var(--shadow-card)] backdrop-blur-md">
+        <div className="flex shrink-0 items-center gap-4 rounded-3xl border border-border/70 bg-card/70 p-3 pr-5 shadow-[var(--shadow-card)]">
           <div className="relative size-[92px]">
             <svg
               viewBox="0 0 92 92"
@@ -321,7 +321,7 @@ function StatusStrip({ data }: { data: CommandCenterSnapshot }) {
               <a
                 href={`#cc-${key}`}
                 style={accentVars(accent)}
-                className="flex min-h-11 items-center gap-2.5 rounded-full border border-border/70 bg-card/80 py-1.5 pl-1.5 pr-3 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] backdrop-blur transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transform-none"
+                className="flex min-h-11 items-center gap-2.5 rounded-full border border-border/70 bg-card/80 py-1.5 pl-1.5 pr-3 text-sm font-semibold text-foreground shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transform-none"
               >
                 <span
                   aria-hidden="true"

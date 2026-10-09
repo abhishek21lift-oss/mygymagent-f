@@ -432,7 +432,7 @@ function ProfileEditor({
       </Panel>
 
       {canEdit && (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/90 px-4 py-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none xl:col-span-2">
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 px-4 py-3 sm:static sm:border-0 sm:bg-transparent sm:p-0 xl:col-span-2">
           <div className="flex items-center justify-end gap-3">
             {dirty && (
               <span className="text-xs text-muted-foreground">

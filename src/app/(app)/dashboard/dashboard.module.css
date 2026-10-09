@@ -36,7 +36,9 @@
   .hero { padding: 1.5rem 2rem; }
 }
 
-/* Four soft colour fields drifting slowly behind frosted glass. */
+/* Four soft colour fields behind a veil. They used to drift under a
+   live blur, which kept the GPU busy for as long as the dashboard was
+   open; the gradients are soft enough on their own. */
 .aurora {
   position: absolute;
   inset: -40%;
@@ -46,22 +48,14 @@
     radial-gradient(30% 36% at 78% 18%, color-mix(in oklab, var(--a-rose-grad-1) 34%, transparent), transparent 70%),
     radial-gradient(34% 40% at 70% 82%, color-mix(in oklab, var(--a-cyan-grad-1) 34%, transparent), transparent 70%),
     radial-gradient(28% 34% at 30% 85%, color-mix(in oklab, var(--a-orange-grad-1) 26%, transparent), transparent 70%);
-  filter: blur(28px) saturate(130%);
-  animation: drift 26s ease-in-out infinite alternate;
 }
 .hero::after {
-  /* Frosted veil keeps text on a calm ground. */
+  /* The veil keeps text on a calm ground. */
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: color-mix(in oklab, var(--card) 58%, transparent);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-@keyframes drift {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
-  100% { transform: translate3d(4%, -3%, 0) rotate(8deg); }
+  background: color-mix(in oklab, var(--card) 62%, transparent);
 }
 
 .eyebrow {
@@ -99,11 +93,9 @@
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
-  background: color-mix(in oklab, var(--card) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 82%, transparent);
   border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
   color: var(--foreground);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 
 .ringPanel {
@@ -112,11 +104,9 @@
   gap: 1rem;
   border-radius: 1.5rem;
   padding: 0.85rem 1.1rem 0.85rem 0.85rem;
-  background: color-mix(in oklab, var(--card) 72%, transparent);
+  background: color-mix(in oklab, var(--card) 84%, transparent);
   border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
   box-shadow: var(--shadow-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 
 /* --- Section heading ------------------------------------------- */
