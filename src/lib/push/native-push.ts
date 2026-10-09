@@ -1,6 +1,7 @@
 import type { PluginListenerHandle } from "@capacitor/core"
 import type { PushNotificationsPlugin } from "@capacitor/push-notifications"
 import { notificationPath } from "@/lib/notification-links"
+import { safeNext } from "@/lib/auth/safe-next"
 
 /**
  * Native push for the Android app.
@@ -114,8 +115,7 @@ export async function unregisterNativePush(): Promise<void> {
 /** A path inside this app, never another origin: the push payload is data,
  * and a tap must not become a way to open an arbitrary site. */
 export function safeInAppPath(url: unknown): string | null {
-  if (typeof url !== "string" || !url.startsWith("/") || url.startsWith("//")) return null
-  return url
+  return safeNext(url)
 }
 
 let tapListener: Promise<PluginListenerHandle> | null = null

@@ -45,6 +45,18 @@ describe("safeNext", () => {
     expect(safeNext("/\\evil.com")).toBeNull();
   });
 
+  it("rejects tabs and newlines, which URL parsing drops", () => {
+    // `/\t/evil.com` parses as `//evil.com`: off-site.
+    expect(safeNext("/\t/evil.com")).toBeNull();
+    expect(safeNext("/\n/evil.com")).toBeNull();
+    expect(safeNext("/\r/evil.com/x")).toBeNull();
+    expect(safeNext("/members\u0000")).toBeNull();
+  });
+
+  it("rejects a backslash anywhere", () => {
+    expect(safeNext("/a/\\evil.com")).toBeNull();
+  });
+
   it("accepts the root path", () => {
     expect(safeNext("/")).toBe("/");
   });
