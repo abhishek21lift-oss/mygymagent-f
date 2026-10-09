@@ -93,6 +93,18 @@ async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}
   }
 }
 
+/** Runs `fn` holding a lock every tab of this origin shares. The tabs
+ * share one refresh cookie, and the single-flight below only covers one
+ * tab: two tabs refreshing at once (several restored on browser start, or
+ * all waking from sleep with expired access tokens) send the same token,
+ * the second arrives after the first rotated it, and the backend reads
+ * that as a stolen token replayed and ends every session the account has.
+ * Serialised, the second tab sends the cookie the first one just set. */
+function withRefreshLock<T>(fn: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator === "undefined" ? undefined : navigator.locks
+  return locks ? (locks.request("auth-refresh", fn) as Promise<T>) : fn()
+}
+
 /** Calls POST /auth/refresh through the same-origin BFF using the httpOnly
  * first-party cookie. Coalesces concurrent callers into a single in-flight
  * request so bootstrap and 401 recovery cannot rotate the refresh token
@@ -102,10 +114,12 @@ export async function refreshSession(): Promise<boolean> {
     const tokenAtStart = getAccessToken()
 
     try {
-      const res = await fetchWithTimeout(buildUrl("/auth/refresh"), {
-        method: "POST",
-        credentials: "include",
-      })
+      const res = await withRefreshLock(() =>
+        fetchWithTimeout(buildUrl("/auth/refresh"), {
+          method: "POST",
+          credentials: "include",
+        }),
+      )
       if (!res.ok) {
         if (getAccessToken() === tokenAtStart) setAccessToken(null)
         return false
