@@ -51,7 +51,10 @@ const nextConfig: NextConfig = {
               "frame-src https://www.facebook.com https://*.facebook.com https://*.facebook.net; " +
               "object-src 'none'; " +
               "base-uri 'self'; " +
-              "form-action 'self';",
+              "form-action 'self'; " +
+              // The modern form of X-Frame-Options: DENY, for browsers that
+              // honour only one of them.
+              "frame-ancestors 'none';",
           },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
@@ -59,6 +62,16 @@ const nextConfig: NextConfig = {
           { key: "X-DNS-Prefetch-Control", value: "off" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+          // Only the camera is used (member photo, barcode and QR scanners);
+          // everything else a page could ask the browser for is switched off.
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), hid=(), midi=()",
+          },
+          // Keeps other sites' windows from holding a handle on this one;
+          // allow-popups so a window the app opens still works.
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
         ],
       },
     ];
