@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { AuthProvider } from "@/lib/auth/auth-context";
-import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { PRODUCT_LOGO_ICON_SRC, PRODUCT_NAME } from "@/lib/brand";
 import Script from "next/script";
@@ -68,33 +65,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-IN" suppressHydrationWarning className="h-full antialiased">
       <body className="min-h-full">
+        {/* The session, data fetching and toasts live in (session)/layout.tsx,
+            so the public pages ship none of them. */}
         <ThemeProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <ErrorBoundary
-                fallback={
-                  <div className="flex min-h-svh flex-col items-center justify-center gap-3 p-6 text-center">
-                    <p className="text-lg font-semibold">Something went wrong.</p>
-                    <p className="text-sm text-muted-foreground">Please refresh the page.</p>
-                  </div>
-                }
-              >
-                {children}
-              </ErrorBoundary>
-              {/* Below the notch / status bar when the page draws under it. */}
-              <Toaster
-                position="top-center"
-                richColors
-                closeButton
-                mobileOffset={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}
-              />
-              {/* Cookie-free page analytics, only where a domain is configured
-                  (next.config.ts allows the script in that case only). */}
-              {PLAUSIBLE_DOMAIN ? (
-                <Script defer data-domain={PLAUSIBLE_DOMAIN} src="https://plausible.io/js/script.js" strategy="afterInteractive" />
-              ) : null}
-            </AuthProvider>
-          </QueryProvider>
+          <ErrorBoundary
+            fallback={
+              <div className="flex min-h-svh flex-col items-center justify-center gap-3 p-6 text-center">
+                <p className="text-lg font-semibold">Something went wrong.</p>
+                <p className="text-sm text-muted-foreground">Please refresh the page.</p>
+              </div>
+            }
+          >
+            {children}
+          </ErrorBoundary>
+          {/* Cookie-free page analytics, only where a domain is configured
+              (next.config.ts allows the script in that case only). */}
+          {PLAUSIBLE_DOMAIN ? (
+            <Script defer data-domain={PLAUSIBLE_DOMAIN} src="https://plausible.io/js/script.js" strategy="afterInteractive" />
+          ) : null}
         </ThemeProvider>
       </body>
     </html>

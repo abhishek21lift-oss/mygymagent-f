@@ -5,8 +5,6 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 
-import { homeRouteFor } from "@/lib/auth/home-route";
-import { useAuth } from "@/lib/auth/auth-context";
 import { PRODUCT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
@@ -20,19 +18,12 @@ export const NAV_LINKS = [
  { href: "/resources", label: "Guides" },
 ] as const;
 
-/** Signed in already: one tap back into the app instead of a sign-up pitch. */
+/** Sign in and sign up. The landing page carries no session (it is the
+ * one page every visitor loads), so it cannot tell who is signed in; a
+ * signed-in owner who taps "Sign in" is sent straight to their app. */
 function AccountActions({ onNavigate, stacked = false }: { onNavigate?: () => void; stacked?: boolean }) {
- const { user, isLoading } = useAuth();
  const primary =
  "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-foreground px-5 text-sm font-semibold text-background shadow-lg shadow-black/10 transition hover:opacity-90 active:scale-[0.98]";
- if (!isLoading && user) {
- return (
- <Link href={homeRouteFor(user)} onClick={onNavigate} className={primary}>
- Open the app
- <ArrowRight className="size-4" aria-hidden="true" />
- </Link>
- );
- }
  return (
  <div className={cn("flex items-center gap-2", stacked && "flex-col items-stretch")}>
  <Link
@@ -134,17 +125,15 @@ export function LandingNav() {
  );
 }
 
-/** The hero's buttons: the same account-aware choice as the nav. */
+/** The hero's buttons. */
 export function HeroActions() {
- const { user, isLoading } = useAuth();
- const signedIn = !isLoading && user;
  return (
  <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
  <Link
- href={signedIn ? homeRouteFor(user) : "/register"}
+ href="/register"
  className="group inline-flex min-h-[52px] items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 px-7 text-base font-semibold text-white shadow-[0_18px_40px_-12px_rgba(168,85,247,0.7)] transition hover:brightness-110 active:scale-[0.98]"
  >
- {signedIn ? "Open your dashboard" : "Start your free trial"}
+ Start your free trial
  <ArrowRight className="size-4 transition group-hover:translate-x-0.5" aria-hidden="true" />
  </Link>
  <a

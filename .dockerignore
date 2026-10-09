@@ -4,4 +4,8 @@ coverage
 .git
 .env*
 !.env.local.example
+# The deployment's public build settings (legal details, analytics,
+# verification, Firebase and Meta app ids): every NEXT_PUBLIC_* value is
+# baked in at build time, and the build reads this file.
+!.env.production
 npm-debug.log*

@@ -4,8 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { homeRouteFor } from "@/lib/auth/home-route";
-import { useAuth } from "@/lib/auth/auth-context";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,7 +12,6 @@ import { cn } from "@/lib/utils";
  * which has its own.
  */
 export function MobileCtaBar({ startAfterId, stopAtId }: { startAfterId: string; stopAtId: string }) {
- const { user, isLoading } = useAuth();
  const [show, setShow] = React.useState(false);
 
  React.useEffect(() => {
@@ -40,7 +37,6 @@ export function MobileCtaBar({ startAfterId, stopAtId }: { startAfterId: string;
  };
  }, [startAfterId, stopAtId]);
 
- const signedIn = !isLoading && user;
  return (
  <div
  aria-hidden={!show}
@@ -50,13 +46,13 @@ export function MobileCtaBar({ startAfterId, stopAtId }: { startAfterId: string;
  )}
  >
  <div className="flex items-center gap-3 rounded-full border border-black/5 bg-white p-1.5 pl-5 shadow-[0_18px_50px_-15px_rgba(20,10,60,0.45)] dark:border-white/10 dark:bg-[#12121c]">
- <p className="min-w-0 flex-1 text-sm font-semibold text-foreground">{signedIn ? "Welcome back" : "Free trial, no card"}</p>
+ <p className="min-w-0 flex-1 text-sm font-semibold text-foreground">Free trial, no card</p>
  <Link
- href={signedIn ? homeRouteFor(user) : "/register"}
+ href="/register"
  tabIndex={show ? 0 : -1}
  className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 px-5 text-sm font-semibold text-white"
  >
- {signedIn ? "Open the app" : "Start free"}
+ Start free
  <ArrowRight className="size-4" aria-hidden="true" />
  </Link>
  </div>

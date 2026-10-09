@@ -19,7 +19,7 @@ const MIN_SECOND_FACTOR_LENGTH = 6;
 
 function LoginForm({ requestedNext }: { requestedNext: string | null }) {
  const router = useRouter();
- const { login, completeMfaLogin, requestOtp, loginWithOtp } = useAuth();
+ const { login, completeMfaLogin, requestOtp, loginWithOtp, user, isLoading } = useAuth();
  const [email, setEmail] = React.useState("");
  const [password, setPassword] = React.useState("");
  const [error, setError] = React.useState("");
@@ -42,6 +42,12 @@ function LoginForm({ requestedNext }: { requestedNext: string | null }) {
  React.useEffect(() => {
  if (mfaToken) codeInputRef.current?.focus();
  }, [mfaToken]);
+
+ // Already signed in (the public pages cannot tell, so their "Sign in"
+ // brings everyone here): go straight on rather than ask again.
+ React.useEffect(() => {
+ if (!isLoading && user) router.replace(requestedNext ?? homeRouteFor(user));
+ }, [isLoading, user, requestedNext, router]);
 
  function describe(err: unknown, fallback: string) {
  return err instanceof ApiError ? err.message : fallback;
