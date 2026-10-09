@@ -88,16 +88,36 @@ function assertSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin")
   if (!origin) return true // non-browser client
 
-  const configuredOrigin = process.env.APP_URL?.replace(/\/$/, "")
-
-  if (configuredOrigin && origin === configuredOrigin) {
-    return true
-  }
-
+  let originHost: string
   try {
-    return origin === new URL(request.url).origin
+    originHost = new URL(origin).host
   } catch {
     return false
+  }
+
+  // The host the browser addressed. Behind the VPS proxy that is the
+  // Host / X-Forwarded-Host header: since Next 16.3.6 `request.url` is
+  // built from the server's own listen address (https://localhost:3200),
+  // never from Host, so comparing against it refused every real login.
+  // A cross-site page can set neither header -- the browser sends this
+  // site's host with the attacker's Origin, and the two differ.
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim()
+  const hosts = [
+    forwardedHost,
+    request.headers.get("host"),
+    hostOf(process.env.APP_URL),
+    hostOf(process.env.NEXT_PUBLIC_SITE_URL),
+    hostOf(request.url),
+  ]
+  return hosts.some((host) => host && host === originHost)
+}
+
+function hostOf(url: string | undefined): string | null {
+  if (!url) return null
+  try {
+    return new URL(url).host
+  } catch {
+    return null
   }
 }
 

@@ -162,6 +162,40 @@ describe("POST /api/auth access control", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it("accepts a same-site post behind the proxy, whatever request.url says", async () => {
+    // Next builds request.url from its own listen address, not Host.
+    const response = await POST(
+      new Request("https://localhost:3200/api/auth/refresh", {
+        method: "POST",
+        headers: {
+          origin: "https://mygymagent.tech",
+          host: "localhost:3200",
+          "x-forwarded-host": "mygymagent.tech",
+        },
+      }),
+      paramsFor("refresh"),
+    )
+
+    expect(response.status).not.toBe(403)
+    expect(fetchMock).toHaveBeenCalled()
+  })
+
+  it("still rejects another site even when it is the one being proxied", async () => {
+    const response = await POST(
+      new Request("https://localhost:3200/api/auth/refresh", {
+        method: "POST",
+        headers: {
+          origin: "https://evil.example",
+          "x-forwarded-host": "mygymagent.tech",
+        },
+      }),
+      paramsFor("refresh"),
+    )
+
+    expect(response.status).toBe(403)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it("rejects an action outside the allowlist without calling the backend", async () => {
     const response = await post(["mfa/disable"])
 
