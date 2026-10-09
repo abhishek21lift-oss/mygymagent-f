@@ -20,6 +20,7 @@ import {
 import { ApiError } from "@/lib/api/client"
 import { cn } from "@/lib/utils"
 import { notificationPath } from "@/lib/notification-links"
+import { safeNext } from "@/lib/auth/safe-next"
 
 const notificationKey = ["notifications"]
 const filters = [
@@ -156,7 +157,9 @@ export function NotificationCenter() {
 
  function openNotification(item: NotificationItem) {
  if (!item.readAt) readMutation.mutate(item.id)
- if (item.actionUrl) { setOpen(false); router.push(notificationPath(item.actionUrl)) }
+ // Stays in the app even if a link in the data points elsewhere.
+ const path = safeNext(item.actionUrl)
+ if (path) { setOpen(false); router.push(notificationPath(path)) }
  }
  function applySearch(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setAppliedSearch(search.trim()) }
 

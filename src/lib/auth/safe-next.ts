@@ -14,10 +14,21 @@
  */
 export function safeNext(value: unknown): string | null {
   if (typeof value !== "string") return null;
-  // Must start at the root, and must not start with `//` (protocol-relative)
-  // or `/\` (which several browsers normalise into `//`).
   if (!value.startsWith("/")) return null;
-  if (value.startsWith("//")) return null;
-  if (value.startsWith("/\\")) return null;
+  // URL parsing drops tabs and newlines and reads `\` as `/`, so
+  // `/\t/evil.com` and `/\evil.com` both become `//evil.com`. No path in
+  // this app needs either.
+  if (/[\u0000-\u001f\u007f\\]/.test(value)) return null;
+  // Then let the URL parser have the last word: whatever it makes of the
+  // string must still be on this origin.
+  let resolved: URL;
+  try {
+    resolved = new URL(value, SAME_ORIGIN);
+  } catch {
+    return null;
+  }
+  if (resolved.origin !== SAME_ORIGIN) return null;
   return value;
 }
+
+const SAME_ORIGIN = "https://same-origin.invalid";
