@@ -61,26 +61,13 @@ export function OperationsHero({
   return (
     <section
       aria-labelledby="operations-title"
-      className="relative -mx-4 mb-5 overflow-hidden rounded-3xl border border-white/70 bg-gradient-to-br from-white/90 via-white/80 to-indigo-50/40 p-6 shadow-sm transition-all dark:border-white/10 dark:from-card/90 dark:via-card/80 dark:to-indigo-950/20 sm:-mx-5 sm:p-8 lg:-mx-8"
-      style={{
-        boxShadow:
-          "inset 0 1px 0 rgb(255 255 255 / 0.9), 0 12px 32px -8px rgb(15 23 42 / 0.08)",
-      }}
+      className="hero-banner mb-5 p-6 sm:p-8"
     >
-      {/* Decorative ambient aurora glows */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-16 -top-24 size-72 rounded-full bg-gradient-to-br from-violet-500/15 via-indigo-500/15 to-transparent blur-3xl dark:from-violet-500/25"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 -right-16 size-72 rounded-full bg-gradient-to-tl from-cyan-500/15 via-emerald-500/15 to-transparent blur-3xl dark:from-cyan-500/25"
-      />
 
       <div className="relative flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 [--foreground:#fff] [--muted-foreground:rgb(255_255_255/0.82)]">
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/60 bg-violet-50/80 px-3 py-1 text-xs font-bold text-violet-800 shadow-2xs dark:border-violet-800/40 dark:bg-violet-950/40 dark:text-violet-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-bold text-white">
               Operations & Facility Health
             </span>
           </div>
@@ -121,7 +108,7 @@ export function OperationsHero({
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/60 p-4 shadow-2xs dark:border-white/10 dark:bg-card/60">
+            <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/90 p-4 shadow-2xs dark:border-white/10 dark:bg-card/80">
               <ProgressRing
                 value={health?.score ?? 0}
                 size={96}

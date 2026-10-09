@@ -22,40 +22,67 @@
 .orange  { --t1: var(--a-orange-grad-1);  --t2: var(--a-orange-grad-2);  --ink: var(--a-orange-ink); }
 
 /* --- Hero ------------------------------------------------------- */
+/* Black and red, the gym's own colours: near-black ground, two deep
+   red glows, and the light inside it drifting slowly. Everything that
+   moves is a transform on a pre-painted layer (no blur, no filter), so
+   it costs the compositor almost nothing.
+   It is dark in both themes, so the tokens are re-pointed for its
+   contents: the ring, the pills and the text all read on black. */
 .hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   border-radius: 1.75rem;
-  border: 1px solid var(--border);
-  background: var(--card);
-  box-shadow: var(--shadow-raised);
+  border: 1px solid rgb(248 113 113 / 0.18);
+  background:
+    radial-gradient(110% 130% at 0% 0%, #4a0b12 0%, transparent 55%),
+    radial-gradient(90% 120% at 100% 100%, #6b0d16 0%, transparent 60%),
+    linear-gradient(135deg, #09090b 0%, #160709 55%, #0a0a0c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 24px 48px -24px rgb(220 38 38 / 0.5);
+  color: #fff;
   padding: 1.5rem;
+  --foreground: #fff;
+  --muted-foreground: rgb(255 255 255 / 0.7);
+  --muted: rgb(255 255 255 / 0.12);
+  --accent: rgb(255 255 255 / 0.12);
+  --border: rgb(255 255 255 / 0.16);
+  --surface-sunken: rgb(255 255 255 / 0.12);
+  animation: hero-in 520ms var(--ease-out, ease-out) backwards;
 }
 @media (min-width: 640px) {
   .hero { padding: 1.5rem 2rem; }
 }
 
-/* Four soft colour fields behind a veil. They used to drift under a
-   live blur, which kept the GPU busy for as long as the dashboard was
-   open; the gradients are soft enough on their own. */
 .aurora {
   position: absolute;
   inset: -40%;
   z-index: -2;
   background:
-    radial-gradient(32% 38% at 18% 30%, color-mix(in oklab, var(--a-violet-grad-1) 42%, transparent), transparent 70%),
-    radial-gradient(30% 36% at 78% 18%, color-mix(in oklab, var(--a-rose-grad-1) 34%, transparent), transparent 70%),
-    radial-gradient(34% 40% at 70% 82%, color-mix(in oklab, var(--a-cyan-grad-1) 34%, transparent), transparent 70%),
-    radial-gradient(28% 34% at 30% 85%, color-mix(in oklab, var(--a-orange-grad-1) 26%, transparent), transparent 70%);
+    radial-gradient(30% 36% at 22% 30%, rgb(239 68 68 / 0.42), transparent 70%),
+    radial-gradient(26% 32% at 78% 72%, rgb(220 38 38 / 0.36), transparent 70%),
+    radial-gradient(18% 24% at 62% 22%, rgb(251 113 133 / 0.2), transparent 70%),
+    radial-gradient(22% 26% at 36% 86%, rgb(127 29 29 / 0.5), transparent 70%);
+  will-change: transform;
+  animation: drift 18s ease-in-out infinite alternate;
 }
 .hero::after {
-  /* The veil keeps text on a calm ground. */
+  /* A faint top sheen and a hairline of red along the bottom edge. */
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: color-mix(in oklab, var(--card) 62%, transparent);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.06), transparent 40%),
+    linear-gradient(90deg, transparent 10%, rgb(239 68 68 / 0.7) 50%, transparent 90%) bottom / 100% 1px no-repeat;
+}
+@keyframes drift {
+  0%   { transform: translate3d(-3%, 2%, 0) rotate(-3deg); }
+  100% { transform: translate3d(4%, -3%, 0) rotate(7deg); }
+}
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
 }
 
 .eyebrow {
@@ -63,7 +90,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted-foreground);
+  color: rgb(252 165 165 / 0.85);
 }
 .gymName {
   margin-top: 0.35rem;
@@ -72,16 +99,28 @@
   text-wrap: balance;
   letter-spacing: -0.035em;
   line-height: 1.05;
-  background: linear-gradient(120deg, var(--foreground) 0%, var(--foreground) 45%, var(--a-violet-ink) 100%);
+  /* White into red, with one pass of light as the page opens. Once,
+     not on a loop: moving a text gradient repaints the heading every
+     frame, which on a slow phone cost a fifth of the CPU while idle. */
+  background: linear-gradient(110deg, #fff 0%, #fff 40%, #fecaca 50%, #fff 60%, #fff 70%, #f87171 88%, #ef4444 100%);
+  background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   overflow-wrap: anywhere;
+  /* At rest the window shows the white-to-red end; the pass starts
+     from the other end, carrying the pale band across the name. */
+  background-position: 100% 0;
+  animation: name-shine 1.8s ease-out 500ms backwards;
+}
+@keyframes name-shine {
+  from { background-position: 0% 0; }
+  to   { background-position: 100% 0; }
 }
 .greeting {
   margin-top: 0.4rem;
   font-size: 0.95rem;
-  color: var(--muted-foreground);
+  color: rgb(255 255 255 / 0.7);
 }
 
 .glassPill {
@@ -93,9 +132,9 @@
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
-  background: color-mix(in oklab, var(--card) 82%, transparent);
-  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
-  color: var(--foreground);
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: #fff;
 }
 
 .ringPanel {
@@ -104,9 +143,16 @@
   gap: 1rem;
   border-radius: 1.5rem;
   padding: 0.85rem 1.1rem 0.85rem 0.85rem;
-  background: color-mix(in oklab, var(--card) 84%, transparent);
-  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
-  box-shadow: var(--shadow-card);
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .aurora,
+  .gymName,
+  .tile { animation: none; }
 }
 
 /* --- Section heading ------------------------------------------- */
@@ -140,6 +186,16 @@
   transition:
     transform var(--duration-base, 200ms) var(--ease-out, ease-out),
     box-shadow var(--duration-base, 200ms) var(--ease-out, ease-out);
+  animation: tile-in 460ms var(--ease-out, ease-out) backwards;
+}
+/* A row of tiles arrives one after another. */
+.tile:nth-child(2) { animation-delay: 50ms; }
+.tile:nth-child(3) { animation-delay: 100ms; }
+.tile:nth-child(4) { animation-delay: 150ms; }
+.tile:nth-child(5) { animation-delay: 200ms; }
+.tile:nth-child(n + 6) { animation-delay: 250ms; }
+@keyframes tile-in {
+  from { opacity: 0; transform: translateY(12px); }
 }
 .tile:hover {
   transform: translateY(-2px);

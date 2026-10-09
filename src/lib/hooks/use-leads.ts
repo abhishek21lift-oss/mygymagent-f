@@ -22,7 +22,7 @@ export interface LeadFollowUpRow extends LeadFollowUp {
 }
 
 export function useLeads(
-  params: PaginationParams & { status?: LeadStatus; createdFrom?: string; createdTo?: string; branchId?: string } = {},
+  params: PaginationParams & { status?: LeadStatus; createdFrom?: string; createdTo?: string; branchId?: string; /** Leave out won and lost leads. */ openOnly?: boolean } = {},
   { enabled = true }: { enabled?: boolean } = {},
 ) {
   return useQuery({ queryKey: [KEY, params], queryFn: () => api.get<Paginated<Lead>>("/leads", { query: params }), enabled })

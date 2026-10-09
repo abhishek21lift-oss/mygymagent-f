@@ -109,8 +109,10 @@ export function PageHero({
           compact && "py-5",
         )}
       >
-        {/* Left: eyebrow + icon + title + description */}
-        <div className="flex items-start gap-4 min-w-0">
+        {/* Left: eyebrow + icon + title + description. Never narrower
+            than its longest word, so a row of actions wraps instead of
+            breaking the title mid-word. */}
+        <div className="flex items-start gap-4 min-w-min">
           {Icon && (
             <span
               aria-hidden="true"
