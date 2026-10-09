@@ -38,7 +38,7 @@ export function RenewalsSection({ branchId }: { branchId?: string }) {
         actions={
           <Link
             href="/memberships"
-            className="text-xs font-semibold text-primary hover:underline"
+            className="inline-flex items-center text-xs font-semibold text-primary hover:underline pointer-coarse:min-h-10"
           >
             All memberships
           </Link>

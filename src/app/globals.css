@@ -311,6 +311,13 @@
   /* — Layout & motion. One decelerating curve for everything, so the
        whole app settles at the same tempo. — */
   --header-height: 3rem;
+  /* The phone tab bar floats over the page. Its top edge sits this far
+     above the screen's bottom (bar + gap + the home-indicator inset), and
+     the raised AI disc another ~1.4rem higher. Anything that must stay
+     clear of it (the page's bottom padding, sticky action bars) reads
+     these instead of guessing a number that ignores the inset. */
+  --mobile-tabbar-height: calc(5rem + env(safe-area-inset-bottom, 0px));
+  --mobile-tabbar-clearance: calc(var(--mobile-tabbar-height) + 1.75rem);
   --sidebar-width: 17rem;
   --sidebar-collapsed-width: 4.5rem;
   --content-max-width: 96rem;

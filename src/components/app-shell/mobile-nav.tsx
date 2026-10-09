@@ -38,7 +38,7 @@ export function MobileNav({ open, onOpenChange }: { open: boolean; onOpenChange:
  showCloseButton={false}
  aria-describedby={undefined}
  data-surface="rail"
- className="top-0 left-0 h-[100svh] w-[min(21rem,88vw)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-r-3xl border-l-0 p-0 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-none"
+ className="top-0 left-0 h-[100svh] max-h-none w-[min(21rem,88vw)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-r-3xl border-l-0 p-0 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left sm:max-w-none"
  >
  <VisuallyHidden>
  <DialogTitle>Navigation</DialogTitle>

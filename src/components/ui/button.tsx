@@ -17,9 +17,12 @@ import { cn } from "@/lib/utils"
  *
  * `outline`, `secondary` and `ghost` stay flat on purpose: when every
  * button is raised, none of them is the one to press.
+ *
+ * On a touch screen every button is at least 40px each way, whatever
+ * size a call site squeezed it to (`link` excepted: it sits in text).
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background touch-manipulation",
+  "inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold tracking-[-0.01em] transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background touch-manipulation pointer-coarse:min-h-10 pointer-coarse:min-w-10",
   {
     variants: {
       variant: {
@@ -28,7 +31,7 @@ const buttonVariants = cva(
         outline: "border border-border bg-card text-foreground shadow-[var(--shadow-card)] hover:border-border-strong hover:bg-surface-hover",
         secondary: "bg-secondary text-secondary-foreground hover:bg-muted",
         ghost: "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline pointer-coarse:min-h-0 pointer-coarse:min-w-0",
       },
       size: {
         default: "h-11 px-5 has-[>svg]:px-4",

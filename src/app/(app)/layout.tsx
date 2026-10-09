@@ -18,6 +18,19 @@ import { BottomTabBar } from "@/components/app-shell/bottom-tab-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PullToRefresh } from "@/components/shared/pull-to-refresh";
 
+/**
+ * Tablet widths, where the rail shows but the full 18rem rail would leave
+ * the page about 480px: less than the `sm:` (640px) layouts assume, so
+ * rows built for "wider than a phone" ran off the side.
+ */
+const TABLET_QUERY = "(min-width: 768px) and (max-width: 1023.98px)";
+
+function subscribeTablet(onChange: () => void) {
+  const mq = window.matchMedia(TABLET_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, mfaEnrolment, user } = useAuth();
   const router = useRouter();
@@ -25,7 +38,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Also on <html>, so portalled dialogs and toasts wear the same hue.
   useSectionAttribute(pathname);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  // The rail starts icon-only on a tablet and full on a desktop; once
+  // someone toggles it, their choice holds.
+  const isTablet = React.useSyncExternalStore(
+    subscribeTablet,
+    () => window.matchMedia(TABLET_QUERY).matches,
+    () => false,
+  );
+  const [collapsedChoice, setCollapsedChoice] = React.useState<boolean | null>(null);
+  const sidebarCollapsed = collapsedChoice ?? isTablet;
   const mainRef = React.useRef<HTMLElement | null>(null);
 
   // A gym member has no staff permissions at all, so this shell would
@@ -99,7 +120,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     // route it is on, which is what keeps them all server-renderable.
     <div
       data-section={accentForPath(pathname)}
-      className="page-ambient flex h-svh overflow-hidden"
+      // Landscape phones put the notch at a side: keep the shell inside it.
+      className="page-ambient flex h-svh overflow-hidden pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
     >
       {/* The rail floats: a rounded glass pane inset from the edge of the
           window, rather than a full-bleed dark column. This is the single
@@ -121,11 +143,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Topbar
           onOpenMobileNav={() => setMobileNavOpen(true)}
           sidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
+          onToggleSidebar={() => setCollapsedChoice(!sidebarCollapsed)}
         />
         <main ref={mainRef} className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
           <PullToRefresh scrollRef={mainRef}>
-            <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pb-24 pt-2 sm:px-5 md:pb-8 lg:px-8">
+            <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pb-[var(--mobile-tabbar-clearance)] pt-2 sm:px-5 md:pb-8 lg:px-8">
               <MfaGraceBanner />
               {children}
             </div>

@@ -276,7 +276,7 @@ export default function ClassesPage() {
 
       {/* Creation and Scheduling Panel */}
       {hasPermission("classes.manage") && (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm">
             <CardHeader className="border-b border-border/60 bg-muted/20 px-6 py-4">
               <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
@@ -289,7 +289,7 @@ export default function ClassesPage() {
                 Define course template, capacity limit, and duration
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 p-6 sm:grid-cols-3">
+            <CardContent className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-3">
               <div className="sm:col-span-3">
                 <Label htmlFor="program-name" className="text-xs font-semibold">
                   Programme Name
@@ -358,7 +358,7 @@ export default function ClassesPage() {
                 Add an upcoming class session to the active timetable
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 p-6 sm:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Label htmlFor="session-program" className="text-xs font-semibold">
                   Class Programme

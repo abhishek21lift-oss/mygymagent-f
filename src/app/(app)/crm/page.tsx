@@ -883,9 +883,9 @@ export default function CrmPage() {
               setFilter(v as LeadStatus | "ALL");
               setPage(1);
             }}
-            className="w-full sm:w-auto"
+            className="w-full min-w-0 sm:w-auto"
           >
-            <TabsList className="h-10 w-full justify-start overflow-x-auto rounded-xl bg-muted/60 p-1 sm:w-auto">
+            <TabsList className="h-10 w-full max-w-full justify-start overflow-x-auto rounded-xl bg-muted/60 p-1 pointer-coarse:h-12 sm:w-auto">
               <div className="flex min-w-max gap-1">
                 {STATUS_TABS.map((t) => (
                   <TabsTrigger key={t.value} value={t.value} className="rounded-lg px-3 text-xs font-semibold">
@@ -896,7 +896,7 @@ export default function CrmPage() {
             </TabsList>
           </Tabs>
 
-          <div className="flex items-center gap-1.5 self-end rounded-xl border border-border/60 bg-muted/30 p-1">
+          <div className="flex shrink-0 items-center gap-1.5 self-end rounded-xl border border-border/60 bg-muted/30 p-1">
             <Button
               variant={viewMode === "table" ? "secondary" : "ghost"}
               size="sm"

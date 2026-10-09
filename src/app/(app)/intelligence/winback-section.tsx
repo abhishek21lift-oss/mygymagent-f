@@ -45,7 +45,7 @@ export function WinbackSection({ branchId }: { branchId?: string }) {
         actions={
           <Link
             href="/members"
-            className="text-xs font-semibold text-primary hover:underline"
+            className="inline-flex items-center text-xs font-semibold text-primary hover:underline pointer-coarse:min-h-10"
           >
             All members
           </Link>

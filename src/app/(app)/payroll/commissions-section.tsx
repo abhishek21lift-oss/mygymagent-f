@@ -201,14 +201,14 @@ export function CommissionsSection() {
               aria-label="Commission window start"
               value={window.from}
               onChange={(e) => setWindow((w) => ({ ...w, from: e.target.value }))}
-              className="h-9 w-[9.5rem]"
+              className="h-9 w-[9.5rem] pointer-coarse:h-11"
             />
             <Input
               type="date"
               aria-label="Commission window end"
               value={window.to}
               onChange={(e) => setWindow((w) => ({ ...w, to: e.target.value }))}
-              className="h-9 w-[9.5rem]"
+              className="h-9 w-[9.5rem] pointer-coarse:h-11"
             />
             {canManage && (
               <Button size="sm" onClick={() => void onGenerate()} disabled={generate.isPending}>

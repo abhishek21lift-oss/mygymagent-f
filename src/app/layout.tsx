@@ -81,7 +81,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               >
                 {children}
               </ErrorBoundary>
-              <Toaster position="top-center" richColors closeButton />
+              {/* Below the notch / status bar when the page draws under it. */}
+              <Toaster
+                position="top-center"
+                richColors
+                closeButton
+                mobileOffset={{ top: "calc(env(safe-area-inset-top) + 0.75rem)" }}
+              />
               {/* Cookie-free page analytics, only where a domain is configured
                   (next.config.ts allows the script in that case only). */}
               {PLAUSIBLE_DOMAIN ? (
