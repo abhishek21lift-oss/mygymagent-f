@@ -76,7 +76,7 @@ export default function PortalRenewPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={Wallet} title="Renew" description="Choose a plan and ask the gym to renew" />
+      <PageHero icon={Wallet} title="Renew" />
       <Panel title="Your membership" titleId="portal-renew-current">
         {membership ? (
           <p className="text-sm">

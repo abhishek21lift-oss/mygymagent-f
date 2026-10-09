@@ -140,7 +140,6 @@ export default function AiPage() {
           id="ai-title"
           icon={Sparkles}
           title="Ask the agent"
-          description="Contextual reasoning, member retention forecasting, workout generation and analytics"
           actions={
             <Link
               href="/ai-actions"

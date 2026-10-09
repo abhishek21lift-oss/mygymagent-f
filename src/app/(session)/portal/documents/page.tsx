@@ -42,7 +42,7 @@ export default function PortalDocuments() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={FileText} title="Documents" description="What the gym has on file for you" />
+      <PageHero icon={FileText} title="Documents" />
       <Panel title="Your documents" titleId="portal-documents" flush>
         <div className="p-4 sm:p-5">
           <DataState

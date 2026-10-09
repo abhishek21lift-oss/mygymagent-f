@@ -80,7 +80,6 @@ export default function PortalHome() {
       <PageHero
         icon={User}
         title={member?.firstName ? `Hello, ${member.firstName}` : "Member Portal"}
-        description="Your fitness dashboard, active membership, and club access pass"
       />
 
       {/* Apple Fitness Style Membership Status Card */}

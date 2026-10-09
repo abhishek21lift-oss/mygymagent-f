@@ -127,7 +127,6 @@ export default function NotificationSettingsPage() {
  id="notification-settings-title"
  icon={Bell}
  title="Notification preferences"
- description="Choose which activity reaches you and through which channels."
  actions={
  <Button asChild variant="outline" className="min-h-11 rounded-lg bg-card">
  <Link href="/settings"><ArrowLeft className="size-4" aria-hidden="true" /> Settings</Link>

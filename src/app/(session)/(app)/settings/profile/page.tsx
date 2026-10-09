@@ -473,7 +473,6 @@ export default function GymProfilePage() {
         id="profile-title"
         icon={Store}
         title="Gym profile"
-        description="How your gym appears to members, in messages and on WhatsApp"
         actions={
           <Button asChild variant="outline" className="min-h-11 rounded-lg">
             <Link href="/settings">

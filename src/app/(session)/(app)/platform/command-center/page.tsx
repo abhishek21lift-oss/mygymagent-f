@@ -230,25 +230,24 @@ function Hero({
         ? "Everything measured is healthy"
         : "All systems operational"
   const tone = !data ? "unknown" : v.degraded > 0 ? "warning" : "ok"
-  const radius = 38
+  const radius = 30
   const circumference = 2 * Math.PI * radius
   const fraction = data ? v.ok / v.total : 0
 
   return (
     <header aria-labelledby="cc-title" className="hero-banner" style={accentVars("cyan")}>
-      <div className="hero-banner-body flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="hero-banner-body flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <span className="hero-banner-glyph size-14" aria-hidden="true">
-            <ServerCog className="size-7" strokeWidth={1.75} />
+          <span className="hero-banner-glyph size-11" aria-hidden="true">
+            <ServerCog className="size-5" strokeWidth={1.75} />
           </span>
           <div className="min-w-0">
-            <p className="hero-banner-eyebrow">Platform</p>
             <h1 id="cc-title" className="hero-banner-title">Command Center</h1>
             <p className="hero-banner-subtitle">
               {headline}
               {data && v.unavailable > 0 ? ` · ${v.unavailable} not measured` : ""}
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               {data ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1 text-xs font-semibold text-foreground">
                   Updated {relative(data.collectedAt, now)}
@@ -262,8 +261,8 @@ function Hero({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-4 rounded-3xl border border-border/70 bg-card/70 p-3 pr-5 shadow-[var(--shadow-card)]">
-          <div className="relative size-[92px]">
+        <div className="flex shrink-0 items-center gap-4 rounded-3xl border border-border/70 bg-card/70 p-2 pr-4 shadow-[var(--shadow-card)]">
+          <div className="relative size-[72px]">
             <svg
               viewBox="0 0 92 92"
               className="size-full -rotate-90"

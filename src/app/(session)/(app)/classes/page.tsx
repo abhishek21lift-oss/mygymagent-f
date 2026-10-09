@@ -226,7 +226,6 @@ export default function ClassesPage() {
         id="classes-title"
         icon={CalendarDays}
         title="Classes"
-        description="Programmes, visual timetable, roster management and show rates"
       />
 
       {/* Control bar */}

@@ -1,10 +1,9 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 
-import { sectionForPath, type Accent } from "@/lib/section-accent";
+import type { Accent } from "@/lib/section-accent";
 import { cn } from "@/lib/utils";
 
 /**
@@ -64,8 +63,9 @@ export function PageHero({
    * material; "noir" no longer repaints it dark. */
   tone?: "section" | "noir";
 }) {
-  const pathname = usePathname();
-  const resolvedEyebrow = eyebrow ?? sectionForPath(pathname);
+  // Eyebrow is opt-in only — the route-derived category label was
+  // decorative noise above every title, so it no longer renders by default.
+  const resolvedEyebrow = eyebrow ?? null;
 
   // An override re-points the CSS variables for this subtree, so the
   // hero-banner class stays identical either way.
@@ -96,7 +96,7 @@ export function PageHero({
       style={override}
       className={cn(
         "hero-banner",
-        compact ? "mb-4" : "mb-6",
+        "mb-4",
         centered && "hero-centered",
       )}
     >
@@ -105,20 +105,20 @@ export function PageHero({
 
       <div
         className={cn(
-          "hero-banner-body flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+          "hero-banner-body flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between",
           compact && "py-5",
         )}
       >
         {/* Left: eyebrow + icon + title + description. Never narrower
             than its longest word, so a row of actions wraps instead of
             breaking the title mid-word. */}
-        <div className="flex items-start gap-4 min-w-min">
+        <div className="flex items-center gap-3 min-w-min">
           {Icon && (
             <span
               aria-hidden="true"
-              className={cn("hero-banner-glyph", centered ? "size-12" : "size-14")}
+              className={cn("hero-banner-glyph", centered ? "size-10" : "size-11")}
             >
-              <Icon className={centered ? "size-6" : "size-7"} strokeWidth={1.75} />
+              <Icon className={centered ? "size-5" : "size-5"} strokeWidth={1.75} />
             </span>
           )}
 

@@ -194,7 +194,6 @@ export default function AutomationPage() {
     id="automation-title"
     icon={Workflow}
     title="Automations"
-    description="What runs on its own, and whether it's reaching anyone"
    />
 
    <DataState

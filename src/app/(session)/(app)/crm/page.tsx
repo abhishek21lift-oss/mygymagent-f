@@ -799,7 +799,6 @@ export default function CrmPage() {
           id="crm-title"
           icon={Megaphone}
           title="Leads"
-          description="Pipeline velocity, follow-up SLAs and conversion tracking"
           actions={
             <>
               <Button

@@ -140,7 +140,6 @@ export default function StaffPage() {
           id="staff-title"
           icon={Users}
           title="Staff"
-          description="Every account on the team — roles, sign-in state and access."
           actions={
             <>
               {canCreate && <AddStaffDialog />}

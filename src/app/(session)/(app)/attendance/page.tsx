@@ -237,7 +237,6 @@ export default function AttendancePage() {
  id="attendance-title"
  icon={CalendarCheck}
  title="Attendance"
- description="Check-ins, the live view and the visit log"
  actions={
  <>
  <Link href="/members" className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">

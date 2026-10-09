@@ -40,7 +40,7 @@ export default function PortalPlan() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={Dumbbell} title="Training" description="The plan your trainer assigned" />
+      <PageHero icon={Dumbbell} title="Training" />
       <DataState
         isLoading={workouts.isPending}
         isError={workouts.isError}

@@ -67,7 +67,6 @@ export function TodayList({ metric, date, branchId }: { metric: TodayMetric; dat
       </Link>
 
       <PageHero
-        eyebrow="Today"
         icon={meta.icon}
         accent={meta.accent}
         title={meta.title}

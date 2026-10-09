@@ -132,7 +132,6 @@ export default function NewInventoryProductPage() {
  return (
  <InventoryResourceShell
  title="New Product"
- description="Create a product for your inventory catalogue."
  >
  <section className="rounded-lg border border-amber-200/70 bg-card p-8 text-center shadow-sm dark:bg-stone-950/75">
  <PackagePlus className="mx-auto size-10 text-amber-600" />
@@ -153,7 +152,6 @@ export default function NewInventoryProductPage() {
  return (
  <InventoryResourceShell
  title="New Product"
- description="Create a clean inventory master record with pricing, stock and reorder controls."
  actions={
  <Button asChild variant="outline" className="rounded-xl bg-card">
  <Link href="/inventory">

@@ -106,7 +106,7 @@ export default function PortalAccountPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={Settings} title="Account" description="Your details and how we contact you" />
+      <PageHero icon={Settings} title="Account" />
       <Panel title="Your details" titleId="portal-account-details">
         <form onSubmit={handleSave} className="flex flex-col gap-3" noValidate>
           <div className="grid gap-3 sm:grid-cols-2">

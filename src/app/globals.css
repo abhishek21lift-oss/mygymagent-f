@@ -1821,10 +1821,10 @@
   .hero-banner > * { position: relative; z-index: 1; }
 
   .hero-banner-body {
-    padding: 1.75rem 2rem;
+    padding: 1rem 1.25rem;
   }
   @media (max-width: 640px) {
-    .hero-banner-body { padding: 1.25rem 1.25rem 1.4rem; }
+    .hero-banner-body { padding: 0.875rem 1rem 1rem; }
   }
 
   .hero-banner-eyebrow {
@@ -1836,10 +1836,10 @@
     margin-bottom: 0.35rem;
   }
   .hero-banner-title {
-    font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
     font-weight: 800;
-    letter-spacing: -0.035em;
-    line-height: 1.08;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
     color: #fff;
     text-shadow: 0 1px 12px rgb(0 0 0 / 0.12);
     /* Not `anywhere`: that lets the actions squeeze the title until a
@@ -1847,11 +1847,11 @@
     overflow-wrap: break-word;
   }
   .hero-banner-subtitle {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 450;
     color: rgb(255 255 255 / 0.84);
-    margin-top: 0.4rem;
-    line-height: 1.5;
+    margin-top: 0.25rem;
+    line-height: 1.45;
     max-width: 46rem;
   }
   /* Controls in here bring their own surface (white pills on the
@@ -1859,10 +1859,10 @@
      banner's white: a pill that only sets a background stays legible. */
   .hero-banner-actions {
     color: var(--foreground);
-    margin-top: 1.25rem;
+    margin-top: 0.75rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.625rem;
+    gap: 0.5rem;
     align-items: center;
   }
 
@@ -1873,7 +1873,9 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 1.15rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.9rem;
     color: #fff;
     background:
       radial-gradient(80% 70% at 30% 15%, rgb(255 255 255 / 0.3), transparent 60%),

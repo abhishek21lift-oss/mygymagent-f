@@ -267,7 +267,6 @@ export default function InventoryPage() {
  id="inventory-title"
  icon={Package}
  title="Inventory"
- description="Products, stock and suppliers"
  actions={
  <>
  {hasPermission("inventory.read") && <ScanStockDialog />}

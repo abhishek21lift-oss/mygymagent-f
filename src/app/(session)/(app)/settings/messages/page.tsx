@@ -121,7 +121,6 @@ export default function MessageTemplatesPage() {
       <PageHero
         icon={Mail}
         title="Message templates"
-        description="The wording behind every reminder, receipt and notification."
       />
 
       <Panel

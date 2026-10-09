@@ -8,18 +8,17 @@ import { InventoryNav } from "./inventory-nav"
 /**
  * One masthead for all twelve inventory screens.
  *
- * `description` now goes into the hero rather than being printed as a
- * loose paragraph under the sub-nav: it is the page's subtitle, and it
- * was the only thing on these screens that sat outside the masthead
- * while describing it.
+ * Title + actions only — per-page subtitles were decorative noise.
+ * `description` is accepted for compatibility but not rendered.
  *
  * No `accent` -- inventory belongs to Operations, and the route map
  * gives the whole section one hue. The `amber` this used to pass was
  * Finance's.
  */
 export function InventoryResourceShell({title,description,children,actions}:{title:string;description?:string;children:ReactNode;actions?:ReactNode}) {
+ void description;
  return <div className="mx-auto flex max-w-[1680px] flex-col gap-5 px-2 pb-12 sm:px-4 lg:px-6">
- <PageHero icon={Package} title={title} description={description} actions={actions} />
+ <PageHero icon={Package} title={title} actions={actions} />
  <InventoryNav />
  {children}
  </div>

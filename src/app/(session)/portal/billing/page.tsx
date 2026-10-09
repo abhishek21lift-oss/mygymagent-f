@@ -60,7 +60,7 @@ export default function PortalBilling() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={Receipt} title="Bills and payments" description="Your bills and what you have paid" />
+      <PageHero icon={Receipt} title="Bills and payments" />
       <DataState
         isLoading={billing.isPending}
         isError={billing.isError}

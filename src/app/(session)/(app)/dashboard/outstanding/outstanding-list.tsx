@@ -45,7 +45,6 @@ export function OutstandingList({ branchId }: { branchId?: string }) {
       </Link>
 
       <PageHero
-        eyebrow="Finance"
         icon={Scale}
         accent="amber"
         title="Outstanding dues"

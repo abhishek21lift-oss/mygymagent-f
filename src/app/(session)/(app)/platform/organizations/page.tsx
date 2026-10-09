@@ -203,7 +203,6 @@ export default function PlatformOrganizationsPage() {
     id="platform-orgs-title"
     icon={Building2}
     title="Organizations"
-    description="Every gym on the platform"
    />
 
    <div className="flex flex-wrap items-end gap-3">

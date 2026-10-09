@@ -14,7 +14,7 @@ export default function PortalVisits() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={CalendarCheck} title="Visits" description="Your recent check-ins" />
+      <PageHero icon={CalendarCheck} title="Visits" />
       <Panel title="Your visits" titleId="portal-visits" flush>
       <div className="p-4 sm:p-5">
         <DataState

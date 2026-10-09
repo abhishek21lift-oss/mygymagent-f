@@ -270,7 +270,7 @@ export default function AiInfrastructurePage() {
 
   return (
     <div className="flex w-full flex-col gap-6 pb-10">
-      <PageHero icon={Sparkles} title="AI Infrastructure" description="Control plane for FreeLLMAPI. Your browser only talks to MyGymAgent — never to FreeLLMAPI directly." eyebrow="Platform" actions={<StatusPill value={state} tone={STATE_TONE[state] ?? "neutral"} />} />
+      <PageHero icon={Sparkles} title="AI Infrastructure" actions={<StatusPill value={state} tone={STATE_TONE[state] ?? "neutral"} />} />
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="flex h-auto w-full justify-start overflow-x-auto [scrollbar-width:none]">

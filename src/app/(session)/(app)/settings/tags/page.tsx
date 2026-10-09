@@ -167,10 +167,8 @@ export default function MemberTagsPage() {
         Settings
       </Link>
       <PageHero
-        eyebrow="Members"
         icon={Tag}
         title="Member tags"
-        description="Group members your way (morning batch, students, corporate) to filter lists and target messages."
       />
 
       {!canRead ? (

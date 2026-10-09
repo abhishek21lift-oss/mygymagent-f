@@ -262,7 +262,6 @@ export default function PayrollPage() {
     <main className="space-y-6 pb-6">
       <PageHero
         title="Payroll & HR"
-        description="Salary runs, leave administration, and compensation management"
         icon={HandCoins}
       />
 

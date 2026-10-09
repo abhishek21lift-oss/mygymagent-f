@@ -20,7 +20,7 @@ export default function PortalNutrition() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={Salad} title="Nutrition" description="The diet plan your trainer assigned" />
+      <PageHero icon={Salad} title="Nutrition" />
       <DataState
         isLoading={diets.isPending}
         isError={diets.isError}

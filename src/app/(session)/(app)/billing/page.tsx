@@ -48,7 +48,6 @@ export default function BillingPage() {
  id="billing-title"
  icon={Wallet}
  title="Payments"
- description="Payments, invoices and expenses"
  actions={
  <>
  {hasPermission("payments.create") && <RecordPaymentDialog />}

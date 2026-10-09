@@ -16,7 +16,7 @@ export default function BranchStockPage(){
  // found." whether the branch was empty or the request had failed, so a
  // dropped connection read as an emptied warehouse. Empty now also
  // distinguishes "nothing here" from "nothing matches what you typed".
- return <InventoryResourceShell title="Branch Stock" description="Live stock by branch, product and SKU.">
+ return <InventoryResourceShell title="Branch Stock">
  <div className="flex flex-wrap gap-3">
  <select value={branchId} onChange={e=>setBranchId(e.target.value)} className="h-10 rounded-xl border border-stone-200 bg-card px-3 text-sm font-semibold"><option value="">All branches</option>{(branches.data?.items??[]).map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select>
  <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search product or SKU" className="max-w-sm rounded-xl"/>

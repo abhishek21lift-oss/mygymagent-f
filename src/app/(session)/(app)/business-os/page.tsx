@@ -123,7 +123,6 @@ export default function BusinessOsPage() {
         id="business-os"
         icon={Sparkles}
         title="Business OS"
-        description="Loyalty, referrals, support, feedback, marketing and the ledger."
       />
 
       <SupportSection />

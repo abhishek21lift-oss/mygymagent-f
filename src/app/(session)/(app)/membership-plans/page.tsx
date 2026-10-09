@@ -34,7 +34,6 @@ export default function MembershipPlansPage() {
           id="plans-title"
           icon={Sparkles}
           title="Membership plans"
-          description="Pricing tiers, package privileges, duration terms, and freeze policies"
           actions={
             <>
               {hasPermission("membership_plans.create") && <PlanDialog />}

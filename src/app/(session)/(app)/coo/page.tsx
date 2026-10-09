@@ -145,21 +145,15 @@ export default function CooPage() {
       {/* Light Apple-Aurora Glass Hero */}
       <section
         aria-labelledby="coo-title"
-        className="hero-banner mb-3 p-6 sm:p-8"
+        className="hero-banner mb-4"
       >
 
-        <div className="relative flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left">
+        <div className="relative flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <div className="min-w-0 flex-1 [--foreground:#fff] [--muted-foreground:rgb(255_255_255/0.82)]">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-bold text-white">
-                <Sparkles className="size-3.5" />
-                AI · Executive Briefing
-              </span>
-            </div>
 
             <h1
               id="coo-title"
-              className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl"
+              className="mt-2 text-xl font-black tracking-tight text-foreground sm:text-2xl"
             >
               Morning briefing
             </h1>
@@ -189,7 +183,7 @@ export default function CooPage() {
               </div>
             )}
 
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
               <Button asChild size="sm" className="rounded-xl shadow-xs">
                 <Link href="/ai">
                   <Sparkles className="mr-1.5 size-4" aria-hidden="true" />
@@ -203,7 +197,7 @@ export default function CooPage() {
           <div className="flex shrink-0 flex-col items-center gap-2">
             {briefing.isLoading ? (
               <div
-                className="size-28 animate-pulse rounded-full bg-muted/60"
+                className="size-20 animate-pulse rounded-full bg-muted/60"
                 aria-label="Loading briefing"
               />
             ) : briefing.isError || !briefing.data ? (
@@ -216,10 +210,10 @@ export default function CooPage() {
                 </Button>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/90 p-4 shadow-2xs dark:border-white/10 dark:bg-card/80">
+              <div className="flex flex-col items-center gap-2 rounded-3xl border border-white/60 bg-white/90 p-3 shadow-2xs dark:border-white/10 dark:bg-card/80">
                 <ProgressRing
                   value={health?.score ?? 0}
-                  size={96}
+                  size={72}
                   strokeWidth={10}
                   tone="auto"
                   label={

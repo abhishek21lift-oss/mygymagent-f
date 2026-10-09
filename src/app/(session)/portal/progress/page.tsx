@@ -184,7 +184,7 @@ export default function PortalProgress() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHero icon={TrendingUp} title="Progress" description="Your goals and measurements" />
+      <PageHero icon={TrendingUp} title="Progress" />
       <DataState
         isLoading={progress.isPending}
         isError={progress.isError}
