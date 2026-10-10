@@ -11,6 +11,7 @@ import {
   ListPlus,
   PhoneCall,
   RefreshCw,
+  Settings2,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ import {
   type TaskView,
 } from "@/lib/hooks/use-action-center";
 import { AddTaskDialog } from "./add-task-dialog";
+import { SettingsDialog } from "./settings-dialog";
 import { LogCallDialog } from "./log-call-dialog";
 import { QueuePanel, ReportPanel } from "./queue-panel";
 import { SuggestionsPanel } from "./suggestions-panel";
@@ -276,6 +278,7 @@ function ActionCenter() {
   const [callFor, setCallFor] = React.useState<ActionTask | null>(null);
   const [callOpen, setCallOpen] = React.useState(false);
   const [addOpen, setAddOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [followUpOpen, setFollowUpOpen] = React.useState(false);
 
   function setTab(next: Tab) {
@@ -392,20 +395,29 @@ function ActionCenter() {
                 </>
               )}
               {isManager && (
-                <Button
-                  variant="ghost"
-                  onClick={runGenerator}
-                  disabled={generate.isPending}
-                  aria-label="Refresh generated tasks"
-                >
-                  <RefreshCw
-                    className={cn(
-                      "size-4",
-                      generate.isPending && "animate-spin",
-                    )}
-                    aria-hidden="true"
-                  />
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSettingsOpen(true)}
+                    aria-label="Action Center rules"
+                  >
+                    <Settings2 className="size-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={runGenerator}
+                    disabled={generate.isPending}
+                    aria-label="Refresh generated tasks"
+                  >
+                    <RefreshCw
+                      className={cn(
+                        "size-4",
+                        generate.isPending && "animate-spin",
+                      )}
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </>
               )}
             </div>
           }
@@ -768,6 +780,9 @@ function ActionCenter() {
         task={callFor}
       />
       <AddTaskDialog open={addOpen} onOpenChange={setAddOpen} />
+      {isManager && (
+        <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      )}
       <AddTaskDialog
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}
