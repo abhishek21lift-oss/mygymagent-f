@@ -2419,3 +2419,23 @@
     .kpi-card { animation: none; }
   }
 }
+
+/* ============================================================
+   Mobile auto-zoom guard.
+   iOS Safari zooms the viewport when a focused editable control
+   computes below 16px. Every shared field already renders 16px on
+   phones (text-base below sm:), but native controls, UA defaults and
+   one-off small-text overrides would still trip it -- so this pins
+   all text-entry controls to 16px under 768px. Unlayered on purpose:
+   layered utilities (text-sm and friends) would otherwise win. Only
+   editable controls are touched: buttons, labels, icons and body
+   copy keep their sizes, desktop is untouched, and pinch-to-zoom
+   stays enabled (no maximum-scale anywhere).
+   ============================================================ */
+@media (max-width: 767px) {
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"]):not([type="image"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
