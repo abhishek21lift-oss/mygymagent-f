@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BadgeIndianRupee, BarChart3, Bell, BookOpen, Brain, Briefcase, Building2, CalendarClock,
+  BadgeIndianRupee, ClipboardList, BarChart3, Bell, BookOpen, Brain, Briefcase, Building2, CalendarClock,
   CalendarDays, CheckSquare, CreditCard, Dumbbell, FileText, Gauge, Gem, Group, HandCoins,
   Home, ListChecks, Megaphone, MessageCircle, MessagesSquare, MonitorSmartphone, NotebookPen,
   Package, Receipt, ReceiptIndianRupee, Rocket, Salad, Send, Settings, ShieldCheck, ShoppingBag,
@@ -89,6 +89,8 @@ export function visibleNavItem(item: NavItem, can: Can, isPlatformStaff: boolean
  */
 export const primaryNav: NavItem[] = [
   { title: "Home", href: "/dashboard", icon: Home },
+  // The front desk's day: generated calls, follow-ups and AI suggestions.
+  { title: "Action Center", shortTitle: "Actions", href: "/action-center", icon: ClipboardList, permission: "tasks.read" },
 
   { title: "Members", href: "/members", icon: Users, hue: "violet", children: [
     { title: "All members", href: "/members", icon: Users, permission: ["members.read", "members.read_assigned"] },

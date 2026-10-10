@@ -52,6 +52,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CallsPanel } from "@/app/(session)/(app)/action-center/calls-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
  Dialog,
@@ -3424,6 +3425,12 @@ export function Member360Tabs({
  Follow-ups
  </TabsTrigger>
  <TabsTrigger
+ value="calls"
+ className={TAB_TRIGGER}
+ >
+ Calls
+ </TabsTrigger>
+ <TabsTrigger
  value="communications"
  className={TAB_TRIGGER}
  >
@@ -3499,6 +3506,9 @@ export function Member360Tabs({
  </TabsContent>
  <TabsContent value="follow-ups">
  <FollowUpsPanel memberId={memberId} />
+ </TabsContent>
+ <TabsContent value="calls">
+ <CallsPanel memberId={memberId} label="This member" />
  </TabsContent>
  <TabsContent value="communications">
  <CommunicationsPanel memberId={memberId} />
