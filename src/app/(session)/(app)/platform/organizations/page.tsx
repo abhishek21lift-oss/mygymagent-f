@@ -248,7 +248,10 @@ function PlatformOrganizations() {
   pageSize: 20,
   ...(status === ALL ? {} : { status: status as OrganizationStatus }),
   ...(search.trim() ? { search: search.trim() } : {}),
- })
+ },
+ // The gate below renders the reason instead of the list; without this
+ // the query would still fire (and 403) for every ordinary gym account.
+ { enabled: isPlatformStaff })
  const plans = usePlatformPlans(isPlatformStaff)
 
  if (isLoading) return <div className="p-8"><Skeleton className="h-40 w-full" /></div>

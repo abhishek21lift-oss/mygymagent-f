@@ -38,10 +38,12 @@ const KEY = "platform-organizations"
  */
 export function usePlatformOrganizations(
   params: PaginationParams & { status?: OrganizationStatus } = {},
+  { enabled = true }: { enabled?: boolean } = {},
 ) {
   return useQuery({
     queryKey: [KEY, params],
     queryFn: () => api.get<Paginated<PlatformOrganization>>("/platform/organizations", { query: params }),
+    enabled,
   })
 }
 
