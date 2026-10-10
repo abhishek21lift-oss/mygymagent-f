@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useLead, useUpdateLead } from "@/lib/hooks/use-lead"
+import { CallsPanel } from "@/app/(session)/(app)/action-center/calls-panel"
 import { useUpdateLeadStatus, useAddFollowUp, useCompleteFollowUp } from "@/lib/hooks/use-leads"
 import { createLeadSchema, createFollowUpSchema, type CreateLeadInput, type CreateFollowUpInput } from "@/lib/validation/gym"
 import type { LeadStatus } from "@/lib/types/gym"
@@ -229,6 +230,9 @@ export default function Lead360Page({ params }: { params: { id: string } }) {
  )}
  </div>
  </div>
+ </section>
+ <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
+ <CallsPanel leadId={currentLead.id} label={`${currentLead.firstName} ${currentLead.lastName}`} />
  </section>
  </div>
  </div>
