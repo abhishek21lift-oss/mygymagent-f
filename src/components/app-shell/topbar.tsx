@@ -7,6 +7,7 @@ import { ChevronsLeft, ChevronsRight, LogOut, Menu, Moon, Sun, User as UserIcon 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AICommandBar } from "@/components/app-shell/ai-command-bar";
+import { TopbarSearch } from "@/components/app-shell/topbar-search";
 import { NotificationCenter } from "@/components/app-shell/notification-center";
 import {
   DropdownMenu,
@@ -78,11 +79,12 @@ export function Topbar({
 
         <div className="flex min-w-0 flex-1 justify-end sm:justify-start">
           <div className="w-full max-w-2xl">
-            <AICommandBar />
+            <TopbarSearch />
           </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <AICommandBar />
           <NotificationCenter />
           <Button
             variant="ghost"

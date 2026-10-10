@@ -14,7 +14,7 @@ import { PageHero } from "@/components/shared/page-hero";
 import { useAuth } from "@/lib/auth/auth-context";
 import { staffAccessState, useStaff, useStaffStats } from "@/lib/hooks/use-staff";
 import type { StaffUser } from "@/lib/types/gym";
-import { AddStaffDialog } from "./add-staff-dialog";
+import { AddStaffLink } from "./add-staff-link";
 import { ManageRolesDialog } from "./manage-roles-dialog";
 import { StaffRowActions } from "./staff-row-actions";
 import { AccessBadge, RolePill, StaffAvatar, accentVars } from "./staff-visuals";
@@ -142,7 +142,7 @@ export default function StaffPage() {
           title="Staff"
           actions={
             <>
-              {canCreate && <AddStaffDialog />}
+              {canCreate && <AddStaffLink />}
               <Link
                 href="/attendance"
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border/80 bg-card px-5 text-sm font-semibold shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transform-none"
@@ -227,7 +227,7 @@ export default function StaffPage() {
               searchPlaceholder="Search by name, email or phone"
               emptyTitle={query ? "No one matches" : "No staff yet"}
               emptyDescription={query ? "Try another name, email or phone number." : "Add your first team member to get started."}
-              emptyAction={!query && canCreate ? <AddStaffDialog /> : undefined}
+              emptyAction={!query && canCreate ? <AddStaffLink /> : undefined}
             />
           </div>
         </section>

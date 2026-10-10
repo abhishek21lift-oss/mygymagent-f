@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Command, CornerDownLeft, Search, Sparkles, X } from "lucide-react";
+import { Command, CornerDownLeft, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,16 +82,16 @@ export function AICommandBar() {
         type="button"
         onClick={openDialog}
         className={cn(
-          "group flex min-h-11 w-11 shrink-0 touch-manipulation items-center justify-center gap-2.5 rounded-2xl border border-border bg-surface-sunken px-2 text-left text-sm text-muted-foreground transition-all duration-200",
-          "hover:border-border-strong hover:bg-card sm:w-full sm:max-w-xl sm:justify-start sm:px-3",
+          "flex size-10 shrink-0 touch-manipulation items-center justify-center rounded-2xl text-muted-foreground transition-colors",
+          "hover:bg-surface-hover hover:text-foreground",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         )}
-        aria-label="Open AI command center (Control or Command K)"
-        aria-haspopup="dialog"
+        aria-label="Ask AI assistant (Control or Command K)"
+        title="Ask AI assistant (Ctrl/⌘K)"
       >
         <span
           aria-hidden="true"
-          className="flex size-7 shrink-0 items-center justify-center rounded-lg"
+          className="flex size-7 items-center justify-center rounded-lg"
           style={{
             backgroundImage: "var(--brand-grad)",
             color: "#ffffff",
@@ -99,10 +99,6 @@ export function AICommandBar() {
         >
           <Sparkles className="size-3.5" />
         </span>
-        <span className="hidden flex-1 truncate sm:inline">Search your gym…</span>
-        <kbd className="hidden shrink-0 rounded-lg border border-border bg-card px-1.5 py-0.5 font-sans text-[11px] font-semibold text-muted-foreground lg:inline">
-          ⌘K
-        </kbd>
       </button>
 
       {open ? (
