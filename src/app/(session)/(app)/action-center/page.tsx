@@ -105,7 +105,7 @@ function Kpi({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex min-h-[64px] flex-col items-start justify-between rounded-lg border border-border bg-card px-3 py-2 text-left shadow-[var(--shadow-card)] transition hover:border-border-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "flex min-h-[54px] flex-col items-start justify-between rounded-lg border border-border bg-card px-2.5 py-1.5 text-left sm:min-h-[64px] sm:px-3 sm:py-2 shadow-[var(--shadow-card)] transition hover:border-border-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         active && "border-foreground/40 ring-1 ring-foreground/20",
       )}
     >
@@ -114,7 +114,7 @@ function Kpi({
       </span>
       <span
         className={cn(
-          "text-xl font-semibold tabular-nums leading-tight",
+          "text-lg font-semibold tabular-nums leading-tight sm:text-xl",
           toneClass,
         )}
       >
@@ -268,6 +268,8 @@ function ActionCenter() {
   } | null>(null);
   const [date, setDate] = React.useState("");
   const [search, setSearch] = React.useState("");
+  // Phones: filters fold away so the list starts near the top.
+  const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [openTaskId, setOpenTaskId] = React.useState<string | null>(
     params.get("task"),
   );
@@ -453,7 +455,7 @@ function ActionCenter() {
 
         <section
           aria-label="Today at a glance"
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10"
+          className="grid grid-cols-3 gap-1.5 sm:grid-cols-5 sm:gap-2 xl:grid-cols-10"
         >
           <Kpi
             label="Today's tasks"
@@ -524,7 +526,11 @@ function ActionCenter() {
             label="AI suggestions"
             value={n(s?.pendingSuggestions)}
             tone={s?.pendingSuggestions ? "ai" : "default"}
-            sub={s ? `${s.callsLogged} calls logged` : undefined}
+            sub={
+              s
+                ? `${s.callsLogged} call${s.callsLogged === 1 ? "" : "s"} logged`
+                : undefined
+            }
             onClick={() => setTab("suggestions")}
             active={tab === "suggestions"}
           />
@@ -577,63 +583,96 @@ function ActionCenter() {
               ))}
             </div>
             {tab !== "suggestions" && (
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-6">
-                <Input
-                  type="date"
-                  aria-label="Day"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-                <Select
-                  value={category}
-                  onValueChange={(v) => setCategory(v as TaskCategory | "ALL")}
+              <>
+                <div className="flex items-center justify-between md:hidden">
+                  <button
+                    type="button"
+                    aria-expanded={filtersOpen}
+                    aria-controls="ac-filters"
+                    onClick={() => setFiltersOpen((v) => !v)}
+                    className="min-h-9 rounded-md border border-border px-3 text-sm font-medium"
+                  >
+                    Filters
+                    {[
+                      date,
+                      category !== "ALL",
+                      priority !== "ALL",
+                      assignee,
+                      member,
+                      search,
+                    ].filter(Boolean).length
+                      ? ` (${[date, category !== "ALL", priority !== "ALL", assignee, member, search].filter(Boolean).length})`
+                      : ""}
+                  </button>
+                </div>
+                <div
+                  id="ac-filters"
+                  className={cn(
+                    "grid-cols-2 gap-2 md:grid md:grid-cols-6",
+                    filtersOpen ? "grid" : "hidden",
+                  )}
                 >
-                  <SelectTrigger aria-label="Category" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">All categories</SelectItem>
-                    {(Object.keys(CATEGORY_LABELS) as TaskCategory[]).map(
-                      (c) => (
-                        <SelectItem key={c} value={c}>
-                          {CATEGORY_LABELS[c]}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={priority}
-                  onValueChange={(v) => setPriority(v as TaskPriority | "ALL")}
-                >
-                  <SelectTrigger aria-label="Priority" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">Any priority</SelectItem>
-                    {(Object.keys(PRIORITY_LABELS) as TaskPriority[]).map(
-                      (p) => (
-                        <SelectItem key={p} value={p}>
-                          {PRIORITY_LABELS[p]}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
-                <StaffSelect
-                  value={assignee}
-                  onChange={setAssignee}
-                  placeholder="All staff"
-                />
-                <MemberPicker value={member} onChange={setMember} />
-                <Input
-                  type="search"
-                  aria-label="Search tasks"
-                  placeholder="Search tasks"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+                  <Input
+                    type="date"
+                    aria-label="Day"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                  <Select
+                    value={category}
+                    onValueChange={(v) =>
+                      setCategory(v as TaskCategory | "ALL")
+                    }
+                  >
+                    <SelectTrigger aria-label="Category" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All categories</SelectItem>
+                      {(Object.keys(CATEGORY_LABELS) as TaskCategory[]).map(
+                        (c) => (
+                          <SelectItem key={c} value={c}>
+                            {CATEGORY_LABELS[c]}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={priority}
+                    onValueChange={(v) =>
+                      setPriority(v as TaskPriority | "ALL")
+                    }
+                  >
+                    <SelectTrigger aria-label="Priority" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">Any priority</SelectItem>
+                      {(Object.keys(PRIORITY_LABELS) as TaskPriority[]).map(
+                        (p) => (
+                          <SelectItem key={p} value={p}>
+                            {PRIORITY_LABELS[p]}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <StaffSelect
+                    value={assignee}
+                    onChange={setAssignee}
+                    placeholder="All staff"
+                  />
+                  <MemberPicker value={member} onChange={setMember} />
+                  <Input
+                    type="search"
+                    aria-label="Search tasks"
+                    placeholder="Search tasks"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </>
             )}
           </div>
 

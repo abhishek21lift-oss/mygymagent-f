@@ -349,6 +349,8 @@ export function useActionSummary(
     queryFn: () =>
       api.get<ActionSummary>("/action-center/summary", { query: params }),
     enabled,
+    // Other staff, the scheduler and the AI change these numbers.
+    refetchInterval: 60_000,
   });
 }
 
@@ -393,6 +395,7 @@ export function useProposals(
     queryFn: () =>
       api.get<Proposal[]>("/action-center/proposals", { query: { status } }),
     enabled,
+    refetchInterval: 60_000,
   });
 }
 
@@ -514,7 +517,14 @@ export function useLogCall() {
   const invalidate = useInvalidate();
   return useMutation({
     mutationFn: (input: LogCallInput) => api.post<CallLog>("/call-logs", input),
-    onSuccess: invalidate,
+    onSuccess: (call) => {
+      invalidate();
+      // The note is analysed in the background and its suggestions land a
+      // few seconds later: look again then rather than wait for the poll.
+      if (call.analysisStatus === "PENDING") {
+        for (const delay of [5_000, 15_000]) setTimeout(invalidate, delay);
+      }
+    },
   });
 }
 
