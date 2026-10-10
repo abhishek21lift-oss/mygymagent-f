@@ -2439,3 +2439,77 @@
     font-size: 16px;
   }
 }
+
+/* ============================================================
+   THE SPLIT-SCREEN AUTH CANVAS
+   ------------------------------------------------------------
+   Desktop: a rich visual panel on the left (55%) — brand,
+   headline, dashboard preview, ambient orbs, decorative grid —
+   and a clean auth surface on the right (45%).
+   Mobile: a compact gradient hero above the form.
+   ============================================================ */
+
+/* Left panel mesh gradient base */
+.auth-visual-bg {
+  background:
+    radial-gradient(60rem 40rem at 8% 12%, color-mix(in oklab, var(--brand-3) 45%, transparent), transparent 62%),
+    radial-gradient(50rem 38rem at 92% 8%, color-mix(in oklab, var(--brand-2) 40%, transparent), transparent 64%),
+    radial-gradient(55rem 42rem at 50% 108%, color-mix(in oklab, var(--brand-1) 45%, transparent), transparent 68%),
+    linear-gradient(155deg, oklch(0.28 0.16 268) 0%, oklch(0.24 0.18 305) 55%, oklch(0.3 0.14 240) 100%);
+}
+
+/* Subtle decorative grid on the visual panel */
+.auth-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 25%, transparent 78%);
+}
+
+/* Floating motion for decorative panels */
+@keyframes auth-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.auth-float {
+  animation: auth-float 6s ease-in-out infinite;
+}
+.auth-float-delayed {
+  animation: auth-float 7s ease-in-out 1.2s infinite;
+}
+.auth-float-slow {
+  animation: auth-float 8.5s ease-in-out 0.6s infinite;
+}
+
+/* Entrance animation for the auth form */
+@keyframes auth-form-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.auth-form-in {
+  animation: auth-form-in 500ms var(--ease-out) backwards;
+}
+
+/* Entrance for the visual panel children */
+@keyframes auth-visual-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+.auth-visual-in > * {
+  animation: auth-visual-in 550ms var(--ease-out) backwards;
+}
+.auth-visual-in > *:nth-child(1) { animation-delay: 0ms; }
+.auth-visual-in > *:nth-child(2) { animation-delay: 90ms; }
+.auth-visual-in > *:nth-child(3) { animation-delay: 180ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-float,
+  .auth-float-delayed,
+  .auth-float-slow,
+  .auth-form-in,
+  .auth-visual-in > * {
+    animation: none;
+  }
+}

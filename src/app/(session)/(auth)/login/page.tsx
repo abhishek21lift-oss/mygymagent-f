@@ -4,7 +4,7 @@ import * as React from "react";
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, KeyRound, Lock, Mail, ShieldCheck, Smartphone } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, KeyRound, Lock, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { homeRouteFor } from "@/lib/auth/home-route";
 import { safeNext } from "@/lib/auth/safe-next";
@@ -17,334 +17,353 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
  * codes issued at enrolment; the backend accepts both in the same field. */
 const MIN_SECOND_FACTOR_LENGTH = 6;
 
+/** Shared input height across both sign-in modes. 48px clears the 44px
+ * touch-target guidance without reading as oversized next to the card. */
+const FIELD_H = "h-12";
+/** Icon inset for the leading glyph inside a field. */
+const FIELD_PL = "pl-11";
+
 function LoginForm({ requestedNext }: { requestedNext: string | null }) {
- const router = useRouter();
- const { login, completeMfaLogin, requestOtp, loginWithOtp, user, isLoading } = useAuth();
- const [email, setEmail] = React.useState("");
- const [password, setPassword] = React.useState("");
- const [error, setError] = React.useState("");
- const [isSubmitting, setIsSubmitting] = React.useState(false);
- // Non-null once the password was accepted but a second factor is owed.
- // Holding the challenge token here (and never in storage) keeps it to the
- // single tab that started the login, and it dies with a reload.
- const [mfaToken, setMfaToken] = React.useState<string | null>(null);
- const [code, setCode] = React.useState("");
- // Members sign in by phone, not email: 947 of this deployment's 954
- // were imported with a number and no address, and none has a password.
- // The two are genuinely different credentials, so they get their own
- // field rather than one box that guesses what was typed into it.
- const [mode, setMode] = React.useState<"password" | "sms">("password");
- const [phone, setPhone] = React.useState("");
- const [otpSent, setOtpSent] = React.useState(false);
- const [otpCode, setOtpCode] = React.useState("");
- const codeInputRef = React.useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { login, completeMfaLogin, requestOtp, loginWithOtp, user, isLoading } = useAuth();
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  // Non-null once the password was accepted but a second factor is owed.
+  // Holding the challenge token here (and never in storage) keeps it to the
+  // single tab that started the login, and it dies with a reload.
+  const [mfaToken, setMfaToken] = React.useState<string | null>(null);
+  const [code, setCode] = React.useState("");
+  // Members sign in by phone, not email: 947 of this deployment's 954
+  // were imported with a number and no address, and none has a password.
+  // The two are genuinely different credentials, so they get their own
+  // field rather than one box that guesses what was typed into it.
+  const [mode, setMode] = React.useState<"password" | "sms">("password");
+  const [phone, setPhone] = React.useState("");
+  const [otpSent, setOtpSent] = React.useState(false);
+  const [otpCode, setOtpCode] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
+  const codeInputRef = React.useRef<HTMLInputElement>(null);
 
- React.useEffect(() => {
- if (mfaToken) codeInputRef.current?.focus();
- }, [mfaToken]);
+  React.useEffect(() => {
+  if (mfaToken) codeInputRef.current?.focus();
+  }, [mfaToken]);
 
- // Already signed in (the public pages cannot tell, so their "Sign in"
- // brings everyone here): go straight on rather than ask again.
- React.useEffect(() => {
- if (!isLoading && user) router.replace(requestedNext ?? homeRouteFor(user));
- }, [isLoading, user, requestedNext, router]);
+  // Already signed in (the public pages cannot tell, so their "Sign in"
+  // brings everyone here): go straight on rather than ask again.
+  React.useEffect(() => {
+  if (!isLoading && user) router.replace(requestedNext ?? homeRouteFor(user));
+  }, [isLoading, user, requestedNext, router]);
 
- function describe(err: unknown, fallback: string) {
- return err instanceof ApiError ? err.message : fallback;
- }
+  function describe(err: unknown, fallback: string) {
+  return err instanceof ApiError ? err.message : fallback;
+  }
 
- async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
- event.preventDefault();
- setError("");
- if (!email.trim() || !password) {
- setError("Please enter your email and password.");
- return;
- }
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  setError("");
+  if (!email.trim() || !password) {
+  setError("Please enter your email and password.");
+  return;
+  }
 
- setIsSubmitting(true);
- try {
- const result = await login({ email: email.trim(), password });
- if (result.mfaRequired) {
- // No session yet: hold the challenge and ask for the code.
- setMfaToken(result.mfaToken);
- setPassword("");
- return;
- }
- // Gym members and staff sign in through this same form; the server
- // says which app the session belongs to, so a member is never
- // dropped into the staff app where every request would 403. A validated
- // `?next=` wins over that default, which is how "Platform staff
- // sign-in" reaches the Command Center.
- router.replace(requestedNext ?? homeRouteFor(result.user));
- } catch (err) {
- setError(
- describe(err, "Unable to sign in. Please check your credentials and try again."),
- );
- } finally {
- setIsSubmitting(false);
- }
- }
+  setIsSubmitting(true);
+  try {
+  const result = await login({ email: email.trim(), password });
+  if (result.mfaRequired) {
+  // No session yet: hold the challenge and ask for the code.
+  setMfaToken(result.mfaToken);
+  setPassword("");
+  setShowPassword(false);
+  return;
+  }
+  // Gym members and staff sign in through this same form; the server
+  // says which app the session belongs to, so a member is never
+  // dropped into the staff app where every request would 403. A validated
+  // `?next=` wins over that default, which is how "Platform staff
+  // sign-in" reaches the Command Center.
+  router.replace(requestedNext ?? homeRouteFor(result.user));
+  } catch (err) {
+  setError(
+  describe(err, "Unable to sign in. Please check your credentials and try again."),
+  );
+  } finally {
+  setIsSubmitting(false);
+  }
+  }
 
- async function onRequestOtp(event: React.FormEvent<HTMLFormElement>) {
- event.preventDefault();
- setError("");
- if (phone.replace(/\D/g, "").length < 10) {
- setError("Please enter the mobile number registered with your gym.");
- return;
- }
- setIsSubmitting(true);
- try {
- await requestOtp(phone.trim());
- // Advances whatever the server found. It answers a number that
- // belongs to nobody exactly like one that does, so this screen
- // must not claim a code is on its way to a known member -- the
- // wording says what was attempted, not what exists.
- setOtpSent(true);
- } catch (err) {
- setError(describe(err, "Could not send a code. Please try again."));
- } finally {
- setIsSubmitting(false);
- }
- }
+  async function onRequestOtp(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  setError("");
+  if (phone.replace(/\D/g, "").length < 10) {
+  setError("Please enter the mobile number registered with your gym.");
+  return;
+  }
+  setIsSubmitting(true);
+  try {
+  await requestOtp(phone.trim());
+  // Advances whatever the server found. It answers a number that
+  // belongs to nobody exactly like one that does, so this screen
+  // must not claim a code is on its way to a known member -- the
+  // wording says what was attempted, not what exists.
+  setOtpSent(true);
+  } catch (err) {
+  setError(describe(err, "Could not send a code. Please try again."));
+  } finally {
+  setIsSubmitting(false);
+  }
+  }
 
- async function onSubmitOtp(event: React.FormEvent<HTMLFormElement>) {
- event.preventDefault();
- setError("");
- if (otpCode.trim().length !== 6) {
- setError("Enter the 6-digit code from the SMS.");
- return;
- }
- setIsSubmitting(true);
- try {
- const session = await loginWithOtp(phone.trim(), otpCode.trim());
- router.replace(requestedNext ?? homeRouteFor(session.user));
- } catch (err) {
- setError(describe(err, "That code is not valid. Please try again."));
- setOtpCode("");
- } finally {
- setIsSubmitting(false);
- }
- }
+  async function onSubmitOtp(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  setError("");
+  if (otpCode.trim().length !== 6) {
+  setError("Enter the 6-digit code from the SMS.");
+  return;
+  }
+  setIsSubmitting(true);
+  try {
+  const session = await loginWithOtp(phone.trim(), otpCode.trim());
+  router.replace(requestedNext ?? homeRouteFor(session.user));
+  } catch (err) {
+  setError(describe(err, "That code is not valid. Please try again."));
+  setOtpCode("");
+  } finally {
+  setIsSubmitting(false);
+  }
+  }
 
- async function onSubmitCode(event: React.FormEvent<HTMLFormElement>) {
- event.preventDefault();
- setError("");
- const trimmed = code.trim();
- if (trimmed.length < MIN_SECOND_FACTOR_LENGTH) {
- setError("Enter the 6-digit code from your authenticator app, or a recovery code.");
- return;
- }
- if (!mfaToken) return;
+  async function onSubmitCode(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  setError("");
+  const trimmed = code.trim();
+  if (trimmed.length < MIN_SECOND_FACTOR_LENGTH) {
+  setError("Enter the 6-digit code from your authenticator app, or a recovery code.");
+  return;
+  }
+  if (!mfaToken) return;
 
- setIsSubmitting(true);
- try {
- const session = await completeMfaLogin(mfaToken, trimmed);
- router.replace(requestedNext ?? homeRouteFor(session.user));
- } catch (err) {
- // The challenge is single-use on success only, so a wrong code can be
- // retried against the same token until it expires. An expired or
- // already-spent token sends the user back to the password step.
- const apiError = err instanceof ApiError ? err : null;
- if (apiError?.status === 401) {
- setError("That code was not accepted. Check your authenticator app and try again.");
- } else {
- setError(describe(err, "Unable to verify that code. Please try again."));
- }
- setCode("");
- codeInputRef.current?.focus();
- } finally {
- setIsSubmitting(false);
- }
- }
+  setIsSubmitting(true);
+  try {
+  const session = await completeMfaLogin(mfaToken, trimmed);
+  router.replace(requestedNext ?? homeRouteFor(session.user));
+  } catch (err) {
+  // The challenge is single-use on success only, so a wrong code can be
+  // retried against the same token until it expires. An expired or
+  // already-spent token sends the user back to the password step.
+  const apiError = err instanceof ApiError ? err : null;
+  if (apiError?.status === 401) {
+  setError("That code was not accepted. Check your authenticator app and try again.");
+  } else {
+  setError(describe(err, "Unable to verify that code. Please try again."));
+  }
+  setCode("");
+  codeInputRef.current?.focus();
+  } finally {
+  setIsSubmitting(false);
+  }
+  }
 
- function startOver() {
- setMfaToken(null);
- setCode("");
- setError("");
- setPassword("");
- }
+  function startOver() {
+  setMfaToken(null);
+  setCode("");
+  setError("");
+  setPassword("");
+  }
 
- if (mfaToken) {
- return (
- <section aria-labelledby="mfa-title" className="overflow-hidden rounded-xl">
- <div className="border-b px-6 py-5">
- <h1 id="mfa-title" className="flex items-center gap-2 text-xl font-semibold tracking-tight">
- <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
- Two-step verification
- </h1>
- <p className="mt-1 text-sm text-muted-foreground">
- Enter the 6-digit code from your authenticator app. You can use one of your
- recovery codes instead if you do not have your device.
- </p>
- </div>
- <div className="p-6">
- <form onSubmit={onSubmitCode} className="flex flex-col gap-4" noValidate>
- <div className="flex flex-col gap-1.5">
- <label htmlFor="mfa-code" className="text-sm font-medium">
- Verification code
- </label>
- <div className="relative">
- <KeyRound
- className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
- aria-hidden="true"
- />
- <Input
- id="mfa-code"
- ref={codeInputRef}
- name="code"
- type="text"
- inputMode="text"
- // `one-time-code` lets password managers and iOS fill the
- // TOTP directly; a recovery code is typed into the same box.
- autoComplete="one-time-code"
- autoCapitalize="characters"
- spellCheck={false}
- placeholder="123456"
- value={code}
- onChange={(e) => setCode(e.target.value)}
- className="h-11 pl-10 font-mono tracking-widest"
- required
- />
- </div>
- </div>
- {error ? (
- <Alert variant="destructive">
- <AlertDescription>{error}</AlertDescription>
- </Alert>
- ) : null}
- <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-11 w-full">
- {isSubmitting ? "Verifying..." : "Verify and sign in"}
- {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
- </Button>
- <Button type="button" variant="ghost" onClick={startOver} className="h-11 w-full">
- Use a different account
- </Button>
- </form>
- </div>
- </section>
- );
- }
+  if (mfaToken) {
+  return (
+  <section aria-labelledby="mfa-title">
+  <div className="mb-8">
+  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+  <ShieldCheck className="size-6 text-primary" aria-hidden="true" />
+  </div>
+  <h1 id="mfa-title" className="text-[28px] leading-tight font-bold tracking-tighter text-foreground">
+  Two-step verification
+  </h1>
+  <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+  Enter the 6-digit code from your authenticator app. You can use one of your
+  recovery codes instead if you do not have your device.
+  </p>
+  </div>
+  <form onSubmit={onSubmitCode} className="flex flex-col gap-4" noValidate>
+  <div className="flex flex-col gap-1.5">
+  <label htmlFor="mfa-code" className="text-sm font-medium text-foreground">
+  Verification code
+  </label>
+  <div className="relative">
+  <KeyRound
+  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+  aria-hidden="true"
+  />
+  <Input
+  id="mfa-code"
+  ref={codeInputRef}
+  name="code"
+  type="text"
+  inputMode="text"
+  // `one-time-code` lets password managers and iOS fill the
+  // TOTP directly; a recovery code is typed into the same box.
+  autoComplete="one-time-code"
+  autoCapitalize="characters"
+  spellCheck={false}
+  placeholder="123456"
+  value={code}
+  onChange={(e) => setCode(e.target.value)}
+  className={"h-12 pl-11 font-mono tracking-widest"}
+  required
+  />
+  </div>
+  </div>
+  {error ? (
+  <Alert variant="destructive">
+  <AlertDescription>{error}</AlertDescription>
+  </Alert>
+  ) : null}
+  <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-12 w-full text-[15px] font-semibold">
+  {isSubmitting ? "Verifying..." : "Verify and sign in"}
+  {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
+  </Button>
+  <Button type="button" variant="ghost" onClick={startOver} className="h-12 w-full">
+  Use a different account
+  </Button>
+  </form>
+  </section>
+  );
+  }
 
- return (
- <section aria-labelledby="login-title" className="overflow-hidden rounded-xl">
- <div className="border-b px-6 py-5">
- <h1 id="login-title" className="text-xl font-semibold tracking-tight">Welcome back</h1>
- {/* One form for both, and the server already knows which app the session
- opens. The old copy described that outcome ("you will land in the right
- place") without ever mentioning there are two ways in, which is what left a
- member unsure whether "Password" applied to them. */}
-<p className="mt-1 text-sm text-muted-foreground">
- Gym staff or member? Pick how you sign in — we&apos;ll take you to the right place.
-</p>
- </div>
- <div className="p-6">
- <div role="tablist" aria-label="How to sign in" className="mb-5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
- {/* Labelled by who is signing in, not by what to type. "Password" and
- "SMS code" described the credential and left a member unable to tell that
- "Password" was not for them — which is the only question this page has to
- answer. The credential itself is still stated in the subcopy below. */}
- {([["password", "Gym staff"], ["sms", "Member"]] as const).map(([value, label]) => (
- <button
- key={value}
- type="button"
- role="tab"
- aria-selected={mode === value}
- onClick={() => { setMode(value); setError(""); setOtpSent(false); setOtpCode(""); }}
- className={"min-h-10 rounded-md px-3 text-sm font-medium transition-colors " + (mode === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
- >
- {label}
- </button>
- ))}
- </div>
+  return (
+  <section aria-labelledby="login-title">
+  <div className="mb-8">
+  <h1 id="login-title" className="text-[28px] leading-tight font-bold tracking-tighter text-foreground sm:text-[32px]">
+  Welcome back
+  </h1>
+  {/* One form for both, and the server already knows which app the session
+  opens. The old copy described that outcome ("you will land in the right
+  place") without ever mentioning there are two ways in, which is what left a
+  member unsure whether "Password" applied to them. */}
+  <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+  Gym staff or member? Pick how you sign in — we&apos;ll take you to the right place.
+  </p>
+  </div>
 
- {/* The tab names the person; this still names the credential, so nothing
- the old labels said is lost — it is just said where it is useful. */}
- <p className="mb-4 text-sm text-muted-foreground">
- {mode === "sms"
- ? "Sign in with your phone number and we'll text you a code."
- : "Sign in with the email and password your gym set up."}
- </p>
+  <div role="tablist" aria-label="How to sign in" className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+  {/* Labelled by who is signing in, not by what to type. "Password" and
+  "SMS code" described the credential and left a member unable to tell that
+  "Password" was not for them — which is the only question this page has to
+  answer. The credential itself is still stated in the subcopy below. */}
+  {([["password", "Gym staff"], ["sms", "Member"]] as const).map(([value, label]) => (
+  <button
+  key={value}
+  type="button"
+  role="tab"
+  aria-selected={mode === value}
+  onClick={() => { setMode(value); setError(""); setOtpSent(false); setOtpCode(""); }}
+  className={"min-h-11 rounded-lg px-3 text-sm font-semibold transition-colors " + (mode === value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+  >
+  {label}
+  </button>
+  ))}
+  </div>
 
- {mode === "sms" ? (
- <form onSubmit={otpSent ? onSubmitOtp : onRequestOtp} className="flex flex-col gap-4" noValidate>
- <div className="flex flex-col gap-1.5">
- <label htmlFor="login-phone" className="text-sm font-medium">Mobile number</label>
- <div className="relative">
- <Smartphone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
- <Input id="login-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="9876543210" value={phone} onChange={(e) => { setPhone(e.target.value); setOtpSent(false); }} className="h-11 pl-10" required />
- </div>
- <p className="text-xs text-muted-foreground">The number your gym has on file.</p>
- </div>
+  {/* The tab names the person; this still names the credential, so nothing
+  the old labels said is lost — it is just said where it is useful. */}
+  <p className="mb-5 text-sm text-muted-foreground">
+  {mode === "sms"
+  ? "Sign in with your phone number and we'll text you a code."
+  : "Sign in with the email and password your gym set up."}
+  </p>
 
- {otpSent ? (
- <div className="flex flex-col gap-1.5">
- <label htmlFor="login-otp" className="text-sm font-medium">6-digit code</label>
- <Input id="login-otp" name="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="123456" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))} className="h-11 text-center font-mono text-lg tracking-[0.4em]" required />
- <p className="text-xs text-muted-foreground">
- If that number is registered, a code is on its way. It expires in 5 minutes.
- </p>
- </div>
- ) : null}
+  {mode === "sms" ? (
+  <form onSubmit={otpSent ? onSubmitOtp : onRequestOtp} className="flex flex-col gap-4" noValidate>
+  <div className="flex flex-col gap-1.5">
+  <label htmlFor="login-phone" className="text-sm font-medium text-foreground">Mobile number</label>
+  <div className="relative">
+  <Smartphone className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+  <Input id="login-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="9876543210" value={phone} onChange={(e) => { setPhone(e.target.value); setOtpSent(false); }} className={FIELD_H + " " + FIELD_PL} required />
+  </div>
+  <p className="text-xs text-muted-foreground">The number your gym has on file.</p>
+  </div>
 
- {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
+  {otpSent ? (
+  <div className="flex flex-col gap-1.5">
+  <label htmlFor="login-otp" className="text-sm font-medium text-foreground">6-digit code</label>
+  <Input id="login-otp" name="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="123456" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))} className="h-12 text-center font-mono text-lg tracking-[0.4em]" required />
+  <p className="text-xs text-muted-foreground">
+  If that number is registered, a code is on its way. It expires in 5 minutes.
+  </p>
+  </div>
+  ) : null}
 
- <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-11 w-full">
- {isSubmitting ? (otpSent ? "Signing in..." : "Sending...") : otpSent ? "Sign in" : "Send code"}
- {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
- </Button>
+  {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
 
- {otpSent ? (
- <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); setError(""); }} className="min-h-10 text-center text-sm font-medium text-primary hover:underline">
- Use a different number
- </button>
- ) : null}
- </form>
- ) : (
- <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
- <div className="flex flex-col gap-1.5">
- <label htmlFor="login-email" className="text-sm font-medium">Email</label>
- <div className="relative">
- <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
- <Input id="login-email" name="email" type="email" inputMode="email" autoComplete="email" placeholder="you@yourgym.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 pl-10" required />
- </div>
- </div>
- <div className="flex flex-col gap-1.5">
- <div className="flex items-center justify-between gap-2">
- <label htmlFor="login-password" className="text-sm font-medium">Password</label>
- <Link href="/forgot-password" className="inline-flex min-h-8 items-center rounded-md px-1 text-xs font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-ring">Forgot password?</Link>
- </div>
- <div className="relative">
- <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
- <Input id="login-password" name="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 pl-10" required />
- </div>
- </div>
- {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
- <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-11 w-full">
- {isSubmitting ? "Signing in..." : "Sign in"}
- {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
- </Button>
- </form>
- )}
- {/* Platform staff sign in with the same email and password as anyone
-  else, so there is nothing to make visible except where they land. This
-  says so and carries the intent through `?next=`; the Command Center
-  itself is auth-gated, so linking straight at it would bounce a signed-out
-  visitor straight back here. */}
- <p className="mt-4 text-center text-sm text-muted-foreground">
- <Link
- href="/login?next=%2Fplatform%2Fcommand-center"
- className="font-medium text-primary hover:underline"
- >
- Platform staff sign-in
- </Link>
- </p>
- <p className="mt-5 text-center text-sm text-muted-foreground">
- Setting up a new gym?{" "}
- <Link href="/register" className="font-medium text-primary hover:underline">Create an account</Link>
- </p>
- </div>
- </section>
- );
+  <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-12 w-full text-[15px] font-semibold">
+  {isSubmitting ? (otpSent ? "Signing in..." : "Sending...") : otpSent ? "Sign in" : "Send code"}
+  {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
+  </Button>
+
+  {otpSent ? (
+  <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); setError(""); }} className="min-h-10 text-center text-sm font-medium text-primary hover:underline">
+  Use a different number
+  </button>
+  ) : null}
+  </form>
+  ) : (
+  <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+  <div className="flex flex-col gap-1.5">
+  <label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</label>
+  <div className="relative">
+  <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+  <Input id="login-email" name="email" type="email" inputMode="email" autoComplete="email" placeholder="you@yourgym.com" value={email} onChange={(e) => setEmail(e.target.value)} className={FIELD_H + " " + FIELD_PL} required />
+  </div>
+  </div>
+  <div className="flex flex-col gap-1.5">
+  <div className="flex items-center justify-between gap-2">
+  <label htmlFor="login-password" className="text-sm font-medium text-foreground">Password</label>
+  <Link href="/forgot-password" className="inline-flex min-h-8 items-center rounded-md px-1 text-xs font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-ring">Forgot password?</Link>
+  </div>
+  <div className="relative">
+  <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+  <Input id="login-password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={FIELD_H + " " + FIELD_PL + " pr-12"} required />
+  <button
+  type="button"
+  onClick={() => setShowPassword((v) => !v)}
+  aria-label={showPassword ? "Hide password" : "Show password"}
+  className="absolute right-1.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+  >
+  {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+  </button>
+  </div>
+  </div>
+  {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
+  <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting} className="h-12 w-full text-[15px] font-semibold">
+  {isSubmitting ? "Signing in..." : "Sign in"}
+  {!isSubmitting && <ArrowRight className="size-4" aria-hidden="true" />}
+  </Button>
+  </form>
+  )}
+  {/* Platform staff sign in with the same email and password as anyone
+   else, so there is nothing to make visible except where they land. This
+   says so and carries the intent through `?next=`; the Command Center
+   itself is auth-gated, so linking straight at it would bounce a signed-out
+   visitor straight back here. */}
+  <div className="mt-6 space-y-3 border-t border-border/60 pt-6 text-center">
+  <p className="text-sm text-muted-foreground">
+  <Link
+  href="/login?next=%2Fplatform%2Fcommand-center"
+  className="font-medium text-primary hover:underline"
+  >
+  Platform staff sign-in
+  </Link>
+  </p>
+  <p className="text-sm text-muted-foreground">
+  Setting up a new gym?{" "}
+  <Link href="/register" className="font-medium text-primary hover:underline">Create an account</Link>
+  </p>
+  </div>
+  </section>
+  );
 }
 
 /**
@@ -360,9 +379,9 @@ function LoginForm({ requestedNext }: { requestedNext: string | null }) {
  * deeper in the tree.
  */
 function LoginWithNext() {
- const searchParams = useSearchParams();
- const requestedNext = safeNext(searchParams.get("next"));
- return <LoginForm requestedNext={requestedNext} />;
+  const searchParams = useSearchParams();
+  const requestedNext = safeNext(searchParams.get("next"));
+  return <LoginForm requestedNext={requestedNext} />;
 }
 
 /**
@@ -372,9 +391,9 @@ function LoginWithNext() {
  * `/login` keeps its own prerendered shell.
  */
 export default function LoginPage() {
- return (
- <Suspense fallback={null}>
- <LoginWithNext />
- </Suspense>
- );
+  return (
+  <Suspense fallback={null}>
+  <LoginWithNext />
+  </Suspense>
+  );
 }
