@@ -3,15 +3,19 @@
 import * as React from "react"
 import { Building2, ShieldAlert } from "lucide-react"
 import { toast } from "sonner"
+import { useSearchParams } from "next/navigation"
 
 import { ApiError } from "@/lib/api/client"
 import { useAuth } from "@/lib/auth/auth-context"
 import {
  usePlatformOrganization,
  usePlatformOrganizations,
+ usePlatformPlans,
+ useUpdatePlatformOrganizationPlan,
  useUpdatePlatformOrganizationStatus,
  type OrganizationStatus,
  type PlatformOrganization,
+ type PlatformPlan,
 } from "@/lib/hooks/use-platform"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { DataState } from "@/components/shared/data-state"
@@ -159,10 +163,83 @@ function StatusControl({ org }: { org: PlatformOrganization }) {
  )
 }
 
+/** Months 1-36, the same window the server enforces. Anything else keeps
+ * the confirm shut rather than round-tripping a 400. Exported for the
+ * spec; the page is its only importer. */
+export function parseMonths(raw: string): number | null {
+  if (!/^\d+$/.test(raw.trim())) return null
+  const months = Number(raw.trim())
+  return months >= 1 && months <= 36 ? months : null
+}
+
+function PlanControl({ org, plans }: { org: PlatformOrganization; plans: PlatformPlan[] }) {
+ const update = useUpdatePlatformOrganizationPlan()
+ const [planKey, setPlanKey] = React.useState("")
+ const [months, setMonths] = React.useState("1")
+ const validMonths = parseMonths(months)
+ const plan = plans.find((p) => p.key === planKey)
+
+ return (
+  <div className="flex items-center gap-2">
+   <Select value={planKey} onValueChange={setPlanKey}>
+    <SelectTrigger className="h-9 w-36" aria-label={`Change plan for ${org.name}`}>
+     <SelectValue placeholder="Set plan..." />
+    </SelectTrigger>
+    <SelectContent>
+     {plans.map((p) => (
+      <SelectItem key={p.key} value={p.key}>{p.name}</SelectItem>
+     ))}
+    </SelectContent>
+   </Select>
+   {planKey && (
+    <>
+     <Input
+      className="h-9 w-20"
+      inputMode="numeric"
+      aria-label={`Paid months for ${org.name}`}
+      value={months}
+      onChange={(event) => setMonths(event.target.value)}
+     />
+     <ConfirmAction
+      label="Apply"
+      title={`Move ${org.name} to ${plan?.name ?? planKey}?`}
+      description={`Paid period of ${validMonths ?? "—"} month${validMonths === 1 ? "" : "s"} from today. The gym keeps working; only its billing standing changes.`}
+      confirmLabel={`Set ${plan?.name ?? planKey}`}
+      pendingLabel="Applying..."
+      successMessage={`${org.name} is now on ${plan?.name ?? planKey}`}
+      errorMessage="Could not change this organization's plan."
+      disabled={validMonths === null}
+      onConfirm={async () => {
+       await update.mutateAsync({ id: org.id, planKey, months: validMonths! })
+       setPlanKey("")
+       setMonths("1")
+      }}
+     />
+    </>
+   )}
+  </div>
+ )
+}
+
 export default function PlatformOrganizationsPage() {
+ return (
+  <React.Suspense fallback={<div className="p-8"><Skeleton className="h-40 w-full" /></div>}>
+   <PlatformOrganizations />
+  </React.Suspense>
+ )
+}
+
+/**
+ * The Command Center's broken-link rows deep-link here with
+ * `?search=<gym name>`, so the operator lands on the gym instead of an
+ * unfiltered list and a manual search. The param seeds the filter once;
+ * typing afterwards owns it.
+ */
+function PlatformOrganizations() {
  const { user, isLoading } = useAuth()
+ const params = useSearchParams()
  const [status, setStatus] = React.useState<string>(ALL)
- const [search, setSearch] = React.useState("")
+ const [search, setSearch] = React.useState(params.get("search") ?? "")
  const [page, setPage] = React.useState(1)
 
  const isPlatformStaff = Boolean(user?.platformRole)
@@ -171,7 +248,11 @@ export default function PlatformOrganizationsPage() {
   pageSize: 20,
   ...(status === ALL ? {} : { status: status as OrganizationStatus }),
   ...(search.trim() ? { search: search.trim() } : {}),
- })
+ },
+ // The gate below renders the reason instead of the list; without this
+ // the query would still fire (and 403) for every ordinary gym account.
+ { enabled: isPlatformStaff })
+ const plans = usePlatformPlans(isPlatformStaff)
 
  if (isLoading) return <div className="p-8"><Skeleton className="h-40 w-full" /></div>
 
@@ -255,6 +336,7 @@ export default function PlatformOrganizationsPage() {
        <div className="flex flex-wrap items-center gap-2">
         <OrgDetailDialog org={org} />
         <StatusControl org={org} />
+        {plans.data ? <PlanControl org={org} plans={plans.data} /> : null}
        </div>
       </div>
      ))}

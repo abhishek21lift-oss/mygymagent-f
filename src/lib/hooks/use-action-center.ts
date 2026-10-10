@@ -589,3 +589,41 @@ export function useAssignableStaff({ enabled = true } = {}) {
     staleTime: 5 * 60_000,
   });
 }
+
+export interface ActionCenterSettings {
+  renewalReminderDays: number[]
+  expiredLookbackDays: number
+  duesFollowUpIntervalDays: number
+  inactiveDays: number
+  promiseGraceDays: number
+  newLeadContactHours: number
+  reminderLeadMinutes: number
+  overdueEscalationHours: number
+  quietHoursStart: number | null
+  quietHoursEnd: number | null
+  maxNewTasksPerSource: number
+  maxOpenInactiveTasks: number
+}
+
+/** The generator/reminder rules (tasks.read). The server fills every gap
+ * with its default, so the dialog always edits complete values. */
+export function useActionCenterSettings({ enabled = true } = {}) {
+  return useQuery({
+    queryKey: [KEY, "settings"],
+    queryFn: () => api.get<ActionCenterSettings>("/action-center/settings"),
+    enabled,
+    staleTime: 5 * 60_000,
+  })
+}
+
+/** tasks.manage, audited server-side. PATCH merges over the stored rules. */
+export function useUpdateActionCenterSettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Partial<ActionCenterSettings>) =>
+      api.patch<ActionCenterSettings>("/action-center/settings", input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [KEY, "settings"] })
+    },
+  })
+}

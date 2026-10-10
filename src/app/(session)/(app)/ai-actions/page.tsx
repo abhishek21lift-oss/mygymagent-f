@@ -5,12 +5,13 @@ import { ArrowRight, Check, Clock3, ShieldCheck, X, Sparkles, Zap } from "lucide
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAiActions, useRejectAiAction } from "@/lib/hooks/use-ai-actions";
+import { useAiActions, useAiActionEffectiveness, useRejectAiAction } from "@/lib/hooks/use-ai-actions";
 import { AiActionReviewDialog } from "./review-dialog";
 import { PageHero } from "@/components/shared/page-hero";
 
 export default function AiActionsPage() {
  const actions = useAiActions("PENDING_APPROVAL");
+ const funnel = useAiActionEffectiveness();
  const reject = useRejectAiAction();
  const count = actions.data?.items.length ?? 0;
 
@@ -72,6 +73,13 @@ export default function AiActionsPage() {
  </span>
  <div>
  <h2 id="aia-queue" className="section-title">Approval queue</h2>
+ {funnel.data ? (
+ <p className="text-xs tabular-nums text-muted-foreground">
+ {funnel.data.executed} executed · {funnel.data.rejected} rejected
+ {funnel.data.acceptanceRate !== null ? ` · ${Math.round(funnel.data.acceptanceRate * 100)}% accepted` : ""}
+ {funnel.data.failed > 0 ? ` · ${funnel.data.failed} failed` : ""}
+ </p>
+ ) : null}
  </div>
  </div>
  <div className="grid gap-4">

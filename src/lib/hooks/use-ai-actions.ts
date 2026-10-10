@@ -72,3 +72,25 @@ export function useRejectAiAction() {
     },
   });
 }
+
+export interface AiActionEffectiveness {
+  total: number
+  pending: number
+  approved: number
+  executed: number
+  rejected: number
+  failed: number
+  /** decided/(decided+rejected)-style rates; null when nothing settled. */
+  acceptanceRate: number | null
+  executionRate: number | null
+}
+
+/** Org-wide approval funnel. Read-only aggregates for the queue header. */
+export function useAiActionEffectiveness({ enabled = true }: { enabled?: boolean } = {}) {
+  return useQuery({
+    queryKey: ["ai-actions", "effectiveness"],
+    queryFn: () => api.get<AiActionEffectiveness>("/ai-actions/effectiveness"),
+    staleTime: 60_000,
+    enabled,
+  })
+}
