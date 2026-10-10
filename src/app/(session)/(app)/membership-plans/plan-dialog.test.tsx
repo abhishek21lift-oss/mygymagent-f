@@ -1,5 +1,5 @@
 import { createMembershipPlanSchema } from "@/lib/validation/gym";
-import { fromDurationDays, toDurationDays } from "./plan-dialog";
+import { fromDurationDays, toDurationDays } from "./plan-form";
 
 const base = {
   name: "12-Month Unlimited",

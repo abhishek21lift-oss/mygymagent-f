@@ -268,31 +268,36 @@ describe("DashboardPage", () => {
     expect(callsTo("/workout-sessions/today")[0]?.query).toEqual({ branchId: BRANCH_B })
   })
 
-  it("shows the slim gym health hero with brand, ring and no alert copy", async () => {
+  it("shows the slim gym health hero with the name and no meter", async () => {
     renderPage()
     // Brand only in the hero eyebrow — no "MyGymAgent ·" prefix, no visible title.
     expect(await screen.findByText("619 Fitness Studio")).toBeInTheDocument()
-    // Data-driven wait: the ring only carries the score once resolved.
-    expect(await screen.findByRole("img", { name: "Gym health 82 out of 100, Healthy" })).toBeInTheDocument()
+    // The health meter lives in "Why this score" now, not the hero.
+    expect(screen.queryByRole("img", { name: /Gym health/ })).not.toBeInTheDocument()
     // Alert copy lives in the breakdown card now, not the hero.
     expect(screen.queryByText("82 · Healthy")).not.toBeInTheDocument()
     expect(screen.queryByText(/biggest opportunity today/)).not.toBeInTheDocument()
     expect(screen.getByText("Why this score")).toBeInTheDocument()
-    expect(screen.getByText(/Kept after refunds/)).toBeInTheDocument()
-    expect(screen.getByText("Revenue at risk")).toBeInTheDocument()
+    // Data-driven wait: the breakdown only carries scores once resolved.
+    expect(await screen.findByText("Revenue at risk")).toBeInTheDocument()
     expect(screen.getByText("At-risk MRR")).toBeInTheDocument()
+    // Explanations sit behind per-row disclosure to keep the card compact.
+    const disclosures = (screen.getAllByText("Details") as HTMLElement[])
+      .map((el) => el.closest("details"))
+      .filter((el): el is HTMLDetailsElement => el !== null);
+    expect(disclosures.length).toBeGreaterThan(0);
+    expect(disclosures[0]?.textContent).toMatch(/Kept after refunds/);
     const healthCalls = callsTo("/analytics/gym-health")
     expect(healthCalls).toHaveLength(1)
   })
 
-  it("keeps the hero to the date, the gym's name and its health ring", async () => {
+  it("keeps the hero to the date and the gym's name", async () => {
     renderPage()
     expect(await screen.findByRole("heading", { level: 1, name: "619 Fitness Studio" })).toBeInTheDocument()
-    expect(await screen.findByRole("img", { name: "Gym health 82 out of 100, Healthy" })).toBeInTheDocument()
+    expect(screen.queryByRole("img", { name: /Gym health/ })).not.toBeInTheDocument()
     // No greeting, no status pill beside the name, no "Updated" time.
     expect(screen.queryByText(/Good (morning|afternoon|evening)/)).not.toBeInTheDocument()
     expect(screen.queryByText(/^Updated /)).not.toBeInTheDocument()
-    expect(screen.getAllByText("Healthy")).toHaveLength(1)
   })
 
   it("opens each Today figure's records for the same day and branch", async () => {
@@ -554,7 +559,8 @@ describe("DashboardPage", () => {
       },
     })
     renderPage()
-    expect(await screen.findByRole("img", { name: "Gym health unavailable" })).toBeInTheDocument()
+    expect(await screen.findByText("Why this score")).toBeInTheDocument()
+    expect(screen.queryByRole("img", { name: /Gym health/ })).not.toBeInTheDocument()
     expect(screen.queryByText("0%")).not.toBeInTheDocument()
     expect(screen.queryByText(/GET \/analytics/)).not.toBeInTheDocument()
   })

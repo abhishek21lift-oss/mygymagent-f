@@ -124,7 +124,7 @@ function ProgressIndicator({ currentStep }: { currentStep: number }) {
  );
 }
 
-function WelcomeStep({ onUpdate }: { onUpdate: (data: Partial<OnboardingData>) => void }) {
+function WelcomeStep({ onNext }: { onNext: () => void }) {
  return (
  <div className="flex flex-col items-center text-center">
  <div className="mb-6 flex size-20 items-center justify-center rounded-lg bg-primary shadow-md">
@@ -165,7 +165,7 @@ function WelcomeStep({ onUpdate }: { onUpdate: (data: Partial<OnboardingData>) =
  <Button
  size="lg"
  className="btn-sheen mt-8 min-h-11 rounded-lg bg-primary px-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
- onClick={() => onUpdate({})}
+ onClick={onNext}
  >
  Let&apos;s Get Started
  <ChevronRight className="ml-2 size-4" aria-hidden="true" />
@@ -508,9 +508,13 @@ function ConfigurationStep({
 function TeamStep({
  data,
  onUpdate,
+ onSkip,
+ isSkipping,
 }: {
  data: OnboardingData;
  onUpdate: (data: Partial<OnboardingData>) => void;
+ onSkip: () => void;
+ isSkipping: boolean;
 }) {
  const [emailInput, setEmailInput] = React.useState("");
 
@@ -597,8 +601,8 @@ function TeamStep({
  </div>
  </div>
 
- <Button variant="outline" className="mt-4 min-h-11 rounded-lg" onClick={() => onUpdate({})}>
- Skip for Now
+ <Button variant="outline" className="mt-4 min-h-11 rounded-lg" onClick={onSkip} disabled={isSkipping}>
+ {isSkipping ? "Saving…" : "Skip for Now"}
  </Button>
  </div>
  </div>
@@ -916,11 +920,11 @@ export function BusinessOnboardingWizard() {
  )}
 
  <div className="flex-1 px-4 pb-8 sm:px-8">
- {currentStep === 0 && <WelcomeStep onUpdate={updateData} />}
+ {currentStep === 0 && <WelcomeStep onNext={goNext} />}
  {currentStep === 1 && <BusinessStep data={data} onUpdate={updateData} />}
  {currentStep === 2 && <BranchStep data={data} onUpdate={updateData} />}
  {currentStep === 3 && <ConfigurationStep data={data} onUpdate={updateData} />}
- {currentStep === 4 && <TeamStep data={data} onUpdate={updateData} />}
+ {currentStep === 4 && <TeamStep data={data} onUpdate={updateData} onSkip={handleComplete} isSkipping={isSubmitting} />}
  {currentStep === 5 && <CompleteStep />}
  {currentStep === 4 && (
  <div className="mt-8">

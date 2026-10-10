@@ -285,14 +285,7 @@ export default function DashboardPage() {
     <div className="flex w-full flex-col gap-8 pb-10">
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <GymHealthHero
-        gymName={gymName}
-        timeZone={timezone}
-        health={gymHealth.data}
-        isLoading={gymHealth.isLoading || !datedReady}
-        isError={gymHealth.isError}
-        onRetry={() => void gymHealth.refetch()}
-      >
+      <GymHealthHero gymName={gymName} timeZone={timezone}>
         {branchPicker}
       </GymHealthHero>
 

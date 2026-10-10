@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import {
  BadgeCheck,
  CalendarCheck,
@@ -44,12 +43,6 @@ import {
  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
- Tabs,
- TabsContent,
- TabsList,
- TabsTrigger,
-} from "@/components/ui/tabs";
-import {
  Select,
  SelectContent,
  SelectItem,
@@ -57,9 +50,8 @@ import {
  SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAssignableTrainers, useMember, useUpdateMember, useDeleteMember } from "@/lib/hooks/use-members";
+import { useMember, useDeleteMember } from "@/lib/hooks/use-members";
 import { useMemberWorkoutHistory } from "@/lib/hooks/use-workout-history";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
@@ -67,8 +59,8 @@ import { useMemberMeasurements } from "@/lib/hooks/use-member-assessments";
 import { useMemberGoals } from "@/lib/hooks/use-member-goals";
 import { useMemberScreenings } from "@/lib/hooks/use-member-screenings";
 import { Member360Tabs } from "./member-360-tabs";
+import { useProfilePhotoUrl } from "./edit/profile-photo-section";
 import { SellMembershipDialog } from "./sell-membership-dialog";
-import { editPayload } from "./edit-member-payload";
 import { MemberActionsPanel } from "./actions/member-actions-panel";
 import { MemberAiProgress } from "./member-ai-progress";
 import { EntryAccessCard } from "./entry-access-card";
@@ -384,485 +376,7 @@ function ProgressStat({
  );
 }
 
-const editMemberSchema = z.object({
- firstName: z.string().min(1, "First name is required"),
- lastName: z.string().min(1, "Last name is required"),
- email: z.string().email("Enter a valid email address").optional().or(z.literal("")),
- phone: z.string().optional().or(z.literal("")),
- dateOfBirth: z.string().optional().or(z.literal("")),
- gender: z.enum(["MALE", "FEMALE", "OTHER", "UNDISCLOSED"]).optional(),
- memberType: z.enum(["GYM", "PT", "GYM_PT"]).optional(),
- addressLine1: z.string().optional(),
- addressLine2: z.string().optional(),
- city: z.string().optional(),
- state: z.string().optional(),
- postalCode: z.string().optional(),
- country: z.string().optional(),
- emergencyContactName: z.string().optional(),
- emergencyContactPhone: z.string().optional(),
- emergencyContactRelationship: z.string().optional(),
- fitnessGoal: z.string().optional(),
- injuries: z.string().optional(),
- allergies: z.string().optional(),
- medicalNotes: z.string().optional(),
- notes: z.string().optional(),
- assignedTrainerId: z.string().optional(),
- primaryBranchId: z.string().optional(),
-});
-
-type EditMemberFormData = z.infer<typeof editMemberSchema>;
-
-function EditMemberDialog({
- member,
- children,
-}: {
- member: MemberWithMemberships;
- children: React.ReactNode;
-}) {
- const [open, setOpen] = React.useState(false);
- const updateMember = useUpdateMember(member.id);
- const trainers = useAssignableTrainers(member.primaryBranchId ?? undefined, open);
-
- const form = useForm<EditMemberFormData>({
- resolver: zodResolver(editMemberSchema),
- defaultValues: {
- firstName: member.firstName,
- lastName: member.lastName,
- email: member.email ?? "",
- phone: member.phone ?? "",
- dateOfBirth: member.dateOfBirth ?? "",
- gender: (member.gender as EditMemberFormData["gender"]) ?? undefined,
- memberType: (member.memberType as EditMemberFormData["memberType"]) ?? undefined,
- addressLine1: member.addressLine1 ?? "",
- addressLine2: member.addressLine2 ?? "",
- city: member.city ?? "",
- state: member.state ?? "",
- postalCode: member.postalCode ?? "",
- country: member.country ?? "",
- emergencyContactName: member.emergencyContactName ?? "",
- emergencyContactPhone: member.emergencyContactPhone ?? "",
- emergencyContactRelationship: member.emergencyContactRelationship ?? "",
- fitnessGoal: member.fitnessGoal ?? "",
- injuries: member.injuries ?? "",
- allergies: member.allergies ?? "",
- medicalNotes: member.medicalNotes ?? "",
- notes: member.notes ?? "",
- assignedTrainerId: member.assignedTrainerId ?? "",
- primaryBranchId: member.primaryBranchId ?? "",
- },
- });
-
- async function onSubmit(values: EditMemberFormData) {
- try {
- await updateMember.mutateAsync(editPayload(values, form.formState.defaultValues ?? {}));
- toast.success("Member updated successfully");
- setOpen(false);
- } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Failed to update member");
- }
- }
-
- return (
- <Dialog open={open} onOpenChange={setOpen}>
- <DialogTrigger asChild>{children}</DialogTrigger>
- <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-border bg-card">
- <DialogHeader>
- <DialogTitle className="font-semibold text-xl tracking-tight">Edit Member</DialogTitle>
- </DialogHeader>
- <Form {...form}>
- <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
- <Tabs defaultValue="personal" className="w-full">
- <TabsList className="grid h-auto w-full grid-cols-5 rounded-lg border border-violet-100/70 bg-muted/40 p-1.5">
- <TabsTrigger value="personal" className="min-h-11 rounded-xl font-bold data-[state=active]: data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Personal</TabsTrigger>
- <TabsTrigger value="address" className="min-h-11 rounded-xl font-bold data-[state=active]: data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Address</TabsTrigger>
- <TabsTrigger value="emergency" className="min-h-11 rounded-xl font-bold data-[state=active]: data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Emergency</TabsTrigger>
- <TabsTrigger value="fitness" className="min-h-11 rounded-xl font-bold data-[state=active]: data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Fitness</TabsTrigger>
- <TabsTrigger value="assignment" className="min-h-11 rounded-xl font-bold data-[state=active]: data-[state=active]:from-violet-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white data-[state=active]:shadow-md">Assignment</TabsTrigger>
- </TabsList>
-
- <TabsContent value="personal" className="space-y-4 pt-4">
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="firstName"
- render={({ field }) => (
- <FormItem>
- <FormLabel>First Name *</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="lastName"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Last Name *</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </div>
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="email"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Email</FormLabel>
- <FormControl>
- <Input type="email" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="phone"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Phone</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </div>
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="dateOfBirth"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Date of Birth</FormLabel>
- <FormControl>
- <Input type="date" {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="gender"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Gender</FormLabel>
- <Select
- value={field.value ?? ""}
- onValueChange={field.onChange}
- >
- <FormControl>
- <SelectTrigger>
- <SelectValue placeholder="Select gender" />
- </SelectTrigger>
- </FormControl>
- <SelectContent>
- <SelectItem value="MALE">Male</SelectItem>
- <SelectItem value="FEMALE">Female</SelectItem>
- <SelectItem value="OTHER">Other</SelectItem>
- <SelectItem value="UNDISCLOSED">Prefer not to say</SelectItem>
- </SelectContent>
- </Select>
- <FormMessage />
- </FormItem>
- )}
- />
- </div>
- <FormField
- control={form.control}
- name="memberType"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Member Type</FormLabel>
- <Select
- value={field.value ?? ""}
- onValueChange={field.onChange}
- >
- <FormControl>
- <SelectTrigger>
- <SelectValue placeholder="Select member type" />
- </SelectTrigger>
- </FormControl>
- <SelectContent>
- <SelectItem value="GYM">Gym</SelectItem>
- <SelectItem value="PT">Personal Training</SelectItem>
- <SelectItem value="GYM_PT">Gym + PT</SelectItem>
- </SelectContent>
- </Select>
- <FormMessage />
- </FormItem>
- )}
- />
- </TabsContent>
-
- <TabsContent value="address" className="space-y-4 pt-4">
- <FormField
- control={form.control}
- name="addressLine1"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Address Line 1</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="addressLine2"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Address Line 2</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="city"
- render={({ field }) => (
- <FormItem>
- <FormLabel>City</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="state"
- render={({ field }) => (
- <FormItem>
- <FormLabel>State</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </div>
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <FormField
- control={form.control}
- name="postalCode"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Postal Code</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="country"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Country</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </div>
- </TabsContent>
-
- <TabsContent value="emergency" className="space-y-4 pt-4">
- <FormField
- control={form.control}
- name="emergencyContactName"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Emergency Contact Name</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="emergencyContactPhone"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Emergency Contact Phone</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="emergencyContactRelationship"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Relationship</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </TabsContent>
-
- <TabsContent value="fitness" className="space-y-4 pt-4">
- <FormField
- control={form.control}
- name="fitnessGoal"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Fitness Goal</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="injuries"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Injuries</FormLabel>
- <FormControl>
- <Textarea {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="allergies"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Allergies</FormLabel>
- <FormControl>
- <Textarea {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="medicalNotes"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Medical Notes</FormLabel>
- <FormControl>
- <Textarea {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </TabsContent>
-
- <TabsContent value="assignment" className="space-y-4 pt-4">
- <FormField
- control={form.control}
- name="assignedTrainerId"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Coach</FormLabel>
- <Select value={field.value || undefined} onValueChange={field.onChange} disabled={trainers.isLoading}>
- <FormControl>
- <SelectTrigger className="w-full">
- <SelectValue placeholder={trainers.isLoading ? "Loading trainers…" : "No coach"} />
- </SelectTrigger>
- </FormControl>
- <SelectContent>
- {member.assignedTrainer && !trainers.data?.some((t) => t.id === member.assignedTrainer?.id) ? (
- <SelectItem value={member.assignedTrainer.id}>
- {member.assignedTrainer.firstName} {member.assignedTrainer.lastName}
- </SelectItem>
- ) : null}
- {(trainers.data ?? []).map((t) => (
- <SelectItem key={t.id} value={t.id}>
- {t.firstName} {t.lastName}
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
- <FormDescription>To remove a coach, use Change PT under Actions.</FormDescription>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="primaryBranchId"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Primary Branch ID</FormLabel>
- <FormControl>
- <Input {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- <FormField
- control={form.control}
- name="notes"
- render={({ field }) => (
- <FormItem>
- <FormLabel>Notes</FormLabel>
- <FormControl>
- <Textarea {...field} />
- </FormControl>
- <FormMessage />
- </FormItem>
- )}
- />
- </TabsContent>
- </Tabs>
- <DialogFooter>
- <Button
- type="submit"
- className="w-full sm:w-auto"
- disabled={updateMember.isPending}
- >
- {updateMember.isPending ? "Saving..." : "Save Changes"}
- </Button>
- </DialogFooter>
- </form>
- </Form>
- </DialogContent>
- </Dialog>
- );
-}
-
-interface MemberWithMemberships {
+export interface MemberWithMemberships {
  id: string;
  firstName: string;
  lastName: string;
@@ -983,6 +497,7 @@ function MemberHero({
  daysLeft,
  });
  const email = member.email?.trim() || null;
+ const photoUrl = useProfilePhotoUrl(member.id);
  const meta = [
  `#${member.memberCode}`,
  `Joined ${new Date(member.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}`,
@@ -1008,6 +523,14 @@ function MemberHero({
  <div className="px-4 pb-5 sm:px-6 sm:pb-6">
  <div className="-mt-12 flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left">
  <div className="relative shrink-0">
+ {photoUrl ? (
+ // eslint-disable-next-line @next/next/no-img-element -- signed document URL
+ <img
+ src={photoUrl}
+ alt={`${member.firstName} ${member.lastName}`}
+ className="size-24 rounded-full object-cover shadow-lg shadow-black/15 ring-4 ring-card"
+ />
+ ) : (
  <div
  className="flex size-24 items-center justify-center rounded-full text-[34px] font-semibold tracking-tight text-white shadow-lg shadow-black/15 ring-4 ring-card"
  style={{ backgroundImage: "linear-gradient(160deg, var(--t), var(--t-g1))" }}
@@ -1015,6 +538,7 @@ function MemberHero({
  >
  {initials(member.firstName, member.lastName)}
  </div>
+ )}
  <span
  aria-hidden="true"
  style={accentVars(statusAccent(member.status))}
@@ -1092,9 +616,7 @@ function MemberHero({
  disabled={!email}
  disabledReason="no email address"
  />
- <EditMemberDialog member={member}>
- <QuickAction accent="amber" icon={Pencil} label="Edit" />
- </EditMemberDialog>
+ <QuickAction accent="amber" icon={Pencil} label="Edit" href={`/members/${member.id}/edit`} />
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
  <QuickAction accent="indigo" icon={MoreHorizontal} label="More" aria-label="More actions" />
