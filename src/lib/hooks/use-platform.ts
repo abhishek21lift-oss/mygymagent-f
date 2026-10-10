@@ -64,3 +64,34 @@ export function useUpdatePlatformOrganizationStatus() {
     },
   })
 }
+
+export interface PlatformPlan {
+  key: string
+  name: string
+}
+
+/**
+ * The active plan catalog for the operator's plan picker. Served by the
+ * platform controller, not `/platform-billing/plans`: that route needs a
+ * grant platform staff can never hold, so it 403s for exactly the user
+ * this screen is built for.
+ */
+export function usePlatformPlans(enabled = true) {
+  return useQuery({
+    queryKey: [KEY, "plans"],
+    queryFn: () => api.get<PlatformPlan[]>("/platform/organizations/plans"),
+    enabled,
+  })
+}
+
+export function useUpdatePlatformOrganizationPlan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, planKey, months }: { id: string; planKey: string; months: number }) =>
+      api.patch(`/platform/organizations/${id}/subscription`, { planKey, months }),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: [KEY] })
+      queryClient.invalidateQueries({ queryKey: [KEY, "detail", id] })
+    },
+  })
+}
