@@ -59,24 +59,30 @@ export function SettingsDialog({
   const settings = useActionCenterSettings({ enabled: open });
   const update = useUpdateActionCenterSettings();
   const [form, setForm] = React.useState<Record<string, string> | null>(null);
+  const [formSeed, setFormSeed] = React.useState<ActionCenterSettings | null>(null);
 
   const loaded = settings.data;
-  React.useEffect(() => {
-    if (loaded && form === null) {
-      setForm({
-        renewalReminderDays: loaded.renewalReminderDays.join(", "),
-        ...Object.fromEntries(
-          INT_FIELDS.map((f) => [f.key, String(loaded[f.key])]),
-        ),
-        quietHoursStart: loaded.quietHoursStart === null ? "" : String(loaded.quietHoursStart),
-        quietHoursEnd: loaded.quietHoursEnd === null ? "" : String(loaded.quietHoursEnd),
-      });
-    }
-  }, [loaded, form]);
+  // Adjust-state-during-render, not an effect: the form seeds once from
+  // the loaded rules, and typing afterwards owns it.
+  if (loaded && formSeed !== loaded) {
+    setFormSeed(loaded);
+    setForm({
+      renewalReminderDays: loaded.renewalReminderDays.join(", "),
+      ...Object.fromEntries(
+        INT_FIELDS.map((f) => [f.key, String(loaded[f.key])]),
+      ),
+      quietHoursStart: loaded.quietHoursStart === null ? "" : String(loaded.quietHoursStart),
+      quietHoursEnd: loaded.quietHoursEnd === null ? "" : String(loaded.quietHoursEnd),
+    });
+  }
 
-  React.useEffect(() => {
-    if (!open) setForm(null);
-  }, [open ]);
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      setForm(null);
+      setFormSeed(null);
+    }
+    onOpenChange(next);
+  }
 
   const set = (key: string, value: string) =>
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
@@ -126,7 +132,7 @@ export function SettingsDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Action Center rules</DialogTitle>
