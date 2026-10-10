@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Building2, ShieldAlert } from "lucide-react"
 import { toast } from "sonner"
+import { useSearchParams } from "next/navigation"
 
 import { ApiError } from "@/lib/api/client"
 import { useAuth } from "@/lib/auth/auth-context"
@@ -221,9 +222,24 @@ function PlanControl({ org, plans }: { org: PlatformOrganization; plans: Platfor
 }
 
 export default function PlatformOrganizationsPage() {
+ return (
+  <React.Suspense fallback={<div className="p-8"><Skeleton className="h-40 w-full" /></div>}>
+   <PlatformOrganizations />
+  </React.Suspense>
+ )
+}
+
+/**
+ * The Command Center's broken-link rows deep-link here with
+ * `?search=<gym name>`, so the operator lands on the gym instead of an
+ * unfiltered list and a manual search. The param seeds the filter once;
+ * typing afterwards owns it.
+ */
+function PlatformOrganizations() {
  const { user, isLoading } = useAuth()
+ const params = useSearchParams()
  const [status, setStatus] = React.useState<string>(ALL)
- const [search, setSearch] = React.useState("")
+ const [search, setSearch] = React.useState(params.get("search") ?? "")
  const [page, setPage] = React.useState(1)
 
  const isPlatformStaff = Boolean(user?.platformRole)

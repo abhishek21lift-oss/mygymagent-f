@@ -501,7 +501,8 @@ function WhatsappTile({ card, now }: { card: CardResult<WhatsappCard>; now: numb
                     {v.attention.map((row) => (
                       <li key={`${row.organizationId}-${row.channel}`}>
                         <Link
-                          href="/platform/organizations"
+                          href={`/platform/organizations?search=${encodeURIComponent(row.organizationName)}`}
+                          title={`Open ${row.organizationName} in Organizations`}
                           className="group flex items-start gap-3 px-3.5 py-3 transition-colors hover:bg-[var(--surface-hover)] focus-visible:outline-2 focus-visible:outline-ring"
                         >
                           <span
