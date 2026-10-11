@@ -327,8 +327,31 @@ export interface MembershipPlan {
   isActive: boolean
   isFeatured: boolean
   isPublic: boolean
+  displayOrder: number
+  trialDays: number | null
+  compareAtPrice: string | null
+  joiningFee: string
+  taxMode: string
+  taxRate: string | null
+  weeklyClassLimit: number | null
+  ptSessionCredits: number
+  appointmentTypes: string[]
+  termsAndConditions: string | null
+  faqs: Array<{ q: string; a: string }>
+  imageUrl: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface PlanPriceEstimate {
+  listPrice: string
+  discount: string
+  joiningFee: string
+  taxable: string
+  taxMode: string
+  taxRate: string
+  tax: string
+  totalPayable: string
 }
 
 export type MembershipStatus = "PENDING" | "ACTIVE" | "FROZEN" | "PAUSED" | "EXPIRED" | "CANCELLED"

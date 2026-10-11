@@ -77,4 +77,72 @@ describe("createMembershipPlanSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("accepts the upgraded offer, fee, tax, limit, trial and content fields", () => {
+    const parsed = createMembershipPlanSchema.safeParse({
+      ...base,
+      displayOrder: 2,
+      compareAtPrice: 25000,
+      joiningFee: 500,
+      taxMode: "exclusive",
+      taxRate: 18,
+      weeklyClassLimit: 3,
+      ptSessionCredits: 2,
+      appointmentTypes: ["Trial"],
+      trialDays: 7,
+      termsAndConditions: "No refunds.",
+      faqs: [{ q: "Can I freeze?", a: "Yes, up to the freeze budget." }],
+      imageUrl: "https://example.com/plan.jpg",
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects a non-offer was-price and a zero class limit", () => {
+    expect(
+      createMembershipPlanSchema.safeParse({ ...base, compareAtPrice: 20000 })
+        .success,
+    ).toBe(false);
+    expect(
+      createMembershipPlanSchema.safeParse({ ...base, compareAtPrice: 15000 })
+        .success,
+    ).toBe(false);
+    const zeroLimit = createMembershipPlanSchema.safeParse({
+      ...base,
+      weeklyClassLimit: 0,
+    });
+    expect(zeroLimit.success).toBe(false);
+    if (!zeroLimit.success) {
+      expect(zeroLimit.error.issues[0].message).toMatch(/unlimited/);
+    }
+    // Blank means unlimited.
+    expect(
+      createMembershipPlanSchema.safeParse({ ...base, weeklyClassLimit: "" })
+        .success,
+    ).toBe(true);
+  });
+
+  it("requires a tax rate when tax applies and a valid currency", () => {
+    expect(
+      createMembershipPlanSchema.safeParse({ ...base, taxMode: "exclusive" })
+        .success,
+    ).toBe(false);
+    expect(
+      createMembershipPlanSchema.safeParse({ ...base, currency: "inr" }).success,
+    ).toBe(false);
+    expect(
+      createMembershipPlanSchema.safeParse({ ...base, currency: "XX" }).success,
+    ).toBe(false);
+    expect(
+      createMembershipPlanSchema.safeParse({
+        ...base,
+        imageUrl: "http://example.com/plan.jpg",
+      }).success,
+    ).toBe(false);
+    expect(
+      createMembershipPlanSchema.safeParse({
+        ...base,
+        description: "x".repeat(2001),
+      }).success,
+    ).toBe(false);
+  });
 });

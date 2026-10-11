@@ -54,21 +54,120 @@ export const createBranchSchema = z.object({
 })
 export type CreateBranchInput = z.infer<typeof createBranchSchema>
 
-export const createMembershipPlanSchema = z.object({
+/** Blank text inputs parse as absent so field-level messages surface
+ * (a raw union would report only "Invalid input"). */
+const blankToUndef = (v: unknown) => (v === "" ? undefined : v);
+
+const planSchemaBase = z.object({
   name: z.string().trim().min(1, "Plan name is required").max(120),
   code: z.string().trim().max(40).optional().or(z.literal("")),
   category: z.string().trim().max(60).optional().or(z.literal("")),
-  description: z.string().optional().or(z.literal("")),
+  description: z.preprocess(blankToUndef, z.string().max(2000).optional()),
   branchId: z.string().optional().or(z.literal("")),
   durationDays: z.coerce.number().int().positive("Must be a positive number of days"),
   price: z.coerce.number().positive("Price must be greater than 0"),
-  currency: z.string().min(1),
+  currency: z
+    .string()
+    .regex(/^[A-Z]{3}$/, "Use a 3-letter currency code like INR"),
   benefits: z.array(z.string().trim().min(1).max(80)).max(20),
   maxFreezeDays: z.coerce.number().int().min(0),
   isFeatured: z.boolean(),
   isPublic: z.boolean(),
+  displayOrder: z.coerce.number().int().min(0).default(0),
+  trialDays: z.preprocess(
+    blankToUndef,
+    z.coerce.number().int().min(1).optional(),
+  ),
+  compareAtPrice: z.preprocess(
+    blankToUndef,
+    z.coerce.number().positive().optional(),
+  ),
+  joiningFee: z.preprocess(
+    blankToUndef,
+    z.coerce.number().min(0).optional(),
+  ),
+  taxMode: z.enum(["none", "inclusive", "exclusive"]).default("none"),
+  taxRate: z.preprocess(
+    blankToUndef,
+    z.coerce.number().min(0).max(28).optional(),
+  ),
+  weeklyClassLimit: z.preprocess(
+    blankToUndef,
+    z.coerce
+      .number()
+      .int()
+      .min(1, "Use blank for unlimited — 0 is not allowed")
+      .optional(),
+  ),
+  ptSessionCredits: z.coerce.number().int().min(0).default(0),
+  appointmentTypes: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
+  termsAndConditions: z.preprocess(
+    blankToUndef,
+    z.string().max(10000).optional(),
+  ),
+  faqs: z
+    .array(
+      z.object({
+        q: z.string().trim().min(1).max(300),
+        a: z.string().trim().min(1).max(300),
+      }),
+    )
+    .max(10)
+    .default([]),
+  imageUrl: z.preprocess(
+    blankToUndef,
+    z
+      .string()
+      .trim()
+      .url("Must be an https URL")
+      .max(500)
+      .startsWith("https://", "Must be an https URL")
+      .optional(),
+  ),
 })
+
+/** Offer-vs-price and tax-required checks shared by create and edit. */
+export function withPlanCrossChecks<S extends z.ZodTypeAny>(schema: S) {
+  return schema.superRefine(
+    (
+      values: {
+        price: unknown
+        compareAtPrice?: unknown
+        taxMode?: unknown
+        taxRate?: unknown
+      },
+      ctx,
+    ) => {
+    const price = Number(values.price)
+    const was =
+      values.compareAtPrice === "" || values.compareAtPrice === undefined
+        ? undefined
+        : Number(values.compareAtPrice)
+    if (was !== undefined && !(was > price)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["compareAtPrice"],
+        message: "Offer price must be above the base price",
+      })
+    }
+    if (values.taxMode !== "none") {
+      const rate = values.taxRate === "" || values.taxRate === undefined ? undefined : Number(values.taxRate)
+      if (rate === undefined || Number.isNaN(rate)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["taxRate"],
+          message: "Tax rate is required when tax applies",
+        })
+      }
+    }
+  })
+}
+
+export { planSchemaBase }
+export const createMembershipPlanSchema = withPlanCrossChecks(planSchemaBase)
 export type CreateMembershipPlanInput = z.infer<typeof createMembershipPlanSchema>
+export const PLAN_CATEGORIES = ["Gym", "PT", "Group classes", "Combo"] as const
+export type PlanCategory = (typeof PLAN_CATEGORIES)[number]
 
 export const inviteStaffSchema = z.object({
   email: z.string().email("Enter a valid email address"),

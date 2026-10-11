@@ -23,6 +23,12 @@ jest.mock("@/lib/hooks/use-membership-plans", () => ({
   useCreateMembershipPlan: () => ({ mutateAsync, isPending: false }),
   useMembershipPlans: () => ({ data: null, isLoading: false, isError: false }),
   useUpdateMembershipPlan: () => ({ mutateAsync: jest.fn(), isPending: false }),
+  usePriceEstimate: () => ({
+    mutate: jest.fn(),
+    data: undefined,
+    isPending: false,
+    isError: false,
+  }),
 }))
 jest.mock("@/lib/hooks/use-branches", () => ({
   useBranches: () => ({ data: { items: [] }, isLoading: false, isError: false }),
@@ -64,5 +70,36 @@ describe("NewMembershipPlanPage", () => {
       expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ name: "Monthly" })),
     )
     expect(push).toHaveBeenCalledWith("/membership-plans")
+  })
+
+  it("sends offer, fee, tax, limit and trial fields when filled", async () => {
+    renderPage()
+    fireEvent.change(screen.getByLabelText(/plan name/i), { target: { value: "Quarterly" } })
+    fireEvent.change(screen.getByLabelText(/base price/i), { target: { value: "5000" } })
+    fireEvent.change(screen.getByLabelText(/offer was-price/i), { target: { value: "6000" } })
+    fireEvent.change(screen.getByLabelText(/joining fee/i), { target: { value: "500" } })
+    fireEvent.change(screen.getByLabelText(/weekly class limit/i), { target: { value: "3" } })
+    fireEvent.change(screen.getByLabelText(/free trial days/i), { target: { value: "7" } })
+    fireEvent.click(screen.getByRole("button", { name: /create plan/i }))
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          compareAtPrice: 6000,
+          joiningFee: 500,
+          weeklyClassLimit: 3,
+          trialDays: 7,
+        }),
+      ),
+    )
+  })
+
+  it("rejects a zero weekly limit with an unlimited hint", async () => {
+    renderPage()
+    fireEvent.change(screen.getByLabelText(/plan name/i), { target: { value: "Monthly" } })
+    fireEvent.change(screen.getByLabelText(/base price/i), { target: { value: "2000" } })
+    fireEvent.change(screen.getByLabelText(/weekly class limit/i), { target: { value: "0" } })
+    fireEvent.click(screen.getByRole("button", { name: /create plan/i }))
+    expect(await screen.findByText(/unlimited/i)).toBeInTheDocument()
+    expect(mutateAsync).not.toHaveBeenCalled()
   })
 })

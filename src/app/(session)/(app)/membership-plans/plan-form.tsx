@@ -29,11 +29,18 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { MembershipPlan } from "@/lib/types/gym";
 import { displayCurrencyAmount } from "@/lib/utils";
-import { createMembershipPlanSchema } from "@/lib/validation/gym";
+import {
+  PLAN_CATEGORIES,
+  planSchemaBase,
+  withPlanCrossChecks,
+} from "@/lib/validation/gym";
+import { usePriceEstimate } from "@/lib/hooks/use-membership-plans";
 
-const planFormSchema = createMembershipPlanSchema.extend({
-  isActive: z.boolean(),
-});
+const planFormSchema = withPlanCrossChecks(
+  planSchemaBase.extend({
+    isActive: z.boolean(),
+  }),
+);
 export type PlanFormInput = z.infer<typeof planFormSchema>;
 
 const DURATION_UNITS = [
@@ -101,14 +108,26 @@ function Section({
 function BenefitsEditor({
   value,
   onChange,
+  placeholder = "e.g. Steam bath access",
+  addLabel = "Add a benefit",
+  listLabel = "Plan benefits",
+  removeLabel = (item: string) => `Remove ${item}`,
+  maxItems = 20,
+  maxLength = 80,
 }: {
   value: string[];
   onChange: (next: string[]) => void;
+  placeholder?: string;
+  addLabel?: string;
+  listLabel?: string;
+  removeLabel?: (item: string) => string;
+  maxItems?: number;
+  maxLength?: number;
 }) {
   const [draft, setDraft] = React.useState("");
   const add = () => {
     const text = draft.trim();
-    if (!text || value.length >= 20) return;
+    if (!text || value.length >= maxItems) return;
     if (value.some((b) => b.toLowerCase() === text.toLowerCase())) {
       setDraft("");
       return;
@@ -128,9 +147,9 @@ function BenefitsEditor({
               add();
             }
           }}
-          placeholder="e.g. Steam bath access"
-          maxLength={80}
-          aria-label="Add a benefit"
+          placeholder={placeholder}
+          maxLength={maxLength}
+          aria-label={addLabel}
         />
         <Button
           type="button"
@@ -143,7 +162,7 @@ function BenefitsEditor({
         </Button>
       </div>
       {value.length > 0 && (
-        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Plan benefits">
+        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={listLabel}>
           {value.map((benefit) => (
             <li
               key={benefit}
@@ -153,7 +172,7 @@ function BenefitsEditor({
               <button
                 type="button"
                 onClick={() => onChange(value.filter((b) => b !== benefit))}
-                aria-label={`Remove ${benefit}`}
+                aria-label={removeLabel(benefit)}
                 className="flex size-6 items-center justify-center rounded-full hover:bg-background focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <X className="size-3.5" aria-hidden="true" />
@@ -164,6 +183,97 @@ function BenefitsEditor({
       )}
     </div>
   );
+}
+
+function FaqsEditor({
+  value,
+  onChange,
+}: {
+  value: Array<{ q: string; a: string }>;
+  onChange: (next: Array<{ q: string; a: string }>) => void;
+}) {
+  const [q, setQ] = React.useState("");
+  const [a, setA] = React.useState("");
+  const add = () => {
+    const question = q.trim();
+    const answer = a.trim();
+    if (!question || !answer || value.length >= 10) return;
+    onChange([...value, { q: question, a: answer }]);
+    setQ("");
+    setA("");
+  };
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Question"
+          maxLength={300}
+          aria-label="FAQ question"
+        />
+        <Input
+          value={a}
+          onChange={(e) => setA(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+          placeholder="Answer"
+          maxLength={300}
+          aria-label="FAQ answer"
+        />
+      </div>
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={add}
+          disabled={!q.trim() || !a.trim()}
+          className="min-h-11"
+        >
+          Add FAQ
+        </Button>
+      </div>
+      {value.length > 0 && (
+        <ul className="flex flex-col gap-2" aria-label="Plan FAQs">
+          {value.map((faq, i) => (
+            <li
+              key={`${faq.q}-${i}`}
+              className="flex items-start justify-between gap-2 rounded-xl border border-border p-3 text-sm"
+            >
+              <span className="min-w-0">
+                <span className="block font-semibold">{faq.q}</span>
+                <span className="block text-muted-foreground">{faq.a}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((_, j) => j !== i))}
+                aria-label={`Remove FAQ ${faq.q}`}
+                className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
+              >
+                <X className="size-3.5" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Client-side SKU suggestion; the server treats code as free-form. */
+function suggestCode(name: string): string {
+  const slug = name
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 20);
+  const rand = Math.random().toString(36).slice(2, 5).toUpperCase();
+  return `${slug || "PLAN"}-${rand}`;
 }
 
 function ToggleRow({
@@ -227,6 +337,10 @@ export function PlanForm({
     (plan?.maxFreezeDays ?? 0) > 0,
   );
   const [branchScoped, setBranchScoped] = React.useState(Boolean(plan?.branchId));
+  const [customCategory, setCustomCategory] = React.useState(
+    Boolean(plan?.category && !PLAN_CATEGORIES.includes(plan.category as never)),
+  );
+  const estimate = usePriceEstimate();
 
   const form = useForm<PlanFormInput>({
     resolver: zodResolver(planFormSchema),
@@ -244,20 +358,77 @@ export function PlanForm({
       isFeatured: plan?.isFeatured ?? false,
       isPublic: plan?.isPublic ?? true,
       isActive: plan?.isActive ?? true,
+      displayOrder: plan?.displayOrder ?? 0,
+      trialDays: plan?.trialDays ?? "",
+      compareAtPrice: plan?.compareAtPrice ? Number(plan.compareAtPrice) : "",
+      joiningFee: plan?.joiningFee ? Number(plan.joiningFee) : "",
+      taxMode: (plan?.taxMode as PlanFormInput["taxMode"]) ?? "none",
+      taxRate: plan?.taxRate ? Number(plan.taxRate) : "",
+      weeklyClassLimit: plan?.weeklyClassLimit ?? "",
+      ptSessionCredits: plan?.ptSessionCredits ?? 0,
+      appointmentTypes: plan?.appointmentTypes ?? [],
+      termsAndConditions: plan?.termsAndConditions ?? "",
+      faqs: plan?.faqs ?? [],
+      imageUrl: plan?.imageUrl ?? "",
     },
   });
   const watched = form.watch();
   const previewDays = toDurationDays(Number(watched.durationDays) || 0, durationUnit);
   const previewFreeze = allowFreeze ? Number(watched.maxFreezeDays) || 0 : 0;
 
+  /** Server-computed payable preview, debounced. The sale path
+   * recomputes from stored values; this display never prices a sale. */
+  const estimateKey = JSON.stringify([
+    watched.price,
+    watched.compareAtPrice,
+    watched.joiningFee,
+    watched.taxMode,
+    watched.taxRate,
+    watched.currency,
+  ]);
+  React.useEffect(() => {
+    const price = Number(watched.price);
+    if (!(price > 0)) return;
+    const timer = setTimeout(() => {
+      const num = (v: unknown) =>
+        v === "" || v === undefined ? undefined : Number(v);
+      estimate.mutate({
+        price,
+        compareAtPrice: num(watched.compareAtPrice),
+        joiningFee: num(watched.joiningFee),
+        taxMode: watched.taxMode,
+        taxRate: num(watched.taxRate),
+        currency: watched.currency || undefined,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estimateKey]);
+
+  const blankToUndefined = (v: unknown) =>
+    v === "" || v === undefined ? undefined : Number(v);
+
   async function handleSubmit(values: PlanFormInput) {
     const cleaned: PlanFormInput = {
       ...values,
       code: values.code?.trim() ? values.code.trim() : undefined,
       category: values.category?.trim() ? values.category.trim() : undefined,
+      description: values.description?.trim() ? values.description : undefined,
       branchId: branchScoped && values.branchId ? values.branchId : undefined,
       durationDays: toDurationDays(Number(values.durationDays) || 0, durationUnit),
       maxFreezeDays: allowFreeze ? Number(values.maxFreezeDays) || 0 : 0,
+      trialDays: blankToUndefined(values.trialDays),
+      compareAtPrice: blankToUndefined(values.compareAtPrice),
+      joiningFee: blankToUndefined(values.joiningFee),
+      taxRate:
+        values.taxMode === "none"
+          ? undefined
+          : blankToUndefined(values.taxRate),
+      weeklyClassLimit: blankToUndefined(values.weeklyClassLimit),
+      termsAndConditions: values.termsAndConditions?.trim()
+        ? values.termsAndConditions
+        : undefined,
+      imageUrl: values.imageUrl?.trim() ? values.imageUrl.trim() : undefined,
     };
     await onSubmit(cleaned);
   }
@@ -266,6 +437,7 @@ export function PlanForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
+        noValidate
         className="flex flex-col gap-3"
       >
         <Section title="Basic information" hint="Name, code and how it is shown" open>
@@ -289,13 +461,25 @@ export function PlanForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Plan code / SKU</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="YR-UNLTD"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input
+                        placeholder="YR-UNLTD"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-h-11 shrink-0"
+                      onClick={() =>
+                        field.onChange(suggestCode(form.getValues("name")))
+                      }
+                    >
+                      Suggest
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -307,10 +491,75 @@ export function PlanForm({
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <FormControl>
+                    <Select
+                      value={
+                        customCategory
+                          ? "custom"
+                          : field.value || undefined
+                      }
+                      onValueChange={(v) => {
+                        if (v === "custom") {
+                          setCustomCategory(true);
+                          field.onChange("");
+                        } else {
+                          setCustomCategory(false);
+                          field.onChange(v);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pick a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLAN_CATEGORIES.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">Custom…</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          {customCategory && (
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Custom category</FormLabel>
+                  <FormControl>
                     <Input
-                      placeholder="Premium"
+                      placeholder="Weight loss"
+                      maxLength={60}
                       {...field}
                       value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="displayOrder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display order</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -416,10 +665,12 @@ export function PlanForm({
           </div>
           <p className="text-xs text-muted-foreground" role="status">
             Stored as {previewDays} {previewDays === 1 ? "day" : "days"}.
+            {(durationUnit === "months" || durationUnit === "years") &&
+              " A month counts ≈30 days and a year ≈365 days."}
           </p>
         </Section>
 
-        <Section title="Pricing & billing" hint="Base price, currency and tax notes">
+        <Section title="Pricing & billing" hint="Base price, offer, fee, currency and tax">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
@@ -444,18 +695,149 @@ export function PlanForm({
             />
             <FormField
               control={form.control}
-              name="currency"
+              name="compareAtPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Currency</FormLabel>
+                  <FormLabel>
+                    Offer was-price{" "}
+                    <span className="font-normal text-muted-foreground">(optional)</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} maxLength={3} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      placeholder="e.g. 2500 for a ₹2000 plan"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="joiningFee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Joining fee{" "}
+                    <span className="font-normal text-muted-foreground">(optional)</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      placeholder="0"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Currency</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      maxLength={3}
+                      className="uppercase"
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="taxMode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No tax</SelectItem>
+                      <SelectItem value="exclusive">Exclusive (added on top)</SelectItem>
+                      <SelectItem value="inclusive">Inclusive (in the price)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {watched.taxMode !== "none" && (
+              <FormField
+                control={form.control}
+                name="taxRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tax rate % *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        max={28}
+                        placeholder="18"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
+          {estimate.data ? (
+            <p className="rounded-xl bg-muted/60 px-3 py-2 text-sm" role="status">
+              Estimated payable{" "}
+              <strong className="tabular-nums">
+                {displayCurrencyAmount(
+                  Number(estimate.data.totalPayable),
+                  watched.currency || "INR",
+                )}
+              </strong>
+              {Number(estimate.data.discount) > 0 && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  (save {displayCurrencyAmount(Number(estimate.data.discount), watched.currency || "INR")})
+                </span>
+              )}
+              {Number(estimate.data.tax) > 0 && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  {watched.taxMode === "inclusive" ? "incl. " : "+ "}
+                  {displayCurrencyAmount(Number(estimate.data.tax), watched.currency || "INR")} tax
+                </span>
+              )}
+            </p>
+          ) : estimate.isPending ? (
+            <p className="text-xs text-muted-foreground" role="status">
+              Estimating payable…
+            </p>
+          ) : null}
           <p className="text-xs text-muted-foreground">
             Discounts are set at sale time and snapshotted on the
             membership — editing the plan never rewrites history.
@@ -516,6 +898,80 @@ export function PlanForm({
               </FormItem>
             )}
           />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="weeklyClassLimit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Weekly class limit{" "}
+                    <span className="font-normal text-muted-foreground">(optional)</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      step={1}
+                      placeholder="Blank = unlimited"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ptSessionCredits"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PT session credits</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={1}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="appointmentTypes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Appointment types{" "}
+                  <span className="font-normal text-muted-foreground">(optional labels)</span>
+                </FormLabel>
+                <FormControl>
+                  <BenefitsEditor
+                    value={field.value ?? []}
+                    onChange={field.onChange}
+                    placeholder="e.g. Trial, Consultation"
+                    addLabel="Add an appointment type"
+                    listLabel="Plan appointment types"
+                    removeLabel={(item) => `Remove appointment type ${item}`}
+                    maxItems={10}
+                    maxLength={40}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </Section>
 
         <Section title="Freeze" hint="Pause rules for sold memberships">
@@ -553,6 +1009,90 @@ export function PlanForm({
           />
         </Section>
 
+        <Section title="Customer content" hint="Terms, FAQs and plan image (all optional)">
+          <FormField
+            control={form.control}
+            name="termsAndConditions"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Terms and conditions</FormLabel>
+                <FormControl>
+                  <Textarea rows={3} {...field} value={field.value ?? ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="faqs"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>FAQs and guidelines</FormLabel>
+                <FormControl>
+                  <FaqsEditor
+                    value={field.value ?? []}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plan image URL</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    inputMode="url"
+                    placeholder="https://…"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </Section>
+
+        <Section title="Trials & advanced" hint="Free trial offer for this plan">
+          <FormField
+            control={form.control}
+            name="trialDays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Free trial days{" "}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={1}
+                    step={1}
+                    placeholder="Blank = no trial"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) =>
+                      field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <p className="text-xs text-muted-foreground">
+            One free trial per member. Trials are free, carry no PT
+            credits, and convert to paid plans through the usual sale flow.
+          </p>
+        </Section>
+
         {/* Live preview — the summary before saving. */}
         <section
           aria-label="Plan preview"
@@ -571,6 +1111,14 @@ export function PlanForm({
               )}
             </p>
             <p className="font-bold tabular-nums">
+              {Number(watched.compareAtPrice) > Number(watched.price || 0) && (
+                <span className="mr-2 font-medium text-muted-foreground line-through">
+                  {displayCurrencyAmount(
+                    Number(watched.compareAtPrice),
+                    watched.currency || "INR",
+                  )}
+                </span>
+              )}
               {displayCurrencyAmount(
                 Number(watched.price) || 0,
                 watched.currency || "INR",
@@ -579,6 +1127,17 @@ export function PlanForm({
                 / {previewDays}d
               </span>
             </p>
+            {estimate.data && Number(estimate.data.totalPayable) > 0 && (
+              <p className="text-xs tabular-nums text-muted-foreground">
+                Estimated payable{" "}
+                {displayCurrencyAmount(
+                  Number(estimate.data.totalPayable),
+                  watched.currency || "INR",
+                )}
+                {Number(estimate.data.tax) > 0 &&
+                  ` (${watched.taxMode === "inclusive" ? "incl." : "+"} ${displayCurrencyAmount(Number(estimate.data.tax), watched.currency || "INR")} tax)`}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               {watched.category?.trim()
                 ? `${watched.category.trim()} · `
@@ -590,10 +1149,16 @@ export function PlanForm({
               {branchScoped ? "One branch" : "All branches"}
               {watched.isFeatured ? " · Featured" : ""}
               {!watched.isPublic ? " · Hidden from app" : ""}
+              {Number(watched.trialDays) > 0 &&
+                ` · ${Number(watched.trialDays)}-day free trial`}
+              {Number(watched.weeklyClassLimit) > 0 &&
+                ` · Up to ${Number(watched.weeklyClassLimit)} classes/week`}
+              {Number(watched.ptSessionCredits) > 0 &&
+                ` · ${Number(watched.ptSessionCredits)} PT credits`}
             </p>
             {(watched.benefits?.length ?? 0) > 0 && (
               <ul className="mt-1 flex flex-wrap gap-1.5">
-                {(watched.benefits ?? []).map((b) => (
+                {(watched.benefits ?? []).map((b: string) => (
                   <li
                     key={b}
                     className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold"

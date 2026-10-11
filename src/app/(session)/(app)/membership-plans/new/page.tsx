@@ -31,20 +31,11 @@ export default function NewMembershipPlanPage() {
 
   async function handleSubmit(values: PlanFormInput) {
     try {
-      await createPlan.mutateAsync({
-        name: values.name,
-        code: values.code,
-        category: values.category,
-        description: values.description,
-        branchId: values.branchId,
-        durationDays: values.durationDays,
-        price: values.price,
-        currency: values.currency,
-        benefits: values.benefits,
-        maxFreezeDays: values.maxFreezeDays,
-        isFeatured: values.isFeatured,
-        isPublic: values.isPublic,
-      });
+      // isActive is edit-only; everything else passes through untouched
+      // so new form fields can never be silently dropped here.
+      const { isActive: _isActive, ...payload } = values;
+      void _isActive;
+      await createPlan.mutateAsync(payload);
       toast.success("Plan created");
       // The listing invalidates on the same mutation, so it refetches fresh.
       router.push("/membership-plans");

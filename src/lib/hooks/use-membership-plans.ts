@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import type { MembershipPlan } from "@/lib/types/gym";
+import type { MembershipPlan, PlanPriceEstimate } from "@/lib/types/gym";
 import type { Paginated, PaginationParams } from "@/lib/types/pagination";
 import type { CreateMembershipPlanInput } from "@/lib/validation/gym";
 
@@ -28,6 +28,26 @@ export function useUpdateMembershipPlan(id: string) {
     mutationFn: (input: Partial<CreateMembershipPlanInput> & { isActive?: boolean }) =>
       api.patch<MembershipPlan>(`/membership-plans/${id}`, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [KEY] }),
+  });
+}
+
+export interface PriceEstimateRequest {
+  price: number;
+  compareAtPrice?: number;
+  joiningFee?: number;
+  taxMode?: "none" | "inclusive" | "exclusive";
+  taxRate?: number;
+  currency?: string;
+}
+
+/**
+ * Server-computed payable preview. The form shows this estimate; the
+ * sale path recomputes from stored plan values and never trusts it.
+ */
+export function usePriceEstimate() {
+  return useMutation({
+    mutationFn: (input: PriceEstimateRequest) =>
+      api.post<PlanPriceEstimate>("/membership-plans/price-estimate", input),
   });
 }
 
