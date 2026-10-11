@@ -143,7 +143,10 @@ export default function DashboardPage() {
   const data = briefing.data;
   const scopedBranchId = data?.branchId && data.branchId !== branchFilter ? data.branchId : null;
 
-  const gymName = organization.data?.name ?? "Dashboard";
+  const gymName =
+    organization.data?.name ??
+    (branchItems.length === 1 ? branchItems[0].name : undefined) ??
+    "Dashboard";
   const currencyCode = organization.data?.currency ?? "INR";
   const timezone = organization.data?.timezone;
   const todayStr = useGymToday(timezone);

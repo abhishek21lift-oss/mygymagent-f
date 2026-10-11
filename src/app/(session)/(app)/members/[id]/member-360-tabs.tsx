@@ -74,7 +74,6 @@ import type {
  MemberDocumentCategory,
  MemberGoalCategory,
  MemberGoalMilestone,
- Payment,
 } from "@/lib/types/gym";
 import {
  useMemberMeasurements,
@@ -120,7 +119,6 @@ import {
 import { useClient360 } from "@/lib/hooks/use-client-360";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
-import { useRefundPayment } from "@/lib/hooks/use-payments";
 import { OPEN_INVOICE_STATUSES, useInvoices, useRetryCollection } from "@/lib/hooks/use-invoices";
 import { useMemberships, useRenewMembership, useMembershipHistory } from "@/lib/hooks/use-memberships";
 import { useMembershipBilling } from "@/lib/hooks/use-members";
@@ -165,13 +163,13 @@ function fmtDate(iso: string) {
 
 function InfoRow({ icon: Icon, label, value }: { icon: typeof User; label: string; value: React.ReactNode }) {
  return (
- <div className="flex items-start gap-3 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
- <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
+ <div className="flex size-9 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <Icon className="size-4" aria-hidden="true" />
  </div>
  <div className="min-w-0 flex-1">
- <p className="text-xs font-bold uppercase tracking-wide text-stone-500">{label}</p>
- <div className="mt-0.5 text-sm font-bold text-stone-900">{value || "—"}</div>
+ <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
+ <div className="mt-0.5 text-sm font-bold text-foreground">{value || "—"}</div>
  </div>
  </div>
  );
@@ -200,7 +198,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
  return (
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
  {[1, 2, 3, 4, 5, 6].map((i) => (
- <Skeleton key={i} className="h-24 rounded-xl" />
+ <Skeleton key={i} className="h-24 rounded-2xl" />
  ))}
  </div>
  );
@@ -228,7 +226,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
  <div className="flex flex-col gap-6">
  {/* Personal Information */}
  <div>
- <h3 className="mb-3 font-semibold text-lg font-semibold tracking-tight text-stone-950">Personal Information</h3>
+ <h3 className="mb-3 text-lg font-semibold tracking-tight text-foreground">Personal Information</h3>
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
  <InfoRow icon={User} label="Full Name" value={`${member.firstName} ${member.lastName}`} />
  <InfoRow icon={Mail} label="Email" value={member.email} />
@@ -248,7 +246,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 
  {/* Emergency & Contact */}
  <div>
- <h3 className="mb-3 font-semibold text-lg font-semibold tracking-tight text-stone-950">Emergency & Contact</h3>
+ <h3 className="mb-3 text-lg font-semibold tracking-tight text-foreground">Emergency & Contact</h3>
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
  <InfoRow
  icon={Phone}
@@ -290,7 +288,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 
  {/* Health & Fitness */}
  <div>
- <h3 className="mb-3 font-semibold text-lg font-semibold tracking-tight text-stone-950">Health & Fitness</h3>
+ <h3 className="mb-3 text-lg font-semibold tracking-tight text-foreground">Health & Fitness</h3>
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
  <InfoRow
  icon={TrendingUp}
@@ -309,7 +307,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
  latestScreening?.flaggedForMedicalClearance ? (
  <Badge variant="warning" className="rounded-full">Review Needed</Badge>
  ) : latestScreening ? (
- <Badge variant="default" className="rounded-full bg-emerald-500">Cleared</Badge>
+ <Badge variant="success" className="rounded-full">Cleared</Badge>
  ) : ( "Not completed"
  )
  }
@@ -336,7 +334,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
 
  {/* Engagement */}
  <div>
- <h3 className="mb-3 font-semibold text-lg font-semibold tracking-tight text-stone-950">Engagement</h3>
+ <h3 className="mb-3 text-lg font-semibold tracking-tight text-foreground">Engagement</h3>
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
  <InfoRow
  icon={Calendar}
@@ -421,7 +419,7 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  }
  }
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -473,7 +471,7 @@ function AddressesPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((addr) => (
- <div key={addr.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={addr.id} className="flex items-start justify-between gap-2 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="min-w-0">
  <div className="flex items-center gap-2">
  <Badge variant="secondary">{addr.type}</Badge>
@@ -556,7 +554,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  }
  }
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -605,13 +603,13 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((contact) => (
- <div key={contact.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={contact.id} className="flex items-start justify-between gap-2 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="min-w-0">
  <div className="flex items-center gap-2">
  <p className="font-medium">{contact.name}</p>
  {contact.isPrimary && <Badge>Primary</Badge>}
  </div>
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  {contact.phone}
  {contact.relationship ? ` · ${contact.relationship}` : ""}
  {(contact as { email?: string | null }).email ? ` · ${(contact as { email?: string | null }).email}` : ""}
@@ -686,7 +684,7 @@ function NotesPanel({ memberId }: { memberId: string }) {
  }
  }
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -711,9 +709,9 @@ function NotesPanel({ memberId }: { memberId: string }) {
  const mine = note.authorUserId === user?.id;
  const isEditing = editingId === note.id;
  return (
- <div key={note.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={note.id} className="flex items-start justify-between gap-2 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="min-w-0 flex-1">
- <div className="flex items-center gap-2 text-xs text-stone-600">
+ <div className="flex items-center gap-2 text-xs text-muted-foreground">
  {note.pinned && <Pin className="size-3" />}
  <span>
  {note.authorUser ? `${note.authorUser.firstName} ${note.authorUser.lastName}` : "Unknown"}
@@ -815,7 +813,7 @@ function ConsentsPanel({ memberId }: { memberId: string }) {
  }
  }
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -864,16 +862,16 @@ function ConsentsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((consent) => (
- <div key={consent.id} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={consent.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div>
  <p className="font-medium">{CONSENT_LABELS[consent.type]}</p>
- {consent.note && <p className="text-sm text-stone-600">{consent.note}</p>}
+ {consent.note && <p className="text-sm text-muted-foreground">{consent.note}</p>}
  </div>
  <div className="flex items-center gap-2">
  <Badge variant={consent.granted ? "default" : "destructive"}>
  {consent.granted ? "Granted" : "Revoked"}
  </Badge>
- <span className="text-xs text-stone-600">{fmtDateTime(consent.createdAt)}</span>
+ <span className="text-xs text-muted-foreground">{fmtDateTime(consent.createdAt)}</span>
  </div>
  </div>
  ))}
@@ -891,7 +889,7 @@ function HistoryPanel({ memberId }: { memberId: string }) {
  const trainerQuery = useMemberTrainerHistory(memberId);
 
  if (statusQuery.isLoading || branchQuery.isLoading || trainerQuery.isLoading) {
- return <Skeleton className="h-24 w-full" />;
+ return <Skeleton className="h-24 w-full rounded-2xl" />;
  }
 
  type Row = { id: string; createdAt: string; label: string };
@@ -927,9 +925,9 @@ function HistoryPanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-2">
  {rows.map((row) => (
- <div key={row.id} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md text-sm">
+ <div key={row.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)] text-sm">
  <span>{row.label}</span>
- <span className="text-xs text-stone-600">{fmtDateTime(row.createdAt)}</span>
+ <span className="text-xs text-muted-foreground">{fmtDateTime(row.createdAt)}</span>
  </div>
  ))}
  </div>
@@ -1012,7 +1010,7 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  }
  }
 
- if (measurementsQuery.isLoading || fitnessQuery.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (measurementsQuery.isLoading || fitnessQuery.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  type Row = { id: string; date: string; label: string; detail: string };
  const rows: Row[] = [
@@ -1133,12 +1131,12 @@ function AssessmentsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {rows.map((row) => (
- <div key={row.id} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md text-sm">
+ <div key={row.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)] text-sm">
  <div>
  <span className="font-medium">{row.label}</span>
- <span className="ml-2 text-stone-600">{row.detail}</span>
+ <span className="ml-2 text-muted-foreground">{row.detail}</span>
  </div>
- <span className="text-xs text-stone-600">{fmtDateTime(row.date)}</span>
+ <span className="text-xs text-muted-foreground">{fmtDateTime(row.date)}</span>
  </div>
  ))}
  </div>
@@ -1192,7 +1190,7 @@ function GoalMilestones({
  <div className="mt-2 flex flex-col gap-2 border-t pt-2">
  {milestones.map((m) => (
  <div key={m.id} className="flex items-center justify-between text-sm">
- <span className={m.achievedAt ? "text-stone-600 line-through" : ""}>{m.title}</span>
+ <span className={m.achievedAt ? "text-muted-foreground line-through" : ""}>{m.title}</span>
  {m.achievedAt ? (
  <CheckCircle2 className="size-4 text-primary" />
  ) : (
@@ -1247,7 +1245,7 @@ function GoalsPanel({ memberId }: { memberId: string }) {
  }
  }
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -1292,11 +1290,11 @@ function GoalsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((goal) => (
- <div key={goal.id} className="rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm">
+ <div key={goal.id} className="rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)]">
  <div className="flex items-center justify-between">
  <div>
  <p className="font-medium">{goal.title}</p>
- <p className="text-xs text-stone-600">{GOAL_CATEGORY_LABELS[goal.category]}</p>
+ <p className="text-xs text-muted-foreground">{GOAL_CATEGORY_LABELS[goal.category]}</p>
  </div>
  <div className="flex items-center gap-2">
  <Badge variant={GOAL_STATUS_VARIANT[goal.status]}>{goal.status}</Badge>
@@ -1424,7 +1422,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  REJECTED: "destructive",
  };
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -1446,7 +1444,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  accept={ALLOWED_DOCUMENT_TYPES}
  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
  />
- <p className="text-xs text-stone-600">JPEG, PNG, WebP, or PDF, up to 10MB.</p>
+ <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or PDF, up to 10MB.</p>
  <Select value={category} onValueChange={(v) => setCategory(v as MemberDocumentCategory)}>
  <SelectTrigger className="w-full">
  <SelectValue />
@@ -1538,7 +1536,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((doc) => (
- <div key={doc.id} className="flex flex-col gap-2 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm">
+ <div key={doc.id} className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)]">
  <div className="flex items-center justify-between gap-3">
  <div className="flex min-w-0 items-center gap-3">
  {doc.mimeType?.startsWith("image/") && doc.url ? (
@@ -1549,24 +1547,24 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  />
  ) : (
  <div className="flex size-10 shrink-0 items-center justify-center rounded bg-muted">
- <FileText className="size-4 text-stone-600" />
+ <FileText className="size-4 text-muted-foreground" />
  </div>
  )}
  <div className="min-w-0">
  <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{doc.originalName ?? "Unknown"}</p>
- <div className="flex items-center gap-2 flex-wrap text-xs text-stone-600">
+ <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
  <Badge variant="outline">{DOCUMENT_CATEGORY_LABELS[doc.category]}</Badge>
  <Badge variant={statusVariant[doc.status]}>{doc.status}</Badge>
  {doc.sizeBytes && <span>{formatFileSize(doc.sizeBytes)}</span>}
  <span>v{doc.currentVersion}</span>
  <span>· {fmtDateTime(doc.createdAt)}</span>
  </div>
- {doc.description && <p className="mt-1 text-xs text-stone-600">{doc.description}</p>}
+ {doc.description && <p className="mt-1 text-xs text-muted-foreground">{doc.description}</p>}
  {doc.status === "REJECTED" && doc.rejectionReason && (
  <p className="mt-1 text-xs text-destructive">Rejected: {doc.rejectionReason}</p>
  )}
  {doc.reviewedBy && (
- <p className="mt-1 text-xs text-stone-600">
+ <p className="mt-1 text-xs text-muted-foreground">
  {doc.status === "APPROVED" ? "Approved" : "Reviewed"} by {doc.reviewedBy.firstName} {doc.reviewedBy.lastName}
  </p>
  )}
@@ -1651,7 +1649,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
  </div>
  {doc.versions.length > 1 && (
  <div className="flex flex-wrap gap-1 rounded bg-muted/50 p-2">
- <p className="text-xs font-medium text-stone-600">Version history:</p>
+ <p className="text-xs font-medium text-muted-foreground">Version history:</p>
  {doc.versions.map((v) => (
  <Badge key={v.id} variant="secondary" className="text-xs">
  v{v.version}: {v.changeNotes ?? "no notes"}
@@ -1671,7 +1669,7 @@ function DocumentsPanel({ memberId }: { memberId: string }) {
 function AttendancePanel({ memberId }: { memberId: string }) {
  const query = useMemberAttendance(memberId);
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  if (!query.data || query.data.length === 0) {
  return (
@@ -1686,16 +1684,16 @@ function AttendancePanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-3">
  {query.data.map((record) => (
- <div key={record.id} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={record.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center gap-3">
- <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div className="flex size-9 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <Clock className="size-4 text-primary" />
  </div>
  <div>
  <p className="text-sm font-medium">
  {new Date(record.checkInAt).toLocaleDateString()} {new Date(record.checkInAt).toLocaleTimeString()}
  </p>
- <p className="text-xs text-stone-600">
+ <p className="text-xs text-muted-foreground">
  {record.method} &bull; Branch: {record.branch?.name ?? "—"}
  </p>
  </div>
@@ -1749,19 +1747,19 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
  }
 
  return (
- <div className="rounded-xl border border-amber-200/70 bg-muted/40 p-4 dark:border-amber-900/40 dark:from-amber-950/40 dark:to-stone-950">
+ <div className="rounded-2xl border border-border/60 bg-[var(--a-amber-tint)] p-4">
  <div className="flex flex-wrap items-center gap-3">
- <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md">
+ <span className="flex size-9 shrink-0 items-center justify-center rounded-xl text-white shadow-md [background-image:linear-gradient(135deg,var(--a-amber-grad-1),var(--a-amber-grad-2))]">
  <AlertTriangle className="size-4" aria-hidden="true" />
  </span>
- <p className="min-w-0 flex-1 text-sm font-bold text-stone-900 dark:text-stone-100">
+ <p className="min-w-0 flex-1 text-sm font-bold text-foreground">
  {displayCurrency} {total.toLocaleString()} outstanding across {openInvoices.length} invoice
  {openInvoices.length > 1 ? "s" : ""}
  </p>
  <Button
  size="sm"
  variant="outline"
- className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-card"
+ className="min-h-11 rounded-lg border-border/70 bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
  onClick={() => setExpanded((v) => !v)}
  >
  {expanded ? "Hide" : "View"}
@@ -1783,11 +1781,11 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
  {openInvoices.map((inv) => (
  <div
  key={inv.id}
- className="flex items-center justify-between gap-2 rounded-lg border border-amber-200/50 bg-card p-3 text-sm dark:bg-card"
+ className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-card p-3 text-sm shadow-[var(--shadow-card)]"
  >
  <div>
  <p className="font-mono font-bold tabular-nums">{inv.number}</p>
- <p className="text-xs text-stone-600 tabular-nums dark:text-stone-400">
+ <p className="text-xs text-muted-foreground tabular-nums">
  Due {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : "—"}
  </p>
  </div>
@@ -1812,7 +1810,7 @@ function OutstandingInvoicesBanner({ memberId, currency }: { memberId: string; c
  </div>
  )}
  {unconfigured && (
- <p className="mt-2 text-xs font-medium text-amber-800 dark:text-amber-300">
+ <p className="mt-2 text-xs font-medium text-[var(--a-amber-ink)]">
  Online collection isn&apos;t configured — record a cash payment instead.
  </p>
  )}
@@ -1823,9 +1821,6 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  const paymentsQuery = useMemberPayments(memberId);
  const membershipsQuery = useMemberships({ memberId });
  const billingQuery = useMembershipBilling(memberId);
- const refundPayment = useRefundPayment();
- const [refundOpen, setRefundOpen] = React.useState(false);
- const [selectedPayment, setSelectedPayment] = React.useState<Payment | null>(null);
  const [renewOpen, setRenewOpen] = React.useState(false);
  const [renewMembershipId, setRenewMembershipId] = React.useState("");
  const [renewDiscount, setRenewDiscount] = React.useState("");
@@ -1833,7 +1828,7 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  const plansQuery = useMembershipPlans({ pageSize: 100 });
 
  if (paymentsQuery.isLoading || membershipsQuery.isLoading || billingQuery.isLoading)
-  return <Skeleton className="h-24 w-full" />;
+  return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  const payments = paymentsQuery.data ?? [];
  const memberships = membershipsQuery.data?.items ?? [];
@@ -1857,26 +1852,6 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  );
  const canRenew = activeOrExpiring.length > 0;
  const renewTarget = activeOrExpiring.find((m) => m.id === renewMembershipId) ?? activeOrExpiring[0];
-
- function openRefundDialog(payment: Payment) {
- setSelectedPayment(payment);
- setRefundOpen(true);
- }
-
- async function handleRefund(amount: number, reason: string) {
- if (!selectedPayment) return;
- try {
- await refundPayment.mutateAsync({
- id: selectedPayment.id,
- input: { amount, reason },
- });
- toast.success("Refund recorded");
- setRefundOpen(false);
- setSelectedPayment(null);
- } catch (error) {
- toast.error(error instanceof ApiError ? error.message : "Refund failed");
- }
- }
 
  async function handleRenew() {
  if (!renewTarget) return;
@@ -1945,7 +1920,7 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  value={renewDiscount}
  onChange={(e) => setRenewDiscount(e.target.value)}
  />
- <p className="text-xs text-stone-600">
+ <p className="text-xs text-muted-foreground">
  Renewing extends the current term at the plan&apos;s duration and price; the
  selected membership&apos;s plan is used. Payment is recorded separately in
  billing.
@@ -1965,38 +1940,38 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  </div>
 
  <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
- <div className="rounded-xl border border-violet-200/60 bg-muted/40 p-3">
- <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">Total</p>
- <p className="font-mono text-lg font-black tabular-nums text-stone-950">
+ <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+ <p className="text-xs font-black uppercase tracking-[.16em] text-muted-foreground">Total</p>
+ <p className="font-mono text-lg font-black tabular-nums text-foreground">
  {currency} {totalFromMemberships.toLocaleString()}
  </p>
  </div>
- <div className="rounded-xl border border-stone-200/70 bg-card p-3">
- <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">Discounts</p>
- <p className="font-mono text-lg font-black tabular-nums text-stone-500">
+ <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+ <p className="text-xs font-black uppercase tracking-[.16em] text-muted-foreground">Discounts</p>
+ <p className="font-mono text-lg font-black tabular-nums text-muted-foreground">
  -{currency} {totalDiscounts.toLocaleString()}
  </p>
  </div>
- <div className="rounded-xl border border-cyan-200/60 bg-muted/40 p-3">
- <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">Final</p>
- <p className="font-mono text-lg font-black tabular-nums text-stone-950">
+ <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+ <p className="text-xs font-black uppercase tracking-[.16em] text-muted-foreground">Final</p>
+ <p className="font-mono text-lg font-black tabular-nums text-foreground">
  {currency} {finalAmount.toLocaleString()}
  </p>
  </div>
- <div className="rounded-xl border border-emerald-200/60 bg-muted/40 p-3">
- <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">Paid</p>
+ <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+ <p className="text-xs font-black uppercase tracking-[.16em] text-muted-foreground">Paid</p>
  <p className="font-mono text-lg font-black tabular-nums text-emerald-700">
  {currency} {totalPaid.toLocaleString()}
  </p>
  {/* Named, because it is why Outstanding is not simply Final minus Paid. */}
  {Number(billing?.totalRefunded ?? 0) > 0 && (
- <p className="mt-0.5 font-mono text-xs font-bold tabular-nums text-stone-600">
+ <p className="mt-0.5 font-mono text-xs font-bold tabular-nums text-muted-foreground">
  {currency} {Number(billing?.totalRefunded ?? 0).toLocaleString()} refunded
  </p>
  )}
  </div>
- <div className="rounded-xl border border-amber-200/60 bg-muted/40 p-3">
- <p className="text-xs font-black uppercase tracking-[.16em] text-stone-500">Outstanding</p>
+ <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+ <p className="text-xs font-black uppercase tracking-[.16em] text-muted-foreground">Outstanding</p>
  <p className={`text-lg font-semibold tabular-nums ${outstandingBalance > 0 ? "text-rose-600" : "text-emerald-600"}`}>
  {currency} {Math.abs(outstandingBalance).toLocaleString()}
  {outstandingBalance > 0 ? " due" : ""}
@@ -2009,16 +1984,16 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  <h4 className="mb-2 text-sm font-medium">Memberships</h4>
  <div className="flex flex-col gap-2">
  {memberships.map((membership) => (
- <div key={membership.id} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={membership.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center gap-3">
- <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div className="flex size-9 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <Dumbbell className="size-4 text-primary" />
  </div>
  <div>
  <p className="text-sm font-medium">
  {membership.membershipPlan?.name ?? "Membership"}
  </p>
- <p className="text-xs text-stone-600">
+ <p className="text-xs text-muted-foreground">
  {membership.membershipPlan?.durationDays ?? 0} days &bull;{" "}
  {new Date(membership.startDate).toLocaleDateString()} -{" "}
  {new Date(membership.endDate).toLocaleDateString()}
@@ -2062,21 +2037,21 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  ? "warning"
  : "secondary";
  return (
- <div key={payment.id} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={payment.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center gap-3">
- <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div className="flex size-9 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <CreditCard className="size-4 text-primary" />
  </div>
  <div>
  <p className="text-sm font-medium">
  {payment.currency} {Number(payment.amount).toLocaleString()}
  {refunded > 0 && (
- <span className="ml-2 text-xs text-stone-600">
+ <span className="ml-2 text-xs text-muted-foreground">
  (refunded: {payment.currency} {refunded.toLocaleString()})
  </span>
  )}
  </p>
- <p className="text-xs text-stone-600">
+ <p className="text-xs text-muted-foreground">
  {payment.method} &bull; {new Date(payment.createdAt).toLocaleDateString()}
  {payment.note && <> &bull; {payment.note}</>}
  </p>
@@ -2086,11 +2061,6 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  <Badge variant={statusVariant as "success" | "warning" | "secondary"}>
  {payment.status}
  </Badge>
- {payment.status === "COMPLETED" && (
- <Button variant="ghost" size="sm" onClick={() => openRefundDialog(payment)}>
- <Undo2 className="size-3.5" />
- </Button>
- )}
  </div>
  </div>
  );
@@ -2099,80 +2069,10 @@ function PaymentsPanel({ memberId }: { memberId: string }) {
  </div>
  )}
 
- <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
- <DialogContent>
- <DialogHeader>
- <DialogTitle>Refund Payment</DialogTitle>
- </DialogHeader>
- {selectedPayment && (
- <RefundPaymentForm
- payment={selectedPayment}
- onSubmit={handleRefund}
- onCancel={() => setRefundOpen(false)}
- isPending={refundPayment.isPending}
- />
- )}
- </DialogContent>
- </Dialog>
  </div>
  );
 }
 
-function RefundPaymentForm({
- payment,
- onSubmit,
- onCancel,
- isPending,
-}: {
- payment: Payment;
- onSubmit: (amount: number, reason: string) => void;
- onCancel: () => void;
- isPending: boolean;
-}) {
- const [amount, setAmount] = React.useState("");
- const [reason, setReason] = React.useState("");
- const alreadyRefunded = (payment.refunds ?? []).reduce((sum, r) => sum + Number(r.amount), 0);
- const remaining = Number(payment.amount) - alreadyRefunded;
-
- function handleSubmit(e: React.FormEvent) {
- e.preventDefault();
- onSubmit(Number(amount) || remaining, reason);
- }
-
- return (
- <form onSubmit={handleSubmit} className="flex flex-col gap-4">
- <p className="text-sm text-stone-600">
- Remaining refundable balance: {payment.currency} {remaining.toFixed(2)}
- </p>
- <div className="flex flex-col gap-2">
- <label className="text-sm font-medium">Amount</label>
- <Input
- type="number"
- step="0.01"
- placeholder={remaining.toFixed(2)}
- value={amount}
- onChange={(e) => setAmount(e.target.value)}
- />
- </div>
- <div className="flex flex-col gap-2">
- <label className="text-sm font-medium">Reason (optional)</label>
- <Input
- placeholder="Customer request, service issue, ..."
- value={reason}
- onChange={(e) => setReason(e.target.value)}
- />
- </div>
- <DialogFooter>
- <Button type="button" variant="outline" onClick={onCancel}>
- Cancel
- </Button>
- <Button type="submit" variant="destructive" disabled={isPending}>
- {isPending ? "Refunding..." : "Issue refund"}
- </Button>
- </DialogFooter>
- </form>
- );
-}
 
 // -- Screening Panel (PAR-Q)
 function ScreeningPanel({ memberId }: { memberId: string }) {
@@ -2201,7 +2101,7 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
  setResponses({});
  }
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  const latestScreening = query.data?.[0];
 
@@ -2252,11 +2152,11 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
  </div>
 
  {latestScreening ? (
- <div className="rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center justify-between">
  <div>
  <p className="font-medium">Latest PAR-Q</p>
- <p className="text-sm text-stone-600">{new Date(latestScreening.completedAt).toLocaleDateString()}</p>
+ <p className="text-sm text-muted-foreground">{new Date(latestScreening.completedAt).toLocaleDateString()}</p>
  </div>
  {latestScreening.flaggedForMedicalClearance && (
  <Badge variant="destructive">Medical clearance needed</Badge>
@@ -2285,7 +2185,7 @@ function ScreeningPanel({ memberId }: { memberId: string }) {
 function WorkoutsPanel({ memberId }: { memberId: string }) {
  const query = useMemberWorkoutAssignments(memberId);
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  if (!query.data || query.data.length === 0) {
  return (
@@ -2300,11 +2200,11 @@ function WorkoutsPanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-2">
  {query.data.map((assignment) => (
- <div key={assignment.id} className="rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={assignment.id} className="rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center justify-between">
  <div>
  <p className="font-medium">{assignment.workoutPlan.name}</p>
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  Started {new Date(assignment.startDate).toLocaleDateString()}
  </p>
  </div>
@@ -2314,7 +2214,7 @@ function WorkoutsPanel({ memberId }: { memberId: string }) {
  {assignment.status}
  </Badge>
  </div>
- {assignment.notes && <p className="mt-2 text-sm text-stone-600">{assignment.notes}</p>}
+ {assignment.notes && <p className="mt-2 text-sm text-muted-foreground">{assignment.notes}</p>}
  </div>
  ))}
  </div>
@@ -2331,7 +2231,7 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
  <PtAdherenceStrip memberId={memberId} />
 
  {query.isLoading ? (
- <Skeleton className="h-24 w-full" />
+ <Skeleton className="h-24 w-full rounded-2xl" />
  ) : query.isError ? (
  <ErrorState message="Couldn't load PT sessions." onRetry={() => query.refetch()} />
  ) : !query.data || query.data.length === 0 ? (
@@ -2345,10 +2245,10 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
  {query.data.map((session) => {
  const coach = ptTrainerName(session.trainer);
  return (
- <div key={session.id} className="rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={session.id} className="rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center justify-between gap-3">
  <div className="flex min-w-0 items-center gap-3">
- <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div className="flex size-10 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <Dumbbell className="size-5" aria-hidden="true" />
  </div>
  <div className="min-w-0">
@@ -2359,7 +2259,7 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
  {"–"}
  {new Date(session.endTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
  </p>
- <p className="text-sm text-stone-600 [overflow-wrap:anywhere]">
+ <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">
  {[coach ?? "No coach", session.type.replaceAll("_", " ").toLowerCase(), session.isPaid ? "paid" : null]
  .filter(Boolean)
  .join(" · ")}
@@ -2372,7 +2272,7 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
  {session.status.replace("_", " ")}
  </Badge>
  </div>
- {session.notes && <p className="mt-2 text-sm text-stone-600 [overflow-wrap:anywhere]">{session.notes}</p>}
+ {session.notes && <p className="mt-2 text-sm text-muted-foreground [overflow-wrap:anywhere]">{session.notes}</p>}
  </div>
  );
  })}
@@ -2388,7 +2288,7 @@ function PtSessionsPanel({ memberId }: { memberId: string }) {
 function NutritionPanel({ memberId }: { memberId: string }) {
  const query = useMemberDietAssignments(memberId);
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  if (!query.data || query.data.length === 0) {
  return (
@@ -2403,18 +2303,18 @@ function NutritionPanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-2">
  {query.data.map((assignment) => (
- <div key={assignment.id} className="rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={assignment.id} className="rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center justify-between">
  <div>
  <p className="font-medium">{assignment.dietPlan?.name}</p>
- <p className="text-sm text-stone-600">Started {new Date(assignment.startDate).toLocaleDateString()}</p>
+ <p className="text-sm text-muted-foreground">Started {new Date(assignment.startDate).toLocaleDateString()}</p>
  </div>
  <Badge variant={assignment.status === "ACTIVE" ? "default" : assignment.status === "COMPLETED" ? "secondary" : "outline"}>
  {assignment.status}
  </Badge>
  </div>
  {assignment.dietPlan && (
- <p className="mt-2 text-sm text-stone-600">Diet plan assigned</p>
+ <p className="mt-2 text-sm text-muted-foreground">Diet plan assigned</p>
  )}
  </div>
  ))}
@@ -2547,26 +2447,26 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
  <div className="flex flex-col gap-2">
  <h4 className="text-sm font-medium">Open ({openFollowUps.length})</h4>
  {openFollowUps.map((followUp) => (
- <div key={followUp.id} className="flex items-start justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={followUp.id} className="flex items-start justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-start gap-3">
- <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div className="flex size-9 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <CheckSquare className="size-4 text-primary" />
  </div>
  <div>
  <p className="text-sm font-medium">{followUp.title}</p>
  {followUp.description && (
- <p className="mt-0.5 text-sm text-stone-600">{followUp.description}</p>
+ <p className="mt-0.5 text-sm text-muted-foreground">{followUp.description}</p>
  )}
  <div className="mt-1 flex items-center gap-2">
  <Badge variant={PRIORITY_VARIANT[followUp.priority]}>{PRIORITY_LABELS[followUp.priority]}</Badge>
  {followUp.dueAt && (
- <span className={`text-xs ${followUp.isOverdue ? "text-rose-600 font-medium" : "text-stone-600"}`}>
+ <span className={`text-xs ${followUp.isOverdue ? "text-[var(--a-rose-ink)] font-medium" : "text-muted-foreground"}`}>
  {followUp.isOverdue ? "Overdue: " : "Due: "}
  {new Date(followUp.dueAt).toLocaleDateString()}
  </span>
  )}
  {followUp.assignedToUser && (
- <span className="text-xs text-stone-600">
+ <span className="text-xs text-muted-foreground">
  Assigned to {followUp.assignedToUser.firstName} {followUp.assignedToUser.lastName}
  </span>
  )}
@@ -2600,7 +2500,7 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
  }
  disabled={remove.isPending}
  >
- <Trash2 className="size-4 text-stone-600" />
+ <Trash2 className="size-4 text-muted-foreground" />
  </Button>
  </div>
  </div>
@@ -2610,16 +2510,16 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
 
  {completedFollowUps.length > 0 && (
  <div className="flex flex-col gap-2">
- <h4 className="text-sm font-medium text-stone-600">Completed ({completedFollowUps.length})</h4>
+ <h4 className="text-sm font-medium text-muted-foreground">Completed ({completedFollowUps.length})</h4>
  {completedFollowUps.map((followUp) => (
  <div key={followUp.id} className="flex items-start justify-between rounded-md border bg-muted/30 p-3">
  <div className="flex items-start gap-3 opacity-60">
  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
- <CheckCircle2 className="size-4 text-stone-600" />
+ <CheckCircle2 className="size-4 text-muted-foreground" />
  </div>
  <div>
  <p className="text-sm font-medium line-through">{followUp.title}</p>
- <p className="mt-0.5 text-xs text-stone-600">
+ <p className="mt-0.5 text-xs text-muted-foreground">
  Completed {new Date(followUp.completedAt!).toLocaleDateString()}
  </p>
  </div>
@@ -2636,7 +2536,7 @@ function FollowUpsPanel({ memberId }: { memberId: string }) {
  }
  disabled={uncomplete.isPending}
  >
- <Undo2 className="size-4 text-stone-600" />
+ <Undo2 className="size-4 text-muted-foreground" />
  </Button>
  </div>
  ))}
@@ -2693,7 +2593,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
  }
 
  if (tagsQuery.isLoading || assignmentsQuery.isLoading) {
- return <Skeleton className="h-24 w-full" />;
+ return <Skeleton className="h-24 w-full rounded-2xl" />;
  }
 
  const assignedTagIds = assignmentsQuery.data?.map((a) => a.tagId) ?? [];
@@ -2714,7 +2614,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
  <DialogTitle>Manage tags</DialogTitle>
  </DialogHeader>
  <div className="flex flex-col gap-3">
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  Select tags to assign to this member:
  </p>
  <div className="flex flex-wrap gap-2">
@@ -2743,7 +2643,7 @@ function TagsPanel({ memberId }: { memberId: string }) {
  );
  })}
  {tagsQuery.data?.length === 0 && (
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  No tags created yet.{" "}
  <a href="/settings/tags" className="font-semibold text-primary underline-offset-4 hover:underline">Create tags</a>
  </p>
@@ -2837,7 +2737,7 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  SKIPPED_NO_CONSENT: "secondary",
  };
 
- if (query.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (query.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  return (
  <div className="flex flex-col gap-3">
@@ -2911,7 +2811,7 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  ) : (
  <div className="flex flex-col gap-2">
  {query.data.map((msg) => (
- <div key={msg.id} className="flex items-start gap-3 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm">
+ <div key={msg.id} className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)]">
  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
  {msg.channel === "EMAIL" ? (
  <Mail className="size-4" />
@@ -2928,10 +2828,10 @@ function CommunicationsPanel({ memberId }: { memberId: string }) {
  </div>
  {/* A push is logged per device as `device:<id>`; the id means
  nothing to staff, and the token is never stored. */}
- <p className="mt-1 text-xs text-stone-600">
+ <p className="mt-1 text-xs text-muted-foreground">
  {msg.recipient.startsWith("device:") ? "Their app" : msg.recipient}
  </p>
- <p className="mt-1 text-xs text-stone-600">
+ <p className="mt-1 text-xs text-muted-foreground">
  {fmtDateTime(msg.createdAt)}
  </p>
  {msg.errorMessage && (
@@ -3011,22 +2911,22 @@ function TimelinePanel({ memberId }: { memberId: string }) {
  {data.events.map((event) => {
  const Icon = TIMELINE_ICON_MAP[event.type] ?? History;
  return (
- <div key={event.id} className="flex items-start gap-3 rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm">
- <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-md shadow-violet-500/20">
+ <div key={event.id} className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)]">
+ <div className="flex size-9 shrink-0 items-center justify-center rounded-xl [background-image:linear-gradient(135deg,var(--a-violet-grad-1),var(--a-violet-grad-2))] text-white shadow-md shadow-violet-500/20">
  <Icon className="size-4 text-white" aria-hidden="true" />
  </div>
  <div className="min-w-0 flex-1">
  <div className="flex items-center justify-between gap-2">
  <p className="text-sm font-medium">{event.title}</p>
- <span className="shrink-0 text-xs text-stone-600">
+ <span className="shrink-0 text-xs text-muted-foreground">
  {fmtDateTime(event.timestamp)}
  </span>
  </div>
  {event.description && (
- <p className="mt-0.5 text-sm text-stone-600">{event.description}</p>
+ <p className="mt-0.5 text-sm text-muted-foreground">{event.description}</p>
  )}
  {event.actorName && (
- <p className="mt-0.5 text-xs text-stone-600">by {event.actorName}</p>
+ <p className="mt-0.5 text-xs text-muted-foreground">by {event.actorName}</p>
  )}
  </div>
  </div>
@@ -3044,7 +2944,7 @@ function TimelinePanel({ memberId }: { memberId: string }) {
  >
  Previous
  </Button>
- <span className="text-sm text-stone-600">
+ <span className="text-sm text-muted-foreground">
  Page {page} of {Math.ceil(data.totalCount / pageSize)}
  </span>
  <Button
@@ -3127,7 +3027,7 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
  return (
  <div className="flex flex-col gap-4">
  <div className="flex items-center justify-between">
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  Found {data.potentialDuplicates.length} potential duplicate
  {data.potentialDuplicates.length !== 1 ? "s" : ""}
  </p>
@@ -3139,7 +3039,7 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
 
  <div className="flex flex-col gap-2">
  {data.potentialDuplicates.map((dup) => (
- <div key={dup.memberId} className="flex items-center justify-between rounded-xl border border-stone-200/70 bg-card p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md">
+ <div key={dup.memberId} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-raised)]">
  <div className="flex items-center gap-3">
  <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10">
  <AlertTriangle className="size-5 text-amber-600" />
@@ -3148,7 +3048,7 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
  <p className="font-medium">
  {dup.firstName} {dup.lastName}
  </p>
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  {dup.email && <span>{dup.email}</span>}
  {dup.phone && <span> · {dup.phone}</span>}
  </p>
@@ -3159,7 +3059,7 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
  </Badge>
  </div>
  {dup.matchReasons.length > 0 && (
- <p className="mt-1 text-xs text-stone-600">
+ <p className="mt-1 text-xs text-muted-foreground">
  Reasons: {dup.matchReasons.join(", ")}
  </p>
  )}
@@ -3194,14 +3094,14 @@ function DuplicatesPanel({ memberId }: { memberId: string }) {
  <p className="mt-1">
  {data.firstName} {data.lastName}
  </p>
- <p className="text-sm text-stone-600">{data.email ?? "No email"}</p>
+ <p className="text-sm text-muted-foreground">{data.email ?? "No email"}</p>
  </div>
  <div>
  <p className="text-sm font-medium">Target (to keep)</p>
  <p className="mt-1">
  {selectedDuplicate.firstName} {selectedDuplicate.lastName}
  </p>
- <p className="text-sm text-stone-600">
+ <p className="text-sm text-muted-foreground">
  {selectedDuplicate.email ?? "No email"}
  </p>
  </div>
@@ -3241,7 +3141,7 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
  const activeId = selectedId ?? membershipsQuery.data?.items?.[0]?.id ?? null;
  const historyQuery = useMembershipHistory(activeId);
 
- if (membershipsQuery.isLoading) return <Skeleton className="h-24 w-full" />;
+ if (membershipsQuery.isLoading) return <Skeleton className="h-24 w-full rounded-2xl" />;
 
  const memberships = membershipsQuery.data?.items ?? [];
  if (memberships.length === 0) {
@@ -3275,7 +3175,7 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
  </SelectContent>
  </Select>
  {selected?.previousMembershipId && (
- <p className="text-xs text-stone-600">
+ <p className="text-xs text-muted-foreground">
  Renewed/continued from a previous membership — full chain is preserved in the audit
  trail.
  </p>
@@ -3298,8 +3198,8 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
  <p className="text-sm font-medium">
  {entry.fromStatus ? `${entry.fromStatus} → ${entry.toStatus}` : `Created as ${entry.toStatus}`}
  </p>
- {entry.detail && <p className="text-sm text-stone-600">{entry.detail}</p>}
- <p className="text-xs text-stone-600">
+ {entry.detail && <p className="text-sm text-muted-foreground">{entry.detail}</p>}
+ <p className="text-xs text-muted-foreground">
  {fmtDateTime(entry.createdAt)}
  {entry.changedByUser
  ? ` — by ${entry.changedByUser.firstName} ${entry.changedByUser.lastName}`.trim()
@@ -3317,7 +3217,7 @@ function MembershipHistoryPanel({ memberId }: { memberId: string }) {
  * never fit across a phone, and snapping keeps a swipe landing on a whole
  * tab rather than half of one. */
 const TAB_TRIGGER =
- "min-h-10 shrink-0 snap-start rounded-xl px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm";
+ "min-h-11 shrink-0 snap-start rounded-full px-4 text-sm font-semibold text-muted-foreground transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-[0_1px_2px_rgb(15_23_42/0.08),0_4px_12px_-6px_rgb(15_23_42/0.18)]";
 
 export function Member360Tabs({
  memberId,
@@ -3336,7 +3236,7 @@ export function Member360Tabs({
  className="w-full"
  >
  <div className="relative">
- <TabsList className="flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+ <TabsList className="flex h-auto w-full snap-x justify-start gap-1 overflow-x-auto rounded-full border border-border/60 bg-muted/50 p-1 shadow-[inset_0_1px_0_rgb(255_255_255/0.6)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  <TabsTrigger
  value="overview"
  className={TAB_TRIGGER}
@@ -3471,70 +3371,70 @@ export function Member360Tabs({
  </TabsTrigger>
  </TabsList>
  </div>
- <TabsContent value="overview" className="mt-6">
+ <TabsContent value="overview" className="mt-4 sm:mt-6">
  <MemberOverviewPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="tags">
+ <TabsContent value="tags" className="mt-4 sm:mt-6">
  <TagsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="addresses">
+ <TabsContent value="addresses" className="mt-4 sm:mt-6">
  <AddressesPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="emergency">
+ <TabsContent value="emergency" className="mt-4 sm:mt-6">
  <EmergencyContactsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="notes">
+ <TabsContent value="notes" className="mt-4 sm:mt-6">
  <NotesPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="consents">
+ <TabsContent value="consents" className="mt-4 sm:mt-6">
  <ConsentsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="assessments">
+ <TabsContent value="assessments" className="mt-4 sm:mt-6">
  <AssessmentsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="goals">
+ <TabsContent value="goals" className="mt-4 sm:mt-6">
  <GoalsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="documents">
+ <TabsContent value="documents" className="mt-4 sm:mt-6">
  <DocumentsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="history">
+ <TabsContent value="history" className="mt-4 sm:mt-6">
  <HistoryPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="attendance">
+ <TabsContent value="attendance" className="mt-4 sm:mt-6">
  <AttendancePanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="payments">
+ <TabsContent value="payments" className="mt-4 sm:mt-6">
  <PaymentsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="screening">
+ <TabsContent value="screening" className="mt-4 sm:mt-6">
  <ScreeningPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="pt-sessions">
+ <TabsContent value="pt-sessions" className="mt-4 sm:mt-6">
  <PtSessionsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="workouts">
+ <TabsContent value="workouts" className="mt-4 sm:mt-6">
  <WorkoutsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="nutrition">
+ <TabsContent value="nutrition" className="mt-4 sm:mt-6">
  <NutritionPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="follow-ups">
+ <TabsContent value="follow-ups" className="mt-4 sm:mt-6">
  <FollowUpsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="calls">
+ <TabsContent value="calls" className="mt-4 sm:mt-6">
  <CallsPanel memberId={memberId} label="This member" />
  </TabsContent>
- <TabsContent value="communications">
+ <TabsContent value="communications" className="mt-4 sm:mt-6">
  <CommunicationsPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="timeline">
+ <TabsContent value="timeline" className="mt-4 sm:mt-6">
  <TimelinePanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="duplicates">
+ <TabsContent value="duplicates" className="mt-4 sm:mt-6">
  <DuplicatesPanel memberId={memberId} />
  </TabsContent>
- <TabsContent value="membership-history">
+ <TabsContent value="membership-history" className="mt-4 sm:mt-6">
  <MembershipHistoryPanel memberId={memberId} />
  </TabsContent>
  </Tabs>

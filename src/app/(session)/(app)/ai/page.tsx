@@ -138,8 +138,11 @@ export default function AiPage() {
       <div className="flex flex-col gap-6">
         <PageHero
           id="ai-title"
+          eyebrow="AI agent"
           icon={Sparkles}
           title="Ask the agent"
+          description="Grounded in your gym's members, attendance and revenue — saved chats included."
+          accent="blue"
           actions={
             <Link
               href="/ai-actions"
@@ -183,7 +186,7 @@ export default function AiPage() {
                   </div>
                 </div>
                 {messages.length > 0 && !chat.isPending ? (
-                  <Button type="button" size="sm" variant="outline" className="min-h-9 rounded-xl" onClick={newChat}>
+                  <Button type="button" size="sm" variant="outline" className="min-h-11 rounded-xl" onClick={newChat}>
                     <Plus className="size-4" aria-hidden="true" />
                     New chat
                   </Button>
@@ -290,7 +293,7 @@ export default function AiPage() {
                   <Button
                     onClick={() => void handleSend()}
                     disabled={chat.isPending || !input.trim()}
-                    className="size-9 shrink-0 rounded-xl bg-primary p-0 shadow-xs"
+                    className="size-11 shrink-0 rounded-xl bg-primary p-0 shadow-xs"
                     aria-label="Send message"
                   >
                     <Send className="size-4" aria-hidden="true" />
@@ -324,7 +327,7 @@ export default function AiPage() {
                             disabled={loadingConversation}
                             aria-current={c.id === conversationId ? "true" : undefined}
                             className={cn(
-                              "min-h-10 min-w-0 flex-1 rounded-xl px-3 py-2 text-left text-xs transition hover:bg-muted",
+                              "min-h-11 min-w-0 flex-1 rounded-xl px-3 py-2 text-left text-xs transition hover:bg-muted",
                               c.id === conversationId && "bg-primary/10 font-semibold text-foreground",
                             )}
                           >
@@ -337,7 +340,7 @@ export default function AiPage() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="size-9 shrink-0 rounded-lg text-muted-foreground"
+                            className="size-11 shrink-0 rounded-xl text-muted-foreground"
                             aria-label="Delete chat"
                             disabled={deleteConversation.isPending}
                             onClick={() => void removeConversation(c.id)}
@@ -350,16 +353,22 @@ export default function AiPage() {
                   )}
                 </CardContent>
               </Card>
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 p-6 text-white shadow-md">
-                <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-fuchsia-400/30 blur-3xl" aria-hidden="true" />
-                <div className="pointer-events-none absolute -bottom-16 -left-10 size-48 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />
-                <h3 className="relative text-sm font-bold">Safe Autonomous Actions</h3>
-                <p className="relative mt-1 text-xs leading-relaxed text-white/80">
+              <div
+                className="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm"
+                style={{
+                  background:
+                    "radial-gradient(90% 90% at 100% 0%, color-mix(in oklab, var(--a-blue-grad-2) 18%, transparent), transparent 60%), radial-gradient(70% 80% at 0% 100%, color-mix(in oklab, var(--a-violet-grad-1) 16%, transparent), transparent 60%), var(--card)",
+                }}
+              >
+                <div className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-blue-200/40 blur-3xl" aria-hidden="true" />
+                <div className="pointer-events-none absolute -bottom-16 -left-10 size-48 rounded-full bg-violet-200/40 blur-3xl" aria-hidden="true" />
+                <h3 className="relative text-sm font-bold text-foreground">Safe Autonomous Actions</h3>
+                <p className="relative mt-1 text-xs leading-relaxed text-muted-foreground">
                   AI suggestions that require write permissions are held in the Human-in-the-Loop review queue.
                 </p>
                 <Link
                   href="/ai-actions"
-                  className="relative mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl bg-white/90 px-4 py-2 text-xs font-bold text-indigo-950 shadow-md transition hover:-translate-y-0.5 hover:bg-white"
+                  className="relative mt-4 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5"
                 >
                   Review Approvals <ArrowRight className="size-3.5" aria-hidden="true" />
                 </Link>
@@ -380,7 +389,7 @@ export default function AiPage() {
                       type="button"
                       variant="outline"
                       onClick={() => void handleSend(tip)}
-                      className="h-auto min-h-10 w-full justify-between whitespace-normal rounded-xl border-border/60 bg-muted/20 px-3.5 py-2.5 text-left text-xs font-semibold hover:border-primary/30"
+                      className="h-auto min-h-11 w-full justify-between whitespace-normal rounded-xl border-border/60 bg-muted/20 px-3.5 py-2.5 text-left text-xs font-semibold hover:border-primary/30"
                     >
                       <span className="line-clamp-2">{tip}</span>
                       <ArrowRight className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />

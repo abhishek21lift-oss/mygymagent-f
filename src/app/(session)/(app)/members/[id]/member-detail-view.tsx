@@ -295,7 +295,7 @@ function WorkoutProgress({ memberId }: { memberId: string }) {
  return (
  <div className="grid gap-3 sm:grid-cols-3">
  {[1, 2, 3].map((item) => (
- <Skeleton key={item} className="h-20 rounded-lg" />
+ <Skeleton key={item} className="h-20 rounded-2xl" />
  ))}
  </div>
  );
@@ -364,7 +364,7 @@ function ProgressStat({
  color?: string;
 }) {
  return (
- <div className="rounded-2xl bg-muted/50 p-4">
+ <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-[var(--shadow-card)]">
  <div>
  <Icon className={`size-5 ${color}`} aria-hidden="true" />
  <p className="mt-3 text-xl font-semibold tracking-tight tabular-nums text-foreground">{value}</p>
@@ -512,14 +512,14 @@ function MemberHero({
  style={accentVars(hue)}
  className={cn(surfaceClass, "relative isolate overflow-hidden")}
  >
- {/* The member's colour, as a band across the top of the card. The
- highlight is what makes it read as glass rather than a flat fill. */}
+ {/* Light pastel mesh in the member's own hue -- the dashboard aurora
+ washed over near-white, so the name always sits on a light ground. */}
  <div
  aria-hidden="true"
- className="h-24 sm:h-28"
- style={{ backgroundImage: "radial-gradient(90% 160% at 100% 0%, var(--t) 0%, transparent 60%), linear-gradient(135deg, var(--t-g1), var(--t-g2))" }}
+ className="relative h-28 overflow-hidden sm:h-32"
+ style={{ backgroundImage: "radial-gradient(110% 130% at 0% 0%, color-mix(in oklab, var(--t-g1) 34%, transparent) 0%, transparent 55%), radial-gradient(90% 120% at 100% 100%, color-mix(in oklab, var(--t-g2) 30%, transparent) 0%, transparent 60%), linear-gradient(135deg, #f8faff 0%, #fdf4ff 55%, #fff7ed 100%)" }}
  >
- <div className="size-full bg-[radial-gradient(70%_130%_at_15%_0%,rgb(255_255_255/0.32),transparent_60%)]" />
+ <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_255_255/0.65),transparent_45%)]" />
  </div>
 
  <div className="px-4 pb-5 sm:px-6 sm:pb-6">
@@ -952,7 +952,7 @@ export function MemberDetailView({ memberId }: { memberId: string }) {
  </div>
  </div>
 
- <section ref={recordsRef} aria-label="Member records" className={cn(surfaceClass, "scroll-mt-4 p-3 sm:p-6")}>
+ <section ref={recordsRef} aria-label="Member records" className={cn(surfaceClass, "scroll-mt-4 p-4 sm:p-6")}>
  <Member360Tabs memberId={memberId} value={recordsTab} onValueChange={setRecordsTab} />
  </section>
  </div>

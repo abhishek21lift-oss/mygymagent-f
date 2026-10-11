@@ -88,7 +88,7 @@ export function SupportSection() {
       >
         <div className="flex flex-col gap-2">
           {(tickets.data ?? []).map((ticket) => (
-            <div key={ticket.id} className="rounded-lg border border-border px-3 py-2">
+            <div key={ticket.id} className="rounded-2xl border border-border/60 bg-muted/20 px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">{ticket.subject}</p>
@@ -210,7 +210,7 @@ export function FeedbackSection() {
       >
         <div className="flex flex-col gap-3">
           {(summary.data ?? []).length > 0 && (
-            <div className="overflow-hidden rounded-lg border border-border">
+            <div className="overflow-hidden rounded-2xl border border-border/60">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -252,7 +252,7 @@ export function FeedbackSection() {
                 aria-label="Survey"
                 value={response.surveyId}
                 onChange={(e) => setResponse((r) => ({ ...r, surveyId: e.target.value }))}
-                className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground"
+                className="h-11 rounded-xl border border-input bg-card px-3 text-sm text-foreground"
               >
                 <option value="">Select a survey</option>
                 {(surveys.data ?? [])
@@ -371,7 +371,7 @@ export function ReferralsSection() {
           {(referrals.data ?? []).map((referral) => (
             <div
               key={referral.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border/60 bg-muted/20 px-4 py-3"
             >
               <div className="min-w-0">
                 <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-medium">
@@ -521,7 +521,7 @@ export function AccountingSection() {
                 ["Credits", tax.data[0].totalCredit],
                 ["Net", tax.data[0].net],
               ] as const).map(([label, value]) => (
-                <div key={label} className="rounded-lg border border-border px-3 py-2">
+                <div key={label} className="rounded-2xl border border-border/60 bg-muted/20 px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                     {label}
                   </p>
@@ -533,7 +533,7 @@ export function AccountingSection() {
             </div>
           )}
           {(trial.data ?? []).length > 0 && (
-            <div className="overflow-hidden rounded-lg border border-border">
+            <div className="overflow-hidden rounded-2xl border border-border/60">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -608,7 +608,7 @@ export function AccountingSection() {
                 emptyTitle="No postings"
                 emptyDescription="Nothing has been posted to this account yet."
               >
-                <div className="overflow-hidden rounded-lg border border-border">
+                <div className="overflow-hidden rounded-2xl border border-border/60">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -664,7 +664,7 @@ export function AccountingSection() {
                         ls.map((l, i) => (i === index ? { ...l, accountId: e.target.value } : l)),
                       )
                     }
-                    className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground"
+                    className="h-11 rounded-xl border border-input bg-card px-3 text-sm text-foreground"
                   >
                     <option value="">Select an account</option>
                     {(accounts.data ?? []).map((a) => (
@@ -757,7 +757,7 @@ export function AccountingSection() {
                   aria-label="Account type"
                   value={account.type}
                   onChange={(e) => setAccount((a) => ({ ...a, type: e.target.value }))}
-                  className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground"
+                  className="h-11 rounded-xl border border-input bg-card px-3 text-sm text-foreground"
                 >
                   {["ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE"].map((t) => (
                     <option key={t} value={t}>
