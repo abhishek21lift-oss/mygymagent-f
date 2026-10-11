@@ -179,7 +179,7 @@ function GatewayPanel({ data }: { data: GatewayPayload }) {
             <Check
               ok={Boolean(d.credentialsConfigured)}
               title="Admin credentials are set"
-              fix="Set FREELLM_EMAIL and FREELLM_PASSWORD on the API service (Render → Environment), then redeploy."
+              fix="Set FREELLM_EMAIL and FREELLM_PASSWORD in the backend service's environment, then redeploy."
             />
             <Check
               ok={!d.loopbackBaseUrl}
