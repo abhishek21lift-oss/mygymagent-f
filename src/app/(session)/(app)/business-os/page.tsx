@@ -121,8 +121,11 @@ export default function BusinessOsPage() {
     <div className="space-y-6">
       <PageHero
         id="business-os"
+        eyebrow="Insights"
         icon={Sparkles}
         title="Business OS"
+        description="Support, feedback, referrals, accounting, loyalty and marketing — run the business."
+        accent="blue"
       />
 
       <SupportSection />
@@ -131,10 +134,17 @@ export default function BusinessOsPage() {
       <AccountingSection />
 
       <div className="grid gap-5 xl:grid-cols-3">
-        <Card>
+        <Card className="rounded-3xl border-border/60 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              <Star className="size-5" /> Loyalty
+            <CardTitle className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-xl text-white shadow-xs"
+                style={{ background: "linear-gradient(135deg, var(--a-amber-grad-1), var(--a-amber-grad-2))" }}
+              >
+                <Star className="size-4" />
+              </span>
+              Loyalty
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -171,10 +181,17 @@ export default function BusinessOsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-3xl border-border/60 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              <Megaphone className="size-5" /> Marketing
+            <CardTitle className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-xl text-white shadow-xs"
+                style={{ background: "linear-gradient(135deg, var(--a-rose-grad-1), var(--a-rose-grad-2))" }}
+              >
+                <Megaphone className="size-4" />
+              </span>
+              Marketing
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -194,7 +211,7 @@ export default function BusinessOsPage() {
                   aria-label="Campaign name"
                 />
                 <select
-                  className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
+                  className="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm"
                   value={campaign.channel}
                   onChange={(e) => setCampaign({ ...campaign, channel: e.target.value })}
                   aria-label="Channel"
@@ -210,7 +227,7 @@ export default function BusinessOsPage() {
                   aria-label="Template"
                 />
                 <textarea
-                  className="min-h-20 w-full rounded-md border border-input bg-card p-3 text-sm"
+                  className="min-h-20 w-full rounded-xl border border-input bg-card p-3 text-sm"
                   value={campaign.audienceFilter}
                   onChange={(e) => setCampaign({ ...campaign, audienceFilter: e.target.value })}
                   aria-label="Audience filter JSON"
@@ -226,7 +243,7 @@ export default function BusinessOsPage() {
                     {campaigns.slice(0, 6).map((c) => (
                       <div
                         key={c.id}
-                        className="grid grid-cols-1 gap-2 rounded-lg border border-border px-3 py-2"
+                        className="grid grid-cols-1 gap-2 rounded-2xl border border-border/60 bg-muted/20 px-4 py-3"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="min-w-0">
@@ -300,10 +317,17 @@ export default function BusinessOsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-3xl border-border/60 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              <Brain className="size-5" /> PT intelligence
+            <CardTitle className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-xl text-white shadow-xs"
+                style={{ background: "linear-gradient(135deg, var(--a-emerald-grad-1), var(--a-emerald-grad-2))" }}
+              >
+                <Brain className="size-4" />
+              </span>
+              PT intelligence
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -322,10 +346,17 @@ export default function BusinessOsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-3xl border-border/60 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              <Sparkles className="size-5" /> Global AI command
+            <CardTitle className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-xl text-white shadow-xs"
+                style={{ background: "linear-gradient(135deg, var(--a-blue-grad-1), var(--a-blue-grad-2))" }}
+              >
+                <Sparkles className="size-4" />
+              </span>
+              Global AI command
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -345,10 +376,17 @@ export default function BusinessOsPage() {
           </CardContent>
         </Card>
 
-        <Card className="xl:col-span-2">
+        <Card className="rounded-3xl border-border/60 shadow-sm xl:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-              <ShieldCheck className="size-5" /> Member app &amp; kiosk
+            <CardTitle className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-xl text-white shadow-xs"
+                style={{ background: "linear-gradient(135deg, var(--a-violet-grad-1), var(--a-violet-grad-2))" }}
+              >
+                <ShieldCheck className="size-4" />
+              </span>
+              Member app &amp; kiosk
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -374,12 +412,12 @@ export default function BusinessOsPage() {
       </div>
 
       {output !== null && (
-        <Card>
+        <Card className="rounded-3xl border-border/60 shadow-sm">
           <CardHeader>
             <CardTitle>Latest result</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="max-h-[420px] overflow-auto rounded-xl bg-muted p-4 text-xs">
+            <pre className="max-h-[420px] overflow-auto rounded-2xl border border-border/60 bg-muted p-4 text-xs">
               {JSON.stringify(output, null, 2)}
             </pre>
           </CardContent>

@@ -304,12 +304,6 @@ export const createPaymentSchema = z.object({
 })
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>
 
-export const refundPaymentSchema = z.object({
-  amount: z.coerce.number().positive("Amount must be greater than 0").optional(),
-  reason: z.string().optional().or(z.literal("")),
-})
-export type RefundPaymentInput = z.infer<typeof refundPaymentSchema>
-
 export const invoiceLineSchema = z.object({
   label: z.string().min(1, "Label is required"),
   amount: z.coerce.number().positive("Amount must be greater than 0"),

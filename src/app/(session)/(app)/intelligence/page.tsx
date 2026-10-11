@@ -89,11 +89,13 @@ function MetricCard({ label, value, detail, tone, loading, error }: { label: str
  return <StatCard title={label} value={typeof value === "string" || typeof value === "number" ? value : String(value ?? "")} isLoading={Boolean(loading)} isError={Boolean(error)} hint={detail} tone={toStatTone(tone)} />;
 }
 
-function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {
+function SectionHeader({ id, eyebrow, title, description, action }: { id?: string; eyebrow?: string; title: string; description?: string; action?: React.ReactNode }) {
  return (
- <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
- <div>
- <h2 className="mt-1 text-base font-semibold tracking-tight text-foreground">{title}</h2>
+ <div className="mb-4 flex scroll-mt-4 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+ <div className="min-w-0">
+ {eyebrow ? <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700">{eyebrow}</p> : null}
+ <h2 id={id} className="mt-1 text-base font-semibold tracking-tight text-foreground">{title}</h2>
+ {description ? <p className="mt-0.5 text-sm text-muted-foreground">{description}</p> : null}
  </div>
  {action}
  </div>
@@ -281,12 +283,14 @@ export default function IntelligencePage() {
  const lowStockCount = inventory.data?.filter((item) => item.lowStock).length ?? 0;
 
  return (
- <div className="pb-4">
- <div className="flex flex-col gap-5">
+ <div className="pb-8">
+ <div className="flex flex-col gap-6 sm:gap-8">
  <PageHero
  id="intel-title"
  icon={Sparkles}
+ eyebrow="Insights"
  title="Member intelligence"
+ description="Revenue, retention, sales and stock — one page, filtered by branch."
  >
  <div className="grid gap-2 sm:grid-cols-2">
  <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card p-1.5"><Filter className="ml-2 size-4 shrink-0 text-muted-foreground" aria-hidden="true" /><Select value={branchId} onValueChange={setBranchId}><SelectTrigger aria-label="Filter by branch" className="h-9 border-0 bg-transparent text-foreground shadow-none focus:ring-0"><SelectValue placeholder="All branches" /></SelectTrigger><SelectContent>{<SelectItem value="all">All branches</SelectItem>}{branches?.items?.map((item: { id: string; name: string }) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div>
@@ -297,14 +301,18 @@ export default function IntelligencePage() {
  {/* The risk roll-ups, directly under the masthead: this page could
  already list who was at risk and had no way to say how much of it
  there was, what it was worth, or whether it was getting worse. */}
+ <section aria-label="Churn risk" className="scroll-mt-4">
  <RiskSection />
+ </section>
 
  {/* Saved segments sit under the risk roll-ups because that is where an
      operator decides who to act on next. */}
+ <section aria-label="Saved segments" className="scroll-mt-4">
  <SegmentsSection />
+ </section>
 
- <section aria-labelledby="intel-pulse">
- <SectionHeader title="Executive signal layer" />
+ <section aria-labelledby="intel-pulse" className="scroll-mt-4">
+ <SectionHeader id="intel-pulse" eyebrow="At a glance" title="Executive signal layer" description="The six numbers that say whether the gym is healthy right now." />
  <div className="grid gap-4 grid-cols-2 xl:grid-cols-6">
  <MetricCard label="Net revenue" value={formatMoney(revenueRow?.netRevenue)} detail={`${revenueRow?.paymentCount ?? 0} recorded payments`} icon={DollarSign} tone="violet" loading={revenue.isLoading} error={revenue.isError} />
  <MetricCard label="Outstanding" value={formatMoney(outstanding?.outstandingBalance)} detail={`${outstanding?.membershipsWithBalance ?? 0} memberships with balance`} icon={WalletCards} tone="rose" loading={revenue.isLoading} error={revenue.isError} href="/billing" />
@@ -320,33 +328,43 @@ export default function IntelligencePage() {
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40 pb-4"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg"><Users className="size-5" aria-hidden="true" /></span><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mt-1 tracking-tight text-stone-950">Member status mix</CardTitle></div></div></CardHeader><CardContent className="p-5"><StatusBreakdown data={status.data} error={status.isError} onRetry={() => void status.refetch()} /></CardContent></Card>
  </section>
 
- <section aria-labelledby="intel-lifecycle">
- <SectionHeader title="Membership lifecycle" />
+ <section aria-labelledby="intel-lifecycle" className="scroll-mt-4">
+ <SectionHeader id="intel-lifecycle" eyebrow="Retention" title="Membership lifecycle" description="Renewal health, freezes and what expires next." />
  <div className="grid gap-5 xl:grid-cols-[1.55fr_0.9fr]">
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40 pb-4"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><Activity className="size-5" aria-hidden="true" /></span><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mt-1 tracking-tight text-stone-950">Status &amp; renewal health</CardTitle></div></div><RefreshCw className="size-5 text-emerald-600" aria-hidden="true" /></div></CardHeader><CardContent className="p-5"><MembershipLifecycleCard data={lifecycle.data} loading={lifecycle.isLoading} error={lifecycle.isError} onRetry={() => void lifecycle.refetch()} /></CardContent></Card>
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="pb-2"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">Expiring soon</CardTitle></div><div className="flex size-11 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg"><Calendar className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-0"><div className="flex h-40 flex-col items-center justify-center rounded-xl bg-muted/40 text-center ring-1 ring-amber-100"><p className="font-mono text-4xl font-black text-amber-700 tabular-nums">{lifecycle.data?.expiringWithin30Days ?? "—"}</p><p className="mt-1 text-xs font-medium text-stone-600">memberships expire within 30 days</p></div></CardContent></Card>
  </div>
  </section>
 
+ <section aria-label="Renewal pipeline" className="scroll-mt-4">
  <RenewalsSection branchId={branch} />
+ </section>
+ <section aria-label="Win-back" className="scroll-mt-4">
  <WinbackSection branchId={branch} />
+ </section>
 
- <section aria-labelledby="intel-queue">
- <SectionHeader title="Signals that need a decision" action={<Button asChild variant="outline" className="min-h-11 rounded-full border-stone-200 bg-card"><Link href="/members">Members <ArrowRight className="ml-2 size-4" aria-hidden="true" /></Link></Button>} />
+ <section aria-labelledby="intel-queue" className="scroll-mt-4">
+ <SectionHeader id="intel-queue" eyebrow="Action queue" title="Signals that need a decision" description="People and workloads that need an owner this week." action={<Button asChild variant="outline" className="min-h-11 rounded-full border-stone-200 bg-card"><Link href="/members">Members <ArrowRight className="ml-2 size-4" aria-hidden="true" /></Link></Button>} />
  <div className="grid gap-5 lg:grid-cols-2">
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">At-risk members</CardTitle></div><div className="flex size-11 items-center justify-center rounded-lg bg-amber-500 text-white shadow-lg"><AlertTriangle className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-4"><AtRiskList members={atRisk.data} error={atRisk.isError} onRetry={() => void atRisk.refetch()} /></CardContent></Card>
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950">Trainer workload</CardTitle></div><div className="flex size-11 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg"><Dumbbell className="size-5" aria-hidden="true" /></div></div></CardHeader><CardContent className="pt-4"><TrainerList data={trainers.data} error={trainers.isError} onRetry={() => void trainers.refetch()} /></CardContent></Card>
  </div>
  </section>
 
- <section aria-label="Sales and acquisition" className="grid gap-5 xl:grid-cols-2">
+ <section aria-labelledby="intel-sales" className="scroll-mt-4">
+ <SectionHeader id="intel-sales" eyebrow="Acquisition" title="Sales and acquisition" description="How leads become members, and which sources earn it." />
+ <div className="grid gap-5 xl:grid-cols-2">
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mt-1 tracking-tight text-stone-950">Sales funnel</CardTitle></div><span className="flex size-11 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg"><CreditCard className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><SalesFunnel data={sales.data} error={sales.isError} onRetry={() => void sales.refetch()} /></CardContent></Card>
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mt-1 tracking-tight text-stone-950">Source performance</CardTitle></div><span className="flex size-11 items-center justify-center rounded-lg bg-violet-600 text-white shadow-lg"><Zap className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><SourcePerformance data={sources.data} error={sources.isError} onRetry={() => void sources.refetch()} /></CardContent></Card>
+ </div>
  </section>
 
- <section aria-label="Inventory and revenue quality" className="grid gap-5 lg:grid-cols-2">
+ <section aria-labelledby="intel-stock" className="scroll-mt-4">
+ <SectionHeader id="intel-stock" eyebrow="Stock and cash" title="Inventory and revenue quality" description="What runs out next, and what the revenue is made of." />
+ <div className="grid gap-5 lg:grid-cols-2">
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mt-1 tracking-tight text-stone-950">Inventory forecast</CardTitle></div><span className="flex size-11 items-center justify-center rounded-lg bg-cyan-500 text-white shadow-lg"><Package className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><InventoryList items={inventory.data} error={inventory.isError} onRetry={() => void inventory.refetch()} /></CardContent></Card>
  <Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-muted/40"><div className="flex items-center justify-between gap-3"><div><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mt-1 tracking-tight text-stone-950">Revenue quality</CardTitle></div><span className="flex size-11 items-center justify-center rounded-lg bg-rose-500 text-white shadow-lg"><WalletCards className="size-5" aria-hidden="true" /></span></div></CardHeader><CardContent className="p-5"><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-lg bg-stone-50 p-4 ring-1 ring-stone-100"><p className="text-xs font-bold uppercase tracking-wider text-stone-500">Gross revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.grossRevenue)}</p></div><div className="rounded-lg bg-rose-50/70 p-4 ring-1 ring-rose-100"><p className="text-xs font-bold uppercase tracking-wider text-stone-500">Refunded</p><p className="mt-1 text-xl font-black text-rose-600">{formatMoney(revenueRow?.refunded)}</p></div><div className="rounded-lg bg-violet-50/70 p-4 ring-1 ring-violet-100"><p className="text-xs font-bold uppercase tracking-wider text-stone-500">Membership revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.membershipRevenue)}</p></div><div className="rounded-lg bg-cyan-50/70 p-4 ring-1 ring-cyan-100"><p className="text-xs font-bold uppercase tracking-wider text-stone-500">Other revenue</p><p className="mt-1 text-xl font-black text-stone-950">{formatMoney(revenueRow?.otherRevenue)}</p></div></div>{revenue.data?.notComputable?.length ? <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4"><div className="flex items-center gap-2"><AlertTriangle className="size-4 text-amber-600" aria-hidden="true" /><p className="text-xs font-bold text-amber-800">Data quality notes</p></div><div className="mt-2 space-y-1">{revenue.data.notComputable.map((item) => <p key={item.key} className="text-xs font-medium text-amber-700"><span className="font-bold">{item.key}:</span> {item.reason}</p>)}</div></div> : null}</CardContent></Card>
+ </div>
  </section>
  </div>
  </div>

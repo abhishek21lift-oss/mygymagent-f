@@ -35,9 +35,10 @@ export function OutstandingList({ branchId }: { branchId?: string }) {
   const totalText = [...totals.entries()].map(([code, sum]) => displayCurrencyAmount(sum, code)).join(" + ");
 
   return (
-    <div className="flex flex-col gap-5 pb-10">
+    <div className="flex flex-col gap-5 pb-10 sm:gap-6">
       <Link
         href="/dashboard"
+        aria-label="Back to dashboard"
         className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-full px-2 text-sm font-semibold text-muted-foreground transition hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -47,16 +48,19 @@ export function OutstandingList({ branchId }: { branchId?: string }) {
       <PageHero
         icon={Scale}
         accent="amber"
+        eyebrow="Finance"
         title="Outstanding dues"
         description={`Members who still owe on a membership · ${branchId ? (branchName ?? "One branch") : "All branches"}`}
       />
 
       {!canView ? (
-        <p className="rounded-3xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          Your role can&apos;t see this list.
-        </p>
+        <div className="rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-8 text-center shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">
+            Your role can&apos;t see this list.
+          </p>
+        </div>
       ) : (
-        <section aria-label="Outstanding balances" className="rounded-3xl border border-border/70 bg-card p-4 shadow-sm sm:p-6">
+        <section aria-label="Outstanding balances" className="overflow-hidden rounded-3xl border border-border/70 bg-card shadow-sm">
           <DataState
             isLoading={query.isPending}
             isError={query.isError}
@@ -67,12 +71,23 @@ export function OutstandingList({ branchId }: { branchId?: string }) {
             emptyDescription="Every current membership is paid up."
             skeletonRows={5}
           >
-            <p className="mb-3 text-sm font-semibold text-foreground">
-              {totalText} outstanding on {rows.length} membership{rows.length === 1 ? "" : "s"} · largest first
-            </p>
-            <ul className="divide-y divide-border/70">
+            <div className="border-b border-amber-200/60 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-4 sm:px-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700">
+                Total still owed
+              </p>
+              <p className="mt-1 text-2xl font-extrabold tracking-tight tabular-nums text-foreground">
+                {totalText || "—"}
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-muted-foreground">
+                outstanding on {rows.length} membership{rows.length === 1 ? "" : "s"} · largest first
+              </p>
+            </div>
+            <ul className="flex flex-col gap-2 p-4 sm:p-6">
               {rows.map((row) => (
-                <li key={row.membershipId} className="flex items-center gap-3 py-3">
+                <li key={row.membershipId} className="flex min-h-11 items-center gap-3 rounded-2xl border border-border/70 bg-card p-3 transition hover:-translate-y-0.5 hover:shadow-md">
+                  <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-sm font-extrabold text-white shadow-sm">
+                    {(row.member.firstName?.[0] ?? "?").toUpperCase()}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/members/${row.member.id}`}
@@ -92,10 +107,10 @@ export function OutstandingList({ branchId }: { branchId?: string }) {
                     </p>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <p className="font-bold tabular-nums text-rose-600 dark:text-rose-400">
+                    <p className="inline-flex rounded-full bg-rose-500/10 px-2.5 py-1 font-bold tabular-nums text-rose-600 ring-1 ring-rose-500/20">
                       {displayCurrencyAmount(row.outstanding, row.currency)}
                     </p>
-                    <p className="text-xs tabular-nums text-muted-foreground">
+                    <p className="mt-1 text-xs tabular-nums text-muted-foreground">
                       paid {displayCurrencyAmount(row.paid, row.currency)} of {displayCurrencyAmount(row.price, row.currency)}
                     </p>
                   </div>
