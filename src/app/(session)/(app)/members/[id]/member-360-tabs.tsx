@@ -233,6 +233,7 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
  <InfoRow icon={User} label="Full Name" value={`${member.firstName} ${member.lastName}`} />
  <InfoRow icon={Mail} label="Email" value={member.email} />
  <InfoRow icon={Phone} label="Phone" value={member.phone} />
+ <InfoRow icon={Phone} label="Alternate Phone" value={(member as { alternatePhone?: string | null }).alternatePhone || "—"} />
  <InfoRow
  icon={Calendar}
  label="Date of Birth"
@@ -257,8 +258,11 @@ function MemberOverviewPanel({ memberId }: { memberId: string }) {
  <span>
  {emergencyContacts[0].name} — {emergencyContacts[0].phone}
  {emergencyContacts[0].relationship && ` (${emergencyContacts[0].relationship})`}
+ {(emergencyContacts[0] as { email?: string | null }).email && ` · ${(emergencyContacts[0] as { email?: string | null }).email}`}
  </span>
- ) : ( "—"
+ ) : (member.emergencyContactName || member.emergencyContactPhone
+ ? `${member.emergencyContactName ?? ""}${member.emergencyContactPhone ? ` — ${member.emergencyContactPhone}` : ""}${(member as { emergencyContactEmail?: string | null }).emergencyContactEmail ? ` · ${(member as { emergencyContactEmail?: string | null }).emergencyContactEmail}` : ""}`
+ : "—"
  )
  }
  />
@@ -519,6 +523,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  const [name, setName] = React.useState("");
  const [phone, setPhone] = React.useState("");
  const [relationship, setRelationship] = React.useState("");
+ const [email, setEmail] = React.useState("");
  const [isPrimary, setIsPrimary] = React.useState(false);
  const pending = create.isPending || update.isPending;
 
@@ -527,6 +532,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  setName(contact?.name ?? "");
  setPhone(contact?.phone ?? "");
  setRelationship(contact?.relationship ?? "");
+ setEmail((contact as { email?: string | null } | null)?.email ?? "");
  setIsPrimary(contact?.isPrimary ?? false);
  setOpen(true);
  }
@@ -537,6 +543,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  name: name.trim(),
  phone: phone.trim(),
  relationship: relationship.trim() || (editing ? "" : undefined),
+ email: email.trim() || (editing ? "" : undefined),
  isPrimary,
  };
  try {
@@ -572,6 +579,13 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  value={relationship}
  onChange={(e) => setRelationship(e.target.value)}
  />
+ <Input
+ placeholder="Email (optional)"
+ aria-label="Email"
+ type="email"
+ value={email}
+ onChange={(e) => setEmail(e.target.value)}
+ />
  <div className="flex items-center gap-2">
  <Switch id="primary-contact" checked={isPrimary} onCheckedChange={setIsPrimary} />
  <Label htmlFor="primary-contact">Call this person first</Label>
@@ -600,6 +614,7 @@ function EmergencyContactsPanel({ memberId }: { memberId: string }) {
  <p className="text-sm text-stone-600">
  {contact.phone}
  {contact.relationship ? ` · ${contact.relationship}` : ""}
+ {(contact as { email?: string | null }).email ? ` · ${(contact as { email?: string | null }).email}` : ""}
  </p>
  </div>
  <div className="flex shrink-0 gap-1">

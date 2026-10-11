@@ -29,6 +29,7 @@ export interface AddMemberInput {
   memberType?: MemberType
   assignedTrainerId?: string
   leadSource?: string
+  referrerMemberId?: string
   fitnessGoal?: string
   addressLine1?: string
   addressLine2?: string
@@ -36,9 +37,11 @@ export interface AddMemberInput {
   state?: string
   postalCode?: string
   country?: string
+  alternatePhone?: string
   emergencyContactName?: string
   emergencyContactPhone?: string
   emergencyContactRelationship?: string
+  emergencyContactEmail?: string
   injuries?: string
   allergies?: string
   medicalNotes?: string
@@ -86,12 +89,14 @@ export function useAddMember() {
         firstName: input.firstName,
         lastName: input.lastName,
         phone: input.phone,
+        alternatePhone: input.alternatePhone || null,
         email: input.email || null,
         dateOfBirth: input.dateOfBirth || null,
         gender: input.gender || null,
         memberType: input.memberType || null,
         assignedTrainerId: input.assignedTrainerId || null,
         leadSource: input.leadSource || null,
+        referrerMemberId: input.referrerMemberId || null,
         fitnessGoal: input.fitnessGoal || null,
         addressLine1: input.addressLine1 || null,
         addressLine2: input.addressLine2 || null,
@@ -102,6 +107,7 @@ export function useAddMember() {
         emergencyContactName: input.emergencyContactName || null,
         emergencyContactPhone: input.emergencyContactPhone || null,
         emergencyContactRelationship: input.emergencyContactRelationship || null,
+        emergencyContactEmail: input.emergencyContactEmail || null,
         injuries: input.injuries || null,
         allergies: input.allergies || null,
         medicalNotes: input.medicalNotes || null,

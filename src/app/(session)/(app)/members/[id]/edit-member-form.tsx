@@ -39,6 +39,7 @@ export interface EditableMember {
   lastName: string;
   email: string | null;
   phone: string | null;
+  alternatePhone?: string | null;
   dateOfBirth: string | null;
   gender: string | null;
   memberType: string | null;
@@ -51,6 +52,7 @@ export interface EditableMember {
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
   emergencyContactRelationship?: string | null;
+  emergencyContactEmail?: string | null;
   fitnessGoal?: string | null;
   injuries?: string | null;
   allergies?: string | null;
@@ -66,6 +68,7 @@ const editMemberSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Enter a valid email address").optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  alternatePhone: z.string().optional().or(z.literal("")),
   dateOfBirth: z.string().optional().or(z.literal("")),
   gender: z.enum(["MALE", "FEMALE", "OTHER", "UNDISCLOSED"]).optional(),
   memberType: z.enum(["GYM", "PT", "GYM_PT"]).optional(),
@@ -78,6 +81,7 @@ const editMemberSchema = z.object({
   emergencyContactName: z.string().optional(),
   emergencyContactPhone: z.string().optional(),
   emergencyContactRelationship: z.string().optional(),
+  emergencyContactEmail: z.string().email("Enter a valid email address").optional().or(z.literal("")),
   fitnessGoal: z.string().optional(),
   injuries: z.string().optional(),
   allergies: z.string().optional(),
@@ -115,6 +119,7 @@ export function EditMemberForm({
       lastName: member.lastName,
       email: member.email ?? "",
       phone: member.phone ?? "",
+      alternatePhone: member.alternatePhone ?? "",
       dateOfBirth: member.dateOfBirth ?? "",
       gender: (member.gender as EditMemberFormData["gender"]) ?? undefined,
       memberType: (member.memberType as EditMemberFormData["memberType"]) ?? undefined,
@@ -127,6 +132,7 @@ export function EditMemberForm({
       emergencyContactName: member.emergencyContactName ?? "",
       emergencyContactPhone: member.emergencyContactPhone ?? "",
       emergencyContactRelationship: member.emergencyContactRelationship ?? "",
+      emergencyContactEmail: member.emergencyContactEmail ?? "",
       fitnessGoal: member.fitnessGoal ?? "",
       injuries: member.injuries ?? "",
       allergies: member.allergies ?? "",
@@ -216,6 +222,19 @@ export function EditMemberForm({
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="alternatePhone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alternate phone</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
@@ -404,6 +423,19 @@ export function EditMemberForm({
                   <FormLabel>Relationship</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="emergencyContactEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Emergency contact email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
