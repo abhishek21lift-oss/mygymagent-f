@@ -33,23 +33,22 @@
   isolation: isolate;
   overflow: hidden;
   border-radius: 1.75rem;
-  border: 1px solid rgb(99 102 241 / 0.16);
+  border: 1px solid rgb(248 113 113 / 0.18);
   background:
-    radial-gradient(110% 130% at 0% 0%, rgb(199 210 254 / 0.55) 0%, transparent 55%),
-    radial-gradient(90% 120% at 100% 100%, rgb(252 165 165 / 0.45) 0%, transparent 60%),
-    radial-gradient(70% 90% at 50% 110%, rgb(167 243 208 / 0.4) 0%, transparent 60%),
-    linear-gradient(135deg, #f8faff 0%, #fdf4ff 55%, #fff7ed 100%);
+    radial-gradient(110% 130% at 0% 0%, #4a0b12 0%, transparent 55%),
+    radial-gradient(90% 120% at 100% 100%, #6b0d16 0%, transparent 60%),
+    linear-gradient(135deg, #09090b 0%, #160709 55%, #0a0a0c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.8),
-    0 24px 48px -24px rgb(99 102 241 / 0.25);
-  color: #0f172a;
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 24px 48px -24px rgb(220 38 38 / 0.5);
+  color: #fff;
   padding: 1.5rem;
-  --foreground: #0f172a;
-  --muted-foreground: rgb(71 85 105 / 0.9);
-  --muted: rgb(15 23 42 / 0.06);
-  --accent: rgb(99 102 241 / 0.12);
-  --border: rgb(99 102 241 / 0.16);
-  --surface-sunken: rgb(255 255 255 / 0.6);
+  --foreground: #fff;
+  --muted-foreground: rgb(255 255 255 / 0.7);
+  --muted: rgb(255 255 255 / 0.12);
+  --accent: rgb(255 255 255 / 0.12);
+  --border: rgb(255 255 255 / 0.16);
+  --surface-sunken: rgb(255 255 255 / 0.12);
   animation: hero-in 520ms var(--ease-out, ease-out) backwards;
 }
 @media (min-width: 640px) {
@@ -61,22 +60,22 @@
   inset: -40%;
   z-index: -2;
   background:
-    radial-gradient(30% 36% at 22% 30%, rgb(129 140 248 / 0.5), transparent 70%),
-    radial-gradient(26% 32% at 78% 72%, rgb(251 113 133 / 0.4), transparent 70%),
-    radial-gradient(18% 24% at 62% 22%, rgb(45 212 191 / 0.35), transparent 70%),
-    radial-gradient(22% 26% at 36% 86%, rgb(251 191 36 / 0.35), transparent 70%);
+    radial-gradient(30% 36% at 22% 30%, rgb(239 68 68 / 0.42), transparent 70%),
+    radial-gradient(26% 32% at 78% 72%, rgb(220 38 38 / 0.36), transparent 70%),
+    radial-gradient(18% 24% at 62% 22%, rgb(251 113 133 / 0.2), transparent 70%),
+    radial-gradient(22% 26% at 36% 86%, rgb(127 29 29 / 0.5), transparent 70%);
   will-change: transform;
   animation: drift 18s ease-in-out infinite alternate;
 }
 .hero::after {
-  /* A faint top sheen and a hairline of indigo along the bottom edge. */
+  /* A faint top sheen and a hairline of red along the bottom edge. */
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.7), transparent 40%),
-    linear-gradient(90deg, transparent 10%, rgb(99 102 241 / 0.7) 50%, transparent 90%) bottom / 100% 1px no-repeat;
+    linear-gradient(180deg, rgb(255 255 255 / 0.06), transparent 40%),
+    linear-gradient(90deg, transparent 10%, rgb(239 68 68 / 0.7) 50%, transparent 90%) bottom / 100% 1px no-repeat;
 }
 @keyframes drift {
   0%   { transform: translate3d(-3%, 2%, 0) rotate(-3deg); }
@@ -88,10 +87,10 @@
 
 .eyebrow {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6d28d9;
+  color: rgb(252 165 165 / 0.85);
 }
 .gymName {
   margin-top: 0.35rem;
@@ -100,17 +99,16 @@
   text-wrap: balance;
   letter-spacing: -0.035em;
   line-height: 1.05;
-  /* Indigo into rose into amber, with one pass of light as the page
-     opens. Once, not on a loop: moving a text gradient repaints the
-     heading every frame, which on a slow phone cost a fifth of the
-     CPU while idle. */
-  background: linear-gradient(110deg, #312e81 0%, #312e81 40%, #c4b5fd 50%, #312e81 60%, #312e81 70%, #f43f5e 88%, #f59e0b 100%);
+  /* White into red, with one pass of light as the page opens. Once,
+     not on a loop: moving a text gradient repaints the heading every
+     frame, which on a slow phone cost a fifth of the CPU while idle. */
+  background: linear-gradient(110deg, #fff 0%, #fff 40%, #fecaca 50%, #fff 60%, #fff 70%, #f87171 88%, #ef4444 100%);
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   overflow-wrap: anywhere;
-  /* At rest the window shows the indigo-to-amber end; the pass starts
+  /* At rest the window shows the white-to-red end; the pass starts
      from the other end, carrying the pale band across the name. */
   background-position: 100% 0;
   animation: name-shine 1.8s ease-out 500ms backwards;
@@ -122,7 +120,7 @@
 .greeting {
   margin-top: 0.4rem;
   font-size: 0.95rem;
-  color: rgb(71 85 105 / 0.9);
+  color: rgb(255 255 255 / 0.7);
 }
 
 .glassPill {
@@ -134,9 +132,9 @@
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
-  background: rgb(255 255 255 / 0.7);
-  border: 1px solid rgb(99 102 241 / 0.2);
-  color: #312e81;
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.18);
+  color: #fff;
 }
 
 .ringPanel {
@@ -145,9 +143,9 @@
   gap: 1rem;
   border-radius: 1.5rem;
   padding: 0.85rem 1.1rem 0.85rem 0.85rem;
-  background: rgb(255 255 255 / 0.65);
-  border: 1px solid rgb(99 102 241 / 0.16);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8);
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {
