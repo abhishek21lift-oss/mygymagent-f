@@ -85,6 +85,7 @@ export interface Member {
   lastName: string
   email: string | null
   phone: string | null
+  alternatePhone?: string | null
   dateOfBirth: string | null
   gender: Gender | null
   addressLine1: string | null
@@ -95,8 +96,11 @@ export interface Member {
   country: string | null
   emergencyContactName: string | null
   emergencyContactPhone: string | null
+  emergencyContactEmail?: string | null
+  emergencyContactRelationship?: string | null
   memberType: MemberType | null
   leadSource: string | null
+  referrerMemberId?: string | null
   profilePhotoUrl: string | null
   status: MemberStatus
   assignedTrainerId: string | null
@@ -139,6 +143,7 @@ export interface MemberEmergencyContact {
   name: string
   phone: string
   relationship: string | null
+  email?: string | null
   isPrimary: boolean
   createdAt: string
   updatedAt: string
@@ -668,18 +673,21 @@ export interface Member360Overview {
     lastName: string
     email: string | null
     phone: string | null
+    alternatePhone?: string | null
     dateOfBirth: string | null
     gender: string | null
     memberType: string | null
     status: string
     joinedAt: string
     addressLine1: string | null
+    addressLine2?: string | null
     city: string | null
     state: string | null
     postalCode: string | null
     country: string | null
     emergencyContactName: string | null
     emergencyContactPhone: string | null
+    emergencyContactEmail?: string | null
     notes: string | null
     assignedTrainerId: string | null
     primaryBranchId: string

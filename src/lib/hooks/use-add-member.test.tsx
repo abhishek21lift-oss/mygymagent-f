@@ -109,4 +109,36 @@ describe("useAddMember", () => {
     const result = render()
     await expect(result.current.mutateAsync(BASE)).rejects.toThrow("Member limit reached")
   })
+
+  it("sends the new contact, address and referral fields to the API", async () => {
+    post.mockImplementation(async (path: string) => (path === "/members" ? { id: "m1" } : {}))
+    const result = render()
+    await result.current.mutateAsync({
+      ...BASE,
+      alternatePhone: "9811111111",
+      addressLine1: "12 Main St",
+      addressLine2: "Indiranagar",
+      city: "Bengaluru",
+      state: "Karnataka",
+      postalCode: "560038",
+      country: "India",
+      emergencyContactName: "Sita",
+      emergencyContactPhone: "9822222222",
+      emergencyContactEmail: "sita@example.com",
+      leadSource: "REFERRAL",
+      referrerMemberId: "ref-1",
+    })
+    expect(post).toHaveBeenCalledWith(
+      "/members",
+      expect.objectContaining({
+        alternatePhone: "9811111111",
+        addressLine2: "Indiranagar",
+        state: "Karnataka",
+        postalCode: "560038",
+        emergencyContactEmail: "sita@example.com",
+        leadSource: "REFERRAL",
+        referrerMemberId: "ref-1",
+      }),
+    )
+  })
 })

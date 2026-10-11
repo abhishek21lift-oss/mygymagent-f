@@ -53,6 +53,7 @@ const GOALS = [
   { value: "STRENGTH", label: "Strength" },
   { value: "ENDURANCE", label: "Endurance" },
   { value: "GENERAL_FITNESS", label: "General fitness" },
+  { value: "OTHER", label: "Other" },
 ]
 
 const SOURCES = [
@@ -107,6 +108,7 @@ interface FormState {
   firstName: string
   lastName: string
   phone: string
+  alternatePhone: string
   email: string
   gender: Gender | ""
   dateOfBirth: string
@@ -120,13 +122,18 @@ interface FormState {
   memberType: MemberType
   trainerId: string
   addressLine1: string
+  addressLine2: string
   city: string
+  state: string
   postalCode: string
   emergencyContactName: string
   emergencyContactPhone: string
   emergencyContactRelationship: string
+  emergencyContactEmail: string
   fitnessGoal: string
   leadSource: string
+  referrerMemberId: string
+  referrerMemberName: string
   heightCm: string
   weightKg: string
   injuries: string
@@ -141,6 +148,7 @@ const EMPTY: FormState = {
   firstName: "",
   lastName: "",
   phone: "",
+  alternatePhone: "",
   email: "",
   gender: "",
   dateOfBirth: "",
@@ -153,13 +161,18 @@ const EMPTY: FormState = {
   memberType: "GYM",
   trainerId: "",
   addressLine1: "",
+  addressLine2: "",
   city: "",
+  state: "",
   postalCode: "",
   emergencyContactName: "",
   emergencyContactPhone: "",
   emergencyContactRelationship: "",
+  emergencyContactEmail: "",
   fitnessGoal: "",
   leadSource: "",
+  referrerMemberId: "",
+  referrerMemberName: "",
   heightCm: "",
   weightKg: "",
   injuries: "",
@@ -168,14 +181,20 @@ const EMPTY: FormState = {
   waiver: false,
 }
 
-type Errors = Partial<Record<"firstName" | "lastName" | "phone" | "email" | "branchId" | "discount" | "paid" | "waiver", string>>
+type Errors = Partial<Record<"firstName" | "lastName" | "phone" | "alternatePhone" | "email" | "branchId" | "discount" | "paid" | "waiver" | "emergencyContactEmail" | "postalCode", string>>
 
 export function validate(form: FormState, plan: MembershipPlan | undefined): Errors {
   const errors: Errors = {}
   if (!form.firstName.trim()) errors.firstName = "Enter the first name."
   if (!form.lastName.trim()) errors.lastName = "Enter the last name."
   if (digits(form.phone).length < 10) errors.phone = "Enter a 10-digit mobile number."
+  const alt = digits(form.alternatePhone)
+  if (form.alternatePhone.trim() && (alt.length < 10 || alt.length > 15)) errors.alternatePhone = "Enter a valid alternate number."
+  if (form.alternatePhone.trim() && alt === digits(form.phone)) errors.alternatePhone = "Must differ from the primary mobile."
   if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) errors.email = "This email doesn't look right."
+  if (form.emergencyContactEmail && !/^\S+@\S+\.\S+$/.test(form.emergencyContactEmail)) errors.emergencyContactEmail = "This email doesn't look right."
+  const pin = form.postalCode.replace(/\s/g, "")
+  if (pin && !/^\d{6}$/.test(pin)) errors.postalCode = "Enter the 6-digit PIN code."
   if (!form.branchId) errors.branchId = "Choose the branch."
   if (plan) {
     const price = Number(plan.price)
@@ -278,6 +297,80 @@ function withLead(prev: FormState, lead: Lead | null): FormState {
   }
 }
 
+/** Referring member picker: authorized org members only, shown for referrals. */
+function ReferrerPicker({
+  memberId,
+  memberName,
+  onChange,
+}: {
+  memberId: string
+  memberName: string
+  onChange: (id: string, name: string) => void
+}) {
+  const [search, setSearch] = React.useState("")
+  const term = search.trim()
+  const results = useMembers({ search: term, pageSize: 5 }, { enabled: term.length >= 2 && !memberId })
+  if (memberId) {
+    return (
+      <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2.5">
+        <p className="min-w-0 flex-1 text-sm">
+          Referred by: <span className="font-semibold">{memberName}</span>
+        </p>
+        <button
+          type="button"
+          onClick={() => onChange("", "")}
+          className="flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+          aria-label="Clear referring member"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+    )
+  }
+  const items = results.data?.items ?? []
+  return (
+    <div className="relative">
+      <Input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search referring member by name or phone (optional)"
+        aria-label="Search referring member"
+      />
+      {term.length >= 2 ? (
+        <div className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
+          {results.isLoading ? (
+            <p className="px-3 py-2.5 text-sm text-muted-foreground">Searching…</p>
+          ) : items.length === 0 ? (
+            <p className="px-3 py-2.5 text-sm text-muted-foreground">No member matches “{term}”.</p>
+          ) : (
+            <ul role="listbox" aria-label="Matching members">
+              {items.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={false}
+                    onClick={() => {
+                      onChange(item.id, `${item.firstName} ${item.lastName}`.trim())
+                      setSearch("")
+                    }}
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm hover:bg-surface-hover"
+                  >
+                    <span className="min-w-0 truncate font-medium">
+                      {item.firstName} {item.lastName}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{item.phone ?? item.memberCode}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
   const router = useRouter()
   const [draft, setForm] = React.useState<FormState>(() => withLead(EMPTY, initialLead ?? null))
@@ -346,20 +439,25 @@ export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         phone: form.phone.trim(),
+        alternatePhone: form.alternatePhone.trim() || undefined,
         email: form.email.trim() || undefined,
         gender: form.gender || undefined,
         dateOfBirth: form.dateOfBirth || undefined,
         memberType: form.memberType,
         assignedTrainerId: form.trainerId || undefined,
         leadSource: form.leadSource || undefined,
+        referrerMemberId: form.leadSource === "REFERRAL" ? form.referrerMemberId || undefined : undefined,
         fitnessGoal: form.fitnessGoal || undefined,
         addressLine1: form.addressLine1.trim() || undefined,
+        addressLine2: form.addressLine2.trim() || undefined,
         city: form.city.trim() || undefined,
+        state: form.state.trim() || undefined,
         postalCode: form.postalCode.trim() || undefined,
-        country: form.addressLine1 || form.city ? "India" : undefined,
+        country: form.addressLine1 || form.addressLine2 || form.city || form.state ? "India" : undefined,
         emergencyContactName: form.emergencyContactName.trim() || undefined,
         emergencyContactPhone: form.emergencyContactPhone.trim() || undefined,
         emergencyContactRelationship: form.emergencyContactRelationship.trim() || undefined,
+        emergencyContactEmail: form.emergencyContactEmail.trim() || undefined,
         injuries: form.injuries.trim() || undefined,
         medicalNotes: form.medicalNotes.trim() || undefined,
         waiverConsent: form.waiver,
@@ -487,6 +585,26 @@ export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
                   aria-describedby={errors.email ? "email-error" : undefined}
                 />
                 <FieldError id="email-error" message={errors.email} />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5" id="field-alternatePhone">
+                <Label htmlFor="alternatePhone">
+                  Alternate mobile <span className="font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id="alternatePhone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="98765 43210"
+                  value={form.alternatePhone}
+                  onChange={(e) => set("alternatePhone", e.target.value)}
+                  aria-invalid={errors.alternatePhone ? true : undefined}
+                  aria-describedby={errors.alternatePhone ? "alternatePhone-error" : undefined}
+                />
+                <FieldError id="alternatePhone-error" message={errors.alternatePhone} />
               </div>
             </div>
 
@@ -688,17 +806,28 @@ export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
                   <Label htmlFor="address">Street</Label>
                   <Input id="address" autoComplete="street-address" value={form.addressLine1} onChange={(e) => set("addressLine1", e.target.value)} />
                 </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="address2">
+                    Building / locality <span className="font-normal text-muted-foreground">(optional)</span>
+                  </Label>
+                  <Input id="address2" autoComplete="address-line2" value={form.addressLine2} onChange={(e) => set("addressLine2", e.target.value)} />
+                </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="city">City</Label>
                   <Input id="city" autoComplete="address-level2" value={form.city} onChange={(e) => set("city", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
+                  <Label htmlFor="state">State</Label>
+                  <Input id="state" autoComplete="address-level1" value={form.state} onChange={(e) => set("state", e.target.value)} />
+                </div>
+                <div className="space-y-1.5" id="field-postalCode">
                   <Label htmlFor="pin">PIN code</Label>
-                  <Input id="pin" inputMode="numeric" autoComplete="postal-code" value={form.postalCode} onChange={(e) => set("postalCode", e.target.value)} />
+                  <Input id="pin" inputMode="numeric" autoComplete="postal-code" value={form.postalCode} onChange={(e) => set("postalCode", e.target.value)} aria-invalid={errors.postalCode ? true : undefined} />
+                  <FieldError id="postalCode-error" message={errors.postalCode} />
                 </div>
               </fieldset>
 
-              <fieldset className="grid gap-4 sm:grid-cols-3">
+              <fieldset className="grid gap-4 sm:grid-cols-2">
                 <legend className="mb-3 text-sm font-semibold">Emergency contact</legend>
                 <div className="space-y-1.5">
                   <Label htmlFor="ecName">Name</Label>
@@ -712,6 +841,13 @@ export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
                   <Label htmlFor="ecRelation">Relation</Label>
                   <Input id="ecRelation" placeholder="Father, spouse…" value={form.emergencyContactRelationship} onChange={(e) => set("emergencyContactRelationship", e.target.value)} />
                 </div>
+                <div className="space-y-1.5" id="field-emergencyContactEmail">
+                  <Label htmlFor="ecEmail">
+                    Email <span className="font-normal text-muted-foreground">(optional)</span>
+                  </Label>
+                  <Input id="ecEmail" type="email" inputMode="email" value={form.emergencyContactEmail} onChange={(e) => set("emergencyContactEmail", e.target.value)} aria-invalid={errors.emergencyContactEmail ? true : undefined} />
+                  <FieldError id="emergencyContactEmail-error" message={errors.emergencyContactEmail} />
+                </div>
               </fieldset>
 
               <fieldset className="flex flex-col gap-4">
@@ -719,7 +855,14 @@ export function AddMemberForm({ initialLead }: { initialLead?: Lead | null }) {
                   <Target className="size-4 text-muted-foreground" aria-hidden="true" /> Goal & how they found us
                 </legend>
                 <Chips label="Goal" options={GOALS} value={form.fitnessGoal} onChange={(v) => set("fitnessGoal", v)} allowClear />
-                <Chips label="Source" options={SOURCES} value={form.leadSource} onChange={(v) => set("leadSource", v)} allowClear />
+                <Chips label="Source" options={SOURCES} value={form.leadSource} onChange={(v) => setForm((prev) => ({ ...prev, leadSource: v, referrerMemberId: v === "REFERRAL" ? prev.referrerMemberId : "", referrerMemberName: v === "REFERRAL" ? prev.referrerMemberName : "" }))} allowClear />
+                {form.leadSource === "REFERRAL" ? (
+                  <ReferrerPicker
+                    memberId={form.referrerMemberId}
+                    memberName={form.referrerMemberName}
+                    onChange={(id, name) => setForm((prev) => ({ ...prev, referrerMemberId: id, referrerMemberName: name }))}
+                  />
+                ) : null}
               </fieldset>
 
               <fieldset className="flex flex-col gap-4">

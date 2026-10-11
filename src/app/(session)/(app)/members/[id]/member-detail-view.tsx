@@ -385,6 +385,7 @@ export interface MemberWithMemberships {
  memberType: string | null;
  email: string | null;
  phone: string | null;
+ alternatePhone?: string | null;
  joinedAt: string;
  dateOfBirth: string | null;
  gender: string | null;
@@ -396,6 +397,7 @@ export interface MemberWithMemberships {
  country: string | null;
  emergencyContactName: string | null;
  emergencyContactPhone: string | null;
+ emergencyContactEmail?: string | null;
  emergencyContactRelationship: string | null;
  fitnessGoal: string | null;
  injuries: string | null;

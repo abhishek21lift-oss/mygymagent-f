@@ -67,6 +67,7 @@ export interface MemberEmergencyContactInput {
   name: string;
   phone: string;
   relationship?: string;
+  email?: string;
   isPrimary?: boolean;
 }
 
