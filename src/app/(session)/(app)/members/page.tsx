@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
  AlertTriangle,
  CalendarClock,
@@ -195,12 +196,25 @@ const columns: ColumnDef<Member>[] = [
 ];
 
 export default function MembersPage() {
+ return (
+  <Suspense fallback={<div className="flex w-full flex-col gap-4 pb-8" aria-label="Loading members" role="status" />}>
+   <MembersDirectory />
+  </Suspense>
+ );
+}
+
+function MembersDirectory() {
  const { hasPermission } = useAuth();
  const [dataOpen, setDataOpen] = React.useState(false);
  const router = useRouter();
- const [filters, setFilters] = React.useState<MemberFilters>({ page: 1, pageSize: 25, orderBy: "createdAt", order: "desc" });
+ const searchParams = useSearchParams();
+ // Deep link (e.g. the dashboard's Active Members KPI): ?status=ACTIVE
+ // pre-selects the matching segment and filter so the list, counts and
+ // pagination all agree on what "active" means.
+ const startsActive = (searchParams.get("status") ?? "").toUpperCase() === "ACTIVE";
+ const [filters, setFilters] = React.useState<MemberFilters>({ page: 1, pageSize: 25, orderBy: "createdAt", order: "desc", ...(startsActive ? { status: ["ACTIVE"] as MemberStatus[] } : {}) });
  const [selection, setSelection] = React.useState<RowSelectionState>({});
- const [segment, setSegment] = React.useState<SegmentKey>("all");
+ const [segment, setSegment] = React.useState<SegmentKey>(startsActive ? "active" : "all");
  const members = useMembers(filters);
  const metrics = useMemberMetrics();
  const items = members.data?.items ?? [];

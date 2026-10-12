@@ -64,6 +64,7 @@ export function RiskSection() {
   const revenue = useRevenueAtRisk(canView);
   const byBranch = useRiskByBranch(canView);
   const batch = useBatchComputeIntelligence();
+  const [severity, setSeverity] = React.useState<string>("all");
 
   if (!canView) return null;
 
@@ -203,6 +204,25 @@ export function RiskSection() {
         title="Revenue at risk by level"
         titleId="revenue-at-risk"
         description="Monthly recurring revenue attached to each risk band."
+        actions={
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by severity">
+            {["all", "CRITICAL", "HIGH", "MEDIUM", "LOW"]
+              .filter((level) => level === "all" || (revenue.data?.bySegment ?? []).some((s) => String(s.riskLevel) === level))
+              .map((level) => (
+                <Button
+                  key={level}
+                  type="button"
+                  variant={severity === level ? "default" : "outline"}
+                  size="sm"
+                  className="min-h-10 rounded-full"
+                  aria-pressed={severity === level}
+                  onClick={() => setSeverity(level)}
+                >
+                  {level === "all" ? "All" : level.charAt(0) + level.slice(1).toLowerCase()}
+                </Button>
+              ))}
+          </div>
+        }
         flush
       >
         <DataState
@@ -224,7 +244,9 @@ export function RiskSection() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(revenue.data?.bySegment ?? []).map((segment) => (
+              {(revenue.data?.bySegment ?? [])
+                .filter((segment) => severity === "all" || String(segment.riskLevel) === severity)
+                .map((segment) => (
                 <TableRow key={String(segment.riskLevel)}>
                   <TableCell>{levelBadge(segment.riskLevel)}</TableCell>
                   <TableCell className="text-right tabular-nums">{segment.memberCount}</TableCell>

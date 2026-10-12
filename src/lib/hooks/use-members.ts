@@ -110,11 +110,12 @@ export async function fetchAllMemberIds(
   return ids.slice(0, BULK_SELECTION_CAP);
 }
 
-export function useMemberMetrics() {
+export function useMemberMetrics({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [KEY, "metrics"],
     queryFn: () => api.get<MemberMetrics>("/members/metrics"),
     staleTime: 30_000,
+    enabled,
   });
 }
 

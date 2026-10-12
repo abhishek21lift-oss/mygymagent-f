@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   AlertTriangle,
   Boxes,
@@ -180,11 +181,14 @@ export function GymHealthRevenueRisk({
   isLoading: boolean;
   isError?: boolean;
 }) {
+  const [severity, setSeverity] = React.useState<string>("all");
   if (!isLoading && (isError || !health)) return null;
 
   const risk = health?.revenueAtRisk;
-  const segments = (risk?.bySegment ?? []).filter((segment) => segment.mrr > 0);
-  const maxSegment = Math.max(1, ...segments.map((s) => s.mrr));
+  const allSegments = (risk?.bySegment ?? []).filter((segment) => segment.mrr > 0);
+  const maxSegment = Math.max(1, ...allSegments.map((s) => s.mrr));
+  const segments = severity === "all" ? allSegments : allSegments.filter((s) => s.riskLevel === severity);
+  const severities = ["all", ...Array.from(new Set(allSegments.map((s) => s.riskLevel)))];
 
   return (
     <DashSection id="dash-risk" title="Revenue at risk" subtitle="Monthly value on members flagged by churn-risk scoring.">
@@ -194,6 +198,7 @@ export function GymHealthRevenueRisk({
           title="At-risk MRR"
           accent="rose"
           feature
+          href="/intelligence#revenue-at-risk"
           isLoading={isLoading}
           value={risk ? displayCurrencyAmount(risk.atRiskMRR) : undefined}
           hint={
@@ -205,6 +210,22 @@ export function GymHealthRevenueRisk({
           }
         />
         <div className={styles.panel}>
+          {severities.length > 2 && (
+            <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="Filter by severity">
+              {severities.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  aria-pressed={severity === level}
+                  onClick={() => setSeverity(level)}
+                  className="inline-flex h-8 shrink-0 items-center rounded-full border px-3 text-[13px] font-medium capitalize transition-colors pointer-coarse:h-10 data-[active=true]:border-primary data-[active=true]:bg-primary data-[active=true]:text-primary-foreground border-border bg-card text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+                  data-active={severity === level}
+                >
+                  {level === "all" ? "All" : level.toLowerCase()}
+                </button>
+              ))}
+            </div>
+          )}
           {isLoading ? (
             <div className="space-y-3" aria-hidden="true">
               {[1, 2, 3].map((i) => (
@@ -235,6 +256,14 @@ export function GymHealthRevenueRisk({
                 </li>
               ))}
             </ul>
+          )}
+          {!isLoading && allSegments.length > 0 && (
+            <Link
+              href="/intelligence#member-segments"
+              className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-[var(--a-rose-ink)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              View at-risk members
+            </Link>
           )}
         </div>
       </div>

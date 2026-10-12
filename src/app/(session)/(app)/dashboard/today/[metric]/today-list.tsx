@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { DataState } from "@/components/shared/data-state";
 import { PageHero } from "@/components/shared/page-hero";
@@ -58,14 +58,6 @@ export function TodayList({ metric, date, branchId }: { metric: TodayMetric; dat
 
   return (
     <div className="flex flex-col gap-5 pb-10">
-      <Link
-        href="/dashboard"
-        className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-full px-2 text-sm font-semibold text-muted-foreground transition hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Dashboard
-      </Link>
-
       <PageHero
         icon={meta.icon}
         accent={meta.accent}

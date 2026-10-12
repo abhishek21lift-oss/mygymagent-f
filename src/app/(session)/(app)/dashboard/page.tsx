@@ -28,9 +28,8 @@ import { useDailyBriefing } from "@/lib/hooks/use-daily-briefing";
 import { useMemberStatusBreakdown, useRevenueSummary, useRevenueTrend } from "@/lib/hooks/use-analytics";
 import { useGymHealth } from "@/lib/hooks/use-gym-health";
 import { useLeads } from "@/lib/hooks/use-leads";
-import { useMembers } from "@/lib/hooks/use-members";
+import { useMemberMetrics, useMembers } from "@/lib/hooks/use-members";
 import { useMemberships } from "@/lib/hooks/use-memberships";
-import { useTodayWorkoutSessions } from "@/lib/hooks/use-workout-sessions";
 import { useBranches } from "@/lib/hooks/use-branches";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { GymHealthHero, GymHealthPanels, GymHealthRevenueRisk } from "./gym-health";
@@ -175,7 +174,6 @@ export default function DashboardPage() {
   const canReadMembers = hasPermission(["members.read", "members.read_assigned"]);
   const canReadMemberships = hasPermission(["memberships.read", "memberships.read_assigned"]);
   const canReadLeads = hasPermission("leads.read");
-  const canReadWorkouts = hasPermission(["workouts.read", "workouts.read_assigned"]);
   const todayCollection = useRevenueSummary(
     { from: todayStr, to: todayStr, ...branchQuery },
     { enabled: datedReady },
@@ -199,10 +197,12 @@ export default function DashboardPage() {
     { createdFrom: todayStr, createdTo: todayStr, pageSize: 1, ...branchQuery },
     { enabled: datedReady && canReadLeads },
   );
-  const todaySessions = useTodayWorkoutSessions({
-    enabled: datedReady && canReadWorkouts,
-    branchId: branchFilter,
-  });
+  /* Active members: Member.status ACTIVE, soft-deleted rows excluded
+     server-side — the same count the Members directory reports. Gated
+     like every other Today figure so nobody asks for what the API
+     would refuse. */
+  const memberMetrics = useMemberMetrics({ enabled: datedReady && canReadMembers });
+  const canReadInventory = hasPermission("inventory.read");
   /* Each Today figure opens the records behind it, for the same day and
      branch -- when this person may read that list. */
   const canReadAttendance = hasPermission(["attendance.read", "attendance.read_assigned"]);
@@ -292,6 +292,13 @@ export default function DashboardPage() {
         {branchPicker}
       </GymHealthHero>
 
+      {/* ── Quick actions: immediately below the hero, before Today ── */}
+      <Launcher id="dash-quick" title="Quick actions" emptyHint="Your account doesn't include any of these actions.">
+        {visibleActions.map(([title, desc, href, Icon, , color]) => (
+          <AppIconLink key={href} href={href} icon={Icon} label={title} hint={desc} accent={color} />
+        ))}
+      </Launcher>
+
       {/* ── Today ────────────────────────────────────────────────── */}
       <DashSection id="dash-today" title="Today" subtitle={`On the floor · ${shortDay(todayStr)}`}>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
@@ -356,16 +363,16 @@ export default function DashboardPage() {
               isError={todayLeads.isError}
             />
           )}
-          {canReadWorkouts && (
+          {canReadMembers && (
             <Tile
-              icon={Dumbbell}
-              title="Workouts"
+              icon={Users}
+              title="Active Members"
               accent="blue"
-              href="/workout-sessions"
-              value={todaySessions.data?.length}
-              hint="Training sessions today"
-              isLoading={todaySessions.isLoading || !datedReady}
-              isError={todaySessions.isError}
+              href="/members?status=ACTIVE"
+              value={memberMetrics.data?.active}
+              hint="Clients with an active status"
+              isLoading={memberMetrics.isLoading || !datedReady}
+              isError={memberMetrics.isError}
             />
           )}
         </div>
@@ -475,6 +482,7 @@ export default function DashboardPage() {
             title="Net revenue"
             accent="emerald"
             feature
+            href={canReadPayments ? "/billing" : undefined}
             value={financeSummary.data ? displayCurrencyAmount(summaryRow?.netRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint="After refunds"
             isLoading={financeSummary.isLoading || !datedReady}
@@ -484,6 +492,7 @@ export default function DashboardPage() {
             icon={HandCoins}
             title="Collected amount"
             accent="cyan"
+            href={canReadPayments ? "/billing" : undefined}
             value={financeSummary.data ? displayCurrencyAmount(summaryRow?.grossRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint={summaryRow && summaryRow.paymentCount > 0
               ? `Across ${summaryRow.paymentCount} payments${Number(summaryRow.productRevenue ?? 0) > 0 ? " + product sales" : ""}`
@@ -507,6 +516,7 @@ export default function DashboardPage() {
             icon={ShoppingBag}
             title="Inventory sale"
             accent="violet"
+            href={canReadInventory ? "/inventory/sales" : undefined}
             value={financeSummary.data ? displayCurrencyAmount(summaryRow?.productRevenue ?? "0.00", summaryRow?.currency ?? currencyCode) : undefined}
             hint="Product sales in period"
             isLoading={financeSummary.isLoading || !datedReady}
@@ -528,7 +538,7 @@ export default function DashboardPage() {
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
               <h2 className={styles.sectionTitle}>Revenue</h2>
-              <p className={styles.sectionSub}>Last 6 months · net of refunds</p>
+              <p className={styles.sectionSub}>Last 6 months</p>
             </div>
             {hasPermission("payments.read") && (
               <Button asChild variant="ghost" size="sm" className="min-h-11 rounded-full">
@@ -650,11 +660,6 @@ export default function DashboardPage() {
         )}
 
         <div className="flex flex-col gap-6">
-          <Launcher id="dash-quick" title="Quick actions" emptyHint="Your account doesn't include any of these actions.">
-            {visibleActions.map(([title, desc, href, Icon, , color]) => (
-              <AppIconLink key={href} href={href} icon={Icon} label={title} hint={desc} accent={color} />
-            ))}
-          </Launcher>
           {jumpItems.length > 0 && (
             <Launcher id="dash-jump" title="Jump to">
               {jumpItems.map((item) => (

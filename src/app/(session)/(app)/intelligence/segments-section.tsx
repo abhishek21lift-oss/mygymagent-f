@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Filter, Plus, Sparkles, Trash2, Users } from "lucide-react"
 import { toast } from "sonner"
 
@@ -281,7 +282,7 @@ function SegmentMembersBody({ segmentId, segmentName }: { segmentId: string; seg
     {(members.data?.members ?? []).map((member) => (
      <div key={member.memberId} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
       <div className="min-w-0">
-       <p className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold">{member.firstName} {member.lastName}</p>
+       <Link href={`/members/${member.memberId}`} className="min-w-0 [overflow-wrap:anywhere] text-sm font-bold hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">{member.firstName} {member.lastName}</Link>
        <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-muted-foreground">{member.email ?? "No email"}</p>
       </div>
       <div className="flex items-center gap-2">

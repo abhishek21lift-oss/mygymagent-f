@@ -85,6 +85,7 @@ function routes(overrides: Record<string, unknown> = {}) {
       notComputable: [],
     },
     "/members": { items: [], total: 3, page: 1, pageSize: 1, totalPages: 3 },
+    "/members/metrics": { total: 39, active: 30, inactive: 4, frozen: 2, expired: 3, pt: 5 },
     "/memberships": {
       items: [
         { id: "m1", previousMembershipId: "m0" },
@@ -178,8 +179,8 @@ describe("DashboardPage", () => {
 
   it("shows hot leads with evidence", async () => {
     renderPage()
-    expect(await screen.findByText("Sana P — Follow-up overdue by 2 days")).toBeInTheDocument()
-    expect(screen.getByText("via Walk-in")).toBeInTheDocument()
+    expect(await screen.findByText("Follow up with Sana P — Follow-up overdue by 2 days")).toBeInTheDocument()
+    expect(screen.getByText("Came in via Walk-in. Hot leads cool fast.")).toBeInTheDocument()
   })
 
   it("shows no lead rows when nothing is hot", async () => {
@@ -220,16 +221,18 @@ describe("DashboardPage", () => {
     expect(await screen.findByText("On 3 memberships · live balance")).toBeInTheDocument()
   })
 
-  it("shows the six Today KPIs from their authoritative sources", async () => {
+  it("shows the Today KPIs from their authoritative sources", async () => {
     renderPage()
     expect(await screen.findByText("Net revenue")).toBeInTheDocument()
-    for (const title of ["Check In", "Collection", "New Members", "Renewals", "Leads"]) {
+    for (const title of ["Check In", "Collection", "New Members", "Renewals", "Leads", "Active Members"]) {
       expect(screen.getByText(title)).toBeInTheDocument()
     }
     // Renewals counts only rows linked to a previous membership.
     expect(await screen.findByText("Of 2 started today")).toBeInTheDocument()
-    // Workouts needs workouts.read, which this permission set lacks.
+    // The Workout KPI is retired: Active Members (from /members/metrics)
+    // stands in its place.
     expect(screen.queryByText("Workouts")).not.toBeInTheDocument()
+    expect(await screen.findByText("Active Members")).toBeInTheDocument()
     const memberCalls = callsTo("/members").filter((options) => options?.query?.joinedFrom)
     expect(memberCalls).toHaveLength(1)
     expect(memberCalls[0]?.query).toMatchObject({ pageSize: 1 })
@@ -258,14 +261,16 @@ describe("DashboardPage", () => {
     )
   })
 
-  it("shows today's workouts for someone who can read workouts, narrowed to the picked branch", async () => {
-    mockPermissions = [...ALL, "workouts.read"]
-    window.localStorage.setItem("mygymagent:dashboard-branch", BRANCH_B)
-    routes({ "/workout-sessions/today": [{ id: "s1" }, { id: "s2" }] })
+  it("shows active members from the member metrics, linking to the filtered directory", async () => {
     renderPage()
-    expect(await screen.findByText("Workouts")).toBeInTheDocument()
-    expect(await screen.findByText("Training sessions today")).toBeInTheDocument()
-    expect(callsTo("/workout-sessions/today")[0]?.query).toEqual({ branchId: BRANCH_B })
+    expect(await screen.findByText("Active Members")).toBeInTheDocument()
+    expect(screen.getByText("Active Members").closest("a")).toHaveAttribute(
+      "href",
+      "/members?status=ACTIVE",
+    )
+    // Data-driven wait: the hint only renders once the metrics resolved.
+    expect(await screen.findByText("Clients with an active status")).toBeInTheDocument()
+    expect(callsTo("/members/metrics")).toHaveLength(1)
   })
 
   it("shows the slim gym health hero with the name and no meter", async () => {
@@ -416,9 +421,9 @@ describe("DashboardPage", () => {
   it("brings renewals home with evidence, only for someone who can act on it", async () => {
     mockPermissions = [...ALL, "workouts.read"]
     renderPage()
-    expect(await screen.findByText("Ravi K — Monthly ends in 5d")).toBeInTheDocument()
+    expect(await screen.findByText("Remind Ravi K — Monthly ends in 5d")).toBeInTheDocument()
     expect(screen.getByText(/at stake/)).toBeInTheDocument()
-    expect(await screen.findByText("Dev M — 6 sessions, 5d left")).toBeInTheDocument()
+    expect(await screen.findByText("Review Dev M's PT package — 6 sessions left, 5d to go")).toBeInTheDocument()
   })
 
   it("shows each priority only to someone who can act on it", async () => {
@@ -442,14 +447,14 @@ describe("DashboardPage", () => {
 
   it("surfaces high-value win-back candidates with evidence", async () => {
     renderPage()
-    expect(await screen.findByText("1 high-value win-back")).toBeInTheDocument()
+    expect(await screen.findByText("Win back 1 high-value former member")).toBeInTheDocument()
     expect(screen.getByText(/Paid 45,000 INR over 210 days/)).toBeInTheDocument()
   })
 
   it("lists AI proposals and outcome counts for an approver", async () => {
     mockPermissions = [...ALL, "ai.approve"]
     renderPage()
-    expect(await screen.findByText("4 AI proposals awaiting approval")).toBeInTheDocument()
+    expect(await screen.findByText("Approve 4 pending AI proposals")).toBeInTheDocument()
     expect(await screen.findByText(/2 AI actions executed/)).toBeInTheDocument()
     expect(screen.getByText("Action history")).toBeInTheDocument()
   })
@@ -497,7 +502,7 @@ describe("DashboardPage", () => {
       return base(path, options)
     })
     renderPage()
-    expect(await screen.findByText("4 AI proposals awaiting approval")).toBeInTheDocument()
+    expect(await screen.findByText("Approve 4 pending AI proposals")).toBeInTheDocument()
     expect(screen.queryByText(/Outcomes so far/)).not.toBeInTheDocument()
   })
 

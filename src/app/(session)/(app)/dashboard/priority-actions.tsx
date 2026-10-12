@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useAiEffectiveness } from "@/lib/hooks/use-gym-health";
@@ -33,12 +34,22 @@ import { outstandingHref } from "./outstanding/outstanding-list";
 interface ActionRow {
   key: string;
   icon: LucideIcon;
+  /** Action-oriented title: what needs attention + who is affected. */
   title: string;
+  /** Plain-language why it matters + the evidence (amount/count). */
   detail?: string;
   href: string;
   action: string;
   color: Accent;
+  severity: "Critical" | "High" | "Medium" | "Low";
 }
+
+const SEVERITY_BADGE: Record<ActionRow["severity"], "destructive" | "warning" | "secondary" | "success"> = {
+  Critical: "destructive",
+  High: "warning",
+  Medium: "secondary",
+  Low: "success",
+};
 
 function endsIn(days: number): string {
   if (days <= 0) return "ends today";
@@ -97,67 +108,73 @@ export function PriorityActions({
     rows.push({
       key: "renewals-overdue",
       icon: AlertTriangle,
-      title: `${overdue.length} renewal${overdue.length === 1 ? "" : "s"} overdue`,
-      detail: "Expired with no active term since.",
+      title: `Renew ${overdue.length} overdue membership${overdue.length === 1 ? "" : "s"}`,
+      detail: "Expired with no active term since. Every lapsed day risks churn.",
       href: "/memberships",
-      action: "Renewals",
+      action: "Review renewals",
       color: "rose",
+      severity: "Critical",
     });
   }
   for (const item of (renewals.data?.upcoming ?? []).slice(0, 3)) {
     rows.push({
       key: `renewal-${item.membershipId}`,
-      icon: AlertTriangle,
-      title: `${item.firstName} ${item.lastName} — ${item.planName} ${endsIn(item.daysUntilExpiry)}`,
-      detail: `${displayCurrencyAmount(item.price, item.currency)} at stake.`,
+      icon: RefreshCw,
+      title: `Remind ${item.firstName} ${item.lastName} — ${item.planName} ${endsIn(item.daysUntilExpiry)}`,
+      detail: `${displayCurrencyAmount(item.price, item.currency)} at stake if they lapse.`,
       href: `/members/${item.memberId}`,
-      action: "Renew",
+      action: "Open member",
       color: "amber",
+      severity: "High",
     });
   }
   for (const lead of (sales.data?.items ?? []).filter((item) => item.severity === "hot").slice(0, 3)) {
     rows.push({
       key: `lead-${lead.leadId}`,
       icon: Megaphone,
-      title: `${lead.firstName} ${lead.lastName} — ${lead.reasons[0] ?? "needs a follow-up"}`,
-      detail: lead.source ? `via ${lead.source}` : undefined,
+      title: `Follow up with ${lead.firstName} ${lead.lastName} — ${lead.reasons[0] ?? "hot prospect"}`,
+      detail: lead.source ? `Came in via ${lead.source}. Hot leads cool fast.` : "Hot lead — follow up before they cool off.",
       href: `/crm/leads/${lead.leadId}`,
       action: "Follow up",
       color: "rose",
+      severity: "High",
     });
   }
   for (const o of (pt.data?.expiring ?? []).slice(0, 2)) {
     rows.push({
       key: `pt-${o.packageId}`,
       icon: Dumbbell,
-      title: `${o.firstName} ${o.lastName} — ${o.sessionsRemaining} sessions, ${o.daysLeft}d left`,
-      detail: o.packageName,
+      title: `Review ${o.firstName} ${o.lastName}'s PT package — ${o.sessionsRemaining} sessions left, ${o.daysLeft}d to go`,
+      detail: `${o.packageName}. Unused sessions rarely renew.`,
       href: `/members/${o.memberId}`,
       action: "PT review",
       color: "violet",
+      severity: "Medium",
     });
   }
   for (const o of (pt.data?.neverStarted ?? []).slice(0, 1)) {
     rows.push({
       key: `pt-${o.packageId}`,
       icon: Dumbbell,
-      title: `${o.firstName} ${o.lastName} — package untouched`,
-      detail: o.packageName,
+      title: `Start ${o.firstName} ${o.lastName} on their untouched PT package`,
+      detail: `${o.packageName}. A package that never starts never renews.`,
       href: `/members/${o.memberId}`,
       action: "PT review",
       color: "violet",
+      severity: "Medium",
     });
   }
   if (outstandingCount > 0 && canReadPayments) {
     rows.push({
       key: "outstanding",
       icon: Wallet,
-      title: `${displayCurrencyAmount(outstandingBalance ?? "0.00", currencyCode)} outstanding`,
-      detail: `On ${outstandingCount} membership${outstandingCount === 1 ? "" : "s"}.`,
+      title: `Collect ${displayCurrencyAmount(outstandingBalance ?? "0.00", currencyCode)} outstanding`,
+      detail: `Owed across ${outstandingCount} membership${outstandingCount === 1 ? "" : "s"}.`,
       // Who owes, not the billing screen: that lists invoices, not these.
       href: outstandingHref(branchFilter),
       action: "Collect",
       color: "amber",
+      severity: "High",
     });
   }
   const winbackHigh = winback.data?.items.filter((i) => i.tier === "HIGH") ?? [];
@@ -166,33 +183,36 @@ export function PriorityActions({
     rows.push({
       key: "winback",
       icon: HeartHandshake,
-      title: `${winbackHigh.length} high-value win-back${winbackHigh.length === 1 ? "" : "s"}`,
+      title: `Win back ${winbackHigh.length} high-value former member${winbackHigh.length === 1 ? "" : "s"}`,
       detail: `${top.firstName} ${top.lastName} leads — ${top.reasons[0] ?? "proven past value"}.`,
       href: "/intelligence",
       action: "Win back",
       color: "emerald",
+      severity: "Medium",
     });
   }
   if (atRiskCount > 0 && canReadMembers) {
     rows.push({
       key: "at-risk",
       icon: AlertTriangle,
-      title: `${atRiskCount} paying member${atRiskCount === 1 ? " hasn't" : "s haven't"} visited in 14 days`,
+      title: `Check on ${atRiskCount} paying member${atRiskCount === 1 ? "" : "s"} not seen in 14 days`,
       detail: "A personal message now is cheaper than a win-back later.",
       href: "/intelligence",
       action: "Review risk",
       color: "orange",
+      severity: "High",
     });
   }
   if (pendingAiActions > 0 && canApproveAi) {
     rows.push({
       key: "ai-pending",
       icon: Sparkles,
-      title: `${pendingAiActions} AI proposal${pendingAiActions === 1 ? "" : "s"} awaiting approval`,
+      title: `Approve ${pendingAiActions} pending AI proposal${pendingAiActions === 1 ? "" : "s"}`,
       detail: "Review proposed actions before they run.",
       href: "/ai-actions",
       action: "Review",
       color: "violet",
+      severity: "Medium",
     });
   }
 
@@ -244,18 +264,23 @@ export function PriorityActions({
             ))}
           </div>
         ) : rows.length > 0 ? (
-          <ul className="flex flex-col">
+          <ul className="flex flex-col gap-1">
             {rows.map((item) => {
               const Icon = item.icon;
               return (
                 <li key={item.key} className={accentStyle(item.color)}>
-                  <Link href={item.href} className={cn(styles.row, "group")}>
+                  <div className={cn(styles.row, "flex-wrap gap-x-3 gap-y-2 sm:flex-nowrap")}>
                     <span className={styles.iconDisc} aria-hidden="true">
                       <Icon className="size-[1.1rem]" strokeWidth={2.2} />
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block [overflow-wrap:anywhere] text-sm font-semibold tracking-tight text-foreground">
-                        {item.title}
+                    <span className="min-w-0 flex-1 basis-48">
+                      <span className="flex flex-wrap items-center gap-1.5">
+                        <Link
+                          href={item.href}
+                          className="text-sm font-semibold tracking-tight text-foreground [overflow-wrap:anywhere] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        >
+                          {item.title}
+                        </Link>
                       </span>
                       {item.detail && (
                         <span className="mt-0.5 block [overflow-wrap:anywhere] text-xs text-muted-foreground">
@@ -263,14 +288,18 @@ export function PriorityActions({
                         </span>
                       )}
                     </span>
-                    <span className="hidden shrink-0 items-center gap-0.5 text-xs font-semibold text-muted-foreground transition-colors group-hover:text-foreground sm:flex">
-                      {item.action}
+                    <span className="flex shrink-0 items-center gap-2">
+                      <Badge variant={SEVERITY_BADGE[item.severity]} className="rounded-full">
+                        {item.severity}
+                      </Badge>
+                      <Button asChild size="sm" variant="outline" className="min-h-11 rounded-full">
+                        <Link href={item.href}>
+                          {item.action}
+                          <ChevronRight className="size-4" aria-hidden="true" />
+                        </Link>
+                      </Button>
                     </span>
-                    <ChevronRight
-                      className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
-                      aria-hidden="true"
-                    />
-                  </Link>
+                  </div>
                 </li>
               );
             })}
