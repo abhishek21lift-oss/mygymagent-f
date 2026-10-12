@@ -44,6 +44,11 @@ import { AutoRepliesCard } from "./auto-replies-card"
 import { WebhooksCard } from "./webhooks-card"
 import { WhatsAppAdapterStatusCard } from "./whatsapp-status-card";
 import { BotConfigCard } from "./bot-config-card";
+import { ScheduledAutomationsCard } from "./scheduled-automations-card"
+import { EventTriggersCard } from "./event-triggers-card"
+import { ImportantSettingsCard } from "./important-settings-card"
+import { SalutationCard } from "./salutation-card"
+import { IrregularMembersCard } from "./irregular-members-card"
 
 declare global {
  interface Window {
@@ -224,6 +229,13 @@ export default function WhatsAppSettingsPage() {
  </CardContent>
  </Card>
  )}
+
+ {/* The Automation Control Center: what runs, when, and to whom. */}
+ <ScheduledAutomationsCard canManage={canSend} />
+ <EventTriggersCard canManage={canSend} />
+ <ImportantSettingsCard canManage={canSend} />
+ <SalutationCard canManage={canSend} />
+ <IrregularMembersCard />
 
  <div className="flex w-full max-w-3xl flex-col gap-5">
   <TestSendCard canManage={canManage} orgCountry={orgCountry} />
