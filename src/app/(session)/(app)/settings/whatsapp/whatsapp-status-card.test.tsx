@@ -25,9 +25,10 @@ function createWrapper() {
       queries: { retry: false },
     },
   })
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  )
+  function TestWrapper({ children }: { children: React.ReactNode }) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  }
+  return TestWrapper
 }
 
 describe("WhatsAppAdapterStatusCard", () => {

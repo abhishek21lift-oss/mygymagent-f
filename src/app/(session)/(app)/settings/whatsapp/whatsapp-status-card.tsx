@@ -5,7 +5,6 @@ import { Loader2, Smartphone } from "lucide-react"
 
 import { ErrorState } from "@/components/shared/error-state"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/lib/auth/auth-context"
 import { useWhatsAppAdapterStatus, WhatsAppAdapterStatus } from "@/lib/hooks/use-whatsapp-adapter"
@@ -42,7 +41,7 @@ export function WhatsAppAdapterStatusCard({ canManage }: { canManage: boolean })
         <div>
           <h2 id="wa-adapter-status-title" className="section-title">WhatsApp Status</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Status of your gym's primary WhatsApp number (Baileys session).
+            Status of your gym&apos;s primary WhatsApp number (Baileys session).
           </p>
         </div>
         {statusQuery.data ? <StatusBadge session={statusQuery.data} /> : null}
@@ -52,7 +51,7 @@ export function WhatsAppAdapterStatusCard({ canManage }: { canManage: boolean })
         {statusQuery.isPending ? (
           <Skeleton className="h-40 w-full rounded-2xl" />
         ) : statusQuery.isError ? (
-          <p className="text-sm text-destructive">Couldn't load WhatsApp status.</p>
+          <p className="text-sm text-destructive">Couldn&apos;t load WhatsApp status.</p>
         ) : !statusQuery.data ? (
           <p className="text-sm text-muted-foreground">No WhatsApp session found.</p>
         ) : (
