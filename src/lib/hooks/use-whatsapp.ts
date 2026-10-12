@@ -8,6 +8,21 @@ export function useWhatsAppIntegration() {
   return useQuery({ queryKey: [KEY, "integration"], queryFn: () => api.get<WhatsAppIntegration | null>("/whatsapp/integration") })
 }
 
+export interface WhatsAppContact {
+  jid: string
+  name: string | null
+  notify: string | null
+  updatedAt: string
+}
+
+/** Address-book lookup for the linked number (newest sync first, cap 50). */
+export function useWhatsAppContacts() {
+  return useQuery({
+    queryKey: [KEY, "contacts"],
+    queryFn: () => api.get<WhatsAppContact[]>("/whatsapp/contacts", { query: { limit: 50 } }),
+  })
+}
+
 export function useCompleteWhatsAppSignup() {
   const queryClient = useQueryClient()
   return useMutation({

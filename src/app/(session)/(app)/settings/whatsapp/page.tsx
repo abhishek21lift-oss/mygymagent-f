@@ -43,6 +43,7 @@ import { ReplyBox, ScheduledMessagesCard } from "./whatsapp-messaging"
 import { AutoRepliesCard } from "./auto-replies-card"
 import { WebhooksCard } from "./webhooks-card"
 import { WhatsAppAdapterStatusCard } from "./whatsapp-status-card";
+import { BotConfigCard } from "./bot-config-card";
 
 declare global {
  interface Window {
@@ -186,6 +187,11 @@ export default function WhatsAppSettingsPage() {
  {user?.features?.whatsappAdapter && (
    <div className="w-full max-w-3xl">
    <WhatsAppAdapterStatusCard canManage={hasPermission("whatsapp.manage")} />
+   </div>
+ )}
+ {user?.features?.whatsappAdapter && (
+   <div className="w-full max-w-3xl">
+   <BotConfigCard canManage={canManage} />
    </div>
  )}
 

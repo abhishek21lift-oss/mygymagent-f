@@ -6,13 +6,18 @@ import { Bot, FileText, Plus, QrCode, Send, Wifi, WifiOff, Zap } from "lucide-re
 import { ErrorState } from "@/components/shared/error-state"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/lib/auth/auth-context"
 import { useAutoReplies, type AutoReplyRule } from "@/lib/hooks/use-auto-replies"
-import { useWhatsAppIntegration } from "@/lib/hooks/use-whatsapp"
+import { useWhatsAppContacts, useWhatsAppIntegration, type WhatsAppContact } from "@/lib/hooks/use-whatsapp"
 import {
   useWhatsAppAdapterAutoReplies,
+  useWhatsAppAdapterContacts,
+  useWhatsAppAdapterGroups,
   useWhatsAppAdapterStatus,
+  type WhatsAppAdapterContact,
+  type WhatsAppAdapterGroup,
   type WhatsAppAdapterStatus,
 } from "@/lib/hooks/use-whatsapp-adapter"
 import type { WhatsAppIntegration } from "@/lib/types/whatsapp"
@@ -136,12 +141,32 @@ function OverviewBody({
   pending,
   failed,
   onRetry,
+  contacts,
+  contactsPending,
+  contactsFailed,
+  onContactsRetry,
+  search,
+  onSearch,
+  groups,
+  groupsPending,
+  groupsFailed,
+  onGroupsRetry,
 }: {
   sessions: SessionRow[]
   rules: AutoReplyRule[]
   pending: boolean
   failed: boolean
   onRetry: () => void
+  contacts: (WhatsAppContact | WhatsAppAdapterContact)[]
+  contactsPending: boolean
+  contactsFailed: boolean
+  onContactsRetry: () => void
+  search: string | null
+  onSearch: ((value: string) => void) | null
+  groups: { available: boolean; groups: WhatsAppAdapterGroup[] } | null
+  groupsPending: boolean
+  groupsFailed: boolean
+  onGroupsRetry: () => void
 }) {
   const connected = sessions.filter((s) => s.status === "CONNECTED").length
   if (pending) {
@@ -169,6 +194,82 @@ function OverviewBody({
       </div>
       <QuickActions />
       <SessionsList sessions={sessions} />
+      <Card className="overflow-hidden border-border bg-card dark:bg-card">
+        <CardHeader className="border-b border-border bg-muted/40">
+          <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">
+            Contacts
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 p-5 sm:p-6">
+          {onSearch ? (
+            <Input
+              value={search ?? ""}
+              onChange={(e) => onSearch(e.target.value)}
+              placeholder="Search by name or number"
+              maxLength={100}
+              className="min-h-11 max-w-sm rounded-xl"
+              aria-label="Search contacts"
+            />
+          ) : null}
+          {contactsPending ? (
+            <Skeleton className="h-24 w-full rounded-xl" />
+          ) : contactsFailed ? (
+            <ErrorState message="Could not load contacts." onRetry={onContactsRetry} />
+          ) : contacts.length === 0 ? (
+            <p className="text-sm font-medium text-stone-600 dark:text-stone-400">
+              No contacts synced yet.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {contacts.slice(0, 10).map((c) => (
+                <li key={c.jid} className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="text-sm font-bold text-stone-950 dark:text-stone-50">
+                    {c.name ?? c.notify ?? c.jid}
+                  </span>
+                  <span className="font-mono text-xs text-stone-600 dark:text-stone-400">{c.jid}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+      {groups ? (
+        <Card className="overflow-hidden border-border bg-card dark:bg-card">
+          <CardHeader className="border-b border-border bg-muted/40">
+            <CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground tracking-tight text-stone-950 dark:text-stone-50">
+              Groups
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 p-5 sm:p-6">
+            {groupsPending ? (
+              <Skeleton className="h-24 w-full rounded-xl" />
+            ) : groupsFailed ? (
+              <ErrorState message="Could not load groups." onRetry={onGroupsRetry} />
+            ) : !groups.available ? (
+              <p className="text-sm font-medium text-stone-600 dark:text-stone-400">
+                Connect WhatsApp to see your groups.
+              </p>
+            ) : groups.groups.length === 0 ? (
+              <p className="text-sm font-medium text-stone-600 dark:text-stone-400">
+                No groups found.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {groups.groups.map((g) => (
+                  <li key={g.jid} className="flex items-center justify-between gap-3 py-2.5">
+                    <span className="text-sm font-bold text-stone-950 dark:text-stone-50">
+                      {g.subject}
+                    </span>
+                    <span className="text-xs font-medium text-stone-600 dark:text-stone-400 tabular-nums">
+                      {g.participantCount} members
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   )
 }
@@ -198,6 +299,7 @@ function adapterSession(status: WhatsAppAdapterStatus | undefined): SessionRow |
 function LegacyOverview() {
   const integrationQuery = useWhatsAppIntegration()
   const rulesQuery = useAutoReplies()
+  const contactsQuery = useWhatsAppContacts()
   const sessions = [metaSession(integrationQuery.data)].filter((s): s is SessionRow => s !== null)
   return (
     <OverviewBody
@@ -209,6 +311,16 @@ function LegacyOverview() {
         void integrationQuery.refetch()
         void rulesQuery.refetch()
       }}
+      contacts={contactsQuery.data ?? []}
+      contactsPending={contactsQuery.isPending}
+      contactsFailed={contactsQuery.isError}
+      onContactsRetry={() => void contactsQuery.refetch()}
+      search={null}
+      onSearch={null}
+      groups={null}
+      groupsPending={false}
+      groupsFailed={false}
+      onGroupsRetry={() => undefined}
     />
   )
 }
@@ -217,6 +329,17 @@ function AdapterOverview() {
   const integrationQuery = useWhatsAppIntegration()
   const statusQuery = useWhatsAppAdapterStatus()
   const rulesQuery = useWhatsAppAdapterAutoReplies()
+  const groupsQuery = useWhatsAppAdapterGroups()
+  const [search, setSearch] = React.useState("")
+  // Debounce the input so intermediate keystrokes never fire requests; the
+  // trimmed value keys the query, so a stale response can never overwrite a
+  // newer one.
+  const [debouncedSearch, setDebouncedSearch] = React.useState("")
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+  const contactsQuery = useWhatsAppAdapterContacts(debouncedSearch)
   const sessions = [metaSession(integrationQuery.data), adapterSession(statusQuery.data)].filter(
     (s): s is SessionRow => s !== null,
   )
@@ -231,6 +354,16 @@ function AdapterOverview() {
         void statusQuery.refetch()
         void rulesQuery.refetch()
       }}
+      contacts={contactsQuery.data ?? []}
+      contactsPending={contactsQuery.isPending}
+      contactsFailed={contactsQuery.isError}
+      onContactsRetry={() => void contactsQuery.refetch()}
+      search={search}
+      onSearch={setSearch}
+      groups={groupsQuery.data ?? null}
+      groupsPending={groupsQuery.isPending}
+      groupsFailed={groupsQuery.isError}
+      onGroupsRetry={() => void groupsQuery.refetch()}
     />
   )
 }

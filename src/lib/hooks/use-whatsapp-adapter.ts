@@ -54,6 +54,92 @@ export function useWhatsAppAdapterAutoReplies() {
   })
 }
 
+export interface WhatsAppAdapterContact {
+  jid: string
+  name: string | null
+  notify: string | null
+  updatedAt: string
+}
+
+export interface WhatsAppAdapterGroup {
+  jid: string
+  subject: string
+  participantCount: number
+}
+
+export interface WhatsAppAdapterGroups {
+  available: boolean
+  groups: WhatsAppAdapterGroup[]
+}
+
+export function useWhatsAppAdapterContacts(search: string) {
+  const trimmed = search.trim()
+  return useQuery({
+    queryKey: [...KEY, "contacts", trimmed],
+    queryFn: () =>
+      api.get<WhatsAppAdapterContact[]>(`/whatsapp-adapter/contacts`, {
+        query: { limit: 50, ...(trimmed ? { search: trimmed } : {}) },
+      }),
+  })
+}
+
+export function useWhatsAppAdapterGroups() {
+  return useQuery({
+    queryKey: [...KEY, "groups"],
+    queryFn: () => api.get<WhatsAppAdapterGroups>(`/whatsapp-adapter/groups`),
+  })
+}
+
+export interface WhatsAppBotConfig {
+  id: string
+  organizationId: string
+  prefix: string
+  enablePing: boolean
+  enableUptime: boolean
+  welcomeMessage: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UpdateBotConfigInput {
+  prefix?: string
+  enablePing?: boolean
+  enableUptime?: boolean
+  welcomeMessage?: string | null
+}
+
+export function useWhatsAppBotConfig() {
+  return useQuery({
+    queryKey: [...KEY, "bot-config"],
+    queryFn: () => api.get<WhatsAppBotConfig | null>(`/whatsapp-adapter/bot/config`),
+  })
+}
+
+export function useWhatsAppUpdateBotConfig() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: UpdateBotConfigInput) =>
+      api.patch<WhatsAppBotConfig>(`/whatsapp-adapter/bot/config`, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: KEY }),
+  })
+}
+
+export interface WhatsAppAutomationActivity {
+  id: string
+  templateKey: string
+  recipient: string
+  status: string
+  createdAt: string
+}
+
+export function useWhatsAppAutomationActivity() {
+  return useQuery({
+    queryKey: [...KEY, "automation-activity"],
+    queryFn: () =>
+      api.get<WhatsAppAutomationActivity[]>(`/whatsapp-adapter/automation/activity`),
+  })
+}
+
 export function useWhatsAppAdapterCreateAutoReply() {
   const queryClient = useQueryClient()
   return useMutation({
