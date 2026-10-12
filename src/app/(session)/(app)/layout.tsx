@@ -13,8 +13,10 @@ import { MfaRequiredGate } from "@/components/security/mfa-required-gate";
 import { MfaGraceBanner } from "@/components/security/mfa-grace-banner";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { Topbar } from "@/components/app-shell/topbar";
+import { WhatsAppNavStrip, WhatsAppSideNav } from "@/components/app-shell/whatsapp-nav";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { BottomTabBar } from "@/components/app-shell/bottom-tab-bar";
+import { isWhatsAppRoute, useVisibleWhatsAppNav } from "@/lib/whatsapp-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PullToRefresh } from "@/components/shared/pull-to-refresh";
 
@@ -46,7 +48,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     () => false,
   );
   const [collapsedChoice, setCollapsedChoice] = React.useState<boolean | null>(null);
-  const sidebarCollapsed = collapsedChoice ?? isTablet;
+  // WhatsApp mode is a pure function of the URL: entering a WhatsApp
+  // route collapses the main rail and docks the WhatsApp pane beside it;
+  // leaving restores the person's own collapse choice untouched. Back,
+  // forward, refresh and direct entry all resolve the same layout, and
+  // there is no mode state to desynchronise or loop.
+  const waPanes = useVisibleWhatsAppNav();
+  const waMode = isWhatsAppRoute(pathname) && waPanes.total > 0;
+  const sidebarCollapsed = collapsedChoice ?? waMode ?? isTablet;
   const mainRef = React.useRef<HTMLElement | null>(null);
 
   // A gym member has no staff permissions at all, so this shell would
@@ -137,6 +146,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarNav collapsed={sidebarCollapsed} className="glass rounded-3xl" />
       </div>
 
+      {/* WhatsApp mode: a dedicated pane docked beside the compact rail.
+          Width-animated rather than mounted so entering and leaving never
+          remounts (or flickers) the navigation state; inert while closed
+          so its links stay out of the keyboard order. */}
+      <div
+        inert={!waMode}
+        className={
+          "hidden shrink-0 overflow-hidden transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:block " +
+          (waMode ? "w-60" : "w-0")
+        }
+      >
+        <div className="h-full w-60 py-2 pr-2">
+          <div className="glass h-full rounded-3xl p-3">
+            <WhatsAppSideNav />
+          </div>
+        </div>
+      </div>
+
       <MobileNav open={mobileNavOpen} onOpenChange={setMobileNavOpen} />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -145,6 +172,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setCollapsedChoice(!sidebarCollapsed)}
         />
+        {/* Phones get the same entries as a horizontal strip: the
+            two-sidebar layout would squeeze content below readability. */}
+        {waMode ? (
+          <div className="shrink-0 px-4 pt-2 sm:px-5 md:hidden">
+            <WhatsAppNavStrip />
+          </div>
+        ) : null}
         <main ref={mainRef} className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
           <PullToRefresh scrollRef={mainRef}>
             <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pb-[var(--mobile-tabbar-clearance)] pt-2 sm:px-5 md:pb-8 lg:px-8">
