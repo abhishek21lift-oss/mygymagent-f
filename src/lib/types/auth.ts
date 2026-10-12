@@ -1,6 +1,10 @@
 export interface AuthUser {
   id: string
   organizationId: string | null
+  /** Feature flags */
+  features?: {
+    whatsappAdapter: boolean
+  };
   email: string
   firstName: string
   lastName: string
