@@ -26,6 +26,7 @@ export type Accent =
 const ROUTE_ACCENTS: ReadonlyArray<readonly [string, Accent]> = [
   // Engage, then Tools. The two WhatsApp pages live under /settings but
   // belong to Engage, so they come first.
+  ["/whatsapp", "orange"],
   ["/settings/whatsapp", "orange"],
   ["/settings/messages", "orange"],
   ["/inbox", "orange"],
@@ -88,6 +89,7 @@ export function accentForPath(pathname: string | null | undefined): Accent {
  * the wrong word above the title.
  */
 const ROUTE_SECTIONS: ReadonlyArray<readonly [string, string]> = [
+  ["/whatsapp", "Engage"],
   ["/settings/whatsapp", "Engage"],
   ["/settings/messages", "Engage"],
   ["/automation", "Engage"],

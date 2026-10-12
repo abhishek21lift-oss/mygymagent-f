@@ -30,13 +30,13 @@ describe("WhatsAppSideNav", () => {
     expect(screen.getByText("Command center")).toBeInTheDocument();
     for (const href of [
       "/whatsapp",
-      "/settings/whatsapp",
+      "/whatsapp/sessions",
       "/inbox",
       "/broadcasts",
       "/whatsapp#contacts",
-      "/settings/whatsapp#auto-replies",
-      "/settings/whatsapp#bot-automation",
-      "/settings/whatsapp#webhooks",
+      "/whatsapp/auto-reply",
+      "/whatsapp/automation",
+      "/whatsapp/webhooks",
       "/settings/messages",
     ]) {
       expect(document.querySelector(`a[href="${href}"]`)).not.toBeNull();
@@ -68,6 +68,6 @@ describe("WhatsAppNavStrip", () => {
 
     expect(screen.getByRole("navigation", { name: "WhatsApp" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Chat" })).toHaveAttribute("aria-current", "page");
-    expect(document.querySelector('a[href="/settings/whatsapp#bot-automation"]')).not.toBeNull();
+    expect(document.querySelector('a[href="/whatsapp/automation"]')).not.toBeNull();
   });
 });

@@ -26,7 +26,7 @@ export const WHATSAPP_NAV_GROUPS: WhatsAppNavGroup[] = [
     label: "Main",
     entries: [
       { title: "Dashboard", href: "/whatsapp", icon: "dashboard", permission: "whatsapp.read" },
-      { title: "Sessions & QR", href: "/settings/whatsapp", icon: "qr", permission: "whatsapp.read" },
+      { title: "Sessions & QR", href: "/whatsapp/sessions", icon: "qr", permission: "whatsapp.read" },
     ],
   },
   {
@@ -45,9 +45,9 @@ export const WHATSAPP_NAV_GROUPS: WhatsAppNavGroup[] = [
   {
     label: "Automation",
     entries: [
-      { title: "Auto Reply", href: "/settings/whatsapp#auto-replies", icon: "zap", permission: "whatsapp.read" },
-      { title: "Bot Automation", href: "/settings/whatsapp#bot-automation", icon: "bot", permission: "whatsapp.read" },
-      { title: "Webhooks & API", href: "/settings/whatsapp#webhooks", icon: "webhook", permission: "whatsapp.read" },
+      { title: "Auto Reply", href: "/whatsapp/auto-reply", icon: "zap", permission: "whatsapp.read" },
+      { title: "Bot Automation", href: "/whatsapp/automation", icon: "bot", permission: "whatsapp.read" },
+      { title: "Webhooks & API", href: "/whatsapp/webhooks", icon: "webhook", permission: "whatsapp.read" },
       { title: "Templates", href: "/settings/messages", icon: "file", permission: "notifications.manage" },
     ],
   },
@@ -62,6 +62,14 @@ const WHATSAPP_ROUTE_BASES = [
   "/settings/messages",
 ];
 
+/** Sub-pages of WhatsApp mode that get the dedicated sidebar. */
+const WHATSAPP_SUBPAGE_BASES = [
+  "/whatsapp/sessions",
+  "/whatsapp/auto-reply",
+  "/whatsapp/automation",
+  "/whatsapp/webhooks",
+];
+
 /**
  * Whether a pathname belongs to WhatsApp mode. Pure function of the URL,
  * so browser back/forward, refresh and direct entry all resolve the same
@@ -70,7 +78,9 @@ const WHATSAPP_ROUTE_BASES = [
 export function isWhatsAppRoute(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   const path = pathname.split("#")[0].split("?")[0];
-  return WHATSAPP_ROUTE_BASES.some((base) => path === base || path.startsWith(`${base}/`));
+  return [...WHATSAPP_ROUTE_BASES, ...WHATSAPP_SUBPAGE_BASES].some(
+    (base) => path === base || path.startsWith(`${base}/`),
+  );
 }
 
 /** Whether a nav entry is the current page (hash anchors compare by base). */

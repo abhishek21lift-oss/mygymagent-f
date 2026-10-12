@@ -110,7 +110,7 @@ export const primaryNav: NavItem[] = [
   { title: "Engage", href: "/engage", icon: MessagesSquare, hue: "orange", children: [
     { title: "Inbox", href: "/inbox", icon: MessagesSquare, permission: "whatsapp.read" },
     { title: "Broadcasts", href: "/broadcasts", icon: Send, permission: "whatsapp.manage" },
-    { title: "WhatsApp", href: "/settings/whatsapp", icon: MessageCircle, permission: ["whatsapp.read", "whatsapp.manage"] },
+    { title: "WhatsApp", href: "/whatsapp", icon: MessageCircle, permission: ["whatsapp.read", "whatsapp.manage"] },
     { title: "Automations", href: "/automation", icon: Workflow, permission: "reports.view" },
     { title: "Message templates", href: "/settings/messages", icon: FileText, permission: "notifications.manage" },
   ] },

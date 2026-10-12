@@ -99,3 +99,11 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Bindings for `next dev` only (miniflare). Guarded because a production
+// build -- including the Docker image's `next build` -- must not spawn the
+// platform-specific `workerd` binary, which is absent in the alpine image
+// and otherwise fails the build with `spawn ... ENOENT`.
+if (process.env.NODE_ENV === 'development' && process.env.DOCKER_BUILD !== '1') {
+  import('@opennextjs/cloudflare').then((m) => m.initOpenNextCloudflareForDev());
+}

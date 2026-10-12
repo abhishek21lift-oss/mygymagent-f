@@ -38,12 +38,10 @@ import {
  type WhatsAppTestSendResult,
 } from "@/lib/hooks/use-whatsapp"
 import { useBranches } from "@/lib/hooks/use-branches"
-import { WhatsAppWebCard } from "./whatsapp-web-card"
 import { ReplyBox, ScheduledMessagesCard } from "./whatsapp-messaging"
-import { AutoRepliesCard } from "./auto-replies-card"
-import { WebhooksCard } from "./webhooks-card"
-import { WhatsAppAdapterStatusCard } from "./whatsapp-status-card";
-import { BotConfigCard } from "./bot-config-card";
+import { ImportantSettingsCard } from "./important-settings-card"
+import { SalutationCard } from "./salutation-card"
+import { IrregularMembersCard } from "./irregular-members-card"
 
 declare global {
  interface Window {
@@ -63,7 +61,7 @@ const GRAPH_VERSION = process.env.NEXT_PUBLIC_WHATSAPP_GRAPH_VERSION ?? "v25.0"
 const LOG_LIMIT = 20
 
 export default function WhatsAppSettingsPage() {
- const { hasPermission, user } = useAuth()
+ const { hasPermission } = useAuth()
  const integrationQuery = useWhatsAppIntegration()
  const completeSignup = useCompleteWhatsAppSignup()
  const branchesQuery = useBranches({ page: 1, pageSize: 1 })
@@ -178,23 +176,6 @@ export default function WhatsAppSettingsPage() {
  }
  />
 
- {/* First: linking the gym's own number is what most gyms come here
- for, and on a phone the Meta card below fills the whole first
- screen -- this card used to start exactly one screen down. */}
- <div className="w-full max-w-3xl">
- <WhatsAppWebCard canManage={hasPermission("whatsapp.manage")} />
- </div>
- {user?.features?.whatsappAdapter && (
-   <div className="w-full max-w-3xl">
-   <WhatsAppAdapterStatusCard canManage={hasPermission("whatsapp.manage")} />
-   </div>
- )}
- {user?.features?.whatsappAdapter && (
-   <div className="w-full max-w-3xl">
-   <BotConfigCard canManage={canManage} />
-   </div>
- )}
-
  {integrationQuery.isLoading ? (
  <Card className="max-w-3xl border-border bg-card dark:bg-card"><CardContent className="space-y-4 pt-6"><Skeleton className="h-20 w-full rounded-lg" /><Skeleton className="h-11 w-40 rounded-lg" /></CardContent></Card>
  ) : integrationQuery.isError ? <ErrorState onRetry={() => integrationQuery.refetch()} /> : (
@@ -225,12 +206,14 @@ export default function WhatsAppSettingsPage() {
  </Card>
  )}
 
+ <ImportantSettingsCard canManage={canSend} />
+ <SalutationCard canManage={canSend} />
+ <IrregularMembersCard />
+
  <div className="flex w-full max-w-3xl flex-col gap-5">
   <TestSendCard canManage={canManage} orgCountry={orgCountry} />
   <TemplatesCard />
   <InboundCard canReply={canSend} />
-  <AutoRepliesCard canManage={canManage} />
-  <WebhooksCard canManage={canManage} />
   <ScheduledMessagesCard canManage={canSend} />
   <DeliveryLogCard />
   <DangerZoneCard canManage={canManage} />
