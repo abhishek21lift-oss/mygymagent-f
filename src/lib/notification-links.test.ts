@@ -14,7 +14,7 @@ describe("notificationPath", () => {
   it("leaves links that work alone", () => {
     for (const url of [
       "/members/abc",
-      "/settings/whatsapp#inbox",
+      "/whatsapp/sessions",
       "/inventory/products/new",
       "/inventory/products/new?edit=abc",
       "/pt-operations/sessions",

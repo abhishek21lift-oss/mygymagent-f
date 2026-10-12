@@ -69,7 +69,7 @@ function StatCard({
 const QUICK_ACTIONS = [
   { href: "/inbox", icon: <Send className="size-5" aria-hidden="true" />, title: "New message", hint: "Reply to members", tone: "bg-emerald-500" },
   { href: "/broadcasts", icon: <Plus className="size-5" aria-hidden="true" />, title: "Broadcast", hint: "Send a campaign", tone: "bg-sky-500" },
-  { href: "/settings/whatsapp#auto-replies", icon: <Bot className="size-5" aria-hidden="true" />, title: "Auto-replies", hint: "Keyword bot rules", tone: "bg-amber-500" },
+  { href: "/whatsapp/auto-reply", icon: <Bot className="size-5" aria-hidden="true" />, title: "Auto-replies", hint: "Keyword bot rules", tone: "bg-amber-500" },
   { href: "/settings/messages", icon: <FileText className="size-5" aria-hidden="true" />, title: "Templates", hint: "Approved messages", tone: "bg-violet-500" },
 ]
 
@@ -108,7 +108,7 @@ function SessionsList({ sessions }: { sessions: SessionRow[] }) {
             Connect your number to start sending and receiving.
           </p>
           <Button asChild variant="outline" size="sm" className="min-h-11">
-            <Link href="/settings/whatsapp">Connect WhatsApp</Link>
+            <Link href="/whatsapp/sessions">Connect WhatsApp</Link>
           </Button>
         </CardContent>
       </Card>
@@ -309,7 +309,7 @@ function metaSession(integration: WhatsAppIntegration | null | undefined): Sessi
     name: integration.displayName ?? "WhatsApp Business",
     detail: integration.displayPhoneNumber,
     status: integration.status,
-    href: "/settings/whatsapp",
+    href: "/whatsapp/sessions",
   }
 }
 
@@ -320,7 +320,7 @@ function adapterSession(status: WhatsAppAdapterStatus | undefined): SessionRow |
     name: "Direct session",
     detail: status.displayPhoneNumber ?? status.phoneNumber,
     status: status.status,
-    href: "/settings/whatsapp",
+    href: "/whatsapp/sessions",
   }
 }
 
@@ -422,7 +422,7 @@ export default function WhatsAppOverviewPage() {
           </p>
         </div>
         <Button asChild variant="outline" size="sm" className="min-h-11">
-          <Link href="/settings/whatsapp">Manage connection</Link>
+          <Link href="/whatsapp/sessions">Manage connection</Link>
         </Button>
       </div>
       {user?.features?.whatsappAdapter ? <AdapterOverview /> : <LegacyOverview />}

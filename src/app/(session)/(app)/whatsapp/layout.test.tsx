@@ -28,13 +28,13 @@ describe("WhatsAppShellNav", () => {
 
     for (const href of [
       "/whatsapp",
-      "/settings/whatsapp",
+      "/whatsapp/sessions",
       "/inbox",
       "/broadcasts",
       "/whatsapp#contacts",
-      "/settings/whatsapp#auto-replies",
-      "/settings/whatsapp#bot-automation",
-      "/settings/whatsapp#webhooks",
+      "/whatsapp/auto-reply",
+      "/whatsapp/automation",
+      "/whatsapp/webhooks",
       "/settings/messages",
     ]) {
       expect(document.querySelector(`a[href="${href}"]`)).not.toBeNull()

@@ -17,6 +17,10 @@ describe("isWhatsAppRoute", () => {
   it.each([
     "/whatsapp",
     "/whatsapp#contacts",
+    "/whatsapp/sessions",
+    "/whatsapp/auto-reply",
+    "/whatsapp/automation",
+    "/whatsapp/webhooks",
     "/inbox",
     "/inbox?to=919876543210",
     "/broadcasts",
@@ -63,10 +67,11 @@ describe("isWhatsAppNavActive", () => {
     expect(isWhatsAppNavActive("/inbox", "/inbox")).toBe(true);
     expect(isWhatsAppNavActive("/broadcasts/abc", "/broadcasts")).toBe(true);
     expect(isWhatsAppNavActive("/settings/whatsapp/overview", "/settings/whatsapp")).toBe(true);
+    expect(isWhatsAppNavActive("/whatsapp/sessions", "/whatsapp/sessions")).toBe(true);
+    expect(isWhatsAppNavActive("/whatsapp/auto-reply", "/whatsapp/auto-reply")).toBe(true);
   });
 
   it("matches hash-anchored entries by base path", () => {
-    expect(isWhatsAppNavActive("/settings/whatsapp", "/settings/whatsapp#auto-replies")).toBe(true);
     expect(isWhatsAppNavActive("/whatsapp", "/whatsapp#contacts")).toBe(true);
   });
 
