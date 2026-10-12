@@ -205,6 +205,52 @@ describe("WhatsAppOverviewPage", () => {
     })
   })
 
+  it("shows contact avatars with picture fallback", async () => {
+    authWith({ whatsappAdapter: true })
+    mockApi.get.mockImplementation((url: string) => {
+      if (url === "/whatsapp/integration") return Promise.resolve(null)
+      if (url === "/whatsapp-adapter/status")
+        return Promise.resolve({
+          id: "sess1",
+          organizationId: "org1",
+          status: "CONNECTED",
+          phoneNumber: null,
+          displayPhoneNumber: null,
+          qrDataUrl: null,
+          pairingCode: null,
+          connectedAt: null,
+          createdAt: "2024-01-01",
+          updatedAt: "2024-01-01",
+          lastError: null,
+        })
+      if (url === "/whatsapp-adapter/auto-replies") return Promise.resolve([])
+      if (url === "/whatsapp-adapter/groups")
+        return Promise.resolve({ available: false, groups: [] })
+      if (url === "/whatsapp-adapter/contacts")
+        return Promise.resolve([
+          { jid: "111@s.whatsapp.net", name: "Asha", notify: null, updatedAt: "2024-01-01" },
+          { jid: "222@s.whatsapp.net", name: null, notify: null, updatedAt: "2024-01-01" },
+        ])
+      if (url.startsWith("/whatsapp/contacts/"))
+        return Promise.resolve(
+          url.includes("111") ? { url: "https://pics/111.jpg" } : { url: null },
+        )
+      throw new Error(`unexpected ${url}`)
+    })
+
+    render(<WhatsAppOverviewPage />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText("Asha")).toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(
+        document.querySelector('img[src="https://pics/111.jpg"]'),
+      ).not.toBeNull()
+    })
+    expect(screen.getByText("2")).toBeInTheDocument()
+  })
+
   it("hides the groups section in legacy mode", async () => {
     authWith({ whatsappAdapter: false })
     mockApi.get.mockImplementation((url: string) => {

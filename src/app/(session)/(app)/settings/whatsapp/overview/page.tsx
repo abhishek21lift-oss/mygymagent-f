@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/lib/auth/auth-context"
+import { api } from "@/lib/api/client"
 import { useAutoReplies, type AutoReplyRule } from "@/lib/hooks/use-auto-replies"
 import { useWhatsAppContacts, useWhatsAppIntegration, type WhatsAppContact } from "@/lib/hooks/use-whatsapp"
 import {
@@ -135,6 +137,29 @@ function SessionsList({ sessions }: { sessions: SessionRow[] }) {
   )
 }
 
+/** Profile picture for one contact, falling back to the initial.
+ * One cached query per JID; the backend live-fetches and answers null
+ * when there is no picture. */
+function ContactAvatar({ jid, name }: { jid: string; name: string }) {
+  const picture = useQuery({
+    queryKey: ["whatsapp", "contact-picture", jid],
+    queryFn: () =>
+      api.get<{ url: string | null }>(
+        `/whatsapp/contacts/${encodeURIComponent(jid)}/picture`,
+      ),
+  })
+  const url = picture.data?.url ?? null
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element -- remote per-contact URL; nothing for next/image to optimise
+    return <img src={url} alt="" aria-hidden="true" className="size-8 shrink-0 rounded-full object-cover ring-1 ring-border/60" />
+  }
+  return (
+    <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+      {name.slice(0, 1).toUpperCase()}
+    </span>
+  )
+}
+
 function OverviewBody({
   sessions,
   rules,
@@ -223,8 +248,11 @@ function OverviewBody({
             <ul className="divide-y divide-border">
               {contacts.slice(0, 10).map((c) => (
                 <li key={c.jid} className="flex items-center justify-between gap-3 py-2.5">
-                  <span className="text-sm font-bold text-stone-950 dark:text-stone-50">
-                    {c.name ?? c.notify ?? c.jid}
+                  <span className="flex min-w-0 items-center gap-3">
+                    <ContactAvatar jid={c.jid} name={c.name ?? c.notify ?? c.jid} />
+                    <span className="truncate text-sm font-bold text-stone-950 dark:text-stone-50">
+                      {c.name ?? c.notify ?? c.jid}
+                    </span>
                   </span>
                   <span className="font-mono text-xs text-stone-600 dark:text-stone-400">{c.jid}</span>
                 </li>
