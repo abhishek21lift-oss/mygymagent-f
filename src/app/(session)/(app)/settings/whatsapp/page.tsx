@@ -168,7 +168,7 @@ export default function WhatsAppSettingsPage() {
  title="WhatsApp"
  actions={
  <div className="flex shrink-0 items-center gap-2">
- <Link href="/settings/whatsapp/overview" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+ <Link href="/whatsapp" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  Overview
  </Link>
  <Link href="/settings" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-card px-4 py-2.5 text-sm font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
