@@ -16,6 +16,12 @@ permissions:
 jobs:
   preview-deploy:
     name: Deploy Preview to Cloudflare Workers
+    # Disabled until the Cloudflare account exists: no CF_API_TOKEN /
+    # CF_ACCOUNT_ID secret is configured and `cloudflare/wrangler-action`
+    # has no `v2` tag, so this job could only ever fail. Re-enable
+    # (remove this line, add the secrets, pin the action) when the
+    # preview Worker is actually set up.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: preview
