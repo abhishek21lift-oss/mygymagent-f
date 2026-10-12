@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTheme } from "next-themes";
-import { ChevronsLeft, ChevronsRight, LogOut, Menu, Moon, Sun, User as UserIcon } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, LogOut, Menu, MessageCircle, Moon, Sun, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -32,7 +33,7 @@ export function Topbar({
   sidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;
 }) {
-  const { user, logout } = useAuth();
+  const { user, hasPermission, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
@@ -84,6 +85,13 @@ export function Topbar({
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          {hasPermission("whatsapp.read") && (
+            <Button variant="ghost" size="icon" asChild className="size-10 rounded-2xl">
+              <Link href="/settings/whatsapp/overview" aria-label="WhatsApp dashboard" title="WhatsApp dashboard">
+                <MessageCircle className="size-[1.15rem]" aria-hidden="true" />
+              </Link>
+            </Button>
+          )}
           <AICommandBar />
           <NotificationCenter />
           <Button
