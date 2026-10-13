@@ -707,7 +707,7 @@ function Launcher({
     <DashSection id={id} title={title}>
       <div className={cn(styles.panel, "p-3 sm:p-3")}>
         {hasItems ? (
-          <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 xl:grid-cols-4">{children}</div>
+          <div className="flex snap-x gap-1 overflow-x-auto pb-1 sm:gap-2 [&>*]:w-24 [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:w-28">{children}</div>
         ) : (
           <EmptyState title="Nothing to do here yet" description={emptyHint} />
         )}
