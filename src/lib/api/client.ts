@@ -251,7 +251,11 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   if (parse === "text") return bodyText as T
 
-  if (typeof raw === "object" && raw !== null && "data" in raw && raw.data !== null && raw.data !== undefined) {
+  // Unwrap whenever the envelope carries a `data` key -- including an
+  // explicit `data: null` (unconnected integration, missing bot config).
+  // Returning the raw envelope for null payloads handed truthy objects
+  // to callers typed `| null` and crashed renderers downstream.
+  if (typeof raw === "object" && raw !== null && "data" in raw) {
     return (raw as { data: T }).data
   }
   return (raw as T) ?? (({ code: "SUCCESS", message: "" } as { code: string; message: string }) as T)
