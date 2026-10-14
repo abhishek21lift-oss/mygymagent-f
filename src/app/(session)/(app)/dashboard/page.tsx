@@ -704,10 +704,10 @@ function Launcher({
 }) {
   const hasItems = React.Children.count(children) > 0;
   return (
-    <DashSection id={id} title={title}>
-      <div className={cn(styles.panel, "p-3 sm:p-3")}>
+    <DashSection id={id} title={title} className="!gap-2">
+      <div className={cn(styles.panel, "p-1.5 sm:p-1.5")}>
         {hasItems ? (
-          <div className="flex snap-x gap-1 overflow-x-auto pb-1 sm:gap-2 [&>*]:w-24 [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:w-28">{children}</div>
+          <div className="flex snap-x gap-1 overflow-x-auto pb-0.5 sm:gap-1.5 [&>*]:w-24 [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:w-28">{children}</div>
         ) : (
           <EmptyState title="Nothing to do here yet" description={emptyHint} />
         )}

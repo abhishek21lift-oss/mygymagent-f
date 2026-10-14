@@ -180,7 +180,7 @@ export function AppIconLink({
       className={cn(styles.appIcon, accentStyle(accent))}
     >
       <span className={styles.appGlyph} aria-hidden="true">
-        <Icon className="size-6" strokeWidth={2} />
+        <Icon className="size-5" strokeWidth={2} />
       </span>
       {count && (
         <span className={cn(styles.appBadge, badgeTone === "neutral" && styles.appBadgeNeutral)} aria-hidden="true">
