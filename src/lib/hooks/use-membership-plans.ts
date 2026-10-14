@@ -13,6 +13,14 @@ export function useMembershipPlans(params: PaginationParams = {}) {
   });
 }
 
+export function useMembershipPlan(id: string) {
+  return useQuery({
+    queryKey: [KEY, id],
+    queryFn: () => api.get<MembershipPlan>(`/membership-plans/${id}`),
+    enabled: !!id,
+  });
+}
+
 export function useCreateMembershipPlan() {
   const queryClient = useQueryClient();
   return useMutation({

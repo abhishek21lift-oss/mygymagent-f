@@ -1,6 +1,8 @@
 "use client";
 
+import { QrCode } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-context";
+import { PageHero } from "@/components/shared/page-hero";
 import { WhatsAppWebCard } from "../../settings/whatsapp/whatsapp-web-card";
 import { WhatsAppAdapterStatusCard } from "../../settings/whatsapp/whatsapp-status-card";
 
@@ -10,14 +12,7 @@ export default function SessionsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-stone-950 dark:text-stone-50">
-          Sessions & QR
-        </h1>
-        <p className="mt-1 text-sm font-medium text-stone-600 dark:text-stone-400">
-          Connect and manage your WhatsApp number sessions.
-        </p>
-      </div>
+      <PageHero id="sessions-title" icon={QrCode} title="Sessions & QR" description="Connect and manage your WhatsApp number sessions." />
       <div className="w-full max-w-3xl">
         <WhatsAppWebCard canManage={canManage} />
       </div>

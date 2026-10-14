@@ -85,19 +85,14 @@ export function PlanDialog({
 }
 
 export function EditPlanButton({ plan }: { plan: MembershipPlan }) {
+  const { hasPermission } = useAuth();
+  if (!hasPermission("membership_plans.update")) return null;
   return (
-    <PlanDialog
-      plan={plan}
-      trigger={
-        <Button
-          variant="outline"
-          size="sm"
-          className="min-h-11 gap-1.5 rounded-xl"
-        >
-          <Pencil className="size-3.5" aria-hidden="true" />
-          Edit
-        </Button>
-      }
-    />
+    <Button variant="outline" size="sm" className="min-h-11 gap-1.5 rounded-xl" asChild>
+      <Link href={`/membership-plans/${plan.id}/edit`}>
+        <Pencil className="size-3.5" aria-hidden="true" />
+        Edit
+      </Link>
+    </Button>
   );
 }

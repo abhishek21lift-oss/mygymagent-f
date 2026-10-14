@@ -2,8 +2,9 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Bot, FileText, Plus, QrCode, Send, Wifi, WifiOff, Zap } from "lucide-react"
+import { Bot, FileText, MessageCircle, Plus, QrCode, Send, Wifi, WifiOff, Zap } from "lucide-react"
 import { ErrorState } from "@/components/shared/error-state"
+import { PageHero } from "@/components/shared/page-hero"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -414,17 +415,17 @@ export default function WhatsAppOverviewPage() {
   }
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-950 dark:text-stone-50">WhatsApp</h1>
-          <p className="mt-1 text-sm font-medium text-stone-600 dark:text-stone-400">
-            Overview of your gym messaging sessions and automation.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm" className="min-h-11">
-          <Link href="/whatsapp/sessions">Manage connection</Link>
-        </Button>
-      </div>
+      <PageHero
+        id="whatsapp-title"
+        icon={MessageCircle}
+        title="WhatsApp"
+        description="Overview of your gym messaging sessions and automation."
+        actions={
+          <Button asChild variant="outline" size="sm" className="min-h-11">
+            <Link href="/whatsapp/sessions">Manage connection</Link>
+          </Button>
+        }
+      />
       {user?.features?.whatsappAdapter ? <AdapterOverview /> : <LegacyOverview />}
     </div>
   )

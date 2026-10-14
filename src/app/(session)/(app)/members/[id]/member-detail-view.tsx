@@ -8,7 +8,7 @@ import {
  BadgeCheck,
  CalendarCheck,
  Flame,
- HeartPulse,
+ Receipt,
  MessageCircle,
  MessageSquareText,
  Dumbbell,
@@ -51,13 +51,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useMember, useDeleteMember } from "@/lib/hooks/use-members";
+import { useMember, useDeleteMember, useMembershipBilling } from "@/lib/hooks/use-members";
 import { useMemberWorkoutHistory } from "@/lib/hooks/use-workout-history";
 import { useMemberAttendance } from "@/lib/hooks/use-member-attendance";
 import { useMemberPayments } from "@/lib/hooks/use-member-payments";
-import { useMemberMeasurements } from "@/lib/hooks/use-member-assessments";
-import { useMemberGoals } from "@/lib/hooks/use-member-goals";
-import { useMemberScreenings } from "@/lib/hooks/use-member-screenings";
 import { Member360Tabs } from "./member-360-tabs";
 import { useProfilePhotoUrl } from "./edit/profile-photo-section";
 import { SellMembershipDialog } from "./sell-membership-dialog";
@@ -790,9 +787,8 @@ function MembershipCard({
 function GlanceRow({ memberId }: { memberId: string }) {
  const attendance = useMemberAttendance(memberId);
  const payments = useMemberPayments(memberId);
- const screenings = useMemberScreenings(memberId);
- const measurements = useMemberMeasurements(memberId);
- const goals = useMemberGoals(memberId);
+ const member = useMember(memberId);
+ const billing = useMembershipBilling(memberId);
  const [now] = React.useState(() => new Date());
 
  const checkIns = (attendance.data ?? []).map((row) => row.checkInAt);
@@ -801,19 +797,7 @@ function GlanceRow({ memberId }: { memberId: string }) {
  const lastVisit = checkIns.reduce<string | null>((latest, iso) => (!latest || iso > latest ? iso : latest), null);
  const paid = netPaid(payments.data ?? []);
 
- const latestScreening = screenings.data?.[0];
- const flagged = latestScreening
- ? latestScreening.flaggedForMedicalClearance ||
- Object.values(latestScreening.responses ?? {}).some((answer) => answer === true)
- : false;
- const latestWeight = [...(measurements.data ?? [])]
- .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))
- .find((row) => row.weightKg != null)?.weightKg;
- const activeGoals = goals.data?.filter((goal) => goal.status === "ACTIVE").length ?? 0;
- const healthCaption = [
- latestWeight != null ? `${latestWeight} kg` : null,
- activeGoals ? `${activeGoals} active goal${activeGoals === 1 ? "" : "s"}` : null,
- ].filter(Boolean).join(" · ");
+
 
  return (
  <section aria-label="At a glance" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
@@ -857,17 +841,23 @@ function GlanceRow({ memberId }: { memberId: string }) {
  }
  />
  <GlanceTile
- accent={flagged ? "rose" : "blue"}
- icon={HeartPulse}
- label="Health"
- isLoading={screenings.isLoading || measurements.isLoading || goals.isLoading}
- value={screenings.isError || !latestScreening ? "—" : flagged ? "Flagged" : "Cleared"}
+ accent={Number(billing.data?.outstandingBalance ?? 0) > 0 ? "rose" : "emerald"}
+ icon={Receipt}
+ label="Balance"
+ isLoading={billing.isLoading}
+ value={
+ billing.isError
+ ? "—"
+ : (member.data?.memberships?.[0]?.currency ?? paid.currency)
+ ? formatMoney(billing.data?.outstandingBalance ?? "0", member.data?.memberships?.[0]?.currency ?? paid.currency ?? "", { whole: true })
+ : (billing.data?.outstandingBalance ?? "—")
+ }
  caption={
- screenings.isError
- ? "Couldn't load screening"
- : !latestScreening
- ? "Not screened yet"
- : healthCaption || (flagged ? "Needs medical clearance" : `Screened ${formatDate(latestScreening.completedAt, false)}`)
+ billing.isError
+ ? "Couldn't load balance"
+ : Number(billing.data?.outstandingBalance ?? 0) > 0
+ ? "Outstanding dues"
+ : "No dues outstanding"
  }
  />
  </section>
