@@ -16,7 +16,8 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:e2e": "e2e run"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@capacitor/android": "^8.5.2",
     "@capacitor/cli": "^8.5.2",
+    "@e2e-dev/web": "^0.14.0",
     "@opennextjs/cloudflare": "^1.20.10",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",
@@ -66,6 +68,8 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "ai": "^7.0.0",
+    "e2e": "^0.20.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "jest": "^30.5.0",
