@@ -705,7 +705,7 @@ function Launcher({
   const hasItems = React.Children.count(children) > 0;
   return (
     <DashSection id={id} title={title}>
-      <div className={cn(styles.panel, "p-3 sm:p-3")}>
+      <div className={cn(styles.panel, "p-2 sm:p-2")}>
         {hasItems ? (
           <div className="flex snap-x gap-1 overflow-x-auto pb-1 sm:gap-2 [&>*]:w-24 [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:w-28">{children}</div>
         ) : (
