@@ -49,12 +49,28 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    // Local development talks to the local API over plain http; the
-    // production CSP (https: only) must stay untouched.
+    // The browser calls the API origin directly (src/lib/api/client.ts),
+    // so connect-src must name the exact origin this build was configured
+    // with. NEXT_PUBLIC_API_URL is inlined at build time; deriving the
+    // allowlist entry from the same variable keeps the two in sync for
+    // every deployment, http or https. Plain `https:` alone silently
+    // breaks every http API origin (local prod-build verification,
+    // http-only staging/hosts): /auth/me is refused, permissions stay
+    // empty, and the app degrades to logged-out-looking states.
     // Plausible analytics, only when a deployment turns it on (layout.tsx).
     const analyticsOrigin = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN?.trim() ? " https://plausible.io" : "";
+    const apiOrigin = (() => {
+      try {
+        const origin = new URL(process.env.NEXT_PUBLIC_API_URL ?? "").origin;
+        // "null" for opaque origins; never allowlist that.
+        return origin && origin !== "null" ? ` ${origin}` : "";
+      } catch {
+        return "";
+      }
+    })();
+    // Local `next dev` without the env var still talks to :4000.
     const devApiOrigin =
-      process.env.NODE_ENV === "development" ? " http://localhost:4000" : "";
+      !apiOrigin && process.env.NODE_ENV === "development" ? " http://localhost:4000" : "";
     return [
       {
         source: "/(.*)",
@@ -67,7 +83,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://connect.facebook.net https://www.facebook.com" + analyticsOrigin + "; " +
               "img-src 'self' data: https:; " +
               "font-src 'self' https://cdnjs.cloudflare.com; " +
-              "connect-src 'self' https:" + devApiOrigin + "; " +
+              "connect-src 'self' https:" + apiOrigin + devApiOrigin + "; " +
               "frame-src https://www.facebook.com https://*.facebook.com https://*.facebook.net; " +
               "object-src 'none'; " +
               "base-uri 'self'; " +

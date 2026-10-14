@@ -270,7 +270,7 @@ export default function DashboardPage() {
       <Select value={branchFilter ?? ALL_BRANCHES} onValueChange={chooseBranch}>
         <SelectTrigger
           aria-label="Branch"
-          className={cn(styles.glassPill, "h-8 w-auto min-w-36 gap-2 !rounded-full text-xs font-semibold")}
+          className={cn(styles.glassPill, "min-h-11 w-auto min-w-36 gap-2 !rounded-full text-xs font-semibold")}
         >
           <Building2 className="size-3.5 text-white/70" aria-hidden="true" />
           <SelectValue />
@@ -645,7 +645,7 @@ export default function DashboardPage() {
       </section>
 
       {/* ── Priorities + launcher ──────────────────────────────── */}
-      <section aria-label="Needs attention and shortcuts" className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <section aria-label="Needs attention and shortcuts" className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         {reportsReady ? (
           <PriorityActions
             branchFilter={branchFilter}
