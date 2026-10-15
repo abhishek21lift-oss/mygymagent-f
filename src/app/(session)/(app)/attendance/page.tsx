@@ -242,9 +242,12 @@ export default function AttendancePage() {
  <Link href="/members" className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-extrabold text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <CalendarCheck className="size-4" aria-hidden="true" /> Members
  </Link>
+ {/* /ai needs `ai.generate`; without it this link dead-ends. */}
+ {hasPermission("ai.generate") && (
  <Link href="/ai" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/80 bg-card px-5 py-3 text-sm font-bold text-foreground shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
  </Link>
+ )}
  </>
  }
  />

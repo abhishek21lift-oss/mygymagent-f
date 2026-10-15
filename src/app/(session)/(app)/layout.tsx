@@ -132,6 +132,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       // Landscape phones put the notch at a side: keep the shell inside it.
       className="page-ambient flex h-svh overflow-hidden pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
     >
+      {/* Keyboard users otherwise tab through the whole rail (~40 links)
+          before reaching the page. Hidden until focused. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-card focus:px-4 focus:py-3 focus:text-sm focus:font-bold focus:text-foreground focus:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        Skip to content
+      </a>
+
       {/* The rail floats: a rounded glass pane inset from the edge of the
           window, rather than a full-bleed dark column. This is the single
           biggest change to the shell's shape, and it is what makes the
@@ -179,7 +188,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <WhatsAppNavStrip />
           </div>
         ) : null}
-        <main ref={mainRef} className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+        <main
+          ref={mainRef}
+          id="main-content"
+          tabIndex={-1}
+          className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
+        >
           <PullToRefresh scrollRef={mainRef}>
             <div className="relative mx-auto w-full max-w-[var(--content-max-width)] px-4 pb-[var(--mobile-tabbar-clearance)] pt-2 sm:px-5 md:pb-8 lg:px-8">
               <MfaGraceBanner />

@@ -801,15 +801,18 @@ export default function CrmPage() {
           title="Leads"
           actions={
             <>
-              <Button
-                asChild
-                variant="outline"
-                className="min-h-11 rounded-xl border-border bg-card hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              >
-                <a href="/ai">
-                  <Sparkles className="size-4" aria-hidden="true" /> Ask AI
-                </a>
-              </Button>
+              {/* /ai needs `ai.generate`; without it this link dead-ends. */}
+              {hasPermission("ai.generate") && (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="min-h-11 rounded-xl border-border bg-card hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  <a href="/ai">
+                    <Sparkles className="size-4" aria-hidden="true" /> Ask AI
+                  </a>
+                </Button>
+              )}
               {hasPermission("leads.manage") && <ImportLeadsDialog />}
               {hasPermission("leads.manage") && <NewLeadDialog />}
             </>

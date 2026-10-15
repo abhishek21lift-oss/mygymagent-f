@@ -167,13 +167,11 @@ export const secondaryNav: NavItem[] = [
   ] },
   { title: "AI agent", href: "/ai", icon: Sparkles, accent: "ai", children: [
     { title: "Ask the agent", href: "/ai", icon: Sparkles, permission: "ai.generate", accent: "ai" },
-    { title: "Action queue", href: "/ai-actions", icon: CheckSquare, permission: "ai.generate", accent: "ai" },
+    { title: "Action queue", href: "/ai-actions", icon: CheckSquare, permission: "ai.approve", accent: "ai" },
     { title: "Morning briefing", href: "/coo", icon: Sunrise, permission: "ai.generate", accent: "ai" },
   ] },
   // No "Search" row: the search box in the top bar is always there.
 ];
-
-export const comingSoonNav: NavItem[] = [];
 
 /**
  * Cross-tenant administration, for platform staff only. Not part of
@@ -195,7 +193,10 @@ export const settingsNav: NavItem = { title: "Settings", href: "/settings", icon
   { title: "Member tags", href: "/settings/tags", icon: Tag, permission: "members.update" },
   // Everyone's own alert preferences: no grant needed.
   { title: "My notifications", href: "/settings/notifications", icon: Bell },
-  { title: "Security", href: "/settings/security", icon: ShieldCheck, permission: ["organizations.update", "audit.read"] },
+  // The signed-in user's own security: their MFA and sessions. The page
+  // carries org-policy sections too, but those gate themselves in-page --
+  // the same reasoning as the ungated Security link on /settings.
+  { title: "Security", href: "/settings/security", icon: ShieldCheck },
   { title: "Subscription", href: "/settings/billing", icon: Gem, permission: "platform_billing.read" },
   { title: "Setup guide", href: "/onboarding", icon: Rocket, permission: "organizations.update" },
 ] };

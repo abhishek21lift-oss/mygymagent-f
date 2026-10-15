@@ -26,12 +26,13 @@ export interface AiConversationMessage extends ChatMessage {
   toolCalls?: ChatToolCall[];
 }
 
-export function useAiConversations(pageSize = 20) {
+export function useAiConversations(pageSize = 20, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [AI_CONVERSATIONS_KEY, "list", pageSize],
     queryFn: async () =>
       (await api.get<{ items: AiConversationSummary[] }>("/ai/conversations", { query: { pageSize } })).items,
     staleTime: 30_000,
+    enabled,
   });
 }
 

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useBranches } from "@/lib/hooks/use-branches"
 import { useMembers } from "@/lib/hooks/use-members"
 import { useStaff } from "@/lib/hooks/use-staff"
+import { useAuth } from "@/lib/auth/auth-context"
 import { ApiError } from "@/lib/api/client"
 import { ptTrainerName, useBookPtSession, usePtSessionAction, usePtSessions, type PtSession, type PtSessionType } from "@/lib/hooks/use-pt-sessions"
 import { StatCard, toStatTone } from "@/components/shared/stat-card";
@@ -103,18 +104,24 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; 
 }
 
 export default function PtSessionsPage() {
+ const { hasPermission, user } = useAuth()
+ const canReadStaff = hasPermission("users.read")
+ const canReadBranches = hasPermission("branches.read")
  const today = new Date()
  const dateKey = today.toISOString().slice(0, 10)
  const startFrom = new Date(`${dateKey}T00:00:00`).toISOString()
  const endTo = new Date(`${dateKey}T23:59:59`).toISOString()
  const sessions = usePtSessions({ page: 1, pageSize: 100, order: "asc", startFrom, endTo })
  const members = useMembers({ page: 1, pageSize: 100, order: "asc" })
- const staff = useStaff({ page: 1, pageSize: 100, order: "asc" })
- const branches = useBranches({ page: 1, pageSize: 100, order: "asc" })
+ // A trainer holds neither `users.read` nor `branches.read`: the staff and
+ // branch pickers below would 403 and paint empty, so they are not fetched
+ // at all, and the booking falls back to the caller's own branch.
+ const staff = useStaff({ page: 1, pageSize: 100, order: "asc" }, { enabled: canReadStaff })
+ const branches = useBranches({ page: 1, pageSize: 100, order: "asc" }, { enabled: canReadBranches })
  const book = useBookPtSession()
  const [memberId, setMemberId] = React.useState("")
  const [trainerId, setTrainerId] = React.useState("")
- const [branchId, setBranchId] = React.useState("")
+ const [branchId, setBranchId] = React.useState(user?.primaryBranchId ?? "")
  const [start, setStart] = React.useState(`${dateKey}T10:00`)
  const [end, setEnd] = React.useState(`${dateKey}T11:00`)
  const [type, setType] = React.useState<PtSessionType>("PERSONAL_TRAINING")
@@ -188,6 +195,7 @@ export default function PtSessionsPage() {
  </SelectContent>
  </Select>
  </Field>
+ {canReadStaff && (
  <Field label="Trainer" htmlFor="pt-trainer">
  <Select value={trainerId || "none"} onValueChange={(v) => setTrainerId(v === "none" ? "" : v)}>
  <SelectTrigger id="pt-trainer" className="min-h-11 w-full rounded-lg text-sm"><SelectValue placeholder="Unassigned" /></SelectTrigger>
@@ -199,6 +207,8 @@ export default function PtSessionsPage() {
  </SelectContent>
  </Select>
  </Field>
+ )}
+ {canReadBranches ? (
  <Field label="Branch" htmlFor="pt-branch">
  <Select value={branchId} onValueChange={setBranchId}>
  <SelectTrigger id="pt-branch" className="min-h-11 w-full rounded-lg text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
@@ -209,6 +219,13 @@ export default function PtSessionsPage() {
  </SelectContent>
  </Select>
  </Field>
+ ) : (
+ <Field label="Branch">
+ <p className="flex min-h-11 items-center rounded-lg border bg-muted/40 px-3 text-sm text-muted-foreground">
+ {user?.primaryBranchId ? "Your assigned branch" : "No branch assigned to your profile"}
+ </p>
+ </Field>
+ )}
  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
  <Field label="Start" htmlFor="pt-start">
  <Input id="pt-start" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} className="min-h-11 rounded-lg text-sm" />

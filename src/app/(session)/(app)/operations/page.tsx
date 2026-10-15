@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { useBranches } from "@/lib/hooks/use-branches";
+import { useAuth } from "@/lib/auth/auth-context";
 import {
   useClassCapacity,
   useOperationsHealth,
@@ -19,8 +20,14 @@ import {
 const ALL_BRANCHES = "all";
 
 export default function OperationsPage() {
+  const { hasPermission } = useAuth();
+  const canReadBranches = hasPermission("branches.read");
   const [selectedBranch, setSelectedBranch] = React.useState<string>(ALL_BRANCHES);
-  const branches = useBranches({ pageSize: 100 });
+  // Branches need `branches.read`; the page's nav row only needs
+  // `reports.view`, so the query stays off for roles without it
+  // (HEAD_TRAINER, ACCOUNTANT) instead of firing a 403. Without it the
+  // branch filter is simply absent; the panels still render.
+  const branches = useBranches({ pageSize: 100 }, { enabled: canReadBranches });
   const branchItems = branches.data?.items ?? [];
   const branchFilter = selectedBranch !== ALL_BRANCHES ? selectedBranch : undefined;
 

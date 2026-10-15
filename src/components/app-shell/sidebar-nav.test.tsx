@@ -167,9 +167,10 @@ describe("nav config", () => {
     ]);
   });
 
-  it("gives everyone their own notification settings", () => {
+  it("gives everyone their own notifications and security settings", () => {
     expect(visibleNavItem(settingsNav, can([]), false)?.children?.map((c) => c.href)).toEqual([
       "/settings/notifications",
+      "/settings/security",
     ]);
   });
 

@@ -28,7 +28,7 @@ const leftTabs: TabItem[] = [
 ];
 
 const rightTabs: TabItem[] = [
-  { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: "attendance.read" },
+  { title: "Attendance", href: "/attendance", icon: CalendarCheck, permission: ["attendance.read", "attendance.read_assigned"] },
 ];
 
 function TabLink({ tab, active }: { tab: TabItem; active: boolean }) {
@@ -101,36 +101,39 @@ export function BottomTabBar({ onOpenMore }: { onOpenMore: () => void }) {
         {/* The AI button breaks the bar's line: a raised gradient disc,
             consistent with how the brand-neon disc works on the sign-in
             screen. Lifted with a negative top margin so it visually
-            floats above the bar. */}
-        <Link
-          href="/ai"
-          aria-label="AI Agent"
-          aria-current={aiActive ? "page" : undefined}
-          className={cn(
-            "relative -mt-7 flex flex-1 touch-manipulation flex-col items-center justify-end gap-1 rounded-3xl pb-1",
-            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-          )}
-        >
-          <span
+            floats above the bar. Hidden for callers who cannot ask the
+            agent, so the bar never offers a screen that turns them away. */}
+        {hasPermission("ai.generate") && (
+          <Link
+            href="/ai"
+            aria-label="AI Agent"
+            aria-current={aiActive ? "page" : undefined}
             className={cn(
-              "flex size-14 items-center justify-center rounded-full border-2 border-background text-white",
-              "shadow-[0_8px_24px_-8px_var(--brand-2)]",
-              "transition-transform duration-200",
-              aiActive ? "scale-105" : "",
-            )}
-            style={{ backgroundImage: "var(--brand-grad)" }}
-          >
-            <Sparkles className="size-5" aria-hidden="true" strokeWidth={2.5} />
-          </span>
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-tight transition-colors",
-              aiActive ? "text-foreground" : "text-muted-foreground",
+              "relative -mt-7 flex flex-1 touch-manipulation flex-col items-center justify-end gap-1 rounded-3xl pb-1",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
             )}
           >
-            AI
-          </span>
-        </Link>
+            <span
+              className={cn(
+                "flex size-14 items-center justify-center rounded-full border-2 border-background text-white",
+                "shadow-[0_8px_24px_-8px_var(--brand-2)]",
+                "transition-transform duration-200",
+                aiActive ? "scale-105" : "",
+              )}
+              style={{ backgroundImage: "var(--brand-grad)" }}
+            >
+              <Sparkles className="size-5" aria-hidden="true" strokeWidth={2.5} />
+            </span>
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-tight transition-colors",
+                aiActive ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              AI
+            </span>
+          </Link>
+        )}
 
         {visibleRight.map((tab) => (
           <TabLink key={tab.href} tab={tab} active={isNavItemActive(pathname, tab.href)} />

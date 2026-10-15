@@ -17,11 +17,12 @@ function invalidateStaff(queryClient: QueryClient) {
   ]);
 }
 
-export function useStaff(params: PaginationParams = {}) {
+export function useStaff(params: PaginationParams = {}, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: [KEY, params],
     queryFn: () => api.get<Paginated<StaffUser>>("/users", { query: params }),
     placeholderData: (previous) => previous,
+    enabled,
   });
 }
 

@@ -47,6 +47,9 @@ function AssignmentRow({ assignment }: { assignment: WorkoutAssignment }) {
 }
 
 export default function PtoOperationsPage() {
+ const { hasPermission } = useAuth();
+ // The Ask AI CTA targets /ai, which needs `ai.generate`; without it the
+ // button would dead-end, so it hides (the rest of the page stays).
  const assignmentsQuery = useWorkoutAssignments({ page: 1, pageSize: 50, order: "desc" });
  const assignments = assignmentsQuery.data?.items ?? [];
  const active = assignments.filter(x => x.status === "ACTIVE");
@@ -55,7 +58,7 @@ export default function PtoOperationsPage() {
  const plans = new Set(active.map(x => x.workoutPlanId)).size;
  return <div className="pb-4">
  <div className="flex flex-col gap-5">
- <PageHero id="pt-title" icon={Dumbbell} title="PT overview" actions={<><Button asChild variant="outline" className="rounded-lg border-stone-200 bg-card"><Link href="/workouts"><Dumbbell className="size-4" /> Manage workouts</Link></Button><Button asChild className="rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/20"><Link href="/ai"><Sparkles className="size-4" /> Ask AI <ArrowRight className="size-4" /></Link></Button></>} />
+ <PageHero id="pt-title" icon={Dumbbell} title="PT overview" actions={<><Button asChild variant="outline" className="rounded-lg border-stone-200 bg-card"><Link href="/workouts"><Dumbbell className="size-4" /> Manage workouts</Link></Button>{hasPermission("ai.generate") && <Button asChild className="rounded-lg bg-[linear-gradient(105deg,#4338ca,#7c3aed_52%,#c026d3)] shadow-lg shadow-violet-500/20"><Link href="/ai"><Sparkles className="size-4" /> Ask AI <ArrowRight className="size-4" /></Link></Button>}</>} />
  <section className="grid gap-4 grid-cols-2 xl:grid-cols-4"><Metric icon={ClipboardCheck} label="Active assignments" value={assignmentsQuery.isLoading ? "—" : active.length} tone="cyan" /><Metric icon={Users} label="Active clients" value={assignmentsQuery.isLoading ? "—" : clients} tone="emerald" /><Metric icon={CheckCircle2} label="Completed" value={assignmentsQuery.isLoading ? "—" : completed.length} tone="amber" /><Metric icon={Dumbbell} label="Plans in workload" value={assignmentsQuery.isLoading ? "—" : plans} tone="violet" /></section>
  <section className="grid gap-5"><Card className="overflow-hidden border-border bg-card"><CardHeader className="border-b border-border bg-card px-5 py-5"><CardTitle className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground flex items-center gap-3 text-stone-950"><span className="flex size-10 items-center justify-center rounded-xl bg-muted/40 text-violet-700"><Zap className="size-4" /></span>Active coaching queue</CardTitle></CardHeader><CardContent className="p-3 sm:p-4">{assignmentsQuery.isError ? <div className="rounded-lg border border-rose-200 bg-rose-50 p-5 text-sm font-semibold text-rose-700">Unable to load PT assignments. Refresh and try again.</div> : active.length === 0 && !assignmentsQuery.isLoading ? <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50/70 p-10 text-center"><ClipboardCheck className="mx-auto size-8 text-stone-400" /><p className="mt-3 text-sm font-bold text-stone-900">No active PT assignments</p><p className="mt-1 text-xs text-stone-500">Assign a workout plan to begin.</p><Button asChild className="mt-4 rounded-xl"><Link href="/workouts">Assign a workout</Link></Button></div> : <div className="flex flex-col gap-3">{active.map(x => <AssignmentRow key={x.id} assignment={x} />)}</div>}</CardContent></Card></section>
  <PtPackagesSection />

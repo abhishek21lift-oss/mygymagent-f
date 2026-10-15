@@ -37,7 +37,7 @@ const TABS = [
  * The member's shell — deliberately not the staff one.
  *
  * A member and a receptionist share a session mechanism but nothing
- * else: no branch switcher, no six work areas, no org search. Four
+ * else: no branch switcher, no six work areas, no org search. Five
  * destinations, because that is how many a member has.
  *
  * Members authenticate through the same `/auth/login` as staff (a linked

@@ -7,6 +7,7 @@ import { Command, CornerDownLeft, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth/auth-context";
 
 const suggestions = [
   "What needs my attention today?",
@@ -23,6 +24,8 @@ export function AICommandBar() {
   const listId = React.useId();
   const [activeIndex, setActiveIndex] = React.useState(0);
   const router = useRouter();
+  const { hasPermission } = useAuth();
+  const canAskAi = hasPermission("ai.generate");
 
   const filtered = suggestions.filter(
     (item) => !query || item.toLowerCase().includes(query.toLowerCase()),
@@ -34,6 +37,7 @@ export function AICommandBar() {
   }, []);
 
   React.useEffect(() => {
+    if (!canAskAi) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -43,7 +47,7 @@ export function AICommandBar() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [openDialog]);
+  }, [canAskAi, openDialog]);
 
   const wasOpen = React.useRef(false);
   React.useEffect(() => {
@@ -75,6 +79,8 @@ export function AICommandBar() {
     }
   }
 
+  if (!canAskAi) return null;
+
   return (
     <>
       <button
@@ -103,7 +109,7 @@ export function AICommandBar() {
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-[rgb(8_10_20/0.5)] p-4 pt-[10vh]-[6px] sm:p-6 sm:pt-[12vh]"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-[rgb(8_10_20/0.5)] p-4 pt-[10vh] sm:p-6 sm:pt-[12vh]"
           onMouseDown={() => setOpen(false)}
         >
           <div

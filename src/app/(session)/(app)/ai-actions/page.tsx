@@ -8,12 +8,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAiActions, useAiActionEffectiveness, useRejectAiAction } from "@/lib/hooks/use-ai-actions";
 import { AiActionReviewDialog } from "./review-dialog";
 import { PageHero } from "@/components/shared/page-hero";
+import { EmptyState } from "@/components/shared/empty-state";
+import { useAuth } from "@/lib/auth/auth-context";
 
 export default function AiActionsPage() {
- const actions = useAiActions("PENDING_APPROVAL");
- const funnel = useAiActionEffectiveness();
+ const { hasPermission } = useAuth();
+ const canApprove = hasPermission("ai.approve");
+ const actions = useAiActions("PENDING_APPROVAL", { enabled: canApprove });
+ const funnel = useAiActionEffectiveness({ enabled: canApprove });
  const reject = useRejectAiAction();
  const count = actions.data?.items.length ?? 0;
+
+ if (!canApprove) {
+  return (
+   <div className="flex w-full flex-col gap-6 pb-8">
+    <EmptyState
+     icon={ShieldCheck}
+     title="Approvals need access"
+     description="Ask the gym owner for AI approval access to review the action queue."
+    />
+   </div>
+  );
+ }
 
  return (
  <div className="pb-4">
@@ -28,6 +44,8 @@ export default function AiActionsPage() {
  <Clock3 className="size-4 text-amber-300" aria-hidden="true" />
  {actions.isLoading ? "Syncing…" : `${count} pending`}
  </span>
+ {/* /ai needs `ai.generate`; without it this link dead-ends. */}
+ {hasPermission("ai.generate") && (
  <Link
  href="/ai"
  className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-card px-4 py-2.5 text-sm font-extrabold text-indigo-950 shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -35,6 +53,7 @@ export default function AiActionsPage() {
  <Sparkles className="size-4" aria-hidden="true" />
  Ask AI
  </Link>
+ )}
  </>
  }
  />
@@ -60,9 +79,11 @@ export default function AiActionsPage() {
  <Check className="size-7" aria-hidden="true" />
  </span>
  <p className="mt-2 text-base font-semibold text-foreground">No pending AI actions</p>
+ {hasPermission("ai.generate") && (
  <Link href="/ai" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg bg-stone-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
  Ask AI <ArrowRight className="size-4" aria-hidden="true" />
  </Link>
+ )}
  </CardContent>
  </Card>
  ) : (

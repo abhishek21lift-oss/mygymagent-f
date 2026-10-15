@@ -11,7 +11,6 @@ import { accentForPath, type Accent } from "@/lib/section-accent";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
   activeChildHref,
-  comingSoonNav,
   isNavItemActive,
   platformNav,
   primaryNav,
@@ -71,7 +70,7 @@ function IconTile({ item, filled, size = "md" }: { item: NavItem; filled: boolea
     <span
       aria-hidden="true"
       className={cn(
-        "relative flex shrink-0 items-center justify-center text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "relative flex shrink-0 items-center justify-center text-white transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
         size === "md" ? "size-9 rounded-[0.8rem]" : "size-7 rounded-[0.6rem]",
         isAi && "ai-glyph",
         !isAi && (filled
@@ -259,7 +258,7 @@ function NavGroup({
         <ChevronDown
           aria-hidden="true"
           className={cn(
-            "size-4 shrink-0 text-sidebar-muted transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "size-4 shrink-0 text-sidebar-muted transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
             open && "rotate-180",
           )}
         />
@@ -376,18 +375,15 @@ export function SidebarNav({
   collapsed = false,
   onNavigate,
   mobile = false,
-  scrollToActive = false,
 }: {
   className?: string;
   collapsed?: boolean;
   onNavigate?: () => void;
   mobile?: boolean;
-  scrollToActive?: boolean;
 }) {
   const pathname = usePathname() ?? "";
   const { hasPermission, user } = useAuth();
   const isPlatformStaff = Boolean(user?.platformRole);
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
   const visible = React.useCallback(
     (items: NavItem[]) =>
@@ -398,7 +394,6 @@ export function SidebarNav({
   );
   const primary = visible(primaryNav);
   const tools = visible(secondaryNav);
-  const comingSoon = visible(comingSoonNav);
   const platform = visible(platformNav);
   const settings = visibleNavItem(settingsNav, hasPermission, isPlatformStaff);
   const actions = visible(quickActions);
@@ -462,16 +457,8 @@ export function SidebarNav({
       );
     });
 
-  // On a phone, open the drawer at the page you are on.
-  React.useEffect(() => {
-    if (!mobile || !scrollToActive || collapsed) return;
-    const frame = window.requestAnimationFrame(() => {
-      scrollRef.current
-        ?.querySelector<HTMLElement>('[aria-current="page"]')
-        ?.scrollIntoView({ block: "center", inline: "nearest" });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [mobile, scrollToActive, collapsed, pathname]);
+  // On a phone, the drawer opens at the page you are on; mobile-nav.tsx
+  // owns that scroll (it re-runs it after its own open animation).
 
   return (
     <nav aria-label="Primary" className={cn("relative flex h-full min-h-0 flex-col text-sidebar-foreground", className)}>
@@ -497,7 +484,6 @@ export function SidebarNav({
       {!collapsed ? <QuickActions items={actions} onNavigate={onNavigate} /> : null}
 
       <div
-        ref={scrollRef}
         data-mobile-nav-section={mobile ? "true" : undefined}
         className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain pb-2 [scrollbar-width:thin]"
       >
@@ -508,13 +494,6 @@ export function SidebarNav({
           <div className="mt-3 flex shrink-0 flex-col gap-0.5 border-t border-sidebar-border pt-3">
             {!collapsed ? <SectionLabel>Tools</SectionLabel> : null}
             {renderItems(tools)}
-          </div>
-        ) : null}
-
-        {comingSoon.length > 0 ? (
-          <div className="mt-3 flex shrink-0 flex-col gap-0.5 opacity-80">
-            {!collapsed ? <SectionLabel>Coming soon</SectionLabel> : null}
-            {renderItems(comingSoon)}
           </div>
         ) : null}
 

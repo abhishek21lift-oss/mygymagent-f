@@ -12,8 +12,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAiChat } from "@/lib/hooks/use-ai-chat";
 import { fetchAiConversation, useAiConversations, useDeleteAiConversation } from "@/lib/hooks/use-ai-conversations";
 import { PageHero } from "@/components/shared/page-hero";
+import { EmptyState } from "@/components/shared/empty-state";
 import { QuickActionCard } from "@/components/shared/bento";
 import { ApiError } from "@/lib/api/client";
+import { useAuth } from "@/lib/auth/auth-context";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, ChatToolCall } from "@/lib/types/ai";
 
@@ -46,6 +48,8 @@ function ToolCallChips({ toolCalls }: { toolCalls: ChatToolCall[] }) {
 }
 
 export default function AiPage() {
+  const { hasPermission } = useAuth();
+  const canGenerate = hasPermission("ai.generate");
   const [messages, setMessages] = React.useState<DisplayMessage[]>([]);
   const [input, setInput] = React.useState("");
   const [notConfigured, setNotConfigured] = React.useState(false);
@@ -53,7 +57,7 @@ export default function AiPage() {
   // The stored chat being continued; null for a new one.
   const [conversationId, setConversationId] = React.useState<string | null>(null);
   const [loadingConversation, setLoadingConversation] = React.useState(false);
-  const conversations = useAiConversations();
+  const conversations = useAiConversations(20, { enabled: canGenerate });
   const deleteConversation = useDeleteAiConversation();
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
@@ -131,6 +135,18 @@ export default function AiPage() {
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : "Chat could not be deleted");
     }
+  }
+
+  if (!canGenerate) {
+    return (
+      <div className="flex w-full flex-col gap-6 pb-8">
+        <EmptyState
+          icon={Sparkles}
+          title="AI agent needs access"
+          description="Ask the gym owner for AI access to use the assistant."
+        />
+      </div>
+    );
   }
 
   return (

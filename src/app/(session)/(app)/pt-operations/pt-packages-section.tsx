@@ -82,7 +82,9 @@ export function PtPackagesSection() {
  const { hasPermission } = useAuth()
  const packages = usePtPackages()
 
- if (!hasPermission("pt-packages.read")) return null
+ // `read_assigned` (trainers) reads packages for their assigned clients
+ // only -- the backend scopes the list the same way.
+ if (!hasPermission(["pt-packages.read", "pt-packages.read_assigned"])) return null
  const items = packages.data ?? []
  const active = items.filter((p) => p.status === "ACTIVE")
 
