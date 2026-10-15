@@ -20,6 +20,11 @@ export function BrandLogo({
  sizes = "160px",
 }: {
  className?: string;
+ /**
+  * Load the logo immediately, for the above-the-fold instance. Maps to
+  * Next 16's `loading="eager"` + `fetchPriority="high"` — the Image
+  * `priority` prop is deprecated in 16. Reserve it for the LCP logo.
+  */
  priority?: boolean;
  /** Next to the product name already: hide it from screen readers. */
  decorative?: boolean;
@@ -31,7 +36,8 @@ export function BrandLogo({
  alt={decorative ? "" : PRODUCT_LOGO_ALT}
  width={PRODUCT_LOGO_WIDTH}
  height={PRODUCT_LOGO_HEIGHT}
- priority={priority}
+ loading={priority ? "eager" : "lazy"}
+ fetchPriority={priority ? "high" : undefined}
  sizes={sizes}
  className={cn(
  "h-9 w-auto shrink-0 select-none object-contain drop-shadow-[0_2px_6px_rgba(120,20,10,0.18)] dark:drop-shadow-[0_0_10px_rgba(255,190,90,0.22)]",

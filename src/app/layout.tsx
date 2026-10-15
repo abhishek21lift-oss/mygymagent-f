@@ -63,7 +63,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" suppressHydrationWarning className="h-full antialiased">
+    <html lang="en-IN" data-scroll-behavior="smooth" suppressHydrationWarning className="h-full antialiased">
       <body className="min-h-full">
         {/* The session, data fetching and toasts live in (session)/layout.tsx,
             so the public pages ship none of them. */}

@@ -99,23 +99,11 @@
   text-wrap: balance;
   letter-spacing: -0.035em;
   line-height: 1.05;
-  /* White into red, with one pass of light as the page opens. Once,
-     not on a loop: moving a text gradient repaints the heading every
-     frame, which on a slow phone cost a fifth of the CPU while idle. */
-  background: linear-gradient(110deg, #fff 0%, #fff 40%, #fecaca 50%, #fff 60%, #fff 70%, #f87171 88%, #ef4444 100%);
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  /* Solid white on the dark hero. A gradient clipped to text is a
+     decorative tell, and the one-pass shine it carried cost a fifth
+     of a slow phone's CPU for a moment nobody reads twice. */
+  color: #ffffff;
   overflow-wrap: anywhere;
-  /* At rest the window shows the white-to-red end; the pass starts
-     from the other end, carrying the pale band across the name. */
-  background-position: 100% 0;
-  animation: name-shine 1.8s ease-out 500ms backwards;
-}
-@keyframes name-shine {
-  from { background-position: 0% 0; }
-  to   { background-position: 100% 0; }
 }
 .greeting {
   margin-top: 0.4rem;
@@ -151,7 +139,6 @@
 @media (prefers-reduced-motion: reduce) {
   .hero,
   .aurora,
-  .gymName,
   .tile { animation: none; }
 }
 
