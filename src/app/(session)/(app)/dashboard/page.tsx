@@ -41,6 +41,7 @@ import { todayMetricHref } from "./today/[metric]/metrics";
 import { outstandingHref } from "./outstanding/outstanding-list";
 import { cn, currencySymbol, displayCurrencyAmount } from "@/lib/utils";
 import { DonutChart } from "@/components/shared/donut-chart";
+import { GradientBarChart } from "@/components/charts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { memberStatusLabel } from "@/lib/member-status";
@@ -546,59 +547,26 @@ export default function DashboardPage() {
               </Button>
             )}
           </div>
-          {revenueTrend.isLoading || !reportsReady ? (
-            <Skeleton className="h-44 w-full rounded-2xl" aria-label="Loading revenue chart" />
-          ) : revenueTrend.isError ? (
-            <ErrorState message="Could not load revenue trend." onRetry={() => void revenueTrend.refetch()} />
-          ) : !hasRevenue ? (
-            <EmptyState title="No revenue yet" description="Revenue will appear here once payments are recorded." />
-          ) : (
-            <>
-              <p className="mb-3 text-xs text-muted-foreground">
-                Peak{" "}
-                <span className="text-base font-bold tabular-nums tracking-tight text-foreground">
-                  {currencySymbol(chartCurrency)}{maxRevenue.toLocaleString("en-IN")}
-                </span>
-              </p>
-              <div
-                role="img"
-                aria-label={`Revenue trend: ${monthlyData.map((d) => `${d.day} ${d.value}`).join(", ")}`}
-                className={styles.bars}
-              >
-                {monthlyData.map((d, i) => {
-                  const isCurrentMonth = i === monthlyData.length - 1;
-                  const pct = d.value > 0 ? Math.max(6, Math.round((d.value / maxRevenue) * 100)) : 0;
-                  return (
-                    <div key={`${d.day}-${i}`} className={styles.barCol} title={`${d.day}: ${currencySymbol(chartCurrency)}${d.value.toLocaleString("en-IN")}`}>
-                      <div className={styles.barTrack} aria-hidden="true">
-                        <div
-                          className={cn(styles.bar, isCurrentMonth && styles.barCurrent)}
-                          style={{ height: `${pct}%` }}
-                        />
-                      </div>
-                      <span
-                        className={cn(
-                          "truncate text-xs",
-                          isCurrentMonth ? "font-semibold text-foreground" : "text-muted-foreground",
-                        )}
-                      >
-                        {d.day}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-              <table className="sr-only">
-                <caption>Revenue by month</caption>
-                <thead><tr><th scope="col">Month</th><th scope="col">Value</th></tr></thead>
-                <tbody>
-                  {monthlyData.map((d, i) => (
-                    <tr key={`${d.day}-${i}`}><th scope="row">{d.day}</th><td>{d.value}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
+          <GradientBarChart
+            data={monthlyData.map((d) => ({ label: d.day, value: d.value }))}
+            isLoading={revenueTrend.isLoading || !reportsReady}
+            isError={revenueTrend.isError}
+            onRetry={() => void revenueTrend.refetch()}
+            emptyTitle="No revenue yet"
+            emptyDescription="Revenue will appear here once payments are recorded."
+            ariaLabel={`Revenue trend: ${monthlyData.map((d) => `${d.day} ${d.value}`).join(", ")}`}
+            formatValue={(v) => `${currencySymbol(chartCurrency)}${v.toLocaleString("en-IN")}`}
+            peakLabel={
+              hasRevenue ? (
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Peak{" "}
+                  <span className="text-base font-bold tabular-nums tracking-tight text-foreground">
+                    {currencySymbol(chartCurrency)}{maxRevenue.toLocaleString("en-IN")}
+                  </span>
+                </p>
+              ) : null
+            }
+          />
         </div>
 
         <div className={cn(styles.panel, "min-w-0 overflow-hidden")}>

@@ -293,42 +293,6 @@
   .panel { padding: 1.5rem; }
 }
 
-/* --- Revenue bars ---------------------------------------------- */
-.bars {
-  display: flex;
-  height: 11rem;
-  align-items: flex-end;
-  gap: 0.6rem;
-}
-.barCol {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-}
-.barTrack {
-  display: flex;
-  height: 9rem;
-  width: 100%;
-  align-items: flex-end;
-  border-radius: 0.85rem;
-  background: var(--surface-sunken);
-}
-.bar {
-  width: 100%;
-  border-radius: 0.85rem;
-  background: linear-gradient(180deg,
-    color-mix(in oklab, var(--a-violet-grad-1) 55%, transparent),
-    color-mix(in oklab, var(--a-indigo-grad-1) 45%, transparent));
-  transition: height 500ms var(--ease-out, ease-out);
-}
-.barCurrent {
-  background: linear-gradient(180deg, var(--a-rose-grad-1) 0%, var(--a-violet-grad-1) 55%, var(--a-indigo-grad-1) 100%);
-  box-shadow: 0 10px 22px -10px color-mix(in oklab, var(--a-violet-grad-1) 75%, transparent);
-}
-
 /* --- Health breakdown meters ----------------------------------- */
 .meter {
   height: 0.5rem;
